@@ -1,0 +1,24 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX dct:   <http://purl.org/dc/terms/>
+PREFIX st:    <http://data.legilux.public.lu/resource/authority/application-status/>
+SELECT DISTINCT ?conso ?cw ?baseAct ?type ?status ?dateApplicability ?dateEnd ?pubDate ?created ?title ?titleShort ?userFormat ?file ?modified
+WHERE {
+  VALUES ?status { st:applicable st:not-yet-applicable }
+  ?conso a jolux:Consolidation ;
+         jolux:inForceStatus ?status ;
+         jolux:isMemberOf ?cw ;
+         jolux:dateApplicability ?dateApplicability ;
+         jolux:isRealizedBy ?expr .
+  OPTIONAL { ?conso jolux:typeDocument ?type }
+  OPTIONAL { ?conso jolux:dateEndApplicability ?dateEnd }
+  OPTIONAL { ?conso jolux:publicationDate ?pubDate }
+  OPTIONAL { ?conso dct:created ?created }
+  OPTIONAL { ?baseAct a jolux:Act ; jolux:isMemberOf ?cw }
+  ?expr jolux:language <http://publications.europa.eu/resource/authority/language/FRA> .
+  OPTIONAL { ?expr jolux:title ?title }
+  OPTIONAL { ?expr jolux:titleShort ?titleShort }
+  ?expr jolux:isEmbodiedBy ?m .
+  ?m jolux:userFormat ?userFormat ; jolux:isExemplifiedBy ?file .
+  OPTIONAL { ?m dct:modified ?modified }
+}
+ORDER BY ?conso ?userFormat

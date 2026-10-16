@@ -1,0 +1,19 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX dct:   <http://purl.org/dc/terms/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+# Incremental change feed: every Work (Act or Consolidation) touched since the watermark.
+SELECT ?reason (COUNT(DISTINCT ?work) AS ?n) WHERE {
+  {
+    ?work a jolux:Act ; jolux:publicationDate ?d . FILTER(?d >= "2026-09-01"^^xsd:date) BIND("act-published" AS ?reason)
+  } UNION {
+    ?work a jolux:Work ; dct:created ?t . FILTER(?t >= "2026-09-01T00:00:00Z"^^xsd:dateTime) BIND("work-created" AS ?reason)
+  } UNION {
+    ?work jolux:isRealizedBy/jolux:isEmbodiedBy ?m . ?m dct:modified ?t . FILTER(?t >= "2026-09-01T00:00:00Z"^^xsd:dateTime) BIND("file-modified" AS ?reason)
+  } UNION {
+    ?work a jolux:Act ; jolux:dateNoLongerInForce ?d . FILTER(?d >= "2026-09-01"^^xsd:date && ?d <= "2026-10-16"^^xsd:date) BIND("ceased-in-window" AS ?reason)
+  } UNION {
+    ?work a jolux:Act ; jolux:dateEntryInForce ?d . FILTER(?d >= "2026-09-01"^^xsd:date && ?d <= "2026-10-16"^^xsd:date) BIND("entered-in-window" AS ?reason)
+  } UNION {
+    ?work a jolux:Consolidation ; jolux:dateApplicability ?d . FILTER(?d >= "2026-09-01"^^xsd:date && ?d <= "2026-10-16"^^xsd:date) BIND("conso-became-applicable" AS ?reason)
+  }
+} GROUP BY ?reason

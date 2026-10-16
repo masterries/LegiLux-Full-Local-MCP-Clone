@@ -1,0 +1,18 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX dct:   <http://purl.org/dc/terms/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+# Q-A (robust): latest consolidation WITH files and dateApplicability <= today, per complex work
+SELECT DISTINCT ?conso ?cw ?type ?flag ?dateApplicability ?dateEndApplicability ?created ?userFormat ?file ?fileModified
+WHERE {
+  { SELECT ?cw (MAX(?d) AS ?dateApplicability) WHERE {
+      ?x0 a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?d ; jolux:isRealizedBy ?e0 .
+      FILTER(?d <= "2026-10-16"^^xsd:date)
+    } GROUP BY ?cw }
+  ?conso a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?dateApplicability ; jolux:isRealizedBy ?e .
+  OPTIONAL { ?conso jolux:typeDocument ?type }
+  OPTIONAL { ?conso jolux:inForceStatus ?flag }
+  OPTIONAL { ?conso jolux:dateEndApplicability ?dateEndApplicability }
+  OPTIONAL { ?conso dct:created ?created }
+  ?e jolux:isEmbodiedBy ?m . ?m jolux:userFormat ?userFormat ; jolux:isExemplifiedBy ?file .
+  OPTIONAL { ?m dct:modified ?fileModified }
+}

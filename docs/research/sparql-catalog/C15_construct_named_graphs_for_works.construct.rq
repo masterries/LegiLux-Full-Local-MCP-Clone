@@ -1,0 +1,1 @@
+CONSTRUCT { ?s ?p ?o } WHERE { VALUES ?g { <http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/jo/graph> <http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/consolide/20251226/graph> } GRAPH ?g { ?s ?p ?o } }

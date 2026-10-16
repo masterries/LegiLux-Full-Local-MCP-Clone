@@ -1,0 +1,2 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+SELECT ?c (COUNT(*) AS ?rows) (COUNT(DISTINCT ?s) AS ?distinct) WHERE { VALUES ?c { jolux:Act jolux:Work jolux:Expression jolux:Manifestation jolux:Consolidation jolux:Code jolux:ComplexWork jolux:Memorial jolux:Article jolux:LegalResource jolux:Collection jolux:DraftRelatedDocument jolux:JudicialDecision jolux:TreatyDocument jolux:EULegalResource } ?s a ?c } GROUP BY ?c ORDER BY DESC(?distinct)

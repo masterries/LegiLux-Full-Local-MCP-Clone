@@ -1,0 +1,9 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX st:    <http://data.legilux.public.lu/resource/authority/application-status/>
+PREFIX uf:    <http://data.legilux.public.lu/resource/authority/user-format/>
+SELECT ?type ?branch (COUNT(DISTINCT ?act) AS ?inForce) (COUNT(DISTINCT ?withHtml) AS ?withHtml) (COUNT(DISTINCT ?withConso) AS ?withConso) WHERE {
+  ?act a jolux:Act ; jolux:typeDocument ?type ; jolux:inForceStatus st:in-force ; jolux:isMemberOf ?cw .
+  BIND(IF(CONTAINS(STR(?act), "/eli/etat/leg/"), "leg", IF(CONTAINS(STR(?act), "/eli/etat/adm/"), "adm", "other")) AS ?branch)
+  BIND(IF(EXISTS { ?act jolux:isRealizedBy/jolux:isEmbodiedBy/jolux:userFormat uf:html }, ?act, ?nothing) AS ?withHtml)
+  BIND(IF(EXISTS { ?c a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:inForceStatus st:applicable }, ?act, ?nothing) AS ?withConso)
+} GROUP BY ?type ?branch ORDER BY DESC(?inForce)

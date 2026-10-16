@@ -1,0 +1,13 @@
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+CONSTRUCT { ?c a skos:Concept ; skos:inScheme ?scheme ; skos:prefLabel ?l ; skos:notation ?n ; skos:broader ?b ; skos:exactMatch ?x }
+WHERE {
+  VALUES ?scheme {
+    <http://data.legilux.public.lu/resource/authority/resource-type>
+    <http://data.legilux.public.lu/resource/authority/application-status>
+    <http://data.legilux.public.lu/resource/authority/legal-subject>
+    <http://data.legilux.public.lu/resource/authority/legal-institution>
+    <http://data.legilux.public.lu/resource/authority/user-format>
+    <http://data.legilux.public.lu/resource/authority/license> }
+  ?c skos:inScheme ?scheme .
+  OPTIONAL { ?c skos:prefLabel ?l } OPTIONAL { ?c skos:notation ?n } OPTIONAL { ?c skos:broader ?b } OPTIONAL { ?c skos:exactMatch ?x }
+}

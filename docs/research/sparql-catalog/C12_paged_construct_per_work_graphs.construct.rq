@@ -1,0 +1,9 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX st: <http://data.legilux.public.lu/resource/authority/application-status/>
+CONSTRUCT { ?s ?p ?o } WHERE {
+  { SELECT ?act WHERE {
+      ?act a jolux:Act ; jolux:typeDocument <http://data.legilux.public.lu/resource/authority/resource-type/LOI> ; jolux:inForceStatus st:in-force .
+    } ORDER BY ?act LIMIT 500 OFFSET 0 }
+  BIND(IRI(CONCAT(STR(?act), "/graph")) AS ?g)
+  GRAPH ?g { ?s ?p ?o }
+}

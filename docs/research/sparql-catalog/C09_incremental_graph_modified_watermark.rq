@@ -1,0 +1,9 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# Incremental: every per-resource named graph whose dct:modified >= watermark (legislation branch only)
+SELECT ?g ?work ?modified WHERE {
+  GRAPH ?g { ?g dct:modified ?modified }
+  FILTER(?modified >= "2026-09-01T00:00:00Z"^^xsd:dateTime)
+  FILTER(STRSTARTS(STR(?g), "http://data.legilux.public.lu/eli/etat/leg/"))
+  BIND(IRI(REPLACE(STR(?g), "/graph$", "")) AS ?work)
+} ORDER BY ?modified

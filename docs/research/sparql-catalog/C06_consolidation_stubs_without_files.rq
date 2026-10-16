@@ -1,0 +1,7 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+# Stub consolidations (announced version, no expression/files yet)
+SELECT DISTINCT ?stub ?cw ?d ?flag WHERE {
+  ?stub a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?d .
+  OPTIONAL { ?stub jolux:inForceStatus ?flag }
+  FILTER NOT EXISTS { ?stub jolux:isRealizedBy ?e }
+}

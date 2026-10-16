@@ -1,0 +1,27 @@
+PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rt:    <http://data.legilux.public.lu/resource/authority/resource-type/>
+PREFIX st:    <http://data.legilux.public.lu/resource/authority/application-status/>
+PREFIX uf:    <http://data.legilux.public.lu/resource/authority/user-format/>
+# Q-B: in-force acts (core legislative types, /eli/etat/leg/ branch) WITHOUT any usable consolidation -> original JO text
+SELECT ?act ?type ?status ?dateDocument ?publicationDate ?dateEntryInForce ?dateNoLongerInForce ?memorial
+       (SAMPLE(?t) AS ?title) (SAMPLE(?h) AS ?html) (SAMPLE(?x) AS ?xml) (SAMPLE(?p) AS ?pdf)
+WHERE {
+  VALUES ?type { rt:Constitution rt:LOI rt:RGD rt:AGD rt:RMIN rt:AMIN rt:A rt:ARGD rt:AGC rt:RGC rt:ORD rt:ORDR rt:DEC rt:REG rt:RBCL rt:RCSF rt:RILR rt:CONV rt:PROT rt:ACCO rt:ST rt:RI rt:IMIN rt:CMIN rt:DGC rt:AGDR rt:DMIN rt:AR rt:RAP rt:REEX rt:RTF rt:RTDE rt:ACC rt:ACCA }
+  VALUES ?status { st:in-force st:not-yet-in-force }
+  ?act a jolux:Act ; jolux:typeDocument ?type ; jolux:inForceStatus ?status ; jolux:isMemberOf ?cw ;
+       jolux:dateDocument ?dateDocument ; jolux:publicationDate ?publicationDate ; jolux:isRealizedBy ?e .
+  FILTER(STRSTARTS(STR(?act), "http://data.legilux.public.lu/eli/etat/leg/"))
+  OPTIONAL { ?act jolux:dateEntryInForce ?dateEntryInForce }
+  OPTIONAL { ?act jolux:dateNoLongerInForce ?dateNoLongerInForce }
+  OPTIONAL { ?act jolux:isPartOf ?memorial }
+  FILTER(!BOUND(?dateNoLongerInForce) || ?dateNoLongerInForce > "2026-10-16"^^xsd:date)
+  FILTER NOT EXISTS { ?c a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:isRealizedBy ?ce ; jolux:dateApplicability ?cd . FILTER(?cd <= "2026-10-16"^^xsd:date) }
+  ?e jolux:language <http://publications.europa.eu/resource/authority/language/FRA> .
+  OPTIONAL { ?e jolux:title ?t }
+  OPTIONAL { ?e jolux:isEmbodiedBy ?mh . ?mh jolux:userFormat uf:html ; jolux:isExemplifiedBy ?h }
+  OPTIONAL { ?e jolux:isEmbodiedBy ?mx . ?mx jolux:userFormat ?ufx ; jolux:isExemplifiedBy ?x . FILTER(?ufx IN (uf:xml, uf:xml-akomantoso)) }
+  OPTIONAL { ?e jolux:isEmbodiedBy ?mp . ?mp jolux:userFormat ?ufp ; jolux:isExemplifiedBy ?p . FILTER(?ufp IN (uf:pdfa, uf:pdf)) }
+}
+GROUP BY ?act ?type ?status ?dateDocument ?publicationDate ?dateEntryInForce ?dateNoLongerInForce ?memorial
+ORDER BY ?act
