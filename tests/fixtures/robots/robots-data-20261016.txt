@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/rss-adm.xml
+Disallow: /eli/*
+Disallow: /filestore/*
+

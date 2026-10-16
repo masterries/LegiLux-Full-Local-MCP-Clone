@@ -1,0 +1,6 @@
+# Q03 partition (fallback): formats of consolidations whose dateApplicability year is in [Y0, Y1].
+SELECT DISTINCT ?c ?uf ?lic ?lang WHERE {
+ ?c a jolux:Consolidation ; jolux:dateApplicability ?d ; jolux:isRealizedBy ?e .
+ FILTER(YEAR(?d) >= {{Y0}} && YEAR(?d) <= {{Y1}})
+ OPTIONAL { ?e jolux:language ?lang }
+ OPTIONAL { ?e jolux:isEmbodiedBy ?m . ?m jolux:userFormat ?uf . OPTIONAL { ?m jolux:license ?lic } } }

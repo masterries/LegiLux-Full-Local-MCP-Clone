@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?><akomaNtoso xmlns="http://docs.oasis-open.org/legaldocml/ns/akn/3.0/CSD13" xmlns:scl="http://www.scl.lu">
+
+<act contains="originalVersion" name="" scl:page-proof="many">
+<meta>
+<identification source="#casemates">
+<FRBRWork>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#author" href="#mdda"/>
+<FRBRcountry value=""/>
+</FRBRWork>
+<FRBRExpression>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#editor" href="#somebody"/>
+<FRBRlanguage language=""/>
+</FRBRExpression>
+<FRBRManifestation>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#editor" href="#somebody"/>
+</FRBRManifestation>
+<scl:JOLUXWork>
+<scl:JOLUXComplexWork>
+<scl:jolux scl:name="uriThis"/>
+</scl:JOLUXComplexWork>
+<scl:JOLUXLegalResource><scl:jolux scl:name="baseAct">true</scl:jolux><scl:jolux scl:name="typeDocument">http://data.legilux.public.lu/resource/authority/resource-type/LOI</scl:jolux><scl:jolux scl:name="dateDocument">2026-02-25</scl:jolux><scl:jolux scl:name="publicationDate"/><scl:jolux scl:name="responsibilityOf"/><scl:jolux scl:name="responsibilityOf">http://data.legilux.public.lu/resource/authority/legal-institution/MAE</scl:jolux><scl:jolux scl:name="urgentEvent">false</scl:jolux><scl:jolux scl:name="subjectLevel1">http://data.legilux.public.lu/resource/authority/legal-subject/3665</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/966</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/1544</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/880</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/978</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/982</scl:jolux><scl:jolux xmlns:xopusAttr="http://www.xopus.com/xmlns/id/attr" xmlns:akoma="http://docs.oasis-open.org/legaldocml/ns/akn/3.0/CSD13" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns="http://www.w3.org/1999/xhtml" scl:name="dateEntryInForce"/></scl:JOLUXLegalResource>
+</scl:JOLUXWork>
+<scl:JOLUXExpression>
+<scl:jolux scl:lg="fra" scl:name="title">Loi du 25 février 2026 relative à l’établissement d’un titre de voyage provisoire de l’Union européenne.</scl:jolux>
+<scl:jolux scl:name="language">http://publications.europa.eu/resource/authority/language/FRA</scl:jolux>
+<scl:jolux scl:name="draft">/eli/dl/pl/2024/229</scl:jolux>
+<scl:jolux scl:name="transposes">/eli/dir_ue/2019/997/jo</scl:jolux>
+<scl:jolux scl:name="transposes">/eli/dir_ue/2024/1986/jo</scl:jolux>
+<scl:jolux scl:name="cites">/eli/etat/leg/agd/1923/06/29/n1/jo</scl:jolux>
+<scl:jolux scl:name="cites">/eli/dir_ue/2015/637/jo</scl:jolux>
+<scl:jolux scl:name="cites">/eli/reg_ue/2016/679/jo</scl:jolux>
+<scl:jolux scl:name="cites">/eli/dir_ue/1995/46/jo</scl:jolux>
+</scl:JOLUXExpression>
+<scl:JOLUXManifestation>
+<scl:jolux scl:name="uriThis"/>
+</scl:JOLUXManifestation>
+</identification>
+</meta>
+<preface>
+<longTitle>
+<p>Loi du 25 février 2026 relative à l’établissement d’un titre de voyage provisoire de l’Union européenne.</p>
+</longTitle>
+</preface>
+<preamble>
+<container name="preamble">
+<p>Nous Guillaume, Grand-Duc de Luxembourg, Duc de Nassau,</p>
+<p>Vu la <ref href="/eli/dir_ue/2019/997/jo" id="fef6c8f0-f0d3-4a61-b97e-e1ad4565d804">directive (UE) 2019/997</ref> du Conseil du 18 juin 2019 établissant un titre de voyage provisoire de l’Union européenne et abrogeant la <ref href="http://data.europa.eu/eli/dec/1996/409/oj" id="f09f02cd-df6f-43e7-8e26-1e37957aa91f">décision 96/409/PESC</ref> ;</p>
+<p>Vu la <ref href="/eli/dir_ue/2024/1986/jo" id="df517921-5408-448f-9120-fc1ef7602cca">directive déléguée (UE) 2024/1986</ref> de la Commission du 6 mai 2024 modifiant la <ref href="/eli/dir_ue/2019/997/jo" id="747d5103-d61d-49c6-bd8a-7573ebc8b2c0">directive (UE) 2019/997</ref> du Conseil en ce qui concerne la zone lisible par machine du titre de voyage provisoire de l’Union européenne ;</p>
+<p>Le Conseil d’État entendu ;</p>
+<p>Vu l’adoption par la Chambre des Députés ;</p>
+<p>Vu la décision de la Chambre des Députés du 20 janvier 2026 et celle du Conseil d’État du 3 février 2026 portant qu’il n’y a pas lieu à second vote ;</p>
+</container>
+<formula name="">
+<p>Avons ordonné et ordonnons :</p>
+</formula>
+</preamble>
+<body>
+<article id="art_1er">
+<num>Art. 1<sup>er</sup>. </num>
+<heading>
+<b>Définitions</b>
+</heading>
+<alinea>
+<content>
+<p>Pour l’application de la présente loi, on entend par :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>« <ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="8c58d440-0213-4108-98b0-39353c7afd56">arrêté grand-ducal du 29 juin 1923</ref> » : l’<ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="fc623562-6705-4ae9-8f38-5757c2bddd5f">arrêté grand-ducal modifié du 29 juin 1923</ref>, portant règlement du service consulaire et introduction de certaines taxes à percevoir par les agents du corps consulaire ;</li>
+<li>« citoyen non représenté » : tout citoyen ayant la nationalité d’un État membre qui n’est pas représenté dans un pays tiers conformément à l’article 16, paragraphe 2, alinéa 2, de l’<ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="79297534-082b-4aea-9187-e3020a11ef9e">arrêté grand-ducal du 29 juin 1923</ref> ;</li>
+<li>« <ref href="http://data.europa.eu/eli/dec/1996/409/oj" id="84c68d20-c150-4cef-a3b4-a3625f9f430c">décision 96/409/PESC</ref> » : la décision des représentants des gouvernements des États membres, réunis au sein du Conseil du 25 juin 1996 concernant l’établissement d’un titre de voyage provisoire <span scl:no-break="true">(<ref href="http://data.europa.eu/eli/dec/1996/409/oj" id="a6110ab5-ea59-4765-aaf5-d2171f04ddd4">96/409/PESC</ref> ) ;</span>
+</li>
+<li>« demandeur » : la personne qui présente une demande de TVP UE ;</li>
+<li>« <ref href="/eli/dir_ue/2019/997/jo" id="b35ea296-760c-4e7b-90de-a13aec352fa3">directive (UE) 2019/997</ref> » : la <ref href="/eli/dir_ue/2019/997/jo" id="b5c07be2-7ded-4e7d-8870-84319cdb0a67">directive (UE) 2019/997</ref> du Conseil du 18 juin 2019 établissant un titre de voyage provisoire de l’Union européenne et abrogeant la <ref href="http://data.europa.eu/eli/dec/1996/409/oj" id="75c1458f-cb6b-4b2e-b0a9-86855d929cba">décision 96/409/PESC</ref> ;</li>
+<li>« bénéficiaire » : la personne à laquelle un TVP UE est délivré ;</li>
+<li>« document 9303 de l’OACI » : le document 9303 de l’Organisation de l’aviation civile internationale (OACI) relatif aux documents de voyage lisibles à la machine (septième édition, 2015) ;</li>
+<li>« État membre prêtant assistance » : l’État membre qui reçoit une demande de TVP UE ;</li>
+<li>« État membre de nationalité » : l’État membre dont le demandeur affirme être ressortissant ; </li>
+<li>« jours ouvrables » : tous les jours autres que les jours fériés ou les week-ends respectés par le ministre ayant les Affaires consulaires dans ses attributions ;</li>
+<li>« <ref href="/eli/reg_ue/2016/679/jo" id="cb766fd6-7828-4882-bd05-4a5bff5fc68a">règlement (UE) 2016/679</ref> » : le <ref href="/eli/reg_ue/2016/679/jo" id="810cd4f9-e736-49b7-8a90-f823e278bfc6">règlement (UE) 2016/679</ref> du Parlement européen et du Conseil du 27 avril 2016 relatif à la protection des personnes physiques à l’égard du traitement des données à caractère personnel et à la libre circulation de ces données, et abrogeant la <ref href="/eli/dir_ue/1995/46/jo" id="2d05b6f1-4db4-46af-971c-7e2a96d69ab7">directive 95/46/CE</ref> (règlement général sur la protection des données).</li>
+</ol>
+</content>
+</alinea>
+</article>
+<article id="art_2">
+<num>Art. 2.</num>
+<heading>
+<b>TVP UE</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Le TVP UE est un titre de voyage qui est délivré par le ministre ayant les affaires consulaires dans ses attributions, ci-après « le ministre », à un citoyen non représenté dans un pays tiers aux fins d’un trajet unique vers l’État membre de nationalité ou l’État membre de résidence du citoyen, à la demande du citoyen, ou à titre exceptionnel, vers une autre destination.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Le ministre délivre des TVP UE aux citoyens non représentés dans des pays tiers en cas de perte, de vol ou de destruction de leur passeport ou de leur titre de voyage, ou lorsqu’il n’est pas possible d’obtenir le document en question dans un délai raisonnable selon d’autres modalités, conformément à la procédure définie à l’article 3 de la présente loi.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_3">
+<num>Art. 3.</num>
+<heading>
+<b>Procédure de délivrance lorsque le Grand-Duché de Luxembourg est l’État membre d’assistance</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Lorsque le ministre reçoit une demande de TVP UE, il consulte, dans les meilleurs délais, et au plus tard dans les deux jours ouvrables suivant la réception de la demande, le ministère des Affaires étrangères de l’État membre de nationalité ou, le cas échéant, l’ambassade ou le consulat compétent de cet État membre, conformément à l’article 37<i>quinquies</i> de l’<ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="78f03341-20c4-433b-a2bc-e6215cb66925">arrêté grand-ducal du 29 juin 1923</ref> en vue de vérifier la nationalité et l’identité du demandeur.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Le ministre communique à l’État membre de nationalité toutes les informations pertinentes et notamment :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>le nom et le prénom, la nationalité, la date de naissance et le sexe du demandeur ;</li>
+<li>une image faciale du demandeur prise par le personnel du consulat ou de la section consulaire de l’ambassade au moment de la demande ou, uniquement dans le cas où cela n’est pas faisable, une photographie scannée ou numérique du demandeur, sur la base des normes établies dans la partie 3 du document 9303 de l’OACI ;</li>
+<li>une copie ou une copie scannée de tous les moyens d’identification disponibles, par exemple la carte d’identité ou le permis de conduire et, si ces informations sont disponibles, le type et le numéro du document remplacé et le numéro de registre national ou le numéro de sécurité sociale.</li>
+</ol>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Si l’État membre de nationalité n’est pas en mesure de répondre dans les trois jours ouvrables, le ministre informe le demandeur en conséquence du délai d’attente.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>En cas de confirmation de la nationalité du demandeur, le ministre délivre le TVP UE au demandeur dans les meilleurs délais, et au plus tard dans les deux jours ouvrables suivant la réception de la confirmation. </p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(4)</num>
+<alinea>
+<content>
+<p>Le TVP UE n’est pas délivré si l’État membre de nationalité s’oppose à ce qu’un TVP UE soit délivré à l’un de ses ressortissants. </p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le ministre, en concertation étroite avec l’État membre de nationalité, informe le demandeur en conséquence.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(5)</num>
+<alinea>
+<content>
+<p>Le ministre peut délivrer un TVP UE sans consultation préalable de l’État membre de nationalité dans des cas d’extrême urgence. </p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Avant de procéder ainsi, le ministre épuise tous les moyens de communication disponibles avec l’État membre de nationalité. Le ministre informe dans les meilleurs délais l’État membre de nationalité de la délivrance d’un TVP UE et de l’identité de la personne à laquelle ce TVP UE a été délivré. Cette notification comprend toutes les données figurant sur le TVP UE.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_4">
+<num>Art. 4.</num>
+<heading>
+<b>Obligations à remplir lorsque le Luxembourg est l’État membre de nationalité</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Dans la mesure où le Grand-Duché de Luxembourg est lui-même l’État membre de nationalité et est consulté par l’État membre prêtant assistance conformément à l’article 10, paragraphe 2, de la <ref href="/eli/dir_ue/2015/637/jo" id="77237727-0b0f-4a90-8458-ca2cb1d292bc">directive (UE) 2015/637</ref>, le ministre répond à la consultation et confirme si le demandeur est un ressortissant luxembourgeois dans les meilleurs délais, et au plus tard dans les trois jours ouvrables suivant la réception des informations mentionnées à l’article 3, paragraphe 2. Si le ministre ne saurait répondre à la consultation dans le délai de trois jours, il en informe l’État membre prêtant assistance et fournit une estimation du délai prévu pour la réponse.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Dans la mesure où le Grand-Duché de Luxembourg est lui-même l’État membre de nationalité, le ministre peut s’opposer à ce qu’un TVP UE soit délivré à l’un de ses ressortissants et en informe l’État membre prêtant assistance.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Dans des cas justifiés, le ministre peut aller au-delà des délais prévus aux articles 3, paragraphe 1<sup>er</sup>, et 4, paragraphe 1<sup>er</sup>.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(4)</num>
+<alinea>
+<content>
+<p>Le ministre stocke une photocopie ou une copie scannée de chaque TVP UE délivré et fait parvenir une autre photocopie ou copie scannée à l’État membre de nationalité du demandeur. </p>
+<p>Le bénéficiaire d’un TVP UE est invité à restituer celui-ci, qu’il ait ou non expiré, dès son arrivée à la destination finale.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_5">
+<num>Art. 5.</num>
+<heading>
+<b>Dispositions financières</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Le ministre adresse une facture au demandeur des frais identiques à ceux qu’il facture à ses propres ressortissants pour la délivrance de documents provisoires nationaux.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Le ministre peut renoncer à facturer des frais, d’une manière générale ou dans des cas particuliers qu’il détermine.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Lorsque le demandeur n’est pas en mesure de payer les frais applicables au moment où il introduit sa demande, il s’engage à rembourser ces frais à l’État membre dont il a la nationalité au moyen du formulaire type figurant à l’annexe I de l’<ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="128d478f-0918-4ddd-bf7c-9d296489174f">arrêté grand-ducal du 29 juin 1923</ref>. Dans ce cas, les articles 37<i>ter</i>, paragraphe 3, alinéa 2, et 37<i>septies</i>, de l’<ref href="/eli/etat/leg/agd/1923/06/29/n1/jo" id="36b1f187-9674-4f02-9bdc-0f35a15f6a62">arrêté grand-ducal du 29 juin 1923</ref> s’appliquent.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_6">
+<num>Art. 6.</num>
+<heading>
+<b>Validité</b>
+</heading>
+<alinea>
+<content>
+<p>Un TVP UE est valide pour la période nécessaire pour effectuer le voyage pour lequel il est délivré. Pour le calcul de cette période, il est tenu compte des arrêts pour la nuit et du temps requis pour les correspondances. La période de validité comprend un délai de grâce supplémentaire de deux jours. </p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sauf circonstances exceptionnelles, la validité d’un TVP UE ne dépasse pas quinze jours civils.</p>
+</content>
+</alinea>
+</article>
+<article id="art_7">
+<num>Art. 7.</num>
+<heading>
+<b>Modèle type de TVP UE</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Les TVP UE se composent d’un formulaire TVP UE type et d’une vignette TVP UE type. Ce formulaire et cette vignette sont conformes aux spécifications définies aux annexes I et II de la présente loi et aux spécifications techniques complémentaires établies par les actes d’exécution adoptés conformément à l’article 9 de la <ref href="/eli/dir_ue/2019/997/jo" id="26bd81fb-cc25-4254-b048-6eaff8274888">directive (UE) 2019/997</ref>. </p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Lorsque la vignette TVP UE type est remplie, les rubriques énumérées à l’annexe II de la présente loi sont complétées et la zone lisible à la machine remplie, respectant les spécifications du document 9303 de l’OACI.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Le ministre ajoute toute mention nationale nécessaire dans la rubrique « Remarques » de la vignette TVP UE type visée à l’annexe II, point 9, de la présente loi. Ces mentions nationales ne font pas double emploi avec les rubriques mentionnées à l’annexe II. </p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(4)</num>
+<alinea>
+<content>
+<p>Toutes les mentions portées sur la vignette TVP UE type, y compris l’image faciale, sont imprimées. Aucune modification manuscrite n’est apportée à une vignette TVP UE type imprimée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>À titre exceptionnel, en cas de force majeure technique, la vignette TVP UE type peut être remplie à la main et une photographie peut y être apposée. En pareils cas, la photographie est pourvue d’une protection supplémentaire contre la substitution de photo. Aucune modification n’est apportée à une vignette TVP UE type qui a été remplie à la main.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(5)</num>
+<alinea>
+<content>
+<p>Si une erreur est décelée sur une vignette TVP UE type qui n’a pas encore été apposée sur le formulaire TVP UE type, la vignette en question est invalidée et détruite.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si une erreur est décelée après que la vignette TVP UE type a été apposée sur le formulaire TVP UE type, les deux éléments sont invalidés et détruits et une nouvelle vignette TVP UE type est produite.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(6)</num>
+<alinea>
+<content>
+<p>La vignette TVP UE type imprimée contenant les rubriques complétées est apposée sur le formulaire TVP UE type conformément à l’annexe I de la présente loi. </p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_8">
+<num>Art. 8.</num>
+<heading>
+<b>Production de TVP UE</b>
+</heading>
+<alinea>
+<content>
+<p>Le ministre est l’organisme ayant la responsabilité de la production des formulaires et des vignettes TVP UE types.</p>
+</content>
+</alinea>
+</article>
+<article id="art_9">
+<num>Art. 9.</num>
+<heading>
+<b>Protection des données à caractère personnel</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Les données à caractère personnel traitées aux fins de la présente loi, y compris l’image faciale ou la photographie du demandeur visée à l’article 43, paragraphe 2, de la présente loi, ne sont utilisées que pour vérifier l’identité du demandeur selon la procédure définie à l’article 43 de la présente loi, pour imprimer la vignette TVP UE type et pour faciliter les déplacements dudit demandeur. La direction des Affaires consulaires garantit une sécurité appropriée des données à caractère personnel.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Sans préjudice du <ref href="/eli/reg_ue/2016/679/jo" id="c8302bc6-36e1-4ad3-8d81-a704d6e34022">règlement (UE) 2016/679</ref>, un demandeur auquel un TVP UE est délivré a le droit de vérifier les données à caractère personnel contenues dans le TVP UE et, le cas échéant, de demander que des corrections y soient apportées en délivrant un nouveau document.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Aucune information sous une forme lisible à la machine n’est incluse dans un TVP UE à moins qu’elle n’apparaisse également dans les rubriques mentionnées à l’annexe II, point 6 de la présente loi.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(4)</num>
+<alinea>
+<content>
+<p>Le ministre ne conserve les données à caractère personnel d’un demandeur qu’aussi longtemps que légalement nécessaires, notamment pour obtenir le paiement des frais visés à l’article 5 de la présente loi. En aucun cas, ces données à caractère personnel ne sont conservées pendant plus de cent quatre-vingts jours en cas d’assistance à un citoyen non représenté dans un pays tiers ou pendant plus de deux ans en cas d’assistance à un ressortissant luxembourgeois.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>À l’expiration de la période de conservation, les données à caractère personnel d’un demandeur sont effacées.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(5)</num>
+<alinea>
+<content>
+<p>Par dérogation au paragraphe 4 du présent article, tout TVP UE restitué et toutes les copies y relatives sont détruits en toute sécurité et dans les meilleurs délais.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_10">
+<num>Art. 10.</num>
+<heading>
+<b>Suivi</b>
+</heading>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Le ministre assure un suivi régulier de l’application de la présente loi sur la base des indicateurs suivants : </p>
+<ol scl:start="1" scl:symbol="1°">
+<li>le nombre de TVP UE délivrés en application de l’article 2 de la présente loi et la nationalité du bénéficiaire ;</li>
+<li>le nombre de TVP UE délivrés en application de l’article 7 de la présente loi et la nationalité du bénéficiaire ; </li>
+<li>le nombre de cas de fraude et de contrefaçon liés aux TVP UE.</li>
+</ol>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Le ministre organise la production et la collecte des données nécessaires pour mesurer tout changement survenant dans les indicateurs mentionnés au paragraphe 1<sup>er</sup> du présent article et fournit ces informations à la Commission européenne sur une base annuelle.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article id="art_11">
+<num>Art. 11.</num>
+<heading>
+<b>Invalidation et destruction des formulaires </b>
+</heading>
+<alinea>
+<content>
+<p>Le ministre assure l’invalidation et la destruction des formulaires de titre de voyage provisoire produits en application de la <ref href="http://data.europa.eu/eli/dec/1996/409/oj" id="68f153f3-6f56-473e-b34b-b5fd0421f18d">décision 96/409/PESC</ref> dans le délai prévu par l’article 18, le paragraphe 1<sup>er</sup>, de la <ref href="/eli/dir_ue/2019/997/jo" id="24b57eb0-d944-4664-afc3-cadcc8197334">directive (UE) 2019/997</ref>.</p>
+</content>
+</alinea>
+</article>
+<clause>
+<content>
+<p>Mandons et ordonnons que la présente loi soit insérée au Journal officiel du Grand-Duché de Luxembourg pour être exécutée et observée par tous ceux que la chose concerne.</p>
+</content>
+</clause>
+</body>
+<conclusions>
+<p> <signature> <shortTitle>Le Ministre des Affaires étrangères<br/> et du Commerce extérieur,</shortTitle> <person refersTo="">Xavier Bettel </person> </signature> </p>
+<p> <signature>
+<docDate date="2999-01-01">Fait le 25 février 2026. </docDate> <person refersTo="">Guillaume</person> </signature> </p>
+</conclusions>
+<attachments>
+<attachment id="attachment_1">
+<doc name="">
+<meta>
+<identification source="">
+<FRBRWork>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2026-02-02" name=""/>
+<FRBRauthor href=""/>
+<FRBRcountry value=""/>
+</FRBRWork>
+<FRBRExpression>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2026-02-02" name=""/>
+<FRBRauthor href=""/>
+<FRBRlanguage language=""/>
+</FRBRExpression>
+<FRBRManifestation>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2026-02-02" name=""/>
+<FRBRauthor href=""/>
+</FRBRManifestation>
+</identification>
+</meta>
+<preface>
+<longTitle>
+<p scl:align="center">Annexes</p>
+</longTitle>
+</preface>
+<mainBody>
+<alinea>
+<content>
+<p scl:align="center">
+<b>ANNEXE I</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>FORMULAIRE TVP UE TYPE</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le formulaire TVP UE type est conforme aux spécifications ci-après :</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>1. Format et dimensions</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le formulaire TVP UE type se présente sous la forme d’un dépliant en triptyque (une seule feuille imprimée recto verso et pliée en trois volets). Une fois plié, ses dimensions répondent à la norme ISO/IEC 7810 ID-3.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>2. Page une : page de garde</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La page de garde du formulaire TVP UE type contient, dans cet ordre, les termes « UNION EUROPÉENNE » dans toutes les langues officielles de l’Union ainsi que les termes « EMERGENCY TRAVEL DOCUMENT » et « TITRE DE VOYAGE PROVISOIRE ». Un cercle de douze étoiles d’or y est également représenté.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>3. Page deux : apposition de la vignette TVP UE type</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La vignette TVP UE type est apposée sur la deuxième page du formulaire TVP UE type de manière à ne pas pouvoir être facilement détachée. Elle est alignée et apposée sur le bord de la page. La zone lisible par machine de la vignette TVP UE type est alignée sur le bord extérieur de la page. Le sceau des autorités de délivrance est placé sur la vignette TVP UE type de telle sorte qu’il déborde sur la page.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>4. Pages trois et quatre : informations</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La troisième et la quatrième pages contiennent des traductions de « Titre de voyage provisoire » et des mentions de la vignette TVP UE type dans toutes les langues officielles de l’Union, excepté l’anglais et le français. Le texte ci-après apparaît également :</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>« This EU Emergency Travel Document is a travel document issued by a Member State of the European Union for a single journey to the holder’s Member State of nationality or residence or, exceptionally, to another destination. Authorities of non-EU countries are hereby requested to allow the holder to pass freely without hindrance.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le présent titre de voyage provisoire de l’UE est un titre de voyage délivré par un État membre de l’Union européenne aux fins d’un trajet unique vers l’État membre de nationalité ou de résidence du détenteur, ou, à titre exceptionnel, vers une autre destination. Les autorités des pays tiers sont priées d’autoriser le détenteur du titre de voyage provisoire à circuler sans entraves. ».</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>5. Pages cinq et six : visas et cachets d’entrée/de sortie </b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La cinquième et la sixième pages portent l’intitulé « VISA/VISA » et sont vierges par ailleurs.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Ces pages sont réservées aux visas et aux cachets d’entrée/de sortie. </p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>6. Numéro du formulaire TVP UE type</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Un numéro à sept chiffres est pré-imprimé sur le formulaire TVP UE type.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p scl:align="center">
+<b>
+<eop/>ANNEXE II </b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>VIGNETTE TVP UE TYPE</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La vignette TVP UE type est conforme aux spécifications ci-après :</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>Éléments de la vignette TVP UE type </b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<ol scl:start="1" scl:symbol="1.">
+<li>La vignette TVP UE type contient une image faciale du titulaire, imprimée selon des normes de sécurité élevées. L’image faciale ou la photographie est celle utilisée aux fins de l’article 3, paragraphe 2, de la présente loi.</li>
+<li>La vignette TVP UE type contient des dispositifs de sécurité assurant une protection suffisante contre la falsification, dans lesquels il est tenu compte, en particulier, des dispositifs de sécurité utilisés pour le modèle type de visa.</li>
+<li>Les mêmes éléments de sécurité sont utilisés pour tous les États membres</li>
+<li>Les mentions suivantes apparaissent sur la vignette TVP UE type : <ol scl:start="1" scl:symbol="a)">
+<li>l’abréviation « EU ETD/TVP UE » ;</li>
+<li>les termes « European Union/Union européenne » ;</li>
+<li>le code à trois lettres « EUE » figurant dans le document 9303 de l’OACI.</li>
+</ol>
+</li>
+<li>Le numéro à sept chiffres de la vignette TVP UE type, orienté horizontalement, est préimprimé en noir. Une police de caractères spéciale est utilisée. Ce numéro est précédé du code de pays à deux lettres de l’État membre de délivrance, établi par le document 9303 de l’OACI, qui peut être pré-imprimé ou ajouté au moment où la vignette TVP UE type est remplie. Pour des raisons de sécurité, le même numéro à sept chiffres peut être pré-imprimé plusieurs fois sur la vignette TVP UE type.</li>
+</ol>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>Rubriques à compléter</b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<ol scl:start="6" scl:symbol="1.">
+<li>La vignette TVP UE type contient des rubriques réservées aux informations suivantes :<ol scl:start="1" scl:symbol="a)">
+<li>le pays de destination et les éventuels pays de transit pour lesquels le TVP UE est délivré ; </li>
+<li>l’État membre de délivrance et le lieu où l’autorité de délivrance est sise ;</li>
+<li>la date de délivrance et la date d’expiration ; </li>
+<li>le nom et le prénom, la nationalité, la date de naissance et le sexe du bénéficiaire du TVP UE ; </li>
+<li>le numéro du formulaire TVP UE type sur lequel la vignette TVP UE type s’appose, conformément à l’annexe I, point 6.</li>
+</ol>
+</li>
+<li>Les mentions correspondant aux rubriques à compléter figurent en anglais et en français et sont numérotées.</li>
+<li>Les dates sont représentées de la manière suivante : le jour à l’aide de deux chiffres, le premier d’entre eux étant un zéro si le jour en question correspond à une unité ; le mois à l’aide de deux chiffres, le premier d’entre eux étant un zéro si le mois en question correspond à une unité ; l’année à l’aide de quatre chiffres. Le jour et le mois sont suivis d’un espace. Exemple : 20 01 2018 = 20 janvier 2018. </li>
+<li>La vignette contient une rubrique « Remarques », qui est utilisée par l’autorité de délivrance pour indiquer toute autre information nécessaire, par exemple le type et le numéro du document remplacé.</li>
+</ol>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>
+<b>Informations lisibles à la machine </b>
+</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<ol scl:start="10" scl:symbol="1.">
+<li> La vignette TVP UE type contient les informations lisibles à la machine nécessaires conformément au document 9303 de l’OACI pour faciliter les contrôles aux frontières extérieures. Les lettres majuscules « PU » sont utilisées en tant que deux premiers caractères dans la zone lisible à la machine pour désigner le document comme titre de voyage provisoire de l’Union européenne. La zone de lecture automatique contient un texte imprimé dans l’impression de fond visible avec les termes « Union européenne » dans toutes les langues officielles de l’Union. Ce texte n’altère pas les éléments techniques de la zone de lecture automatique ni sa lisibilité. </li>
+<li>Un espace est réservé à l’ajout éventuel d’un code-barres commun 2D.</li>
+</ol>
+</content>
+</alinea>
+</mainBody>
+</doc>
+</attachment>
+</attachments>
+<components>
+<component>
+<interstitial>
+<p>Doc. parl. <ref href="/eli/dl/pl/2024/229" id="a2b69952-9061-428d-83a5-36a8b841bf5e">8454</ref> ; <ref href="/eli/dir_ue/2019/997/jo" id="64deccb8-e8d3-47a7-bc4c-d25ffcea4ca3">Dir. (UE) 2019/997</ref>
+<ref href="/eli/dir_ue/2024/1986/jo" id="6fe5d3ad-38ae-4fe2-980f-184409d35b14">, Dir. dél. (UE) 2024/1986</ref> ; législature 2023-2028.</p>
+</interstitial>
+</component>
+</components>
+</act>
+</akomaNtoso>

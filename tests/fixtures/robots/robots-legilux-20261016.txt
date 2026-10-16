@@ -1,0 +1,32 @@
+User-agent: *
+Disallow: /publications-regroupees
+Disallow: /api/rss-adm.xml
+Disallow: /eli/etat/adm/
+Disallow: /reg_ue/
+Disallow: /dir_ue/
+Disallow: /search
+Disallow: /*.svg
+Disallow: /*.docx
+Disallow: /eli/etat/adm/pa/2017/01/16/b326/jo
+Disallow: /eli/etat/adm/pa/2017/01/10/b159/jo
+Disallow: /eli/etat/adm/pa/2017/01/10/b159/jo/fr/html
+Disallow: /eli/etat/adm/pa/2017/01/10/b159/jo/fr/xml
+Disallow: /eli/etat/leg/loi/2007/01/15/n2/jo
+Disallow: /eli/etat/leg/loi/2007/01/15/n2/jo/fr/html
+Disallow: /eli/etat/leg/loi/2007/01/15/n2/jo/fr/xml
+Disallow: /eli/etat/leg/memorial/2007/8/fr/pdf
+Disallow: /eli/etat/adm/amin/2021/05/26/b2350
+# Sitemap directive
+Sitemap: https://legilux.public.lu/sitemap-index.xml
+
+Sitemap: https://legilux.public.lu/sitemap-1.xml
+Sitemap: https://legilux.public.lu/sitemap-2.xml
+Sitemap: https://legilux.public.lu/sitemap-3.xml
+Sitemap: https://legilux.public.lu/sitemap-4.xml
+Sitemap: https://legilux.public.lu/sitemap-5.xml
+Sitemap: https://legilux.public.lu/sitemap-6.xml
+Sitemap: https://legilux.public.lu/sitemap-7.xml
+Sitemap: https://legilux.public.lu/sitemap-8.xml
+Sitemap: https://legilux.public.lu/sitemap-9.xml
+Sitemap: https://legilux.public.lu/sitemap-10.xml
+Sitemap: https://legilux.public.lu/sitemap-11.xml

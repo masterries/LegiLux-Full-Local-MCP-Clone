@@ -1,0 +1,102 @@
+{
+  "format": 1,
+  "sync_date": "2026-10-16",
+  "source": "import",
+  "note": "Frozen research pulls of 2026-10-16 (gaps-and-reconciliation a1,c1,c2,c3,m2,histid,l4; plan checks P2 relother, P3 titles; review Q10, plan Q-MANIF 5 works). act_formats is the union of GR l4 (= Q09: in-force LOI/RGD/AGD/RMIN, all branches) and the live Q19 pull of 2026-10-16T22:44Z (every /etat/leg/ act of the 18 text types), so it covers every JO candidate. manifestations also holds the live Q-MANIF rows of the 51 sample works (47 IRIs, pulled 2026-10-16T22:44Z with the same query; every other table was byte-identical to the research pull).",
+  "act_formats_coverage": null,
+  "tables": {
+    "acts": {
+      "file": "acts.parquet",
+      "file_sha256": "38ff9d9f7bbbd859a66d7e2dc445e1a25a47c65186a4d4a05bc2b6a45c162376",
+      "source_file": "a1",
+      "rows": 151253,
+      "distinct_keys": 151250,
+      "bytes": 46136891
+    },
+    "consolidations": {
+      "file": "consolidations.parquet",
+      "file_sha256": "a0f63598fda2acb051bcc8c0eea33f3b89a223f0e10dff911b817898e63082a2",
+      "source_file": "c1",
+      "rows": 4719,
+      "distinct_keys": 4719,
+      "bytes": 1638807
+    },
+    "conso_formats": {
+      "file": "conso_formats.parquet",
+      "file_sha256": "9ab6a5964760ce1b4fea6f8f8d7ccf13fc530631abdb9264e7d57277bd50f0fc",
+      "source_file": "c2",
+      "rows": 13679,
+      "distinct_keys": 4606,
+      "bytes": 3541126
+    },
+    "conso_base_acts": {
+      "file": "conso_base_acts.parquet",
+      "file_sha256": "75be0bf29d93c340f2ab9e1516ab175f323126d43f9b86f114f96e452819b1f6",
+      "source_file": "c3",
+      "rows": 1370,
+      "distinct_keys": 1370,
+      "bytes": 386788
+    },
+    "rel_modifies_repeals": {
+      "file": "rel_modifies_repeals.parquet",
+      "file_sha256": "c1db041178c1a541ca86c55ad265e56c35086ac3e3d65eb87ef646db568c9be4",
+      "source_file": "m2",
+      "rows": 47428,
+      "distinct_keys": 29640,
+      "bytes": 9894740
+    },
+    "rel_other": {
+      "file": "rel_other.parquet",
+      "file_sha256": "90d97940bfb36b2ebdf6b3c3dd8e8eba1678f05ff81eb68fe850d4712b2e43e3",
+      "source_file": "relother.csv",
+      "rows": 169243,
+      "distinct_keys": 69695,
+      "bytes": 32998420
+    },
+    "titles": {
+      "file": "titles.parquet",
+      "file_sha256": "6062d424c39d772218a000b8a25a869de6b000ead9b8ec3a334f1a717c263023",
+      "source_file": "titles.csv",
+      "rows": 80906,
+      "distinct_keys": 80906,
+      "bytes": 18611429
+    },
+    "memorial_refs": {
+      "file": "memorial_refs.parquet",
+      "file_sha256": "fa9cc4b018a11731ce805aac144ce915975de1d3795712b49805e9364bcdc3f7",
+      "source_file": "histid",
+      "rows": 71455,
+      "distinct_keys": 71455,
+      "bytes": 10136001
+    },
+    "vocab": {
+      "file": "vocab.parquet",
+      "file_sha256": "7cfb05ff19adb700759af657c0f2731f65bb30274cacd948c485e5489be8c270",
+      "source_file": "Q10.nt",
+      "rows": 3785,
+      "distinct_keys": 3785,
+      "bytes": 2422346
+    },
+    "act_formats": {
+      "file": "act_formats.parquet",
+      "file_sha256": "4cacf98cffdbdc1a66f4540efbf8f11dd67cb111026a940426926d3377c46d9d",
+      "source_file": "l4 + live Q19 (q19_act_formats)",
+      "rows": 107743,
+      "distinct_keys": 45607,
+      "bytes": 14182255,
+      "live_query_sha256": "8d1fe5149044407340e5558d7371b68033fe527a02095806f19fd981eba6836f",
+      "live_fetched_at": "2026-10-16T22:44:13.996714+00:00"
+    },
+    "manifestations": {
+      "file": "manifestations.parquet",
+      "file_sha256": "fa5c5bdc209d90942455df2e0b2ca792856ae6c6d2fb5b12e36f21671a198b92",
+      "source_file": "q_manif.csv + live Q-MANIF of the config/sample.yaml works",
+      "rows": 187,
+      "distinct_keys": 49,
+      "bytes": 5923,
+      "live_query_sha256": "1941e98a43c66502e39d7989d63242e73ec84d920ed891a0d36f61f33d4fb230",
+      "live_fetched_at": "2026-10-16T22:44:20.012626+00:00"
+    }
+  },
+  "snapshot_digest": "sha256:c0a9622d0e9b2df6445fb6ed546bfbc89823273a9db3cc2c22c100cd49d53c29"
+}

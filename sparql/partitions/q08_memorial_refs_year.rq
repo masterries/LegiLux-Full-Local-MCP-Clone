@@ -1,0 +1,4 @@
+# Q08 partition (fallback): Mémorial references of /eli/etat/leg/ acts whose dateDocument year is in [Y0, Y1].
+SELECT DISTINCT ?a ?h ?mem WHERE { ?a a jolux:Act ; jolux:dateDocument ?dd ; jolux:historicalLegalId ?h .
+  OPTIONAL { ?a jolux:isPartOf ?mem }
+  FILTER(CONTAINS(STR(?a),"/eli/etat/leg/")) FILTER(YEAR(?dd) >= {{Y0}} && YEAR(?dd) <= {{Y1}}) }

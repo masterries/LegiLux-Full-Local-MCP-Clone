@@ -464,6 +464,8 @@ class DataLayout:
         "memorial_refs",
         "vocab",
         "manifestations",
+        "act_formats",  # Q19 (agent A, M1): formats/licences of JO acts for the licence-aware pick
+        "serving_plan",  # written by `lgx select` (one row per act of the metadata scope)
     )
 
     def __init__(self, root: Path, sync_date: dt.date) -> None:

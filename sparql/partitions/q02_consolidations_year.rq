@@ -1,0 +1,6 @@
+# Q02 partition (fallback): consolidation versions whose dateApplicability year is in [Y0, Y1].
+SELECT DISTINCT ?c ?cw ?d ?end ?st ?type ?created ?pub WHERE {
+ ?c a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?d .
+ FILTER(YEAR(?d) >= {{Y0}} && YEAR(?d) <= {{Y1}})
+ OPTIONAL { ?c jolux:dateEndApplicability ?end } OPTIONAL { ?c jolux:inForceStatus ?st }
+ OPTIONAL { ?c jolux:typeDocument ?type } OPTIONAL { ?c dct:created ?created } OPTIONAL { ?c jolux:publicationDate ?pub } }

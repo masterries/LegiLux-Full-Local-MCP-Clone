@@ -1,0 +1,130 @@
+{
+  "format": 1,
+  "sync_date": "2026-10-16",
+  "source": "subset of snapshot-20261016",
+  "note": "Subset of tests/golden/snapshot-20261016 for the config/sample.yaml works plus selection edge cases (lgx_ingest.sparql.subset_snapshot). Offline rule tests run on it.",
+  "act_formats_coverage": null,
+  "works": [
+    "http://data.legilux.public.lu/eli/etat/leg/a/1892/12/29/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/acc/2026/02/27/a120",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1995/05/18/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/amin/2022/07/15/a355",
+    "http://data.legilux.public.lu/eli/etat/leg/code/cooperation_judiciaire",
+    "http://data.legilux.public.lu/eli/etat/leg/code/environnement_annexes",
+    "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
+    "http://data.legilux.public.lu/eli/etat/leg/code/route",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1922/03/05/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1976/08/29/n5",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/1999/05/31/n8",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2002/11/12/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2010/05/27/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2014/07/04/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2015/07/30/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2017/04/24/a479",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/09/a882",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2023/07/29/a504",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2026/04/15/a211",
+    "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+    "http://data.legilux.public.lu/eli/etat/leg/recueil/sites_monuments",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1978/02/28/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1988/07/15/n3",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2003/01/24/n2",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2004/02/13/n6",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/11/30/a1010",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/08/17/a1153",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/07/11/a319",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
+    "http://data.legilux.public.lu/eli/etat/leg/rgd/2026/06/12/a299",
+    "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779",
+    "http://data.legilux.public.lu/eli/etat/leg/rmin/1985/01/28/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/rmin/2024/02/08/a56",
+    "http://data.legilux.public.lu/eli/etat/leg/rmin/2026/05/06/a230"
+  ],
+  "tables": {
+    "acts": {
+      "file": "acts.parquet",
+      "file_sha256": "bf6bcd4211f5961e6765ec20447decb2a13e4a82ebfcbff4490f840915a38fb8",
+      "rows": 91
+    },
+    "consolidations": {
+      "file": "consolidations.parquet",
+      "file_sha256": "1cb8fed9b6bcea608d9cc686db807110f2fe03e08adb37fb1307991048ccf077",
+      "rows": 519
+    },
+    "conso_formats": {
+      "file": "conso_formats.parquet",
+      "file_sha256": "0ec04adc37db6e45e3b6d02f1b975e9ed41fa21b79116b90cb8dd8bf5e7c15d8",
+      "rows": 1229
+    },
+    "conso_base_acts": {
+      "file": "conso_base_acts.parquet",
+      "file_sha256": "c647132a91d21c12ef3ae46e9c0b0fb9c6ad1cc26c827d6a246faac0e7d8fdf7",
+      "rows": 34
+    },
+    "rel_modifies_repeals": {
+      "file": "rel_modifies_repeals.parquet",
+      "file_sha256": "a7dd81bad769d921fae245d27afe7a58f42fa30abb4406e3976e33d9b694cddd",
+      "rows": 1229
+    },
+    "rel_other": {
+      "file": "rel_other.parquet",
+      "file_sha256": "3583c7a80a8843c7735cb7f89e691022a41c17d39ec5d552342c9c49a36e7dfd",
+      "rows": 393
+    },
+    "titles": {
+      "file": "titles.parquet",
+      "file_sha256": "3b00ed136dff4161217bac09cabe9e983a9ce20877b6e59e64c1cf358fb9da8b",
+      "rows": 90
+    },
+    "memorial_refs": {
+      "file": "memorial_refs.parquet",
+      "file_sha256": "96dd1f21ebda0b64ecf44a04decabf30947a34fe5d693f6019089c59b39ec431",
+      "rows": 57
+    },
+    "vocab": {
+      "file": "vocab.parquet",
+      "file_sha256": "7e8339a48411a522a98cfc4b77c9630adfdacdc673f430fbef273c3a025cbf97",
+      "rows": 74
+    },
+    "act_formats": {
+      "file": "act_formats.parquet",
+      "file_sha256": "822f94c5bd529b48b19d8b3a517032302e0d6fe1ac2fd5718390125fc0e48dc1",
+      "rows": 222
+    },
+    "manifestations": {
+      "file": "manifestations.parquet",
+      "file_sha256": "633dbe773414175198b3e065884b7eea5c92c50cda723e57647357b87687d064",
+      "rows": 183
+    }
+  },
+  "snapshot_digest": "sha256:a6ad9cf74e862e600b4131c30516ac1c2e757b8d69d42e9d842e2a604f0a485c"
+}

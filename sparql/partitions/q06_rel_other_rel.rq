@@ -1,0 +1,5 @@
+# Q06 partition (fallback): one predicate per request (basedOn, cites, rectifies, transposes).
+SELECT DISTINCT ?src ?rel ?tgt WHERE {
+  VALUES ?rel {
+    {{IRIS}} }
+  ?src a jolux:Act ; ?rel ?tgt . }

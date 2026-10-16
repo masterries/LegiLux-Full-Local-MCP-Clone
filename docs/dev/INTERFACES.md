@@ -40,6 +40,10 @@ A stage that raises `NotImplementedError` makes the CLI exit with code **3** ("n
 |---|---|---|
 | `lgx robots` | `lgx_ingest.robots:run_robots` | `(ctx: StageContext) -> StageResult` |
 | `lgx robots-ack SHA` | `lgx_ingest.robots:acknowledge` | `(ctx, sha256: str) -> StageResult` |
+| `lgx robots check` / `lgx robots ack SHA` | same functions (group added by `lgx_ingest/cli_meta.py`; `lgx robots` alone still runs S0) | — |
+| `lgx meta pull [-q …] [--manif sample\|all\|none]` | `lgx_ingest.sparql:run_discover` | as `lgx discover` |
+| `lgx meta select [--date D] [--snapshot DIR]` | `lgx_ingest.select:run_select` | as `lgx select`, selection at any date / on any snapshot |
+| `lgx meta golden [--snapshot DIR]` | `lgx_ingest.select:golden_check` | PLAN §11.5 expected vs actual (also `scripts/check_golden.py`) |
 | — (used by fetch) | `lgx_ingest.robots:load_policy` | `(ctx) -> UrlPolicy` |
 | `lgx discover [-q q01 …]` | `lgx_ingest.sparql:run_discover` | `(ctx, queries: Sequence[str] \| None = None) -> StageResult` |
 | `lgx select [--sample/--full]` | `lgx_ingest.select:run_select` | `(ctx) -> StageResult` |
@@ -77,6 +81,9 @@ messages, details}`; the CLI prints it as JSON and exits 1 when `ok` is false.
 | `robots/ack.json` | acknowledged robots sha256 per host | `robots-ack` → robots |
 | `meta/<T>/<table>.parquet` (§3) | SPARQL snapshot tables, zstd parquet | discover → select |
 | `meta/<T>/_snapshot.json` | per query: file, query sha256, rows, bytes, seconds, fetched_at; Q17 completeness | discover → select, gates |
+| `meta/<T>/serving_plan.parquet` | one row per act of the metadata scope: label, rule, flags, served version + file + licence, text window, future version, amending list (`lgx_ingest.select.SERVING_PLAN_SCHEMA`) | select → report, review |
+| `manifest/<T>/data_quality.jsonl` | `DataQualityIssue` (flag/date conflicts, URI-date mismatches, flag/window conflicts) | select → load |
+| `manifest/<T>/gdpr_review.json` | naturalisation-titled LOIs **not** caught by the title rule, for lawyer review (never shipped) | select → lawyer |
 | `manifest/<T>/manifest.jsonl` | `ManifestEntry` | select → fetch, parse, chunk, load |
 | `manifest/<T>/acts.jsonl` | `Act` (whole metadata scope) | select → load |
 | `manifest/<T>/versions.jsonl` | `ActVersion` (all versions; fetch provenance empty) | select → load |
@@ -123,10 +130,19 @@ included) — aggregation is selection's job.
 | `memorial_refs` | q08 | `a`, `h`, `mem` |
 | `vocab` | q10 | `concept_uri`, `scheme`, `code`, `label_fr`, `label_de`, `label_en` (= `VocabConcept`) |
 | `manifestations` | q_manif (≤ 500 IRIs per POST) | `w`, `uf` *code*, `lic`, `file`, `mod` (timestamp) |
+| `act_formats` | q19 (M1, one flat request; IRIS = the 18 text types) | `a`, `uf` *code*, `lic` |
+
+M1 additions (agent A): parquet rows are sorted by all columns (key first) so files and the snapshot digest
+do not depend on server order; `_snapshot.json` also carries `act_formats_coverage` (`null` = every
+`/etat/leg/` act of the text types; a `{doc_types, rdf_status}` filter for older snapshots, outside of which
+the licence is *unknown*), `manifestations_scope`, `snapshot_digest` and per table `partitioned`/`errors`.
+Partitioned fallbacks live in `sparql/partitions/` (year windows, predicates, types).
 
 Q-MANIF must cover at least every version that gets a `file` in the manifest (in sample mode: the
-sample works). Licence decisions for non-sampled JO acts may use `checks/q09_licence_crosstab` (one
-request); record which source was used in the selection report.
+sample works). Licence decisions for non-sampled JO acts use `act_formats` (Q19, which widens
+`checks/q09_licence_crosstab` to every status and text type; the Q09 gate numbers are recomputed from it);
+the source per act is in the serving plan (`licence_source`: `q_manif` | `conso_formats` | `act_formats` |
+`unknown`) and summarised in the selection report (`licence_sources`).
 
 Golden numbers (PLAN §11.5) are asserted on the **frozen 2026-10-16 snapshot**: the research pulls are at
 `/tmp/claude-0/-home-user-LegiLux-Full-Local-MCP-Clone/dc1ab714-bae7-500d-838b-586da454eb94/scratchpad/research/gaps-and-reconciliation/out/`
@@ -163,6 +179,24 @@ Decisions fixed in M0 (tell the orchestrator if a rule forces a change):
 by_role, by_reason}, golden: {name: value}, anomalies: [...], sample: {works, matched, mismatches: [{work,
 expected, actual}]}}`. `config/sample.yaml` expectations (computed offline on the frozen snapshot) must
 match on the frozen snapshot; mismatches are triaged, not silently fixed.
+
+M1 implementation notes (agent A):
+- `select(snapshot, T, config, *, denylist=(), works=None)`: `denylist` adds the robots-derived prefixes
+  (`data/robots/<T>/denylist.json`, read by `run_select`); `works` restricts the output (Q-MANIF candidates,
+  tests). The report also has `golden.research` (research definitions) and `golden.selection` (rule
+  counts), `counts.by_act_reason`, `licence_sources`, `counts.excluded`.
+- Sample mode: `text_valid` is set on every version whose text the rules store (the serving decision);
+  `file` only where Q-MANIF ran (the sample works, or all with `--full` / `--opt manif=all`).
+- `ActVersion` rows carry `source_format/source_url/licence` of the chosen file but `has_text = false`
+  and `text_valid = null` (the model requires sha256 for text); the loader sets both from the manifest and
+  `raw/index.jsonl`. JO originals get a version row only when their text is served.
+- Extra rule ids: `2b:excluded_by_config`, `2d:discontinued_last_consolidation`, `2d:recueil_ended`,
+  `2e:future_no_files`, `2e:future_only`, `2e:original_after_end` (JO original stored, role `future`, from
+  the end date of a current version that has no successor), `2f:history_text`, `3:pdf_only`, `3:amending_metadata_only`
+  (`lgx_core.rules.select.REASONS`).
+- Runtime parity: `serving_at(T)` equals the build label for every act except not-yet-in-force acts with
+  stored text (their window starts at `dei`, so the runtime says `metadata_only` + `not-yet-in-force` until
+  then). Tested against the SQL twins in `tests/db/test_rules_parity.py`.
 
 ## 5. Agent B — fetch (S3), parse (S4/S5), normalise, chunk (S6)
 
@@ -204,6 +238,46 @@ from the manifest entry / `RawFile`; `text_sha256` defaults to sha256(`text_plai
 + index terms; split > ~1,500 tokens at paragraph boundaries (header repeated, `part_no/part_count`); never
 merge; no chunks for repealed stubs, preamble/visas, modifying articles, table annexes; `searchable=false` for
 `superseded_by_code`; `valid_from/valid_to` = the version's `text_valid`; `content_sha256 = sha256(header + body)`.
+
+M1 implementation notes (agent B):
+- **Inputs.** `fetch`/`parse`/`chunk` read `manifest/<T>/manifest.jsonl`, or `--opt manifest=PATH` (`.jsonl`,
+  a parquet export of manifest rows, or `meta/<T>/serving_plan.parquet`, converted by
+  `lgx_ingest.fetch.entries_from_serving_plan`: served version + stored future version). `lgx content fetch
+  --plan PATH` and `lgx content parse FILE` (`lgx_ingest/cli_content.py`) wrap the same code.
+- **Fetch.** Fails closed without a robots policy (`robots.load_policy`). Progress for T is in
+  `logs/fetch_progress_<T>.txt` (URLs done; `--opt refetch=1` ignores it). `RawFile.etag` was added
+  (additive; the filestore sends no ETag). Cap = `scope.fetch.max_file_bytes` (checked on
+  `X-Content-Size`/`Content-Length` and while streaming), allowlist matched on the path after `filestore/eli/`.
+  `max_retries` = retries after the first attempt; transport errors are retried too.
+- **Units.** Besides articles the parsers emit hierarchy units (`book…subsection`; anchor = AKN id, or
+  `_<type>.<n>` when the source has none or a generated one), one `preamble` unit for JO acts (visas +
+  formula), `paragraph` units for loose body text (acts without article markup, transitional alineas in
+  recueils) and `annex` units (one per attachment, or per bold « ANNEXE … » heading). `text_plain` keeps
+  one line per block (paragraph `(1) …`, alinea, list item with its rendered label `1°`/`a)`/`-`/`•`);
+  `text_md` is set only when it differs (tables). Article `heading` fully in parentheses → `provenance`.
+  Repeal stubs: `style="del"`, all-deleted bodies, and bodies (or headings) that are only a note such as
+  « Abrogé ( L. 23 avril 1934 ) » (`lgx_core.normalise.is_repeal_stub_text`); `repeal_note` holds the note.
+  `is_modifying` = the unit contains `embeddedStructure`/`quotedStructure` or a content `<mod>`
+  (HTML: `table.richtext_embeddedStructurequote`).
+- **Article ELIs.** Malformed in-XML URIs (55 articles of `code/travail/20260726`, e.g.
+  « …/code/travail/art. l.143-1. ») are logged (`malformed_article_eli`) and replaced by a derived
+  `<prefix>/<akn id>` with `eli_unit_derived = true`; articles without any ELI log `article_without_eli`.
+  JO originals get `<work>/<akn id>` (derived). Recueil articles with a `wId` get `from_recueil_wid`
+  (normalised) and `member_act_eli`, anchor = the relative wId.
+- **Relations.** `akn-ref`: `src_eli` = act work, `src_version_eli` + `src_unit_ordinal` = the citing unit;
+  `akn-textualmod`: `src_eli` = modifying act (`/jo`), `dst_eli` = this work, `dst_unit_hint` = destination
+  anchor or the unit carrying the `mod-start` marker; `akn-note`: notes not tied to a textualMod.
+- **Num keys.** `num_norm` keeps list/range connectors (`'Art. 9 et 10.' → '9_et_10'`, `'Art. 17 à 20.' →
+  '17_a_20'`); `lgx_core.normalise.num_aliases(num_raw, akn_id=, eli_unit=)` gives the extra
+  `article_alias` keys (members `9`, `10`; `17`…`20`; ELI forms `9_10`, `17--20`). Annex articles keep their
+  plain number (the resolver must prefer non-annex units on a collision).
+- **Chunks.** `chunk_units(..., text_valid=None, max_tokens=1500)`; body = `text_md` or `text_plain`;
+  header `"{titre court} — {label} > {breadcrumb} > {num} {heading}"` + `" | Index : …"`; titre court =
+  `Act.title_short` → curated `short_title` alias (`config/aliases.yaml`, « Code du travail ») →
+  `citation_title` → title cut at 120 chars. Token estimate `lgx_core.textsize` (`ceil(chars/3.5)`).
+  Deterministic identity `lgx_ingest.chunk.chunk_id` = `<slug>:<unit ordinal>:<part>`.
+- **PDF** (`parse/pdf.py`) and recueil dedup (`parse/recueil.py`) are M2 stubs; `lgx parse` reports PDF
+  entries as `skipped_pdf`.
 
 ## 6. Loader (S8) and gates (S9) — next stage
 

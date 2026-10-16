@@ -1,0 +1,3 @@
+# Q08 partition (fallback): Mémorial references of /eli/etat/leg/ acts without jolux:dateDocument.
+SELECT DISTINCT ?a ?h ?mem WHERE { ?a a jolux:Act ; jolux:historicalLegalId ?h . OPTIONAL { ?a jolux:isPartOf ?mem }
+  FILTER(CONTAINS(STR(?a),"/eli/etat/leg/")) FILTER NOT EXISTS { ?a jolux:dateDocument ?dd } }

@@ -1,0 +1,5 @@
+# Q01 partition (fallback, Appendix A.0): acts whose jolux:dateDocument year is in [Y0, Y1]. Unsorted.
+SELECT DISTINCT ?a ?cw ?type ?st ?dei ?dnl ?pub WHERE {
+ ?a a jolux:Act ; jolux:isMemberOf ?cw ; jolux:typeDocument ?type ; jolux:inForceStatus ?st ; jolux:dateDocument ?dd .
+ FILTER(YEAR(?dd) >= {{Y0}} && YEAR(?dd) <= {{Y1}})
+ OPTIONAL { ?a jolux:dateEntryInForce ?dei } OPTIONAL { ?a jolux:dateNoLongerInForce ?dnl } OPTIONAL { ?a jolux:publicationDate ?pub } }

@@ -1,0 +1,5 @@
+# Q05 partition (fallback): one predicate per request (IRIS = [jolux:modifies] or [jolux:repeals]).
+SELECT DISTINCT ?src ?rel ?tgt ?dei WHERE {
+ VALUES ?rel {
+    {{IRIS}} }
+ ?src ?rel ?tgt . OPTIONAL { ?src jolux:dateEntryInForce ?dei } }

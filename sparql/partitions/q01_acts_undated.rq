@@ -1,0 +1,5 @@
+# Q01 partition (fallback): acts without jolux:dateDocument (completes the year partitions).
+SELECT DISTINCT ?a ?cw ?type ?st ?dei ?dnl ?pub WHERE {
+ ?a a jolux:Act ; jolux:isMemberOf ?cw ; jolux:typeDocument ?type ; jolux:inForceStatus ?st .
+ FILTER NOT EXISTS { ?a jolux:dateDocument ?dd }
+ OPTIONAL { ?a jolux:dateEntryInForce ?dei } OPTIONAL { ?a jolux:dateNoLongerInForce ?dnl } OPTIONAL { ?a jolux:publicationDate ?pub } }

@@ -1,0 +1,13 @@
+# Q19 — formats and licences of /eli/etat/leg/ acts of the text types (new in M1; widens checks/q09 to
+# every status and every text type). One flat unsorted pull instead of ~55 Q-MANIF batches: selection
+# needs a licence decision for every candidate JO original (PLAN §2.2 step 3, §3.4). File URLs still
+# come from Q-MANIF for the versions that are fetched. IRIS = resource-type IRIs (scope.text_types).
+# Columns: a, uf (code), lic. The Q09 licence gate is recomputed from this table client-side.
+SELECT DISTINCT ?a ?uf ?lic WHERE {
+  VALUES ?t {
+    {{IRIS}} }
+  ?a a jolux:Act ; jolux:typeDocument ?t ; jolux:isRealizedBy ?e . ?e jolux:isEmbodiedBy ?m . ?m jolux:userFormat ?uf .
+  FILTER(STRSTARTS(STR(?a), "http://data.legilux.public.lu/eli/etat/leg/"))
+  FILTER(?uf IN (<http://data.legilux.public.lu/resource/authority/user-format/html>,<http://data.legilux.public.lu/resource/authority/user-format/xml>,
+                 <http://data.legilux.public.lu/resource/authority/user-format/xml-akomantoso>,<http://data.legilux.public.lu/resource/authority/user-format/pdf>))
+  OPTIONAL { ?m jolux:license ?lic } }

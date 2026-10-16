@@ -598,6 +598,7 @@ class RawFile(LgxModel):
     content_type: str | None = None
     http_status: int = 200
     last_modified: dt.datetime | None = None
+    etag: str | None = Field(default=None, description="ETag if the server sends one (the filestore does not)")
     fetched_at: dt.datetime
     eli_version: str | None = None
     source_format: SourceFormat | None = None

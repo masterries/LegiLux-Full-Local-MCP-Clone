@@ -80,6 +80,7 @@ addopts = "-ra --strict-markers"
 markers = [
     "live: hits the real Legilux endpoints (skipped unless --run-live or LGX_RUN_LIVE=1)",
     "db: needs PostgreSQL (Docker or LGX_TEST_PG_DSN); skipped when neither is available",
+    "large: needs the sha256-pinned large fixtures in data/fixtures-large/ (scripts/fetch_fixtures.sh); skipped when absent",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

@@ -1,0 +1,487 @@
+{
+ "version": 1,
+ "snapshot": "2026-10-16",
+ "licence_note": "Every file is a CC BY 4.0 manifestation (jolux:license) of Legilux, © SCL; source: legilux.public.lu. Changes: a936 trimmed (see note).",
+ "small_dir": "tests/fixtures/legilux",
+ "large_dir": "data/fixtures-large",
+ "files": {
+  "a686_conso": {
+   "path": "xml/eli-etat-leg-loi-2018-08-01-a686-consolide-20251226-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2018/08/01/a686/consolide/20251226/fr/xml/eli-etat-leg-loi-2018-08-01-a686-consolide-20251226-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/consolide/20251226",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2025-12-26",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "a03796f9edc950a7fcc19fe5d890a4a150fb4650b9254a85be4ee5dac8fe1e05",
+   "bytes": 140421,
+   "last_modified": "2026-01-08T08:59:17Z",
+   "note": "Art. 56 style=del repealed stub; textualMod source loi/2025/12/19/a619/jo"
+  },
+  "aifm_conso": {
+   "path": "xml/eli-etat-leg-loi-2013-07-12-n1-consolide-20260416-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2013/07/12/n1/consolide/20260416/fr/xml/eli-etat-leg-loi-2013-07-12-n1-consolide-20260416-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/consolide/20260416",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-04-16",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "b5e9c7df5e25681cc286ee6fc8c2126a2c50e85799088741dc62ea848ac76abe",
+   "bytes": 1080499,
+   "last_modified": "2026-04-09T07:52:45Z",
+   "note": "229 article units, 59 id-less embeddedStructure articles, 140 textualMod"
+  },
+  "constitution": {
+   "path": "xml/eli-etat-leg-constitution-1868-10-17-n1-consolide-20260829-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829/fr/xml/eli-etat-leg-constitution-1868-10-17-n1-consolide-20260829-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+   "doc_type": "Constitution",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-08-29",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "293316a4e19fe120a79c07a4663484a0980ef2becef9b2333139a6c9cbbafde6",
+   "bytes": 204339,
+   "last_modified": "2026-08-26T08:08:49Z",
+   "note": "132 articles"
+  },
+  "a88_jo": {
+   "path": "xml/eli-etat-leg-loi-2026-02-25-a88-jo-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2026/02/25/a88/jo/fr/xml/eli-etat-leg-loi-2026-02-25-a88-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2026-03-02",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "7cfd9c579132cf5ee9a92520a157f6ee8b5b172ddbc27b74f8c43eec6b845dd4",
+   "bytes": 33278,
+   "last_modified": "2026-02-26T15:45:05Z",
+   "note": "11 articles + annexes without articles; stale meta (docDate 2999-01-01)"
+  },
+  "n25_jo": {
+   "path": "xml/eli-etat-leg-loi-2016-12-23-n25-jo-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2016/12/23/n25/jo/fr/xml/eli-etat-leg-loi-2016-12-23-n25-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2017-01-01",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "8001f747407e1440ec2219fbf87668f922889c38bd8748200d18b90f56ada6c6",
+   "bytes": 13589,
+   "last_modified": "2025-11-20T11:42:06Z",
+   "note": "Art. 5 « fait seul foi »"
+  },
+  "copyright_conso": {
+   "path": "xml/eli-etat-leg-loi-2001-04-18-n2-consolide-20220409-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2001/04/18/n2/consolide/20220409/fr/xml/eli-etat-leg-loi-2001-04-18-n2-consolide-20220409-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/consolide/20220409",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2022-04-09",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "8b94e21f70cc3a817ae85c88a9531a216276e16a859536c4468d7d936062b0cb",
+   "bytes": 483074,
+   "last_modified": "2025-11-12T15:19:14Z",
+   "note": "Art. 10, 8° actes officiels; content <mod> in Art. 87"
+  },
+  "a203_jo": {
+   "path": "xml/eli-etat-leg-loi-2023-04-19-a203-jo-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2023/04/19/a203/jo/fr/xml/eli-etat-leg-loi-2023-04-19-a203-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2023-04-25",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "9bf000b899c9f6b02f84867b854982afc9a90c58c68f7907848ff0cef3160a93",
+   "bytes": 52083,
+   "last_modified": "2025-11-18T17:46:20Z",
+   "note": "pure amending act (arbitration reform): modifying articles"
+  },
+  "l1922_jo": {
+   "path": "xml/eli-etat-leg-loi-1922-03-05-n1-jo-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/1922/03/05/n1/jo/fr/xml/eli-etat-leg-loi-1922-03-05-n1-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/1922/03/05/n1/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1922/03/05/n1",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_possibly_outdated",
+   "text_valid": {
+    "lower": "1922-03-15",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "483498ee85cadbd041b4ef918927a84288e4f223df532139397deb3d628a1501",
+   "bytes": 13069,
+   "last_modified": "2025-11-22T16:36:31Z",
+   "note": "short JO act with an annex"
+  },
+  "a88_html": {
+   "path": "html/eli-etat-leg-loi-2026-02-25-a88-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2026/02/25/a88/jo/fr/html/eli-etat-leg-loi-2026-02-25-a88-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2026-03-02",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "f686e91da1b5eddb52b4baff5733632ec83f374844ae4d2ace8da5983c959747",
+   "bytes": 58519,
+   "last_modified": null,
+   "note": "HTML twin of a88_jo"
+  },
+  "aifm_conso_html": {
+   "path": "html/eli-etat-leg-loi-2013-07-12-n1-consolide-20260416-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2013/07/12/n1/consolide/20260416/fr/html/eli-etat-leg-loi-2013-07-12-n1-consolide-20260416-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/consolide/20260416",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-04-16",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "d92e531b6d2bd5deaa65004a7dcd520223006ddcce332aea3709fa3f06fa83b8",
+   "bytes": 1831526,
+   "last_modified": null,
+   "note": "HTML twin of aifm_conso (hidden widgets, mod_del rows, repealed art_213)"
+  },
+  "constitution_html": {
+   "path": "html/eli-etat-leg-constitution-1868-10-17-n1-consolide-20260829-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829/fr/html/eli-etat-leg-constitution-1868-10-17-n1-consolide-20260829-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+   "doc_type": "Constitution",
+   "kind": "consolidated",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-08-29",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "b53450e7e6095145a45aa03ae79c4ac039f9001b5daab0ef3b4c94b0e405b136",
+   "bytes": 184930,
+   "last_modified": null,
+   "note": "HTML twin of constitution"
+  },
+  "l1978_jo_html": {
+   "path": "html/eli-etat-leg-loi-1978-07-14-n1-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/1978/07/14/n1/jo/fr/html/eli-etat-leg-loi-1978-07-14-n1-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "1978-08-07",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "f6e3f4c94bce8f9fa76dac6d6e73f6e95c41881ed7ffeb37f884b5d871931b7b",
+   "bytes": 24687,
+   "last_modified": "2025-11-22T08:53:31Z",
+   "note": "retro-converted act; its XML is licenceSCL, the HTML is CC BY"
+  },
+  "n5_jo_html": {
+   "path": "html/eli-etat-leg-loi-2001-06-20-n5-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/loi/2001/06/20/n5/jo/fr/html/eli-etat-leg-loi-2001-06-20-n5-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+   "doc_type": "LOI",
+   "kind": "original",
+   "text_basis": "original_possibly_outdated",
+   "text_valid": {
+    "lower": "2001-07-22",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "c8da8a472b5272092ec60f8473fdcc40e8dac2790f1d5582d16a7a2efdca9b92",
+   "bytes": 64197,
+   "last_modified": "2025-11-21T14:09:57Z",
+   "note": "CC-BY HTML path (XML licenceSCL); amended, never consolidated"
+  },
+  "n3_rgd_jo_html": {
+   "path": "html/eli-etat-leg-rgd-2000-07-24-n3-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/rgd/2000/07/24/n3/jo/fr/html/eli-etat-leg-rgd-2000-07-24-n3-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+   "doc_type": "RGD",
+   "kind": "original",
+   "text_basis": "original_possibly_outdated",
+   "text_valid": {
+    "lower": "2000-08-18",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "6661dca1435e7ab980096695b76aeacb8474de455735492b8e6cb75ada022fb1",
+   "bytes": 33888,
+   "last_modified": "2025-11-21T14:23:24Z",
+   "note": "CC-BY HTML path; base légale abrogée"
+  },
+  "agd1939_jo_html": {
+   "path": "html/eli-etat-leg-agd-1939-09-25-n2-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/agd/1939/09/25/n2/jo/fr/html/eli-etat-leg-agd-1939-09-25-n2-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2",
+   "doc_type": "AGD",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "1939-10-04",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "fd1b7c7dc87eb4f4b5cf96c872664a93b700e06163ee21ceff261231c6e1b7b6",
+   "bytes": 18194,
+   "last_modified": "2025-11-22T15:48:12Z",
+   "note": "CC-BY HTML path (AGD)"
+  },
+  "rgd1989_jo_html": {
+   "path": "html/eli-etat-leg-rgd-1989-03-24-n1-jo-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/rgd/1989/03/24/n1/jo/fr/html/eli-etat-leg-rgd-1989-03-24-n1-jo-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1",
+   "doc_type": "RGD",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "1989-04-01",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "10d73f1ea3faf0233da94210579bb87ced4d76a9b8cd69389dd02830382a7829",
+   "bytes": 24411,
+   "last_modified": "2025-11-22T07:25:30Z",
+   "note": "CC-BY HTML path; quoted amendments (embeddedStructurequote)"
+  },
+  "a936_jo_trimmed": {
+   "path": "xml/eli-etat-leg-rgd-2018-10-02-a936-jo-fr-xml.trimmed.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/rgd/2018/10/02/a936/jo/fr/xml/eli-etat-leg-rgd-2018-10-02-a936-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936",
+   "doc_type": "RGD",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2018-10-14",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "80ca86b3bc288c71335cc509343e6c54f52a00ae7721d63df953e934986fe6a5",
+   "bytes": 18615,
+   "last_modified": "2025-11-20T05:55:21Z",
+   "note": "base64 PNG payload replaced by a 1x1 PNG (scripts/fetch_fixtures.sh --trim rebuilds it from a936_jo_full)",
+   "derived_from": "a936_jo_full"
+  }
+ },
+ "large": {
+  "code_civil": {
+   "path": "eli-etat-leg-code-civil-20251226-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/civil/20251226/fr/xml/eli-etat-leg-code-civil-20251226-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/civil/20251226",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2025-12-26",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "4e00c9ed4d906f537a2630cddcd49fe3368a5ecbd9a9b5c06876f54e9f1a0e96",
+   "bytes": 5413811,
+   "last_modified": "2026-09-09T12:10:21Z",
+   "note": "2,301 articles; « Art. 9 et 10. » / « 17 à 20 » aliases"
+  },
+  "code_travail": {
+   "path": "eli-etat-leg-code-travail-20260726-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/travail/20260726/fr/xml/eli-etat-leg-code-travail-20260726-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/travail/20260726",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-07-26",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "6e278fe972d73c6a6f651324813e8cb20505ea9efa8cdd6db09547cc3279c0ca",
+   "bytes": 4128058,
+   "last_modified": "2026-07-30T07:21:37Z",
+   "note": "1,196 articles; art_l_121-1; provenance headings; index terms"
+  },
+  "code_penal": {
+   "path": "eli-etat-leg-code-penal-20251219-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/penal/20251219/fr/xml/eli-etat-leg-code-penal-20251219-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/penal/20251219",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2025-12-19",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "f2c463eb996a87f64622627c5ac4ec099a34c3ca2c6d68c90ca9bc1db2b1ab35",
+   "bytes": 1639494,
+   "last_modified": "2025-12-17T11:20:11Z",
+   "note": "699 articles"
+  },
+  "code_procedure_civile": {
+   "path": "eli-etat-leg-code-procedure_civile-20251219-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/procedure_civile/20251219/fr/xml/eli-etat-leg-code-procedure_civile-20251219-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/20251219",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2025-12-19",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "e387a7fc7f00d6a30efddac071beaa03aa871a86b01d38ab7b6fe5c4819322a4",
+   "bytes": 3156272,
+   "last_modified": "2025-12-18T16:12:43Z",
+   "note": "NCPC"
+  },
+  "code_fonction_publique": {
+   "path": "eli-etat-leg-code-fonction_publique-20261011-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/fonction_publique/20261011/fr/xml/eli-etat-leg-code-fonction_publique-20261011-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique/20261011",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-10-11",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "e2d1f60f26908b0809aec2eac50b8756ec810771c2ca272b51f31f75480ac3fb",
+   "bytes": 6550354,
+   "last_modified": "2026-10-09T08:40:25Z",
+   "note": "XML code-recueil: generated ids, wId"
+  },
+  "a936_jo_full": {
+   "path": "eli-etat-leg-rgd-2018-10-02-a936-jo-fr-xml.xml",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/rgd/2018/10/02/a936/jo/fr/xml/eli-etat-leg-rgd-2018-10-02-a936-jo-fr-xml.xml",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936/jo",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936",
+   "doc_type": "RGD",
+   "kind": "original",
+   "text_basis": "original_never_amended",
+   "text_valid": {
+    "lower": "2018-10-14",
+    "upper": null
+   },
+   "source_format": "xml",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "67de0020efd5a0464cc9c9ec6a9e1b5aad14a0dad6abd9c3a6594fdd85225e85",
+   "bytes": 1900411,
+   "last_modified": "2025-11-20T05:55:21Z",
+   "note": "1.9 MB of base64 images"
+  },
+  "code_travail_html": {
+   "path": "eli-etat-leg-code-travail-20260726-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/travail/20260726/fr/html/eli-etat-leg-code-travail-20260726-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/travail/20260726",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-07-26",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "7648f2d2b1bb54edfe395476bf8148d31dd8d3ff9dca4ddd64fa4fd0468c79fa",
+   "bytes": 4242544,
+   "last_modified": null,
+   "note": "HTML twin of code_travail"
+  },
+  "code_civil_html": {
+   "path": "eli-etat-leg-code-civil-20251226-fr-html.html",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/civil/20251226/fr/html/eli-etat-leg-code-civil-20251226-fr-html.html",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/civil/20251226",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+   "doc_type": "CODE",
+   "kind": "code",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2025-12-26",
+    "upper": null
+   },
+   "source_format": "html",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "45e9be403941b10ae0ab81ad31ff3d293f5708b084f6bdfc3c4f0e856992c76f",
+   "bytes": 3012461,
+   "last_modified": null,
+   "note": "HTML twin of code_civil"
+  }
+ }
+}

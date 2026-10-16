@@ -1,0 +1,1301 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><akomaNtoso xmlns="http://docs.oasis-open.org/legaldocml/ns/akn/3.0/CSD13" xmlns:scl="http://www.scl.lu">
+
+<act contains="originalVersion" name="" scl:page-proof="many">
+<meta>
+<identification source="#casemates">
+<FRBRWork>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#author" href="#mdda"/>
+<FRBRcountry value=""/>
+</FRBRWork>
+<FRBRExpression>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#editor" href="#somebody"/>
+<FRBRlanguage language=""/>
+</FRBRExpression>
+<FRBRManifestation>
+<FRBRthis value=""/>
+<FRBRuri value=""/>
+<FRBRdate date="2999-01-01" name=""/>
+<FRBRauthor as="#editor" href="#somebody"/>
+</FRBRManifestation>
+<scl:JOLUXWork>
+<scl:JOLUXComplexWork>
+<scl:jolux scl:name="uriThis"/>
+</scl:JOLUXComplexWork>
+<scl:JOLUXLegalResource><scl:jolux scl:name="typeDocument">http://data.legilux.public.lu/resource/authority/resource-type/LOI</scl:jolux><scl:jolux scl:name="dateDocument">2023-04-19</scl:jolux><scl:jolux scl:name="publicationDate"/><scl:jolux scl:name="responsibilityOf"/><scl:jolux scl:name="responsibilityOf">http://data.legilux.public.lu/resource/authority/legal-institution/MJ</scl:jolux><scl:jolux scl:name="subjectLevel1">http://data.legilux.public.lu/resource/authority/legal-subject/2012</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/1354</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/5</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/3316</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/3042</scl:jolux><scl:jolux scl:name="subjectLevel2">http://data.legilux.public.lu/resource/authority/legal-subject/3271</scl:jolux><scl:jolux xmlns="http://www.w3.org/1999/xhtml" xmlns:akoma="http://docs.oasis-open.org/legaldocml/ns/akn/3.0/CSD13" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:xopusAttr="http://www.xopus.com/xmlns/id/attr" scl:name="dateEntryInForce"/></scl:JOLUXLegalResource>
+</scl:JOLUXWork>
+<scl:JOLUXExpression>
+<scl:jolux scl:lg="fra" scl:name="title">Loi du 19 avril 2023 portant modification de la deuxième partie, livre III, titre Ier, du Nouveau Code de procédure civile, en vue de la réforme de l’arbitrage.</scl:jolux>
+<scl:jolux scl:name="language">http://publications.europa.eu/resource/authority/language/FRA</scl:jolux>
+<scl:jolux scl:name="modifies">/eli/etat/leg/rgd/1998/08/03/n4/jo</scl:jolux>
+<scl:jolux scl:name="draft">/eli/etat/projet/pl/20170333</scl:jolux>
+</scl:JOLUXExpression>
+<scl:JOLUXManifestation>
+<scl:jolux scl:name="uriThis"/>
+</scl:JOLUXManifestation>
+</identification>
+</meta>
+<preface>
+<longTitle>
+<p>Loi du 19 avril 2023 portant modification de la deuxième partie, livre III, titre I<sup>er</sup>, du Nouveau Code de procédure civile, en vue de la réforme de l’arbitrage.</p>
+</longTitle>
+</preface>
+<preamble>
+<container name="preamble">
+<p>Nous Henri, Grand-Duc de Luxembourg, Duc de Nassau,</p>
+<p>Notre Conseil d’État entendu ;</p>
+<p>De l’assentiment de la Chambre des Députés ;</p>
+<p>Vu la décision de la Chambre des Députés du 23 mars 2023 et celle du Conseil d’État du 24 mars 2023 portant qu’il n’y a pas lieu à second vote ;</p>
+</container>
+<formula name="">
+<p>Avons ordonné et ordonnons :</p>
+</formula>
+</preamble>
+<body>
+<article id="art_1er">
+<num>Art. 1<sup>er</sup>.</num>
+<alinea>
+<content>
+<p>À la deuxième partie, livre III, du <ref href="/eli/etat/leg/code/procedure_civile" id="47119cf8-6443-4f70-a91e-e3d4bcc0d5b7">Nouveau Code de procédure civile</ref>, le titre I<sup>er</sup> est remplacé comme suit :<embeddedStructure scl:hide-quote="true">
+<title>
+<num>« TITRE I<sup>er</sup>.</num>
+<heading scl:separator=" – " scl:style-format="b">Des arbitrages</heading>
+<chapter>
+<num>Chapitre I.</num>
+<heading scl:separator=" – " scl:style-format="bi">De l’arbitrabilité</heading>
+<article>
+<num>
+<b>Art. 1224.</b>
+</num>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Toutes personnes peuvent compromettre sur les droits dont elles ont la libre disposition.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>En particulier, on ne peut compromettre sur les causes qui concernent l’état et la capacité des personnes, la représentation des incapables, les causes de ces mêmes incapables et celles des personnes absentes ou présumées absentes.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral applique les règles d’ordre public.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article>
+<num>
+<b>Art. 1225.</b>
+</num>
+<alinea>
+<content>
+<p>Ne peuvent être soumis à l’arbitrage :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>les litiges entre professionnels et consommateurs ;</li>
+<li>les litiges entre employeurs et salariés ;</li>
+<li>les litiges en matière de bail d’habitation.</li>
+</ol>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Cette interdiction reste applicable même après la fin des relations contractuelles visées ci-dessus.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1226.</b>
+</num>
+<alinea>
+<content>
+<p>L’ouverture d’une procédure collective ne s’oppose ni à l’application des conventions d’arbitrage qui ont pu être conclues antérieurement par la personne soumise à la procédure collective, ni à la conclusion d’une convention d’arbitrage au cours de la procédure collective.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>On ne peut cependant compromettre sur les contestations nées de la procédure collective.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre II.</num>
+<heading scl:separator=" – " scl:style-format="bi">De la convention d’arbitrage</heading>
+<article>
+<num>
+<b>Art. 1227.</b>
+</num>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>La convention d’arbitrage est une convention par laquelle les parties décident de soumettre à l’arbitrage tous les différends ou certains des différends qui se sont élevés ou peuvent s’élever entre elles au sujet d’un rapport de droit déterminé, contractuel ou non contractuel. Elle n’est soumise à aucune condition de forme.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Elle peut être conclue sous forme de clause compromissoire ou de compromis.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La clause compromissoire est la convention par laquelle les parties aux contrats s’engagent à soumettre à l’arbitrage les litiges qui peuvent naître relativement aux contrats.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le compromis est la convention par laquelle les parties à un litige né soumettent celui-ci à l’arbitrage.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article>
+<num>
+<b>Art. 1227-1.</b>
+</num>
+<alinea>
+<content>
+<p>Les parties peuvent compromettre même au cours d’une instance déjà engagée devant une juridiction.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1227-2.</b>
+</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral statue sur sa propre compétence, y compris sur toute exception relative à l’existence ou à la validité de la convention d’arbitrage.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Une clause compromissoire faisant partie d’un contrat est considérée comme une convention distincte des autres clauses du contrat. Elle n’est pas affectée par la nullité, la caducité ou la résolution de celui-ci.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La nullité de la clause compromissoire n’implique pas la nullité du contrat.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1227-3.</b>
+</num>
+<alinea>
+<content>
+<p>Lorsqu’un litige relevant d’une convention d’arbitrage est porté devant une juridiction étatique, <span scl:no-break="true">celle-ci</span> se déclare incompétente sauf si la convention d’arbitrage est nulle à raison de l’inarbitrabilité de la cause ou si, pour toute autre raison, elle est manifestement nulle ou manifestement inapplicable.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La juridiction étatique ne peut relever d’office son incompétence.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si le tribunal arbitral se déclare incompétent, ou si la sentence arbitrale est annulée pour une cause excluant qu’un tribunal arbitral puisse être saisi à nouveau, l’examen de la cause est poursuivi devant la juridiction étatique initialement saisie dès que les parties ou l’une d’elles ont notifié au greffe et aux autres parties la survenance de l’événement pertinent.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1227-4.</b>
+</num>
+<alinea>
+<content>
+<p>Aussi longtemps que le tribunal arbitral n’est pas encore constitué ou lorsqu’il apparaît qu’un tribunal arbitral ne peut octroyer la mesure recherchée, l’existence d’une convention d’arbitrage ne fait pas obstacle à ce qu’une partie saisisse une juridiction étatique aux fins d’obtenir une mesure d’instruction ou une mesure provisoire ou conservatoire.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Une telle demande n’implique pas renonciation à la convention d’arbitrage.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre III.</num>
+<heading scl:separator=" – " scl:style-format="bi">Le tribunal arbitral</heading>
+<article>
+<num>
+<b>Art. 1228.</b>
+</num>
+<alinea>
+<content>
+<p>Les parties sont libres de déterminer le siège de l’arbitrage ou de déléguer cette détermination à la personne qui peut avoir été chargée d’organiser l’arbitrage. Faute d’une telle détermination, ce siège est fixé par le tribunal arbitral, compte tenu des circonstances de l’affaire, y compris les convenances des parties.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’arbitrage est réputé se dérouler au siège de l’arbitrage, nonobstant la possibilité pour le tribunal, sauf convention contraire, de tenir des audiences, diligenter des mesures d’instruction, signer des décisions et se réunir en tout lieu qu’il juge approprié.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Les décisions arbitrales sont réputées avoir été rendues au siège de l’arbitrage.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-1.</b>
+</num>
+<alinea>
+<content>
+<p>La mission d’arbitre ne peut être exercée que par une personne physique. Celle-ci jouit de ses droits civils.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si la convention d’arbitrage désigne une personne morale, celle-ci ne bénéficie que du pouvoir de nommer l’arbitre.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-2.</b>
+</num>
+<alinea>
+<content>
+<p>La convention d’arbitrage peut, directement ou par référence à un règlement d’arbitrage ou à des règles de procédure, désigner les arbitres ou prévoir les modalités de leur désignation.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Les parties sont libres de convenir du nombre d’arbitres. Faute d’une telle convention, il est nommé trois arbitres.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-3.</b>
+</num>
+<alinea>
+<content>
+<p>Tout différend lié à la constitution du tribunal arbitral est réglé, faute d’accord des parties, par la personne chargée d’organiser l’arbitrage ou, à défaut, tranché par le juge d’appui.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-4.</b>
+</num>
+<alinea>
+<content>
+<p>En l’absence d’accord des parties sur les modalités de désignation d’un arbitre, il est procédé comme suit :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>en cas d’arbitrage par un arbitre unique, si les parties ne s’accordent pas sur le choix de l’arbitre, celui-ci est désigné par la personne chargée d’organiser l’arbitrage ou, à défaut, par le juge d’appui ;</li>
+<li>en cas d’arbitrage par trois arbitres, chaque partie en choisit un et les deux arbitres ainsi choisis désignent le troisième ; si une partie ne choisit pas d’arbitre dans un délai d’un mois à compter de la réception de la demande qui lui en est faite par l’autre partie ou si les deux arbitres ne s’accordent pas sur le choix du troisième dans un délai d’un mois à compter de l’acceptation par le dernier en date de sa désignation, la personne chargée d’organiser l’arbitrage ou, à défaut, le juge d’appui procède à cette désignation ;</li>
+<li>lorsque le litige oppose plus de deux parties et que celles-ci ne s’accordent pas sur les modalités de constitution du tribunal arbitral, la personne chargée d’organiser l’arbitrage ou, à défaut, le juge d’appui, désigne les arbitres ;</li>
+<li>tous les autres désaccords relatifs à la désignation des arbitres sont pareillement réglés par la personne chargée d’organiser l’arbitrage ou, à défaut, le juge d’appui.</li>
+</ol>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-5.</b>
+</num>
+<alinea>
+<content>
+<p>Si la convention d’arbitrage est nulle en raison de l’inarbitrabilité de la cause ou si, pour toute autre raison, elle est manifestement nulle ou manifestement inapplicable, le juge d’appui déclare n’y avoir lieu à désignation. Lorsque le juge déclare n’y avoir lieu à désignation d’un arbitre, la décision peut être frappée d’appel.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’appel est introduit, instruit et jugé dans les formes de l’article 939.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-6.</b>
+</num>
+<alinea>
+<content>
+<p>Il appartient à l’arbitre, avant d’accepter sa mission, de révéler toute circonstance susceptible d’affecter son indépendance ou son impartialité. Il lui est également fait obligation de révéler sans délai toute circonstance de même nature qui pourrait naître après l’acceptation de sa mission.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-7.</b>
+</num>
+<alinea>
+<content>
+<p>Un arbitre ne peut être récusé que s’il existe des circonstances de nature à soulever des doutes légitimes sur son impartialité ou son indépendance, ou si celui-ci ne possède pas les qualifications requises par les parties.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>En cas de différend sur la récusation de l’arbitre, la difficulté est réglée par la personne chargée d’organiser l’arbitrage ou, à défaut, tranchée par le juge d’appui, saisi dans le mois qui suit la révélation ou la découverte du fait litigieux.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-8.</b>
+</num>
+<alinea>
+<content>
+<p>L’arbitre ne peut être révoqué que du consentement unanime des parties. À défaut d’unanimité, la difficulté est réglée par la personne chargée d’organiser l’arbitrage ou, à défaut, tranchée par le juge d’appui, saisi dans le mois qui suit la révélation ou la découverte du fait litigieux.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1228-9.</b>
+</num>
+<alinea>
+<content>
+<p>Il appartient à l’arbitre de poursuivre sa mission jusqu’au terme de celle-ci à moins qu’il ne justifie d’un empêchement ou d’une cause légitime d’abstention ou de démission.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>En cas de différend sur la réalité du motif invoqué, la difficulté est réglée par la personne chargée d’organiser l’arbitrage ou, à défaut, tranchée par le juge d’appui, saisi dans le mois qui suit l’empêchement, l’abstention ou la démission.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le nouvel arbitre est désigné suivant les modalités convenues entre les parties ou, à défaut, suivant celles qui ont présidé à la désignation de l’arbitre qu’il remplace.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre IV.</num>
+<heading scl:separator=" – " scl:style-format="bi">Le juge d’appui</heading>
+<article>
+<num>
+<b>Art. 1229.</b>
+</num>
+<alinea>
+<content>
+<p>Le juge d’appui de la procédure arbitrale est le juge luxembourgeois lorsque le siège de l’arbitrage a été fixé au Grand-Duché de Luxembourg, ou, à défaut de fixation du siège, lorsque :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>les parties ont convenu de soumettre l’arbitrage à la loi de procédure luxembourgeoise ; ou</li>
+<li>les parties ont expressément donné compétence aux juridictions étatiques luxembourgeoises pour connaître des différends relatifs à la procédure arbitrale ; 3° il existe un lien significatif entre le litige et le Grand-Duché de Luxembourg.</li>
+</ol>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le juge d’appui luxembourgeois est toujours compétent si l’une des parties est exposée à un risque de déni de justice.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1230.</b>
+</num>
+<alinea>
+<content>
+<p>Le juge d’appui compétent est le président du tribunal d’arrondissement désigné dans la convention d’arbitrage, et à défaut le président du Tribunal d’arrondissement de Luxembourg.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le juge d’appui est saisi soit par une partie, soit par le tribunal arbitral ou l’un de ses membres.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La demande est portée devant le président du tribunal d’arrondissement siégeant comme en matière de référé.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La saisine s’opère par voie de requête. Les parties sont convoquées par le greffe.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral est informé de la saisine du juge d’appui par le greffe.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Par ailleurs, la partie défenderesse est réputée convoquée s’il est établi qu’elle a eu connaissance de la requête et de la convocation en temps utile.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sauf disposition contraire, le juge d’appui statue par ordonnance non susceptible de recours.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre V.</num>
+<heading scl:separator=" – " scl:style-format="bi">L’instance arbitrale</heading>
+<article>
+<num>
+<b>Art. 1231.</b>
+</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral tranche le litige conformément aux règles de droit applicables.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>En matière internationale, les règles applicables sont celles choisies par les parties ou, à défaut, celles que le tribunal estime appropriées.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal statue en amiable composition si les parties lui en ont confié la mission.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-1.</b>
+</num>
+<alinea>
+<content>
+<p>Sauf convention contraire des parties, la procédure arbitrale commence à la date à laquelle la demande d’arbitrage est expédiée par le demandeur au défendeur ou, si cette date est antérieure, celle où cette demande est expédiée à la personne chargée de l’organisation de l’arbitrage par les parties.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-2.</b>
+</num>
+<alinea>
+<content>
+<p>La convention d’arbitrage peut, directement ou par référence à un règlement d’arbitrage ou à des règles de procédure, régler la procédure à suivre dans l’instance arbitrale.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Dans le silence de la convention d’arbitrage, le tribunal arbitral règle la procédure autant qu’il est besoin, soit directement, soit par référence à un règlement d’arbitrage ou à des règles de procédure, sans être tenu de suivre les règles établies pour les tribunaux étatiques.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-3.</b>
+</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral garantit toujours l’égalité des parties et le respect du principe de la contradiction.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-4.</b>
+</num>
+<alinea>
+<content>
+<p>La partie qui, en connaissance de cause et sans motif légitime, s’abstient d’invoquer en temps utile une irrégularité devant le tribunal arbitral est réputée avoir renoncé à s’en prévaloir.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-5.</b>
+</num>
+<alinea>
+<content>
+<p>Sous réserve des obligations légales contraires ou à moins que les parties n’en disposent autrement, la procédure arbitrale est confidentielle.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-6.</b>
+</num>
+<alinea>
+<content>
+<p>Si la convention d’arbitrage ne fixe pas de délai, la durée de la mission du tribunal arbitral est limitée à six mois à compter de l’acceptation de la mission par le dernier des arbitres.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le délai légal ou conventionnel peut être prorogé par accord des parties ou par la personne chargée d’organiser l’arbitrage si elle a été habilitée à cette fin par les parties, ou, à défaut, par le juge d’appui.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-7.</b>
+</num>
+<alinea>
+<content>
+<p>Sauf convention contraire des parties, chaque partie peut modifier ou compléter les demandes en cours de procédure arbitrale à condition que cet amendement ait un lien suffisant avec la demande initiale.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut décider de rejeter ces demandes d’amendement, notamment en raison du retard avec lequel elles sont formulées.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-8.</b>
+</num>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral procède aux actes d’instruction nécessaires, à moins que les parties ne l’autorisent à commettre l’un de ses membres.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Il peut entendre toute personne, y compris les parties. Sauf si la procédure est soumise à une loi étrangère prévoyant le contraire, cette audition a lieu sans prestation de serment.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si une partie détient un élément de preuve, le tribunal arbitral peut lui enjoindre de le produire selon les modalités qu’il détermine.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Si une partie à l’instance arbitrale entend faire état d’une pièce détenue par un tiers, elle peut<b>, </b>sur invitation du tribunal arbitral, faire convoquer ce tiers devant le juge d’appui aux fins d’obtenir la délivrance d’une expédition ou la production de la pièce.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le juge d’appui décide conformément à la procédure visée à l’article 1230, alinéas 1 à 5.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le juge d’appui, s’il estime la demande fondée, ordonne la délivrance ou la production de la pièce, en original, en copie ou en extrait, selon le cas, dans les conditions et sous les garanties qu’il fixe, au besoin à peine d’astreinte.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’ordonnance peut être frappée d’appel dans un délai de quinze jours à partir de la signification.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’appel est introduit, instruit et jugé dans les formes de l’article 939.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>En cas de défaut, elle est susceptible d’opposition dans un délai de huit jours à partir de la signification, lequel court simultanément avec le délai d’appel.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>À l’exception des demandes relatives à des actes authentiques, le tribunal arbitral a le pouvoir de trancher les demandes de vérification d’écritures et de statuer sur la prétendue fausseté de documents.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Pour les demandes relatives à des actes authentiques, le tribunal arbitral invite les parties à saisir le tribunal compétent dans le délai qu’il détermine. Les délais de l’arbitrage sont alors suspendus jusqu’au jour où le tribunal arbitral a eu communication par la partie la plus diligente de la décision coulée en force de chose jugée sur l’incident.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article>
+<num>
+<b>Art. 1231-9.</b>
+</num>
+<alinea>
+<content>
+<p>Sauf convention contraire des parties, le tribunal arbitral peut ordonner aux parties, dans les conditions qu’il détermine, d’exécuter toute mesure provisoire ou conservatoire qu’il juge opportune. Toutefois, la juridiction étatique est seule compétente pour ordonner des saisies.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut modifier, compléter, suspendre ou rétracter une mesure provisoire ou conservatoire.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut décider que la partie qui demande une mesure provisoire ou conservatoire fournit une garantie appropriée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut décider qu’une partie signale sans tarder tout changement important des circonstances sur la base desquelles la mesure provisoire ou conservatoire a été demandée ou accordée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La partie qui poursuit l’exécution d’une mesure provisoire ou conservatoire est responsable de tous les frais et de tous les dommages causés par la mesure à une autre partie, si le tribunal arbitral décide par la suite qu’en l’espèce la mesure provisoire ou conservatoire n’a pas dû être prononcée. Le tribunal arbitral peut accorder réparation pour ces frais et dommages à tout moment pendant la procédure.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La reconnaissance ou la déclaration de la force exécutoire d’une mesure provisoire ou conservatoire ne peut être refusée que pour les cas prévus à l’article 1238.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-10.</b>
+</num>
+<alinea>
+<content>
+<p>Sauf convention contraire des parties, si, sans invoquer d’empêchement légitime,</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>le demandeur ne développe pas sa demande, le tribunal arbitral met fin à la procédure arbitrale, sans préjudice du traitement des demandes d’une autre partie ;</li>
+<li>le défendeur ne développe pas sa défense, le tribunal arbitral poursuit la procédure arbitrale sans pouvoir considérer cette carence en soi comme une acceptation des allégations du demandeur ;</li>
+<li>l’une des parties ne participe pas à la procédure orale ou ne produit pas de documents, le tribunal arbitral poursuit la procédure et statue sur la base des éléments dont il dispose.</li>
+</ol>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-11.</b>
+</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut, s’il y a lieu, surseoir à statuer. Cette décision suspend le cours de l’instance ainsi que le délai de l’arbitrage, pour le temps ou jusqu’à la survenance de l’événement qu’elle détermine.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut, suivant les circonstances, révoquer le sursis ou en abréger le délai.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sauf stipulation contraire, l’instance arbitrale et le délai d’arbitrage sont également suspendus en cas de décès, d’empêchement, d’abstention, de démission, de récusation ou de révocation d’un arbitre jusqu’à l’acceptation de sa mission par l’arbitre désigné en remplacement.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le nouvel arbitre est désigné suivant les modalités convenues entre les parties ou, à défaut, selon les modalités prévues à l’article 1228-4.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La suspension de l’instance ne dessaisit pas le tribunal arbitral.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut inviter les parties à lui faire part de leurs initiatives en vue de reprendre l’instance ou de mettre un terme aux causes de suspension. En cas de carence des parties, il peut mettre fin à l’instance.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’instance reprend son cours en l’état où elle se trouvait au moment où elle a été suspendue lorsque les causes de sa suspension cessent d’exister.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1231-12.</b>
+</num>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Tout tiers intéressé peut demander au tribunal arbitral d’intervenir dans la procédure. Cette demande est adressée par écrit au tribunal arbitral qui la communique aux parties.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>Une partie peut appeler un tiers en intervention.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Pour pouvoir être admise, l’intervention nécessite une convention d’arbitrage entre le tiers et les parties au différend.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’intervention est subordonnée à l’assentiment du tribunal arbitral.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article>
+<num>
+<b>Art. 1231-13.</b>
+</num>
+<alinea>
+<content>
+<p>Le tribunal arbitral peut assortir ses décisions, y compris les mesures provisoires ou conservatoires et les mesures d’instruction, d’une astreinte.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre VI.</num>
+<heading scl:separator=" – " scl:style-format="bi">La sentence arbitrale</heading>
+<article>
+<num>
+<b>Art. 1232.</b>
+</num>
+<alinea>
+<content>
+<p>Les délibérations du tribunal arbitral sont secrètes.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Les parties peuvent, par une stipulation de la convention d’arbitrage ou d’un règlement d’arbitrage, autoriser chacun des arbitres à faire suivre la sentence arbitrale de son opinion individuelle ou dissidente.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1232-1.</b>
+</num>
+<alinea>
+<content>
+<p>Sauf convention contraire des parties, la sentence arbitrale est rendue à la majorité des voix.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Elle est signée par tous les arbitres.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si une minorité d’entre eux refuse de la signer, la sentence en fait mention et celle-ci produit le même effet que si elle avait été signée par tous les arbitres.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1232-2.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence arbitrale est motivée, à moins que les parties n’aient dispensé le tribunal arbitral de toute motivation.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1232-3.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence arbitrale a, dès qu’elle est rendue, l’autorité de la chose jugée. Le tribunal arbitral remet un exemplaire signé de la sentence à chaque partie.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La sentence peut faire l’objet d’une signification par une partie.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Les parties peuvent cependant convenir que cet effet est attaché à un autre mode de notification qu’elles désignent.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1232-4.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence dessaisit le tribunal arbitral de la contestation qu’elle tranche.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Toutefois, à la demande d’une partie, le tribunal arbitral peut interpréter la sentence, réparer les erreurs et omissions matérielles qui l’affectent ou la compléter lorsqu’il a omis de statuer sur un chef de demande. Il statue après avoir entendu les parties ou celles-ci appelées.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si le tribunal arbitral ne peut être à nouveau réuni et si les parties ne peuvent s’accorder pour le reconstituer, ce pouvoir appartient au juge d’appui, statuant à charge d’appel. L’appel est introduit, instruit et jugé dans les formes de l’article 939.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1232-5.</b>
+</num>
+<alinea>
+<content>
+<p>Les demandes formées en application de l’article 1232-4, alinéa 2, sont présentées dans un délai de trois mois à compter de la signification de la sentence.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sauf convention contraire, la sentence rectificative ou complétée est rendue dans un délai de trois mois à compter de la saisine du tribunal arbitral. Ce délai peut être prorogé conformément à l’article 1231-6, alinéa 2.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La sentence rectificative ou complétée est signifiée dans les mêmes formes que la sentence initiale.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Même après l’expiration du délai prévu à l’alinéa 1<sup>er</sup>, l’interprétation de la sentence et la réparation d’erreurs ou d’omissions matérielles peuvent être effectuées, par voie incidente, par les juridictions devant lesquelles la sentence est invoquée.</p>
+</content>
+</alinea>
+</article>
+</chapter>
+<chapter>
+<num>Chapitre VII.</num>
+<heading scl:separator=" – " scl:style-format="bi">L’exécution de la sentence et les voies de recours</heading>
+<section>
+<num>Section I<sup> re</sup>.</num>
+<heading scl:separator=" – " scl:style-format="bi">Les sentences rendues au Grand-Duché de Luxembourg</heading>
+<article>
+<num>
+<b>Art. 1233.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence arbitrale n’est susceptible d’exécution forcée sur le territoire du Grand-Duché de Luxembourg qu’en vertu d’une ordonnance d’exequatur émanant du président du tribunal d’arrondissement dans le ressort duquel cette sentence a été rendue.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La procédure relative à la demande d’exequatur n’est pas contradictoire.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La requête est déposée par la partie la plus diligente au greffe du tribunal accompagnée de l’original ou d’une copie de la sentence et de la convention d’arbitrage.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si la sentence ou la convention ne sont pas rédigées dans une des langues administratives et judiciaires, le tribunal peut demander de produire une traduction dans l’une de ces langues.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le requérant élit domicile dans l’arrondissement du tribunal saisi. Les significations au requérant ayant trait à l’exécution de la sentence ou aux voies de recours peuvent être effectuées au domicile ainsi élu.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Une copie de la sentence est annexée à l’ordonnance d’exequatur.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1234.</b>
+</num>
+<alinea>
+<content>
+<p>L’exequatur ne peut être accordé si la sentence est manifestement atteinte de l’une des causes d’annulation prévue à l’article 1238.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’ordonnance qui accorde l’exequatur n’est susceptible d’aucun recours séparé du recours contre la sentence prévue à l’article 1237.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1235.</b>
+</num>
+<alinea>
+<content>
+<p>L’ordonnance qui refuse l’exequatur est motivée et peut être frappée d’appel devant la Cour d’appel siégeant en matière civile.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Ce recours est intenté dans le mois de la notification de la décision de refus. Il est formé par exploit d’huissier, contenant assignation à comparaître à la partie contre laquelle l’exécution est poursuivie.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Dans ce cas, la Cour d’appel connaît, à la demande d’une partie, du recours en annulation formé à l’encontre de la sentence arbitrale, si le délai pour l’exercer n’est pas expiré.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1236.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence n’est pas susceptible d’opposition, d’appel ou de pourvoi en cassation devant une juridiction étatique.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Elle peut faire l’objet d’un recours en annulation devant la Cour d’appel.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Toute stipulation contraire est réputée non écrite.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1237.</b>
+</num>
+<alinea>
+<content>
+<p>Le recours en annulation de la sentence emporte de plein droit, dans les limites de la saisine de la Cour d’appel, recours contre l’ordonnance du juge ayant statué sur l’exequatur ou dessaisissement de ce juge.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1238.</b>
+</num>
+<alinea>
+<content>
+<p>Le recours en annulation n’est ouvert que si :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>le tribunal arbitral s’est déclaré à tort compétent ou incompétent ; ou</li>
+<li>le tribunal arbitral a été irrégulièrement constitué ; ou</li>
+<li>le tribunal arbitral a statué sans se conformer à la mission qui lui avait été confiée ; ou</li>
+<li>la sentence est contraire à l’ordre public ; ou</li>
+<li>la sentence n’est pas motivée, à moins que les parties n’aient dispensé les arbitres de toute motivation ; ou</li>
+<li>il y a eu violation des droits de la défense.</li>
+</ol>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1239.</b>
+</num>
+<alinea>
+<content>
+<p>Le recours en annulation est recevable dès le prononcé de la sentence. Il cesse de l’être s’il n’a pas été exercé dans le mois de la notification ou de la signification de la sentence effectuée dans les formes de l’article 1232-3.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1240.</b>
+</num>
+<alinea>
+<content>
+<p>Le recours en annulation est formé par exploit d’huissier contenant assignation à comparaître des autres parties à la sentence. Il est instruit et jugé selon les règles relatives à la procédure de droit commun devant la Cour d’appel siégeant en matière civile.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1241.</b>
+</num>
+<alinea>
+<content>
+<p>Le recours en annulation n’est pas suspensif. Toutefois, la Cour d’appel statuant comme en matière de référé peut arrêter ou aménager l’exécution de la sentence si cette exécution est susceptible de léser gravement les droits de l’une des parties.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La saisine de la Cour d’appel s’opère par voie de requête, l’autre partie présente ou appelée par le greffe, par lettre recommandée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La partie défenderesse est réputée appelée s’il est établi qu’elle a eu connaissance de la requête et de la convocation en temps utile.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1242.</b>
+</num>
+<alinea>
+<content>
+<p>Le rejet du recours en annulation confère l’exequatur à la sentence arbitrale ou à celles de ses dispositions qui ne sont pas atteintes par la censure de la Cour d’appel.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1243.</b>
+</num>
+<paragraph>
+<num>(1)</num>
+<alinea>
+<content>
+<p>Un recours en révision, qui tend à la rétractation de la sentence pour qu’il soit à nouveau statué en fait et en droit, est ouvert contre la sentence arbitrale dans les cas suivants :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>s’il se révèle, après que la sentence a été rendue, qu’elle a été surprise par la fraude de la partie au profit de laquelle elle a été rendue ;</li>
+<li>si, depuis le prononcé de la sentence, il a été recouvré des pièces décisives qui avaient été retenues par le fait d’une autre partie ;</li>
+<li>s’il a été jugé sur des pièces reconnues ou judiciairement déclarées fausses depuis la sentence ;</li>
+<li>s’il a été jugé sur des attestations, témoignages ou serments reconnus ou judiciairement déclarés faux depuis la sentence.</li>
+</ol>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(2)</num>
+<alinea>
+<content>
+<p>La révision ne peut être demandée que par les personnes qui ont été parties ou représentées à la sentence.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le délai du recours en révision est de deux mois ; il court à compter du jour où la partie a eu connaissance de la cause de révision qu’elle invoque.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Toutes les parties à la sentence attaquée sont appelées à l’instance en révision par l’auteur du recours, à peine d’irrecevabilité.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(3)</num>
+<alinea>
+<content>
+<p>Le recours en révision est porté devant le tribunal arbitral.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Toutefois, si le tribunal arbitral ne peut à nouveau être réuni, le recours est porté devant la Cour d’appel ; il est dans ce cas formé, instruit et jugé selon les règles relatives à la procédure de droit commun devant la Cour d’appel siégeant en matière civile.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(4)</num>
+<alinea>
+<content>
+<p>Si le tribunal arbitral déclare le recours fondé, il statue également sur le fond du litige. La révision par la Cour d’appel n’entraîne une décision de la Cour d’appel sur le fond du litige que si la constitution d’un autre tribunal arbitral se heurte au refus des parties ou au refus, justifié par l’absence de convention d’arbitrage qui continue de les lier, de l’une d’elles.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Si la révision n’est justifiée que contre un chef de la sentence, ce chef est seul révisé à moins que les autres n’en dépendent.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph>
+<num>(5)</num>
+<alinea>
+<content>
+<p>Une partie n’est pas recevable à demander la révision d’une sentence qu’elle a déjà attaquée par cette voie, si ce n’est pour une cause qui s’est révélée postérieurement.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<article>
+<num>
+<b>Art. 1244.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence arbitrale peut être frappée de tierce opposition. La tierce-opposition est portée devant la juridiction qui eût été compétente en l’absence de cet arbitrage, sous réserve des dispositions de l’article 613, alinéa 2.</p>
+</content>
+</alinea>
+</article>
+</section>
+<section>
+<num>Section II.</num>
+<heading scl:separator=" – " scl:style-format="bi">Les sentences rendues à l’étranger</heading>
+<article>
+<num>
+<b>Art. 1245.</b>
+</num>
+<alinea>
+<content>
+<p>La sentence arbitrale rendue à l’étranger n’est susceptible d’exécution forcée au Grand-Duché de Luxembourg qu’en vertu d’une ordonnance d’exequatur rendue par le président du tribunal d’arrondissement dans le ressort duquel la personne contre laquelle l’exécution est demandée à son domicile et, à défaut de domicile, sa résidence. Si cette personne n’a ni domicile, ni résidence au Grand-Duché de Luxembourg, la demande est portée devant le président du tribunal d’arrondissement du lieu où la sentence est exécutée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’ordonnance qui refuse l’exequatur est motivée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’exequatur ne peut être accordé si la sentence est manifestement atteinte de l’une des causes d’annulation prévue à l’article 1246.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sont applicables les dispositions des articles 1233, alinéas 2 à 5 et 1235.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1246.</b>
+</num>
+<alinea>
+<content>
+<p>L’ordonnance qui statue sur une demande d’exequatur d’une sentence arbitrale rendue à l’étranger peut être frappée d’appel devant la Cour d’appel siégeant en matière civile.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>L’appel est formé dans le délai d’un mois à compter de la signification de l’ordonnance. Ce délai n’est pas susceptible d’augmentation en raison des distances.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Sous réserve des dispositions de conventions internationales, la Cour d’appel ne peut refuser l’exequatur de la sentence arbitrale que dans l’un des cas suivants :</p>
+<ol scl:start="1" scl:symbol="1°">
+<li>le tribunal arbitral s’est déclaré à tort compétent ou incompétent ;</li>
+<li>le tribunal arbitral a été irrégulièrement constitué ;</li>
+<li>le tribunal arbitral a statué sans se conformer à la mission qui lui avait été confiée ;</li>
+<li>la sentence est contraire à l’ordre public ;</li>
+<li>la sentence n’est pas motivée, à moins que les parties n’aient dispensé les arbitres de toute motivation ; </li>
+<li>s’il y a eu violation des droits de la défense ;</li>
+<li>s’il se révèle, après que la sentence a été rendue, qu’elle a été surprise par la fraude de la partie au profit de laquelle elle a été rendue ;</li>
+<li>s’il a été recouvré des pièces décisives qui avaient été retenues par le fait d’une autre parti ;</li>
+<li>s’il a été jugé sur des pièces reconnues ou judiciairement déclarées fausses depuis la sentence ;</li>
+<li>s’il a été jugé sur des attestations, témoignages ou serments reconnus ou judiciairement déclarés faux depuis la sentence.</li>
+</ol>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1247.</b>
+</num>
+<alinea>
+<content>
+<p>Si l’existence du motif de refus visé à l’article 1246, alinéa 3, point 7°, est révélée à une partie après l’expiration du délai d’appel contre l’ordonnance d’exequatur, cette partie peut exercer un recours en révision contre l’ordonnance d’exequatur dans un délai de deux mois à partir du jour où elle a eu connaissance du motif de révision. Ce délai n’est pas susceptible d’augmentation en raison des distances.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le recours en révision, qui tend à la rétractation de l’ordonnance, est porté devant la Cour d’appel. Il est formé, instruit et jugé selon les règles relatives à la procédure de droit commun devant la Cour d’appel siégeant en matière civile. En cas d’admission de la rétractation, la Cour d’appel statuera définitivement sur l’exequatur de la sentence.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1248.</b>
+</num>
+<alinea>
+<content>
+<p>L’appel et le recours en révision de l’ordonnance ayant accordé l’exequatur ne sont pas suspensifs.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Toutefois, la Cour d’appel, statuant comme en matière de référé peut arrêter ou aménager l’exécution de la sentence si cette exécution est susceptible de léser gravement les droits de l’une des parties.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>La saisine de la Cour d’appel s’opère par voie de requête, l’autre partie présente ou appelée par le greffe, par lettre recommandée.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Par ailleurs, la partie défenderesse est réputée appelée s’il est établi qu’elle a eu connaissance de la requête et de la convocation en temps utile.</p>
+</content>
+</alinea>
+</article>
+<article>
+<num>
+<b>Art. 1249.</b>
+</num>
+<alinea>
+<content>
+<p>L’appel et le recours en révision de l’ordonnance ayant statué sur l’exequatur sont formés, instruits et jugés selon les règles relatives à la procédure de droit commun devant la Cour d’appel siégeant en matière civile.</p>
+</content>
+</alinea>
+<alinea>
+<content>
+<p>Le rejet de l’appel ou du recours en révision contre l’ordonnance d’exequatur confère l’exequatur à la sentence ou à celles de ses dispositions qui ne sont pas atteintes par la censure de la Cour d’appel.
+</p>
+</content>
+</alinea>
+</article>
+</section>
+</chapter>
+</title>
+</embeddedStructure>
+</p>
+</content>
+</alinea>
+</article>
+<article id="art_2">
+<num>Art. 2.</num>
+<paragraph id="paragraph_1">
+<num>(1)</num>
+<alinea>
+<content>
+<p>La deuxième partie, livre III, titre 1<sup>er</sup>, chapitre 2, du <ref href="/eli/etat/leg/code/procedure_civile" id="cfade708-2edd-43fe-96ab-d50f660f8075">Nouveau Code de procédure civile</ref>, s’applique aux seules conventions d’arbitrage conclues postérieurement à l’entrée en vigueur de la présente loi, à moins que toutes les parties à la convention n’en aient expressément décidé autrement.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph id="paragraph_2">
+<num>(2)</num>
+<alinea>
+<content>
+<p>La deuxième partie, livre III, titre 1<sup>er</sup>, chapitre 3, du <ref href="/eli/etat/leg/code/procedure_civile" id="561a7a80-a005-4d72-ac8f-755a1a810aff">Nouveau Code de procédure civile</ref>, s’applique à tous les tribunaux arbitraux constitués postérieurement à l’entrée en vigueur de la présente loi.</p>
+</content>
+</alinea>
+</paragraph>
+<paragraph id="paragraph_3">
+<num>(3)</num>
+<alinea>
+<content>
+<p>La deuxième partie, livre III, titre 1<sup>er</sup>, chapitre 7, du <ref href="/eli/etat/leg/code/procedure_civile" id="ae8b4e04-4a4d-4f95-a48f-108a1dcd380d">Nouveau Code de procédure civile</ref>, s’applique aux sentences arbitrales qui sont rendues postérieurement à l’entrée en vigueur de la présente loi.</p>
+</content>
+</alinea>
+</paragraph>
+</article>
+<clause>
+<content>
+<p>Mandons et ordonnons que la présente loi soit insérée au Journal officiel du Grand-Duché de Luxembourg pour être exécutée et observée par tous ceux que la chose concerne.</p>
+</content>
+</clause>
+</body>
+<conclusions>
+<p> <signature> <shortTitle> La Ministre de la Justice,</shortTitle> <person refersTo=""> Sam Tanson </person> </signature> </p>
+<p> <signature> <docDate date="2999-01-01">Palais de Luxembourg, le 19 avril 2023.</docDate>
+<person refersTo="">Henri</person> </signature> </p>
+</conclusions>
+<components>
+<component>
+<interstitial>
+<p>Doc. parl. <ref href="/eli/etat/projet/pl/20170333" id="36e371e3-e0d6-4177-a0f4-25d6f378b1a1">7671</ref> ; sess. ord. 2019-2020 ; 2020-2021 ; 2021-2022 et 2022-2023.</p>
+</interstitial>
+</component>
+</components>
+</act>
+</akomaNtoso>

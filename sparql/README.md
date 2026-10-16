@@ -24,10 +24,10 @@ fragments are never interpolated.
 
 | Placeholder | Python type | Rendered as | Used by |
 |---|---|---|---|
-| `{{WORKS}}`, `{{GRAPHS}}`, `{{IRIS}}` | sequence of 1–500 IRIs | `<iri>` per line (inside `VALUES`) | `q_manif`, `q16_construct_graphs.construct` |
+| `{{WORKS}}`, `{{GRAPHS}}`, `{{IRIS}}` | sequence of 1–500 IRIs | `<iri>` per line (inside `VALUES`) | `q_manif`, `q16_construct_graphs.construct`, `q19_act_formats`, `partitions/q05_*`, `partitions/q06_*` |
 | `{{SINCE}}` | tz-aware `datetime` | `2026-09-01T00:00:00Z` (UTC, inside `"…"^^xsd:dateTime`) | `q11_graph_watermark` |
 | `{{FROM}}`, `{{TO}}`, `{{SINCE_DATE}}` | `date` | `2026-10-09` (inside `"…"^^xsd:date`) | `q12_boundary_sweep`, `q13_*` |
-| `{{Y0}}`, `{{Y1}}` | `int` | `1990` | `q07_titles_by_year` |
+| `{{Y0}}`, `{{Y1}}` | `int` | `1990` | `q07_titles_by_year`, `partitions/*_year` |
 
 ```python
 from lgx_ingest.sparql_templates import render_query
@@ -54,6 +54,8 @@ text = render_query(
 | `q08_memorial_refs.rq` | `memorial_refs` | W |
 | `q10_vocabularies.construct.rq` | `vocab` | W |
 | `q_manif.rq` | `manifestations` | N (changed works) / M (all) |
+| `q19_act_formats.rq` (M1) | `act_formats` | W |
+| `partitions/*.rq` (M1) | fallback for the table of the same query number | only on failure / incompleteness |
 | `q11_graph_watermark.rq`, `q12_boundary_sweep.rq`, `q13_*.rq`, `q16_*.rq` | sync state / reports | N / D |
 | `checks/q09, q14, q15, q17, q18` | gates and reports | N / W |
 | `checks/probe_*.rq` | endpoint regression probes (A.5) | M1, then quarterly |
@@ -66,3 +68,15 @@ text = render_query(
   describes but does not print.
 - Golden-number reproductions (A.4: b1, tt1, m1, natur, …) are test assets built from the frozen
   2026-10-16 snapshot, not production queries; they are not duplicated here.
+- **Q19 `q19_act_formats.rq` (new in M1).** Formats + licences of every `/eli/etat/leg/` act of the 18
+  text types, all statuses, in one flat unsorted request (live 2026-10-16: 103,935 rows, 20.3 MB, 1.9 s).
+  Selection needs a licence decision for every candidate JO original; `checks/q09` only covers in-force
+  LOI/RGD/AGD/RMIN (and, having no branch filter, includes 3,369 `/etat/adm/` acts). The Q09 gate classes are
+  recomputed client-side from this table (`lgx_core.rules.golden.licence_crosstab`). File URLs still come
+  from Q-MANIF.
+- **`checks/q15_codes.rq`** now carries the Constitution type, exactly as tested in plan check P9
+  (53 rows); the M0 file had the 52-row C13 text without it.
+- **`partitions/`** — the fallback of Appendix A.0, used by `lgx_ingest.sparql.Puller` when a single pull
+  fails (after retries) or Q17 reports it incomplete: Q01/Q07/Q08 by `YEAR(jolux:dateDocument)` windows plus an
+  "undated" partition, Q02/Q03 by `YEAR(dateApplicability)`, Q05/Q06 one predicate per request, Q19 one type
+  per request. Partitions are merged and de-duplicated; none is sorted.

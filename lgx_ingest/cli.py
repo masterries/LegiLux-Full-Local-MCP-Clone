@@ -280,5 +280,8 @@ def ingest(
         _run(target, stage_ctx)
 
 
+from lgx_ingest import cli_content as _cli_content  # noqa: E402, F401  — `lgx content fetch|parse` (agent B)
+from lgx_ingest import cli_meta as _cli_meta  # noqa: E402, F401  — `lgx meta …`, `lgx robots check` (agent A)
+
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(app())

@@ -1,9 +1,11 @@
-# Q15 — applicable codes, code-recueils and recueils with titles (SJ C13) [V]: 52 rows (sorted, < 10k).
+# Q15 — applicable codes, code-recueils, recueils and the Constitution with titles (SJ C13 + Constitution
+# type, plan check P9) [V]: 53 rows (RECUEIL 37, CODE_RECUEIL 8, CODE 7, Constitution 1); sorted, < 100 rows.
 # Cross-check only: every CODE and the Constitution must have stored text.
 SELECT DISTINCT ?c ?type ?d ?title WHERE {
   ?c a jolux:Consolidation ; jolux:inForceStatus <http://data.legilux.public.lu/resource/authority/application-status/applicable> ;
      jolux:typeDocument ?type ; jolux:dateApplicability ?d .
   FILTER(?type IN (<http://data.legilux.public.lu/resource/authority/resource-type/RECUEIL>,
                    <http://data.legilux.public.lu/resource/authority/resource-type/CODE_RECUEIL>,
-                   <http://data.legilux.public.lu/resource/authority/resource-type/CODE>))
+                   <http://data.legilux.public.lu/resource/authority/resource-type/CODE>,
+                   <http://data.legilux.public.lu/resource/authority/resource-type/Constitution>))
   OPTIONAL { ?c jolux:isRealizedBy/jolux:title ?title } } ORDER BY ?type ?c

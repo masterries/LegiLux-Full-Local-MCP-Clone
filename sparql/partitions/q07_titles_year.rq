@@ -1,0 +1,6 @@
+# Q07 partition (fallback): French titles of /eli/etat/leg/ acts whose dateDocument year is in [Y0, Y1].
+SELECT DISTINCT ?a ?title WHERE {
+  ?a a jolux:Act ; jolux:dateDocument ?dd ; jolux:isRealizedBy ?e .
+  ?e jolux:language <http://publications.europa.eu/resource/authority/language/FRA> ; jolux:title ?title .
+  FILTER(STRSTARTS(STR(?a), "http://data.legilux.public.lu/eli/etat/leg/"))
+  FILTER(YEAR(?dd) >= {{Y0}} && YEAR(?dd) <= {{Y1}}) }
