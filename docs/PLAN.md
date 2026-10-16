@@ -9,7 +9,7 @@
   - [D — MCP tool contracts, warning texts and answer policy](plan/appendix-d-mcp-tools.md)
   - [E — evidence index](plan/appendix-e-evidence.md)
 - **Markers:**
-  - **[V]** verified live (research tracks, judge checks J1–J10, plan checks P1–P8);
+  - **[V]** verified live (research tracks, judge checks J1–J10, plan checks P1–P11);
   - **[E]** estimate, re-measured where the roadmap says so;
   - **[U]** unverified: kept only with a "verify at build time" note and a named fallback.
 
@@ -28,7 +28,7 @@
 6. Run gates and evaluation.
 7. Emit signed bundles.
 
-An **embedding stage exists but is off by default.** When the user enables it, it embeds chunks with Mistral Embed through the Mistral API, sending only public CC BY text. Development and CI use a **small stratified sample**. The **full crawl** (≈ 25k GETs, ≈ 7 h at 1 req/s [E]) is a documented operator command.
+An **embedding stage exists but is off by default.** When the user enables it, it embeds chunks with Mistral Embed through the Mistral API, sending only public CC BY text. Development and CI use a **small stratified sample**. The **full crawl** (≈ 25k GETs; under the plan's ceiling of 2,000 requests per hour that is ≈ 12.5 h of fetching, i.e. ≈ 4 nightly windows, resumable [E]) is a documented operator command.
 
 **AIRGAPPED RUNTIME zone.** Zero outbound network. It runs:
 - the restored database;
@@ -58,7 +58,7 @@ The first shipped retrieval mode is **lexical**: French FTS, exact identifiers a
 | D12 | LLM serving | Profiles `cpu` (test first), `gpu24` (recommended), `gpu48+`. Apache-2.0 defaults. The user's on-prem Mistral chat endpoint plugs in as an OpenAI-compatible URL. | §9. |
 | D13 | Dev data | A stratified **sample** (`config/sample.yaml`, ≈ 150–250 files) is used in dev and CI. The **full crawl** is the operator command `lgx ingest --full`. | User decision 2. |
 | D14 | Packaging | Three signed bundle channels: `platform`, `models-<profile>` and `data-<T>`. Data is activated by **database rename-swap** after a candidate-MCP smoke test. One `lgx` operator CLI. | §10. |
-| D15 | Airgap enforcement | Internal backend network, plus a **permanent DOCKER-USER DROP rule**, plus a DNS sentinel, packet capture and a **browser HAR check** as release gates. | Offline flags "do not block outbound connections" [V]. |
+| D15 | Airgap enforcement | Internal `backend` and `front` networks (only the proxy sits on the gateway network `edge`), plus a **permanent DOCKER-USER DROP rule**, plus a DNS sentinel, packet capture and a **browser HAR check** as release gates. | Offline flags "do not block outbound connections" [V]. |
 | D16 | Minimisation | Every stored artefact has a ledger entry. Raw files, caches, logs, the denylist and the API key stay on the build side. | First-class user requirement (§4.3). |
 
 > **Conflict to be aware of (embeddings).**
@@ -98,15 +98,15 @@ découpé et indexé ; copie locale non officielle du 16/10/2026.
 | Consolidation versions (metadata) | 4,719 over 1,416 works | [V] |
 | Current consolidations served as text | 1,118 in `/etat/leg/` (of 1,129 usable: 1,097 XML + 32 PDF-only) + 10 stub fallbacks + ≤ 18 next versions | [V] |
 | JO originals served as text | ≈ 20.3k in-force core-type acts + up to ≈ 5.8k pure amending acts, minus licence-restricted ones | [E] |
-| Clean text / tokens / chunks | ≈ 280–300 MB (range 205–395) / ≈ 70–75M / ≈ 400k ± 30 % | [E], re-measured on the sample (M1) |
-| PostgreSQL, **lexical-only** (default) | ≈ 0.7–0.9 GB; dump ≈ 0.2–0.5 GB | [E] |
-| PostgreSQL **with Mistral vectors** (`halfvec(1024)`, 2,052 B each) | ≈ 2.3–3 GB; dump ≈ 1.5–2 GB | [E] / [V] |
+| Clean text / tokens / chunks | ≈ 280–300 MB (range 205–375) / ≈ 70–75M / ≈ 400k ± 30 % | [E], re-measured on the sample (M1) |
+| PostgreSQL, **lexical-only** (default) | ≈ 0.9–1.3 GB; dump ≈ 0.2–0.5 GB | [E] (§4.2) |
+| PostgreSQL **with Mistral vectors** (`halfvec(1024)`, 2,052 B each) | ≈ 2.5–3.1 GB; dump ≈ 1.5–2 GB | [E] / [V] |
 | Mistral embedding cost, full corpus (optional) | ≈ 80–95M tokens ≈ **$8–10** at $0.1/M; budget ≤ $25; weekly deltas cost cents | [E] / [V price] |
-| Full crawl (operator step) | ≈ 25k file GETs ≈ 7 h at 1 req/s | [E] |
-| Dev sample crawl | ≈ 150–250 files, a few tens of MB, ≈ 5 min | [E] |
+| Full crawl (operator step) | ≈ 25k file GETs at ≥ 1.2 s spacing and ≤ 2,000 per hour ≈ 12.5 h of fetching ≈ 4 nightly windows (resumable); `--ignore-window` runs it in one ≈ 13 h session | [E] |
+| Dev sample crawl | ≈ 150–250 files, a few tens of MB, ≈ 5 min; exempt from the nightly window | [E] |
 | Sync traffic | Nightly ≈ 8 SPARQL requests (≈ 6 MB) + < 50 GETs. Weekly ≈ 12 full pulls (≈ 140 MB) | [V sizes] / [E] |
 | Platform bundle | Images ≈ 6.3 GB (≈ 4.7 GB without Open WebUI) | [V sizes] |
-| Models bundle | `cpu` ≈ 18.3 GB (gemma4:26b-a4b 16 GB + reranker 2.3 GB); `gpu24` ≈ 20.3 GB (qwen3.8:27b-q4_K_M 18 GB + reranker) | [V sizes] |
+| Models bundle | `cpu` ≈ 21 GB (gemma4:26b-a4b 18.7 GB incl. vision projector and MTP draft layer + reranker 2.3 GB); `gpu24` ≈ 20.3 GB (qwen3.8:27b-q4_K_M 18 GB + reranker) | [V sizes] |
 | Effort to M5 (hardened, packaged) | ≈ 82 person-days ≈ 16–17 weeks for 1 senior engineer + ≈ 10–12 lawyer-days | [E] |
 
 **Milestones.**
@@ -152,7 +152,7 @@ découpé et indexé ; copie locale non officielle du 16/10/2026.
 | Criterion | Threshold | First enforced |
 |---|---|---|
 | Selection golden numbers on the frozen 2026-10-16 snapshot (§11.5) | exact | M1 |
-| Egress: DOCKER-USER drops, sentinel lookups, bridge SYNs, browser HAR (Streamlit, Open WebUI) | 0 / 0 / 0 / 0 | M1 (rule), M1b (HAR), M5 (full gate) |
+| Egress: DOCKER-USER drops, sentinel lookups, bridge SYNs, browser HAR (Streamlit, Open WebUI) | 0 / 0 / 0 / 0 | M1 (rule), M1b (HAR + Streamlit sentinel test), M5 (full gate) |
 | G0 deterministic MCP smoke (no LLM) | 20/20 | M1 |
 | Mandatory warnings present (G3 traps) | 100 % | M2 |
 | Fabricated citations in G4/G5 answers, measured by the verifier | 0 | M4 |
@@ -376,13 +376,16 @@ recueil_members_file: config/recueil_members.yaml
 ### 3.3 Politeness
 - **One connection, ≤ 1 request/s** (default spacing 1.2 s) across both hosts.
 - User-Agent: `LegiLux-Local-Clone/<version> (+mailto:<operator contact>; <=1 req/s)`.
-- Nightly window 01:00–05:00 Europe/Luxembourg.
+- Nightly window 01:00–05:00 Europe/Luxembourg for the nightly sync and `lgx ingest --full`.
+  - `lgx ingest --sample` (≤ 300 file GETs + ≈ 12 SPARQL requests) is exempt from the window, but not from the rate limits.
+  - `lgx ingest --full --ignore-window` is an operator opt-in that keeps every rate limit.
 - Backoff on 429/5xx (1 → 60 s, max 5 tries; `Retry-After` honoured).
 - Circuit breaker: 20 consecutive errors, or more than 5 × 403 in a minute.
 - Conditional GET; no HEAD.
 - File cap 64 MB, plus an allowlist for the code-recueil PDFs. The largest PDF is 239.9 MB and is off by default; the largest XML is reportedly ≈ 31 MB [U].
 - SPARQL: flat, unsorted, `DISTINCT`, each query < 30 s server time. If single-request pulls ever break, fall back to year/type partitions, with `ORDER BY` only inside partitions of fewer than 10k rows.
 - Hard client ceilings: 2,000 requests per hour and 30,000 per day.
+  - The hourly ceiling binds before the spacing does. The ≈ 25k file GETs of a full crawl therefore take ≈ 12.5 h, i.e. ≈ 4 nightly windows of ≤ 8,000 GETs each, resumable [E].
 
 ### 3.4 Licence situation and policy
 
@@ -426,7 +429,7 @@ The quoted Art. 5 wording was verified in the XML of `loi/2016/12/23/n25/jo` [V]
 ### 3.7 Mistral API data flow (only when the embedding stage is enabled)
 - **Only the build host** calls the Mistral API. It sends **only public CC BY Legilux chunk text** (header + body); it never sends user questions.
 - The airgapped side never contacts Mistral's cloud. Its query embeddings come from the user's **on-prem** endpoint.
-- **The API key is a build-side secret:** a Docker secret or a 0600 file (`secrets/mistral_api_key`).
+- **The API key is a build-side secret:** a Docker secret backed by the 0600 file `secrets/mistral_api_key`, mounted only by the `embedder` service (profile `embed`). The default `builder` runs without it.
   - It is never written to bundles, `release.json`, logs or the airgap.
   - It is rotated if exposed.
   - CI uses a restricted key, or none.
@@ -448,7 +451,7 @@ The quoted Art. 5 wording was verified in the XML of `loi/2016/12/23/n25/jo` [V]
    - model licences;
    - Mistral API and on-prem licence terms.
 3. **Licence compliance of the bundles.**
-   - syft SBOM per image, then a licence gate over the SPDX files. It fails on AGPL-, SSPL-, CC-BY-NC- or BUSL-licensed components and on the Commons Clause in default profiles.
+   - syft SBOM per image, then a licence gate over the SPDX files. It fails on AGPL-, SSPL-, CC-BY-NC- or BUSL-licensed components and on the Commons Clause in default profiles. It also enforces a package denylist for the runtime images `lgx-mcp` and `lgx-streamlit` (tiktoken, transformers, tokenizers, torch, huggingface_hub), because these download files on first use.
    - Generated `THIRD_PARTY_NOTICES.md`.
    - psycopg is LGPL-3.0 and used unmodified [V]. Poppler (GPL) is a build-side tool only.
    - No Grafana (AGPL).
@@ -476,12 +479,14 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 |---|---|---|
 | Vectors (2,052 B each [V]) × ≈ 400k chunks | — | ≈ 0.82 GB |
 | HNSW index (m = 16, ef_construction = 128) | — | ≈ 0.8–1.0 GB |
-| Unit text + chunk text (TOAST) | ≈ 0.25–0.4 GB | same |
+| Unit text (`text_plain`; `text_md` only for units with tables or lists) + chunk header and body. TOAST compresses only values above ≈ 2 kB, and the median article has 331 characters | ≈ 0.4–0.75 GB | same |
 | tsvector × 2 + GIN | ≈ 0.35–0.45 GB | same |
 | Acts, versions, relations, aliases, vocab | ≈ 0.1–0.15 GB | same |
-| **PostgreSQL total** | **≈ 0.7–0.9 GB** (upper bound ≈ 1 GB) | **≈ 2.3–3 GB** |
+| **PostgreSQL total** | **≈ 0.9–1.3 GB** | **≈ 2.5–3.1 GB** |
 | **Data bundle** (`pg_dump -Fc -Z zstd:9`; index data and generated tsvectors are rebuilt at restore [V P4]) | **≈ 0.2–0.5 GB** | **≈ 1.5–2 GB** |
 | Restore on the airgap host | minutes [E] | + HNSW build ≈ 10–30 min [E], measured in M3 |
+
+The chunk body repeats the unit text (≈ 90 % of it is chunked), so text is stored twice. This is deliberate: the generated `tsv` / `tsv_exact` columns can only read in-row text, and in exchange they are not dumped but rebuilt at restore, which keeps the data bundle at ≈ 0.2–0.5 GB. `text_md` is not a third copy: it exists only for units with tables or lists (Appendix B §B.8).
 
 ### 4.3 Minimisation ledger
 
@@ -496,8 +501,9 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 | Act metadata (scope) | yes | yes | Status from dates, "abrogé par X le Y", citation resolution | in PG |
 | All version windows (4,719) | yes | yes | "Version applicable du … au …"; honest "texte non stocké" | < 5 MB |
 | Relations | yes | yes | Amending lists, implementing RGDs, base-légale check | ≈ 30 MB |
-| Unit text of served versions | yes | yes | Answers and verbatim quotes | ≈ 300 MB |
-| Chunks + 2 tsvectors | yes | yes | Lexical retrieval (stemmed + exact identifiers) | see §4.2 |
+| Unit text of served versions: `text_plain`, plus `text_md` only where the unit has a table or list | yes | yes | Answers and verbatim quotes; Markdown keeps tables readable | ≈ 280 MB (205–375) + `text_md` ≤ 10 % [E] |
+| Chunk header + body | yes | yes | Second copy of the chunked unit text: the generated tsvector columns must read in-row text, and the reranker takes header + body. The tsvectors themselves are not dumped (§4.2) | ≈ 0.25–0.45 GB |
+| 2 tsvectors + GIN indexes | yes | yes | Lexical retrieval (stemmed + exact identifiers) | ≈ 0.35–0.45 GB; rebuilt at restore |
 | Repealed-article stubs | yes | yes | "Article abrogé par …" | small |
 | Embeddings (`halfvec`) | optional | optional | Dense retrieval; float32 is never stored | ≈ 0.82 GB |
 | `embedding_model` + probe vectors | if enabled | if enabled | Startup parity check | KB |
@@ -516,7 +522,7 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 
 - **BUILD zone (connected).**
   - One Linux host (8 vCPU, 32 GB RAM, 200 GB disk [E]) with Docker.
-  - It runs `lgx-builder` and `pg-build`. For development it also runs the dev compose stack: MCP, reranker, Ollama and Streamlit, plus an opt-in cloud LLM.
+  - It runs `lgx-builder` and `pg-build`. For development it also runs the dev compose stack: MCP, reranker, Ollama and Streamlit, plus an opt-in cloud LLM. `lgx dev-init` bootstraps that stack and `lgx dev-load` restores a locally built data dump into it (§10.11).
   - It holds all caches and the signing keys (on a hardware token or an offline machine).
   - A GPU is optional, only for evaluating larger local LLMs.
 - **RUNTIME zone (airgapped).**
@@ -545,12 +551,12 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
                                              │ USB / optical / one-way diode
                                              v
 ┌──────────────────────────────────────── AIRGAPPED RUNTIME ZONE ────────────────────────────────────────┐
-│ host: no default route, no upstream DNS; DOCKER-USER drops NEW conns from br-lgx-back/br-lgx-edge      │
+│ host: no default route, no upstream DNS; DOCKER-USER drops NEW conns from br-lgx-back/-front/-edge     │
 │ lgx CLI: verify -> docker load (image-ID check) -> restore legilux_next -> candidate smoke -> swap     │
 │                                                                                                        │
 │ backend network (internal: true, br-lgx-back)                                                          │
 │   ┌────────────┐ SQL lgx_ro ┌──────────────┐  HTTP  ┌──────────────────┐                               │
-│   │ db         │<───────────│ mcp          │───────>│ rerank (TEI cpu) │                               │
+│   │ db         │<───────────│ mcp          │───────>│ rerank (TEI)     │                               │
 │   │ PG18 +     │            │ 5 tools /mcp │───────>│ embed-local      │ optional: user's Mistral      │
 │   │ pgvector   │            └───^──────^───┘        │ (profile)        │ on-prem embedder,             │
 │   └────────────┘   MCP+Bearer   │      │ MCP+Bearer └──────────────────┘ parity-checked                │
@@ -560,9 +566,9 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 │   │ profile testui  │            │ vLLM | on-prem   │            │ Open WebUI     │                    │
 │   └──────▲──────────┘            │ Mistral endpoint │            │ profile webui  │                    │
 │          │                       └──────────────────┘            └───────▲────────┘                    │
-│          │ :8443 basic auth        edge network (br-lgx-edge)            │ :443                        │
+│          │ :8443 basic auth  front network (internal, br-lgx-front)      │ :443                        │
 │   ┌──────┴───────────────────────────────────────────────────────────────┴───────┐                     │
-│   │ proxy: Caddy, tls internal - the only published ports                        │                     │
+│   │ proxy: Caddy on front + br-lgx-edge, tls internal - the only published ports │                     │
 │   └─────────────────────────────────────▲────────────────────────────────────────┘                     │
 │                                         │ testers / users on the isolated LAN                          │
 │ egress-sentinel (CoreDNS, profile audit) + bridge capture + headless-browser HAR = release gates       │
@@ -573,26 +579,26 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 
 | Component | Zone | Image / technology (pins in §10.1) | Notes |
 |---|---|---|---|
-| `lgx-builder` | build | own, FROM `python:3.13.16-slim-trixie`; lxml 6.1.3, httpx, psycopg 3, poppler-utils | Never shipped. Poppler (GPL) is build-only |
+| `lgx-builder` | build | own, FROM `python:3.13.16-slim-trixie`; lxml 6.1.3, httpx, psycopg 3, poppler-utils | Never shipped. Poppler (GPL) is build-only. The compose service `embedder` (profile `embed`) runs the same image and is the only one that mounts the Mistral API key |
 | `pg-build` / `db` | both | own `lgx-db`, FROM `pgvector/pgvector:0.8.7-pg18-trixie` + `french_unaccent.stop` | Volume `/var/lib/postgresql` (PGDATA `/var/lib/postgresql/18/docker`) [V] |
 | Mistral API | external (build) | `mistral-embed-2312` via `/v1/embeddings` | Optional; off by default |
 | `mcp` | runtime (+ dev) | own `lgx-mcp`, `mcp==2.3.0` | Stateless; read-only DB role; no ML libraries inside |
-| `rerank` | runtime (+ dev) | TEI `cpu-1.9.4`; `89-1.9.4` on gpu48 | `BAAI/bge-reranker-v2-m3` @ `953dc6f6…` (Apache-2.0, safetensors) [V] |
+| `rerank` | runtime (+ dev) | TEI `cpu-1.9.4`; on gpu48 the GPU tag matching the card (`86-`, `89-` or `hopper-1.9.4`) via `compose.gpu48.yml` | `BAAI/bge-reranker-v2-m3` @ `953dc6f6…` (Apache-2.0, safetensors) [V] |
 | `embed-local` | runtime, optional | **operator-supplied** under the user's Mistral licence | Configured by URL + model id only; image never invented here |
 | `llm-cpu` / `llm-gpu` / `llm-vllm` | runtime (+ dev) | Ollama 0.40.5 / vLLM v0.31.0 | One per profile; alias `llm` |
 | `lgx-streamlit` | runtime + dev | own, FROM `python:3.13.16-slim-trixie`; streamlit, openai, mcp client | Profile `testui`; on by default in dev |
 | `webui` | runtime, optional | Open WebUI v0.12.3 | Profile `webui`; accounts and chat history |
-| `proxy` | runtime | Caddy 2.11.7-alpine | Only published ports: 443 (webui), 8443 (Streamlit, basic auth) |
+| `proxy` | runtime (profiles `testui`, `webui`) | Caddy 2.11.7-alpine | The only service on the gateway network `edge`, apart from the audit-time DNS sentinel. Only published ports: 443 (webui), 8443 (Streamlit, basic auth). The UIs sit on the internal `front` network |
 | `egress-sentinel` | runtime | CoreDNS 1.14.7 | Profile `audit` |
-| `lgx-ctl` | runtime | own | One-shot jobs: restore, smoke, provision, backup, audit-egress, eval |
+| `lgx-ctl` | runtime | own | One-shot jobs: restore, smoke, provision, backup (Open WebUI volume mounted read-only), eval, sentinel report. The bridge packet capture runs in the host `lgx` script |
 
 ### 5.4 Build-up by milestone
-- **M1:** builder (metadata + sample) → PG (FTS) → mcp (5 tools, lexical) → Ollama `cpu`. Bundles with SHA256SUMS. Installed on the offline VM with the DOCKER-USER rule.
-- **M1b:** + `lgx-streamlit` (dev and airgap), HAR check.
+- **M1:** builder (metadata + sample) → PG (FTS) → mcp (5 tools, lexical) → Ollama `cpu`. Dev bootstrap (`lgx dev-init`, `lgx dev-load`). Bundles with SHA256SUMS. A **minimal `lgx install`** (SHA-256 check, `docker load` + image-ID check, secrets, DOCKER-USER rule, restore, `compose up`) installs them on the offline VM.
+- **M1b:** + `lgx-streamlit` (dev and airgap) behind Caddy basic auth on `:8443`, HAR check, DNS-sentinel test of the Streamlit container.
 - **M2:** + HTML/PDF parsers, all labels and relations, reranker, lexical bake-off, `lgx ingest --full` documented.
 - **M3:** + embedding adapter, parity check, conditional HNSW, hybrid RRF. Still off by default.
 - **M4:** + eval gates, verifier library, nightly sync, weekly bundles, rename-swap and rollback.
-- **M5:** + signing, image-ID checks, sentinel, SBOM licence gate, Caddy, Open WebUI profile, gpu24/gpu48 profiles, `lgx` CLI, backup drill.
+- **M5:** + signing, sentinel and capture for the whole stack, SBOM licence gate, TLS hardening, Open WebUI profile, gpu24/gpu48 profiles (incl. `compose.gpu48.yml`), the full `lgx` CLI (doctor, upgrades, backup, audit), backup drill.
 
 ---
 
@@ -607,11 +613,11 @@ The sizes are **estimates for the full run**. M1 re-bases them on the dev sample
 | S0 robots | `lgx robots` | `snapshots/T/robots.*`, generated denylist | robots sha256 | Pause on change (§3.2) |
 | S1 discover | `lgx discover` | `snapshots/T/*.csv.zst` | query hash + T | Appendix A; completeness check `COUNT(DISTINCT)` |
 | S2 select | `lgx select` | `manifest-T.jsonl`, `selection_report-T.json` | (snapshot hash, config hash, T) | §2.2; pure function |
-| S3 fetch | `lgx fetch` | `cache/raw/<sha256>` + index (url, Last-Modified, sha256, bytes) | URL + Last-Modified | Denylist check, ≤ 1 req/s, resumable |
+| S3 fetch | `lgx fetch` | `cache/raw/<sha256>` + index (url, Last-Modified, sha256, bytes) | URL + Last-Modified | Denylist check, ≤ 1 req/s and ≤ 2,000/h, nightly window (§3.3), resumable |
 | S4 parse | `lgx parse` | `cache/parsed/<sha256>.<parser_ver>.json` | (file sha256, parser version) | §6.3 |
 | S5 normalise + structure | `lgx structure` | units, aliases, relations from AKN refs, recueil dedup, repeal stubs | (unit hash, rules version) | §2.6–2.7 |
 | S6 chunk | `lgx chunk` | `cache/chunks/T.parquet` | (unit hash, chunker version) | §6.4 |
-| S7 embed | `lgx embed` | `cache/emb/<model_id>@<version>/<sha256>` | sha256(header + body) + model_id + model_version | **provider `none` by default** (§6.5) |
+| S7 embed | `lgx embed` | `cache/emb/<model_id>@<version>/<sha256>` | sha256(header + body) + model_id + model_version | **provider `none` by default** (§6.5); runs only in the `embedder` service |
 | S8 load | `lgx load` | fresh DB `legilux_build_T` | release id | COPY → indexes → post-load (conditional HNSW) → ANALYZE → invariants (Appendix B §B.15) |
 | S9 gates + eval | `lgx gates`, `lgx eval` | `gates-T.json`, `eval-T.json` | — | §6.8, §11 |
 | S10 package | `lgx package` | `data-<T>/` | content digest | `pg_dump -Fc -Z zstd:9 --exclude-schema=build --no-owner --no-privileges` [V P4]; `release.json`, `smoke.json`, gold sets, `RELEASE_NOTES.md`, signatures |
@@ -627,7 +633,8 @@ Every unit also carries `anchor` and `text_sha256`. `release.json` records the p
 - **`lgx ingest --sample`** is the default in dev and CI.
   - It runs the **full SPARQL metadata pulls** (≈ 12 flat requests, ≈ 140 MB), because selection must see all metadata and the golden numbers are asserted on it.
   - It then fetches only the files listed in `config/sample.yaml`: ≈ 150–250 files, a few tens of MB, ≈ 5 min [E].
-- **`lgx ingest --full`** is the operator command run on the build host when ready. It makes ≈ 25k GETs in ≈ 7 h at 1 req/s [E] and resumes after interruption.
+  - It is exempt from the nightly window, but not from the rate limits (§3.3), so it can run during working hours.
+- **`lgx ingest --full`** is the operator command run on the build host when ready. It makes ≈ 25k GETs. Under the default limits (≥ 1.2 s spacing, ≤ 2,000 requests per hour, nightly window 01:00–05:00) that is ≈ 12.5 h of fetching spread over ≈ 4 nights [E]. It resumes after each window or interruption. `--ignore-window` (operator opt-in) runs it in one ≈ 13 h session with the same rate limits.
 
 `config/sample.yaml` contains:
 - **Core texts:** Constitution `consolide/20260829`; Code civil, Code du travail and Code pénal (XML).
@@ -683,7 +690,7 @@ The same sample feeds the **sizing report** (articles, text bytes, chunks per st
 ### 6.4 Chunking and index membership
 - **One chunk per article.**
   - Header: `"{titre court} — {version label} > Livre … > Titre … > Chapitre … > Section … > Art. X." + index terms`.
-  - Articles over ≈ 1,500 tokens are split at `<paragraph>` boundaries, with the header repeated.
+  - Articles over ≈ 1,500 tokens are split at `<paragraph>` boundaries, with the header repeated. Tokens are estimated as `ceil(chars / 3.5)` by `lgx_core.textsize`, which the runtime shares; no tokenizer library is used [E].
   - Articles are **never merged**, so every citation maps to one article.
 - **Not chunked:**
   - repealed stubs;
@@ -724,14 +731,14 @@ parity_threshold: 0.999
 cost_budget_usd: 25              # the run aborts before exceeding it (token estimate x list price)
 ```
 
-**Build side (`lgx embed --provider mistral-api`, an operator command)**
+**Build side (`lgx embed --provider mistral-api`, an operator command run in the compose service `embedder`, profile `embed`, the only service that mounts the API key)**
 - Batched, rate-limited and resumable.
 - Cache key: `sha256(header + body) + model_id + model_version`. Only new or changed chunks are sent; weekly deltas cost cents.
 - Before the run, it estimates the cost from a tokenizer-free count: ≈ 70M text tokens + ≈ 12–24M header tokens ≈ **80–95M tokens ≈ $8–10** [E]. The ≈ 4 chars/token ratio for Mistral's tokenizer is [U], hence the $25 budget.
 - It writes `lgx.embedding_model`, which sets the vector column dimension for the release.
 - It writes **8 golden probes** to `lgx.embedding_probe`: fixed texts (4 French article snippets, 2 French questions, 1 German and 1 English question) with their **full-precision float32** API vectors.
 
-**Runtime parity check** (MCP start, then every 15 min while vectors are disabled)
+**Runtime parity check** (at MCP start; then every 15 min while vectors are disabled, every 60 min while they are enabled, and after any recovery from an endpoint error)
 1. Embed the 8 probe texts through `mistral-local`.
 2. Require all of the following:
    - the same `dim`;
@@ -744,6 +751,7 @@ cost_budget_usd: 25              # the run aborts before exceeding it (token est
    - retrieval runs lexical + rerank;
    - `about_corpus` and Streamlit show the reason;
    - hybrid requests get `mode_used = lexical` with the reason.
+5. **Every query-embedding response** is checked too: the vector length must equal `dim`, and the reported `model` must be `model_id` or one of `model_aliases`. On a mismatch, `vector_status = disabled:model_mismatch` (or `disabled:dim_mismatch`), that request runs lexical, and only a new full probe run re-enables vectors. This catches an on-prem upgrade or model swap while MCP is running.
 
 The threshold is calibrated against the real on-prem deployment once it exists. A quantised on-prem model may need a documented lower threshold (OD2).
 
@@ -769,7 +777,7 @@ The threshold is calibrated against the real on-prem deployment once it exists. 
 - **Why weekly bundles suffice.** Consolidation creation lag has a median of 0 days and a p90 of 48 days. 67 works got a new version in the last 90 days. Mémorial A gets ≈ 55 acts and ≈ 55 consolidation versions per month [V].
 - **Status flips** need no sync: runtime status is computed from dates.
 - **Atom and RSS** are logged as cross-check signals only.
-- All requests are sequential, spaced ≥ 1.2 s, and confined to the nightly window.
+- All requests are sequential, spaced ≥ 1.2 s, capped at 2,000 per hour, and confined to the nightly window. The only exceptions to the window are `lgx ingest --sample` and an operator's `--ignore-window` run (§3.3).
 
 ### 6.8 Anomaly gates (the build fails; the previous release stays current)
 
@@ -839,7 +847,7 @@ There is one dump file to ship, and the licences are permissive. The DDL in Appe
 - `lgx.act_status(dei, dnl, rdf_status, as_of)` implements §2.2 step 1. The raw flag is consulted only for `-implicit` and for an undated repeal.
 - `lgx.version_as_of(act, as_of)` returns the window version, which may be a stub. `lgx.text_version_as_of(act, as_of)` returns the stored text that serves on that date; there is at most one.
 - `lgx.serving_at(act, as_of)` returns status, window version, served version, the **label recomputed for `as_of`**, flags, and the next announced version. `lgx.amending_acts_since(act, since, as_of)` returns the mandatory amending list.
-- Every search filters on `valid_from ≤ as_of < valid_to`. An aging offline database therefore switches to a stored future version, drops repealed acts and activates not-yet-in-force acts **on the right day**. Versions announced after T stay unknown; `W_DATA_STALE` says so.
+- Every search filters on `valid_from ≤ as_of < valid_to`; `in_force_only = false` also admits stored windows that start after `as_of`. An aging offline database therefore switches to a stored future version, drops repealed acts and activates not-yet-in-force acts **on the right day**. Versions announced after T stay unknown; `W_DATA_STALE` says so.
 - A parity test compares SQL and Python results on all acts × {T, T+1, T+30, T+90, T+365}.
 
 ### 7.4 Vectors
@@ -871,8 +879,13 @@ There is one dump file to ship, and the licences are permissive. The DDL in Appe
   4. **Clock:** `now() ≥ T` (else `W_CLOCK_SUSPECT`) and `now() ≤ H`.
   5. A canned query returns.
 
-  `/readyz` reports all five.
+- **Health endpoints** (custom routes outside the MCP transport; contract in Appendix D, D.0):
+  - `/livez` returns 200 while the process runs.
+  - `/readyz` returns 200 **if and only if** the database is reachable and check 1 passes; otherwise 503.
+  - Checks 2–5 never make `/readyz` fail. Their results appear in its JSON body as degraded states (`vector_status`, `reranker_ok`, `clock_ok`, `canned_query_ok`). Both UIs wait for `mcp` to be healthy, so they still start in lexical mode and show the reason.
+  - Both routes are exempt from bearer authentication and from the Host/Origin allowlist, which protect `/mcp` only. The compose health check calls `http://localhost:8000/readyz`.
 - No ML libraries run inside the server. Reranking and query embedding are HTTP calls. httpx uses `trust_env=False`, and only the configured internal URLs are allowed.
+- **Token budgets** use the tokenizer-free estimate `ceil(chars / 3.5)` from `lgx_core.textsize` [E]. tiktoken, transformers and tokenizers are not dependencies of `lgx-mcp` or `lgx-streamlit`, because they download vocabulary files on first use. The package denylist of the licence gate enforces this (§3.8).
 
 ### 8.2 Tools (5, read-only; contracts in Appendix D)
 
@@ -894,13 +907,15 @@ There is one dump file to ship, and the licences are permissive. The DDL in Appe
 1. **Citation parser** (port of the prototype `citeparse.py`, 9 of 10 test strings [V], plus backward "RGD du …, art. 3").
    - Resolution order: ELI → Mémorial reference → `act_alias` (code abbreviations, lawyer-curated acronyms such as CNPD, RGPD, CSSF, ADEM) → (type, date) candidates ranked by title trigram similarity.
    - **Never guess.** Only 2,078 of 8,060 in-force LOIs have a unique date, and up to 35 share one [V]. If the top two candidates are within 0.05 of each other, the result is `ambiguous`.
-2. **Candidates in one SQL statement** (`lgx.search_candidates`, Appendix B §B.14), all filtered to the validity window at `as_of`:
+2. **Candidates in one SQL statement** (`lgx.search_candidates`, Appendix B §B.14), all filtered to the validity window at `as_of` (plus stored future windows when `in_force_only = false`). Every tool filter (`doc_types`, `act_eli`) applies to every branch:
    - lexical: OR-query over `fr_legal` lexemes, `ts_rank_cd`, top 50;
    - exact identifiers on `tsv_exact`, top 20;
    - cited units (weight 10);
    - **dense top 50, only if `vector_status = ok` and the mode allows it.**
    - Fusion is RRF with k = 60, then the chunk's `rank_prior`.
-3. **Rerank** with `bge-reranker-v2-m3` on `header + body[:512 tokens]`. 40 candidates on GPU profiles; **16 on `cpu`**, where 40 candidates took 10.6–16.9 s on 4 vCPU [V]. The reranker is mandatory in lexical mode, because native FTS has no IDF: it ranked the target 6th where the reranker ranked it 1st [V].
+3. **Rerank** with `bge-reranker-v2-m3` on `header + body`, with the body cut to ≈ 1,800 characters (≈ 512 tokens by the estimate in §8.1). TEI's `--auto-truncate` (on by default in 1.9 [V]) cuts anything still too long. 40 candidates on GPU profiles; **16 on `cpu`**, where 40 candidates took 10.6–16.9 s on 4 vCPU [V]. The reranker is mandatory in lexical mode, because native FTS has no IDF: it ranked the target 6th where the reranker ranked it 1st [V].
+   - **Batch limit.** TEI 1.9.4 rejects a `/rerank` request with more than `--max-client-batch-size` texts, which defaults to **32** [V]. The compose command sets 64, and `lgx_mcp/retrieval/rerank.py` also splits the candidates into batches of ≤ 32. An integration test reranks 40 candidates against the real TEI image (M2).
+   - **Reranker unavailable.** With `LGX_RERANK=auto` (the default) the results come back unreranked, with `retrieval.reranked = false` and a reason. With `LGX_RERANK=on` the tool returns `BACKEND_UNAVAILABLE`.
 4. **Assembly.** Group by act. Attach computed status, `text_basis`, flags and warnings (`lgx_core.warnings` over `lgx.serving_at`). Stay within the token budget.
 
 **Modes.**
@@ -987,13 +1002,15 @@ The G3 gate requires **100 %** correct warnings. Warnings are computed by code, 
 | V7 coverage | Out-of-scope questions get the refusal template |
 | V8 language | Quotes are in French; translations are marked |
 
+V1, V4 and V5 need lookups, so `verify` takes a **resolver interface** (citation → unit, unit → verbatim text, act → status and label at `as_of`). Streamlit has no database credentials and passes an MCP-backed implementation over `resolve_citation`, `get_article` and `get_act`; evaluation may pass a database-backed one over `lgx.serving_at`. The self-test runs against both.
+
 Self-test: **100 % detection** on 200 synthetic corrupted answers (fake article numbers, wrong dates, altered quotes, repealed presented as current, future presented as current), and **0 false rejections** on lawyer-approved answers. An enforcing gateway (retrieve → generate → verify → repair, strip or refuse) is the optional M6. It is escalated only if evaluation shows fabricated citations.
 
 ### 8.8 Security
 
 | Control | Setting |
 |---|---|
-| Network | `mcp` sits only on `backend` (internal). It is published only in the dev overlay, on 127.0.0.1 |
+| Network | `mcp` sits only on `backend` (internal). In the dev overlay it is also attached to `edge` and published on 127.0.0.1, because Docker does not publish ports of containers that sit only on internal networks [V test, P10] |
 | Authentication | `Authorization: Bearer` from a Docker secret (256-bit), compared in constant time. Host and Origin allowlists |
 | Limits | Query ≤ 1,000 chars; `top_k` ≤ 20; 30 calls/min per client, 300/min global; result ≤ 4k tokens; `statement_timeout` 5 s |
 | SQL | Parameterised only; no tool accepts SQL; read-only role |
@@ -1009,9 +1026,9 @@ Self-test: **100 % detection** on 200 synthetic corrupted answers (fake article 
 
 | Profile | Hardware [E] | LLM runtime + default model (licence) | Reranker | Context / budget | Users [E] |
 |---|---|---|---|---|---|
-| **`cpu` (test first)** | 16–32 cores (AVX-512/AMX), 64 GB RAM (32 GB min), 250 GB NVMe | Ollama 0.40.5 + `gemma4:26b-a4b` (Apache-2.0; 25.2B total / 3.8B active; 16 GB). Dev-laptop fallback `ministral-3:8b` (Apache-2.0, 6.0 GB). Alternative `qwen3.6:35b-a3b-q4_K_M` (24 GB) | TEI cpu, `rerank_k` 16 | 16k / ≤ 2.5k retrieved tokens | 1–2 (minutes per answer) |
+| **`cpu` (test first)** | 16–32 cores (AVX-512/AMX), 64 GB RAM (32 GB min), 250 GB NVMe | Ollama 0.40.5 + `gemma4:26b-a4b` (Apache-2.0; 25.2B total / 3.8B active; ≈ 18.7 GB including a 1.2 GB vision projector and a 0.46 GB MTP draft layer [V registry]). Candidate `gemma4:26b-a4b-it-qat` (15.6 GB [V]) is compared on G4 in the M0 spike. Dev-laptop fallback `ministral-3:8b` (Apache-2.0, 6.0 GB). Alternative `qwen3.6:35b-a3b-q4_K_M` (24 GB) | TEI cpu, `rerank_k` 16 | 16k / ≤ 2.5k retrieved tokens | 1–2 (minutes per answer) |
 | **`gpu24` (recommended)** | 1 × 24 GB (RTX 4090 / L4 / A10), 16 cores, 64 GB, 500 GB | Ollama 0.40.5 + `qwen3.8:27b-q4_K_M` (Apache-2.0, 18 GB, 256K native; KV ≈ 64 KiB/token, so 32K ≈ 2 GiB). Alternative `gemma4:31b` (19 GB) | TEI cpu, k = 40 | 32k / ≤ 4k | 2–5 |
-| **`gpu48+`** | 1 × 48 GB (L40S / RTX 6000 Ada, sm89+), 24 cores, 128 GB, 1 TB | vLLM v0.31.0 + `Qwen/Qwen3.8-27B-FP8` @ `017b9c7a…` (30.9 GB), `--max-model-len 131072 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3`. Parser names for 3.8 are [U]; fallback `Qwen3.6-35B-A3B-FP8` (37.5 GB), whose card documents them. CUDA 13 image; `-cu129` for older drivers (driver minimum [U]) | TEI `89-1.9.4` | 128k / ≤ 8k | 10–30 |
+| **`gpu48+`** | 1 × 48 GB (L40S / RTX 6000 Ada; A6000 / A40 with the matching TEI tag), 24 cores, 128 GB, 1 TB | vLLM v0.31.0 + `Qwen/Qwen3.8-27B-FP8` @ `017b9c7a…` (30.9 GB), `--max-model-len 131072 --gpu-memory-utilization 0.85 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3`. The 0.85 leaves room for the reranker on the same card. At ≈ 64 KiB/token a 128k context needs ≈ 8 GiB of KV cache, so M5 lowers `LGX_VLLM_MAX_LEN` to 65536 if the KV capacity is short. Parser names for 3.8 are [U]; fallback `Qwen3.6-35B-A3B-FP8` (37.5 GB, tight next to the reranker on 48 GB; checked in M5), whose card documents them. CUDA 13 image; `-cu129` for older drivers (driver minimum [U]) | TEI GPU tag matching the card: `86-1.9.4` (A6000/A40), `89-1.9.4` (L40S/RTX 6000 Ada), `hopper-1.9.4` (H100) [V tags]; digest pinned per tag in `images.lock`; GPU reservation via `compose.gpu48.yml` | 128k (64k fallback) / ≤ 8k | 10–30 |
 | **User's Mistral on-prem** | per vendor | OpenAI-compatible chat endpoint under the user's licence: `OPENAI_BASE_URL` + model id. Tool-calling support [U] → Streamlit "retrieve-first" fallback | — | — | — |
 
 - **Licences.** All defaults are Apache-2.0. Excluded from defaults: Mistral-Medium-3.5 (no rights above $20M monthly revenue), Qwen3.8-Flash-Next (Qwen Community License), jina-* (CC-BY-NC). The `gpu80` profile (Qwen3.8-27B BF16, gpt-oss-120b, Mistral-Small-4 NVFP4) is in the M6 backlog.
@@ -1022,8 +1039,8 @@ Self-test: **100 % detection** on 200 synthetic corrupted answers (fake article 
 - **Ollama.**
   - Primary: on the build side, `ollama pull <tag>` into a clean `OLLAMA_MODELS`, then archive the store (manifests + blobs). This is common practice but undocumented [U, M0 spike].
   - Fallback (documented): ship the GGUF + `Modelfile` and run `ollama create` at install. Ollama does not re-quantize on import [V].
-  - `OLLAMA_CONTEXT_LENGTH=32768`, because the default is 4096 [V]. `OLLAMA_NO_CLOUD=1`, `OLLAMA_KEEP_ALIVE=-1`.
-- The `gemma4` QAT tag is [U]; use the plain `gemma4:26b-a4b`.
+  - `OLLAMA_CONTEXT_LENGTH` is always set explicitly: 16384 on `cpu` (its own environment block in Appendix C) and 32768 on `gpu24`. Ollama's default depends on VRAM: 4k below 24 GiB, 32k at 24–48 GiB, 256k at 48 GiB or more [V docs.ollama.com/context-length, 2026-10-16]. `OLLAMA_NO_CLOUD=1`, `OLLAMA_KEEP_ALIVE=-1`.
+- `gemma4:26b-a4b-it-qat` exists (15.6 GB, no MTP draft layer) [V registry, 2026-10-16]. The plain `gemma4:26b-a4b` (≈ 18.7 GB) stays the default until the M0 spike has compared both on G4.
 
 ### 9.3 Streamlit test UI (`ui/`, service `lgx-streamlit`, profile `testui`)
 
@@ -1034,7 +1051,7 @@ Self-test: **100 % detection** on 200 synthetic corrupted answers (fake article 
 
 **Stack.**
 - `streamlit` 1.65.0 (Apache-2.0, released 2026-10-02; 1.66.0 came out on 2026-10-14) [V J3].
-- `openai` Python client (Apache-2.0). Every 3.x release listed on 2026-10-16 is newer than two weeks, so the exact pin, the newest release that is ≥ 14 days old, is chosen in M0 [U].
+- `openai==3.24.0` (Apache-2.0, released 2026-10-02), the newest 3.x release that is ≥ 14 days old on 2026-10-16 [V PyPI]. It is re-evaluated in M0 by the same rule.
 - `mcp==2.3.0` client: `mcp.client.Client` over `mcp.client.streamable_http.streamable_http_client(url, http_client=httpx2.AsyncClient(headers={"Authorization": "Bearer …"}))` [V names J4; call signatures verified in the M0 spike]. The 1.x name `streamablehttp_client` does not exist in 2.x.
 - Shared `lgx_core.verify` and `eval/harness`.
 - Image FROM `python:3.13.16-slim-trixie@sha256:70729b46…`, dependencies locked with hashes. No pip at runtime.
@@ -1048,8 +1065,8 @@ Self-test: **100 % detection** on 200 synthetic corrupted answers (fake article 
 1. `list_tools` once per session, cached.
 2. Convert each MCP `inputSchema` into OpenAI `tools=[{"type":"function","function":{name, description, parameters}}]`.
 3. `tool_choice="auto"`.
-4. Validate each tool call's JSON arguments against the schema; on an error, return the error to the model. Execute valid calls with `call_tool`.
-5. Append the compact `structuredContent` as a `role: tool` message, truncated to the token budget.
+4. Validate each tool call's JSON arguments against the schema; on an error, return the error to the model. Before `call_tool`, `tools_bridge.py` merges the sidebar values into the arguments as **hard overrides**, for the arguments each tool accepts: `as_of` for `search_legislation`, `get_article`, `get_act` and `resolve_citation`; `filters.in_force_only`, `filters.doc_types`, `retrieval_mode`, and `top_k` capped at the sidebar value, for `search_legislation`. The tool panel shows the effective arguments next to the model's own.
+5. Append the compact `structuredContent` as a `role: tool` message, truncated to the token budget (estimated as `ceil(chars / 3.5)`, §8.1; the image contains no tokenizer library).
 6. Repeat until there are no tool calls, or `max_iterations` (default 5) or the total time budget is reached.
 
 Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streamlit re-runs scripts, so each user turn opens a short-lived MCP client inside `asyncio.run(...)`; the server is stateless.
@@ -1066,7 +1083,7 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 **Sidebar.**
 - Endpoint preset, base URL, model, temperature (default 0.2), max iterations.
 - **Lexical vs hybrid** (`retrieval_mode`). Hybrid is greyed out with the reason while `vector_status ≠ ok`.
-- Filters: in-force only (default on), document types, `as_of`, `top_k`.
+- Filters: in-force only (default on), document types, `as_of`, `top_k`. In Chat they are hard overrides of the model's tool arguments (tool loop step 4).
 
 **Tabs.**
 - **Chat.**
@@ -1074,9 +1091,10 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 - **Eval:** runs `eval/harness` on the gold sets shipped with the data bundle (G0, G1, G2, G3; G4 with the selected LLM). Shows Recall@k, MRR, warning correctness and citation precision; results download as JSON.
 - **Corpus:** `about_corpus` (T, age, counts per label, gaps, embedding status).
 
-**Offline.** The `.streamlit/config.toml` keys were verified in the 1.65.0 wheel (J5):
+**Offline.** The `.streamlit/config.toml` keys were verified in the 1.65.0 wheel (J5, P10):
 - `browser.gatherUsageStats=false` (also `STREAMLIT_BROWSER_GATHER_USAGE_STATS=false`). The frontend metrics call only fires when this is true.
 - `server.headless=true`, which suppresses the first-run e-mail prompt that would GET `data.streamlit.io/metrics.json`.
+- `logger.hideWelcomeMessage=true` and `browser.serverAddress=<LGX_HOSTNAME>`, also set as `STREAMLIT_*` environment variables. Without them, `server.headless=true` makes 1.65.0 call `net_util.get_external_ip()` at startup: a **server-side** GET to `checkip.amazonaws.com` [V wheel read; the reviewer's sentinel test saw 1 lookup without the setting and 0 with it]. The browser HAR cannot see this call. **M1b therefore adds a CI test** that starts `lgx-streamlit` on an internal network with the DNS sentinel and asserts 0 lookups.
 - `server.fileWatcherType=none`, `client.toolbarMode=minimal`, `client.showErrorDetails=false` in the airgap.
 - No `theme.font` URLs. No `st.map` or pydeck (CARTO/Mapbox tiles). No remote `st.image`.
 - **Release gate:** a headless-browser HAR session with **0 external requests**. This also covers the [U] `StaticConnection` fetch of `data.streamlit.io/static.json`.
@@ -1085,7 +1103,7 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 - Read-only. Streamlit talks only to MCP and the LLM endpoint.
 - No database credentials, no file upload, **no server-side chat persistence**.
 - The MCP token stays server-side.
-- Streamlit has no authentication: in dev it binds to 127.0.0.1; in the airgap it sits behind Caddy basic auth on `:8443`, or on an admin network only.
+- Streamlit has no authentication. In dev it is published on 127.0.0.1 only. In the airgap it sits on the internal `front` and `backend` networks behind Caddy basic auth on `:8443`, from M1b on. `lgx install` and `lgx dev-init` always generate the bcrypt hash, and a missing value stops `compose up` (Appendix C).
 
 ### 9.4 Open WebUI (optional end-user UI, profile `webui`)
 - **Why keep it:** it has multi-user accounts, chat history and admin-managed MCP connections.
@@ -1104,15 +1122,15 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 
 | Component | Possible outbound behaviour | Control | Proof |
 |---|---|---|---|
-| All containers | Any | `pull_policy: never`; backend `internal: true`; permanent DOCKER-USER DROP; no upstream DNS; `HF_HUB_OFFLINE=1`, `HF_HUB_DISABLE_TELEMETRY=1`, `TRANSFORMERS_OFFLINE=1`, `DO_NOT_TRACK=1` | Sentinel + capture |
+| All containers | Any | `pull_policy: never`; `backend` and `front` `internal: true`, only the proxy (and the audit-time sentinel) on `edge`; permanent DOCKER-USER DROP; no upstream DNS; `HF_HUB_OFFLINE=1`, `HF_HUB_DISABLE_TELEMETRY=1`, `TRANSFORMERS_OFFLINE=1`, `DO_NOT_TRACK=1` | Sentinel + capture |
 | PostgreSQL | none | `listen_addresses` on the backend only | Capture |
 | TEI | Hub download if `--model-id` is not a path | Local path `--model-id /models/hf/…@sha` | Sentinel |
 | Ollama | Cloud features, registry pulls | `OLLAMA_NO_CLOUD=1` [V]; models preloaded; no `pull` at runtime | Sentinel |
 | vLLM | Usage stats, Hub | `VLLM_NO_USAGE_STATS=1`, `DO_NOT_TRACK=1` [V]; local path | Sentinel |
 | Open WebUI | Version check, model auto-download, web search, sharing, OTEL, browser-side CDN | Env in Appendix C | Sentinel + **HAR** |
-| Streamlit | Usage stats, first-run e-mail, static.json, fonts and maps | config.toml + env (§9.3) | **HAR** |
+| Streamlit | Browser side: usage stats, first-run e-mail, static.json, fonts and maps. Server side: a startup `checkip.amazonaws.com` lookup when `server.headless=true` [V] | config.toml + env (§9.3), incl. `logger.hideWelcomeMessage=true` and `browser.serverAddress` | **HAR** + **sentinel** (CI test from M1b) |
 | `lgx-mcp`, `lgx-ctl`, `lgx-streamlit` | none by design | Startup assertion that configured URLs are internal service names; httpx `trust_env=False` | Sentinel |
-| Caddy | ACME | `tls internal`, `skip_install_trust`, `auto_https disable_redirects` [U syntax: tested in M5] | Sentinel |
+| Caddy | ACME | `tls internal`, `skip_install_trust`, `auto_https disable_redirects`; the Caddyfile passes `caddy validate` in 2.11.7 [V P10], runtime behaviour tested in M5 | Sentinel |
 | Mistral on-prem (operator) | Vendor telemetry or licence calls [U] | Placement (i) inside `backend` or (ii) an allow-listed enclave IP only | Egress gate: 0 packets to non-allow-listed destinations |
 
 ---
@@ -1125,7 +1143,8 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 |---|---|---|
 | `pgvector/pgvector:0.8.7-pg18-trixie` → own `lgx-db` | `sha256:9d9c930220cb9bf2f956d10a8f909cf9973d9672ca0278aef2c1e6facccad2e0` | 0.17 GB |
 | `ghcr.io/huggingface/text-embeddings-inference:cpu-1.9.4` | `sha256:2538ea1c9640d3763b15af668039d24172d063b42337b0c27796fc2be180c78d` | 0.24 GB |
-| `…text-embeddings-inference:89-1.9.4` (gpu48) | `sha256:1a284d9ca1adcc20b78c261d4d052c06057f0a3cb49a15c5d2c00930f710fce2` | ≈ 3.1 GB |
+| `…text-embeddings-inference:89-1.9.4` (gpu48 on Ada: L40S, RTX 6000 Ada) | `sha256:1a284d9ca1adcc20b78c261d4d052c06057f0a3cb49a15c5d2c00930f710fce2` | ≈ 3.1 GB |
+| `…text-embeddings-inference:86-1.9.4` / `hopper-1.9.4` (gpu48 on A6000/A40 or H100) | tags [V]; digest resolved at build and pinned per tag. A gpu48 platform bundle carries the one tag that matches the target card | ≈ 3.1 GB [E] |
 | `ollama/ollama:0.40.5` | `sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241` | 3.79 GB |
 | `vllm/vllm-openai:v0.31.0` (gpu48) | `sha256:c1c9f6fd5c109ba7f0546a59f5b2f15fb87f64c77782e90a27b648b42a8e67c3` (`-cu129` digest resolved at build) | 9.04 GB |
 | `ghcr.io/open-webui/open-webui:v0.12.3` (optional) | `sha256:a537bbe1e6b428820f52ed4a029d7fff97062e24d5cf32c365fba36fd0542def` | 1.62 GB |
@@ -1141,23 +1160,24 @@ Timeouts: MCP 20 s per call; LLM 120 s per call on `cpu` (configurable). Streaml
 - **Pulls** on the build side go through `mirror.gcr.io` or an authenticated Docker Hub, because anonymous pulls returned 429 [V]. A build fails if any digest differs from the lock.
 - **Not needed:** `postgres:18.6`. Its recorded digest belongs to tag `18.6`, not `18.6-trixie` (J1).
 
-### 10.2 Compose profiles (Appendix C; validated with `docker compose config` [V P5])
+### 10.2 Compose profiles (Appendix C; validated with `docker compose config` [V P5, P10])
 
 | Profile / file | Services |
 |---|---|
-| base | `db`, `mcp`, `rerank`, `proxy` |
-| `cpu` / `gpu24` / `gpu48` | `llm-cpu` / `llm-gpu` (Ollama, GPU reservation) / `llm-vllm` (with TEI GPU tag) |
-| `testui` | `lgx-streamlit` |
-| `webui` | Open WebUI |
+| base | `db`, `mcp`, `rerank` |
+| `cpu` / `gpu24` / `gpu48` | `llm-cpu` (16k context) / `llm-gpu` (Ollama, GPU reservation) / `llm-vllm` (`--gpu-memory-utilization 0.85`); gpu48 also needs `compose.gpu48.yml` |
+| `testui` | `lgx-streamlit` + `proxy` (:8443) |
+| `webui` | Open WebUI + `proxy` (:443) |
 | `embed-local` | Operator-supplied Mistral on-prem embedder (placement i) |
 | `audit` | `egress-sentinel`; `compose.audit.yml` sets `dns:` on every service |
 | `jobs` | `lgx-ctl` |
 | `observability` / `bm25-agpl` / `rdf` | Prometheus / ParadeDB bake-off / Oxigraph |
-| `compose.dev.yml` | Connected dev: Streamlit and MCP on 127.0.0.1; opt-in `cloudllm` |
+| `compose.dev.yml` | Connected dev: Streamlit and MCP published on 127.0.0.1 (attached to `edge` for that); opt-in `cloudllm` (`lgx-streamlit-cloud` with `profiles: !override [cloudllm]`, so the default dev command never starts it) |
 | `compose.enclave.yml` | Placement (ii): attaches `mcp` and `lgx-streamlit` to `edge` for an allow-listed enclave IP |
-| `compose.build.yml` | `builder`, `pg-build`; `mistral_api_key` secret; **no GPU** |
+| `compose.gpu48.yml` | gpu48: `rerank` switches to the TEI GPU image (`LGX_TEI_TAG`) with a GPU reservation. Compose profiles cannot add a reservation to an existing service |
+| `compose.build.yml` | `builder`, `pg-build`; `embedder` (profile `embed`) is the only service with the `mistral_api_key` secret; **no GPU**. Run from the repository root; paths are `../config`, `../out`, `../secrets` |
 
-Secrets are 0600 files generated by `lgx install`: PG passwords, MCP token, LLM key, `WEBUI_SECRET_KEY` (Open WebUI accepts it only through env, so it lives in a 0600 env file).
+Secrets are 0600 files under `${LGX_HOME}/secrets/`. `lgx install` generates them in the airgap (`LGX_HOME=/opt/legilux`) and `lgx dev-init` on the dev host (`LGX_HOME=./.dev`, i.e. `deploy/.dev`). They are the PG passwords, MCP token, LLM key and `WEBUI_SECRET_KEY` (Open WebUI accepts it only through env, so it lives in a 0600 env file). Both commands also always write `LGX_TESTUI_BCRYPT` to `deploy/.env`, single-quoted because bcrypt hashes contain `$`; `compose up` fails fast without it. Build-side secrets (`pgbuild_pw`, and optionally `mistral_api_key` and `cloud_llm_api_key`) live in the gitignored repository folder `secrets/`.
 
 ### 10.3 Hardening baseline (enforced by a compose lint in CI)
 - `pull_policy: never`; `restart: unless-stopped`.
@@ -1165,7 +1185,8 @@ Secrets are 0600 files generated by `lgx install`: PG passwords, MCP token, LLM 
 - `read_only` where possible, with tmpfs or volumes for writable paths; non-root (uid 10001) for our images.
 - `pids_limit`, `mem_limit`; `logging: local` with rotation.
 - Health checks with `depends_on: service_healthy` where the image ships a probe (db, mcp, Ollama, Streamlit in Appendix C). Probes for TEI, Open WebUI, Caddy and CoreDNS are added in M5 once the tools present in each image are confirmed [U]; until then `lgx status` checks them over HTTP.
-- Only Caddy publishes ports (443, 8443) on `${LGX_BIND_ADDR}`.
+- Only Caddy publishes ports (443, 8443) on `${LGX_BIND_ADDR}` in the airgap.
+- `bundle/compose_lint.py` also asserts that: the dev command `--profile cpu --profile testui` never lists `lgx-streamlit-cloud`, and `--profile cloudllm` does; only `proxy` (and, during audits, `egress-sentinel`) sits on `edge` in the runtime file; `builder` mounts no Mistral key. CI runs `caddy validate` on the Caddyfile for `testui`, `webui` and both.
 
 ### 10.4 Bundle channels and compatibility
 
@@ -1203,7 +1224,7 @@ With vectors, `embedding` is `{"model_id":"mistral-embed-2312","model_version":"
 
 Host prerequisites:
 - Ubuntu 24.04 / Debian 13 / RHEL 9 (candidates);
-- Docker Engine + compose plugin (offline packages in `host/`);
+- Docker Engine + compose plugin ≥ 2.24, because Appendix C uses `env_file.required` and the `!override` merge tag (validated with v5.6.0); offline packages in `host/`;
 - NVIDIA driver + Container Toolkit for GPU profiles;
 - an enclave NTP source.
 
@@ -1214,14 +1235,14 @@ sudo ./lgx install --profile cpu|gpu24|gpu48 [--with testui] [--with webui] --ho
 ```
 
 Steps (state kept in `/opt/legilux/state.json`; a re-run resumes):
-1. `doctor`: CPU flags, RAM, disk, Docker and cgroup v2, GPU and driver, clock vs T.
-2. Verify signatures.
+1. `doctor`: CPU flags, RAM, disk, Docker and cgroup v2, GPU and driver, clock vs T. On gpu48 it derives `LGX_TEI_TAG` from the GPU compute capability and refuses a platform bundle built for another GPU architecture.
+2. Verify signatures (the minimal M1 installer checks SHA-256 only; Ed25519 and cosign from M5).
 3. `docker load` + image-ID check + retag.
 4. Copy models and verify their manifest.
-5. Generate secrets.
+5. Generate secrets, and the tester-UI bcrypt hash (always, even without `--with testui`).
 6. **Install the DOCKER-USER rules** and the `lgx-firewall.service` that re-applies them.
 7. Start `db`, create roles, restore the data bundle.
-8. `compose up` with the profile.
+8. `compose up` with the profile (plus `compose.gpu48.yml` on gpu48).
 9. Provision Open WebUI, if enabled.
 10. **Smoke:** `smoke.json` 20/20 + parity status + 5 E2E questions.
 11. **Egress check.**
@@ -1255,7 +1276,7 @@ Target ≤ 30 min. If the HNSW rebuild exceeds ≈ 20 min with vectors (measured
 
 | What | Why | How | Retention |
 |---|---|---|---|
-| Open WebUI volume (if enabled) | Users, chats, settings: the only irreplaceable runtime state | `lgx backup`: stop webui ≈ 10 s, `tar \| zstd`, start | 14 daily + 8 weekly |
+| Open WebUI volume (if enabled) | Users, chats, settings: the only irreplaceable runtime state | `lgx backup`: stop webui ≈ 10 s, `tar \| zstd` in `lgx-ctl` (volume mounted read-only), start | 14 daily + 8 weekly |
 | Secrets, `.env`, overrides, `state.json` | Reinstall without re-provisioning | Included, encrypted (`age` [U] or `openssl enc -aes-256-gcm`) | same |
 | MCP audit log | Accountability | Rotated JSONL, copied | 180 days |
 | Legal database | **Not backed up**; reproducible from the last two data bundles | — | 2 bundles |
@@ -1278,9 +1299,10 @@ Targets: **RPO 24 h, RTO ≤ 2 h** on a spare host. The restore drill runs each 
 | `lgx upgrade-platform <dir>` / `lgx rollback-platform` / `lgx update-models <dir>` | §10.8 |
 | `lgx status` | Active release, T, age, staleness, `vector_status`, health, last smoke, disk, GPU |
 | `lgx smoke [--full]` / `lgx eval --quick` | G0 / gold-set subset on the airgap |
-| `lgx audit-egress [--minutes 30]` | Scripted session + sentinel log + bridge capture + HAR → pass/fail |
+| `lgx audit-egress [--minutes 30]` | Scripted session + sentinel log + host-side `tcpdump` on `br-lgx-back`, `br-lgx-front` and `br-lgx-edge` + HAR → pass/fail |
 | `lgx backup` / `lgx restore-backup <file>` / `lgx gc [--keep 1]` | §10.9 |
 | `lgx logs <svc>` / `lgx support-bundle` | Logs; redacted diagnostics |
+| `lgx dev-init` / `lgx dev-load <out/data-T>` | Connected dev host only. `dev-init` writes `deploy/.env` and 0600 secrets under `deploy/.dev`, and unpacks the models bundle and its Ollama store. `dev-load` restores a locally built dump into the dev `db` (GRANTs, read-only flag; no signature check) and links its gold sets for the Eval tab |
 
 ---
 
@@ -1367,7 +1389,7 @@ Targets: **RPO 24 h, RTO ≤ 2 h** on a spare host. The restore drill runs each 
 2. Pass conditions:
    - **0** DOCKER-USER DROP/LOG counters from our bridges;
    - **0** external names in the sentinel log (`compose.audit.yml`);
-   - **0** outbound SYN in `tcpdump` on `br-lgx-*`;
+   - **0** outbound SYN in a host-side `tcpdump` on `br-lgx-back`, `br-lgx-front` and `br-lgx-edge`;
    - from inside every container, `getent hosts huggingface.co` fails.
 3. **Headless-browser HAR** (Playwright/Chromium on the VM) for Streamlit (all tabs) and Open WebUI (login, chat): **0 requests** to any host other than the Caddy origin. Browser-side CDN calls bypass container firewalls, so this check is separate.
 
@@ -1375,7 +1397,7 @@ Targets: **RPO 24 h, RTO ≤ 2 h** on a spare host. The restore drill runs each 
 
 | When | What runs |
 |---|---|
-| CI, every commit | Unit tests, fixtures, schema apply on the `lgx-db` image, MCP contract tests (both protocol eras), compose lint, licence gate |
+| CI, every commit | Unit tests, fixtures, schema apply on the `lgx-db` image, MCP contract tests (both protocol eras, every search filter, health endpoints), compose lint, `caddy validate` per UI profile, Streamlit DNS-sentinel test (0 lookups), licence gate |
 | Nightly | G0, G1, G3, selection golden numbers, parity, invariants (sample mode in CI; full mode on the build host once the operator has run `--full`) |
 | Weekly bundle | All automatic gates + a 30-item lawyer sample of G4 when available |
 | Model or runtime change | G4/G5 bake-off per profile, recorded in `eval/model-selection-<date>.md` |
@@ -1387,8 +1409,10 @@ Targets: **RPO 24 h, RTO ≤ 2 h** on a spare host. The restore drill runs each 
 ```text
 LegiLux-Full-Local-MCP-Clone/
 ├── README.md                         # what/why; quick start (build zone, dev stack, airgap)
-├── Makefile                          # sample | full | bundle-* | test | eval | egress-test | har-test
+├── Makefile                          # build-init | dev-init | dev-up | dev-load | sample | full | embed | bundle-* |
+│                                     # test | eval | egress-test | har-test
 ├── pyproject.toml  uv.lock
+├── secrets/  out/  models/           # gitignored, connected side only: 0600 build secrets; build outputs and bundles; HF model dirs
 ├── docs/
 │   ├── PLAN.md                       # this plan
 │   ├── plan/                         # appendix-a-sparql-queries.md  appendix-b-schema.sql  appendix-c-docker-compose.yml
@@ -1403,7 +1427,7 @@ LegiLux-Full-Local-MCP-Clone/
 │   └── warnings.yaml                 # W_* texts FR/DE/EN (source of lgx.warning_def)
 ├── sparql/                           # q01_acts.rq … q18_impact.rq, q_manif.rq, checks/*.rq (Appendix A)
 ├── lgx_core/                         # shared by build, MCP, UI and eval: the single source of legal logic
-│   ├── rules/ (select.py, status.py, serving.py)   citeparse/   normalise/   warnings/
+│   ├── rules/ (select.py, status.py, serving.py)   citeparse/   normalise/   warnings/   textsize.py
 │   ├── verify/ (v1_exist.py … v8_language.py, selftest.py)
 │   └── embed/ (base.py, none.py, mistral_api.py, mistral_local.py, openai_compat.py, tei.py, parity.py, cache.py)
 ├── lgx_ingest/                       # build zone only
@@ -1423,7 +1447,9 @@ LegiLux-Full-Local-MCP-Clone/
 │   └── schema/ 00_extensions.sql 10_tsearch.sql 20_tables.sql 30_functions.sql 40_search.sql 90_postload.sql 95_roles.sql
 ├── eval/  gold/{G0..G5}/  harness/  oracles/  reports/
 ├── deploy/
-│   ├── compose.yml  compose.dev.yml  compose.build.yml  compose.audit.yml  compose.enclave.yml  .env.example
+│   ├── compose.yml  compose.dev.yml  compose.build.yml  compose.audit.yml  compose.enclave.yml  compose.gpu48.yml
+│   ├── .env.example                  # deploy/.env itself is written by lgx install / lgx dev-init (gitignored)
+│   ├── .dev/                         # gitignored dev runtime home (LGX_HOME=./.dev): secrets/ models/ bundles/
 │   ├── images.lock  models.lock  Caddyfile  Corefile  prometheus.yml
 │   ├── firewall/ (lgx-docker-user.rules, lgx-firewall.service)
 │   ├── ollama/ Modelfile.*      webui/ (provision.py, model-preset.json)
@@ -1446,13 +1472,13 @@ Assumptions:
 
 | M | Weeks / effort | Deliverables | Acceptance |
 |---|---|---|---|
-| **M0 Foundations** | wk 1, ≈ 4 pd | Repo skeleton; `images.lock`, `models.lock` (digests, HF revisions, file sha256); SCL letter sent; lawyer reviewer(s) named; offline reference VM. **Spikes:** (a) Ollama offline import of `gemma4:26b-a4b` and `ministral-3:8b` (store archive vs GGUF + Modelfile); (b) an `mcp==2.3.0` server reached by the mcp 2.3.0 `Client` **and** by an `mcp==1.27.2` client, plus the bearer hook; (c) TEI `cpu-1.9.4` loading the reranker from a local dir offline; (d) optional Mistral API probe on 10 texts (dim 1024, norm ≈ 1), only if a key exists; (e) pin `openai` and `streamlit` releases ≥ 14 days old | Spikes pass or their fallbacks are recorded; lock files committed |
-| **M1 Metadata, selection, sample, lexical MCP** | wk 2–4, ≈ 15 pd (+ 1 ld GDPR review) | Full SPARQL metadata pulls; robots + denylist + GDPR rule; selection with **golden numbers on the frozen snapshot**; `lgx ingest --sample`; AKN parser; schema v1 (nullable embedding, `embedding_model`, EXCLUDE); lexical FTS; the 5 MCP tools with date-computed status and core warnings; `cpu` Ollama profile; DOCKER-USER rule on the VM; data bundle from the sample; **sizing report from the sample** | Golden numbers exact (§11.5). Fixtures pass: a686 Art. 56 stub, AIFM 229 units, travail `art_l_121-1`, civil 2,301. G0 20/20 on the sample. `get_article("art. L. 121-1 C. trav.")` returns `…/code/travail/art_l_121-1` in `code/travail/20260726`. Egress 0. Installed from bundles |
-| **M1b Streamlit test UI** | wk 5, ≈ 5 pd | `ui/` per §9.3; `compose.dev.yml` (testui on); Direct-search, Chat and Corpus tabs; Eval tab with G0 | On the offline VM (`cpu`): direct search works with no LLM; chat answers show tool calls and sources; the hybrid toggle shows "vectors disabled: provider_none"; **HAR = 0**; MCP works with both protocol eras; the dev compose also works against a cloud endpoint via the opt-in profile |
-| **M2 Full text basis + lexical quality** | wk 6–9, ≈ 20 pd (+ ≈ 4 ld) | HTML parser + HTML-twin oracle; PDF codes (pages, then member-context segmentation); `recueil_members.yaml` v1 (lawyer); all labels, flags and amending lists; all relations; **reranker**; **pg_textsearch bake-off**; G1 and G3 v1, G2 v1 (150); `lgx ingest --full` documented and dry-run on the sample | Oracle thresholds met on the sample; CSS spot-check ≥ 98 %; **100 % mandatory warnings on G3**; lexical + rerank baseline recorded (it calibrates the gates); restore time measured; ranker decision recorded (OD7) |
-| **M3 Embedding stage (OFF by default)** | wk 10–11, ≈ 8 pd | Adapter providers; content-hash cache; probes + parity check; conditional HNSW; hybrid RRF; degradation tests; `mistral-api` run **on the sample only** (cents); `mistral-local` tested against a mock that replays recorded vectors (CI); options B/C documented | Parity failure → lexical fallback with reason (tests: wrong dim, wrong model id, cos < 0.999, endpoint down); hybrid vs lexical on G2 with sample vectors (report only); the default build still has 0 vectors |
+| **M0 Foundations** | wk 1, ≈ 4 pd | Repo skeleton; `images.lock`, `models.lock` (digests, HF revisions, file sha256); SCL letter sent; lawyer reviewer(s) named; offline reference VM. **Spikes:** (a) Ollama offline import of `gemma4:26b-a4b` and `ministral-3:8b` (store archive vs GGUF + Modelfile), and `gemma4:26b-a4b` vs `gemma4:26b-a4b-it-qat` on a G4 subset; (b) an `mcp==2.3.0` server reached by the mcp 2.3.0 `Client` **and** by an `mcp==1.27.2` client, plus the bearer hook; (c) TEI `cpu-1.9.4` loading the reranker from a local dir offline; (d) optional Mistral API probe on 10 texts (dim 1024, norm ≈ 1), only if a key exists; (e) confirm the pins `openai==3.24.0` and `streamlit==1.65.0` (the newest releases ≥ 14 days old on 2026-10-16) or bump them by the same rule | Spikes pass or their fallbacks are recorded; lock files committed |
+| **M1 Metadata, selection, sample, lexical MCP** | wk 2–4, ≈ 16 pd (+ 1 ld GDPR review) | Full SPARQL metadata pulls; robots + denylist + GDPR rule; selection with **golden numbers on the frozen snapshot**; `lgx ingest --sample`; AKN parser; schema v1 (nullable embedding, `embedding_model`, EXCLUDE); lexical FTS; the 5 MCP tools with date-computed status and core warnings, `/livez` + `/readyz`; `cpu` Ollama profile; dev bootstrap (`lgx dev-init`, `lgx dev-load`); **minimal `lgx install`** (SHA-256 check, `docker load` + image-ID check, secrets, DOCKER-USER rule, restore, `compose up`); data bundle from the sample; **sizing report from the sample** | Golden numbers exact (§11.5). Fixtures pass: a686 Art. 56 stub, AIFM 229 units, travail `art_l_121-1`, civil 2,301. G0 20/20 on the sample. `get_article("art. L. 121-1 C. trav.")` returns `…/code/travail/art_l_121-1` in `code/travail/20260726`. `/readyz` is 200 with `vector_status = disabled:provider_none`. Egress 0. Installed from bundles with the minimal `lgx install`; the dev stack starts with `make dev-init dev-up dev-load` |
+| **M1b Streamlit test UI** | wk 5, ≈ 6 pd | `ui/` per §9.3; `compose.dev.yml` (testui on); Direct-search, Chat and Corpus tabs; Eval tab with G0; Caddy + basic auth on `:8443`; Streamlit DNS-sentinel CI test; compose lint for the `cloudllm` profile | On the offline VM (`cpu`): direct search works with no LLM; chat answers show tool calls and sources; the hybrid toggle shows "vectors disabled: provider_none"; **HAR = 0** and **0 sentinel lookups from `lgx-streamlit`**; Streamlit reachable only through Caddy (`front` network); MCP works with both protocol eras; the default dev command does not start `lgx-streamlit-cloud`, and the dev compose works against a cloud endpoint via the opt-in profile |
+| **M2 Full text basis + lexical quality** | wk 6–9, ≈ 20 pd (+ ≈ 4 ld) | HTML parser + HTML-twin oracle; PDF codes (pages, then member-context segmentation); `recueil_members.yaml` v1 (lawyer); all labels, flags and amending lists; all relations; **reranker** (batches ≤ 32; 40-candidate integration test against the real TEI image); search-filter contract tests; **pg_textsearch bake-off**; G1 and G3 v1, G2 v1 (150); `lgx ingest --full` documented and dry-run on the sample | Oracle thresholds met on the sample; CSS spot-check ≥ 98 %; **100 % mandatory warnings on G3**; lexical + rerank baseline recorded (it calibrates the gates); restore time measured; ranker decision recorded (OD7) |
+| **M3 Embedding stage (OFF by default)** | wk 10–11, ≈ 8 pd | Adapter providers; content-hash cache; probes + parity check; conditional HNSW; hybrid RRF; degradation tests; `mistral-api` run **on the sample only** (cents); `mistral-local` tested against a mock that replays recorded vectors (CI); options B/C documented | Parity failure → lexical fallback with reason (tests: wrong dim, wrong model id, cos < 0.999, endpoint down, model swapped while running); hybrid vs lexical on G2 with sample vectors (report only); the default build still has 0 vectors |
 | **M4 Quality, sync, operations** | wk 12–14, ≈ 15 pd (+ ≈ 2 ld aliases) | Eval harness + gates; verifier library (Streamlit panel + eval) + self-test; nightly sync (§6.7) + weekly data bundle; rename-swap + rollback; XML recueil dedup; `aliases.yaml`; `change_log` + `RELEASE_NOTES.md`; G2 → 300, G4, G5 | 14 nightly runs without manual action (gates may legitimately stop a run); 2 weekly bundles applied on the VM in ≤ 30 min each; rollback ≤ 2 min; all §11.3 gates from M4 green |
-| **M5 Hardening + packaging** | wk 15–17, ≈ 15 pd | 3 bundle channels; Ed25519 + cosign; image-ID verification; sentinel + capture; SBOM + licence gate; Caddy TLS + Streamlit basic auth; **Open WebUI optional profile** + provisioning; `gpu24`/`gpu48` profiles (vLLM parsers verified or fallback chosen); `lgx` CLI; backup drill; runbooks; counsel review | Install ≤ 60 min on a no-network VM; tampered bundle refused; egress 0 / HAR 0; restore drill ≤ 2 h; no critical CVE without a waiver |
+| **M5 Hardening + packaging** | wk 15–17, ≈ 13 pd | 3 bundle channels; Ed25519 + cosign; image-ID verification on both image stores; sentinel + capture for the whole stack; SBOM + licence gate; Caddy TLS hardening; **Open WebUI optional profile** + provisioning; `gpu24`/`gpu48` profiles (vLLM parsers verified or fallback chosen; on gpu48 the TEI GPU tag and vLLM at `--gpu-memory-utilization 0.85` share one card, KV capacity recorded); full `lgx` CLI (doctor, upgrades, backup, audit); backup drill; runbooks; counsel review | Install ≤ 60 min on a no-network VM; tampered bundle refused; egress 0 / HAR 0; restore drill ≤ 2 h; no critical CVE without a waiver |
 | **M6 Optional backlog** | ≈ 10–25 pd per item | Full-scale Mistral embeddings once the on-prem endpoint passes parity (OD2/OD3); answer gateway (≈ 15 pd); point-in-time history (OD1); Tier 2 data; LibreChat; options B/C; `gpu80`; lawyer pilot (3–5 lawyers, 2 weeks) | Per item |
 
 **Totals to M5:** ≈ 82 person-days ≈ 16–17 weeks, plus ≈ 10–12 lawyer-days (GDPR list 1, recueil routing 2, G1–G3 validation 4, aliases 2, warning wording 1–2, plus spare).
@@ -1477,10 +1503,10 @@ Assumptions:
 | R10 | **Mistral on-prem unavailable or not identical** (version, quantisation) to `mistral-embed-2312` | M / M | Parity check → lexical fallback; calibrate the threshold on the real endpoint; options B/C documented (OD2) |
 | R11 | Mistral API terms, cost or rate limits; public text sent to a third party | L / M | Build side only, public CC BY text only; cost estimate + budget abort; limits configurable with backoff; terms reviewed (OD3) |
 | R12 | Build-side API key leak | L / M | Secret file / Docker secret; never in bundles, logs or `release.json`; secret scanning in CI; rotation |
-| R13 | Streamlit has no authentication | M / M | 127.0.0.1 in dev; Caddy basic auth on `:8443` or an admin network in the airgap; read-only; no DB credentials |
+| R13 | Streamlit has no authentication | M / M | 127.0.0.1 in dev; internal `front` network + Caddy basic auth on `:8443` in the airgap (from M1b); read-only; no DB credentials |
 | R14 | Cloud LLM in dev leaks questions | M / M | Opt-in `cloudllm` profile only; red banner; never in airgap bundles; DOCKER-USER blocks it there |
 | R15 | Browser-side CDN calls (Streamlit, Open WebUI) bypass container firewalls | M / M | HAR release gate; config.toml; no maps or fonts; Open WebUI assets served locally |
-| R16 | Hidden outbound call in a third-party image (incl. the operator's Mistral image) | M / H | Permanent DOCKER-USER rule + sentinel + capture; placement (i)/(ii); egress gate per platform bundle |
+| R16 | Hidden outbound call in a third-party image (incl. the operator's Mistral image) | M / H | Permanent DOCKER-USER rule + sentinel + capture; placement (i)/(ii); egress gate per platform bundle. Example found in review: Streamlit 1.65.0's startup `checkip.amazonaws.com` lookup, disabled by config and tested in CI |
 | R17 | `docker load` drops repository digests | M / M | Image-ID verification + local tags; `registry` profile fallback |
 | R18 | CPU-only latency (minutes per answer) | H / M | MoE model with 3.8B active parameters; ≤ 2.5k retrieved tokens; `rerank_k` 16; Open WebUI aux generations off; recommend `gpu24` |
 | R19 | Unverified runtime glue: Ollama store copy, OWUI persistence and header fields, mcp 2.x auth hook, Qwen3.8 parsers, CUDA 13 driver, Streamlit `StaticConnection`, TEI `/v1/embeddings` path | M / L–M | M0/M5 spikes, each with a named fallback (§5–§10) |

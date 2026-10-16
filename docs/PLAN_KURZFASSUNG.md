@@ -1,7 +1,8 @@
 # LegiLux Local MCP Clone – Kurzfassung des Plans
 
 > Stand 16.10.2026. Der ausführliche Plan steht in [`PLAN.md`](PLAN.md), die Anhänge in [`plan/`](plan/).
-> Status: **Entwurf.** Die Gegenprüfung (Fakten, Airgap, Umsetzbarkeit) läuft noch, Korrekturen folgen.
+> Status: **geprüft.** Zwei Gegenprüfungen (Fakten; Anforderungen, Airgap und Umsetzbarkeit) mit 22 Befunden
+> (9 schwer, 13 leicht) sind eingearbeitet. Die DB-Größe ist neu geschätzt: ohne Vektoren ca. 0,9–1,3 GB.
 
 ## Was gebaut wird
 
@@ -33,7 +34,7 @@ aus Legilux. Sie läuft in einer **Airgap-Umgebung**, also ohne Internet. Ein lo
 - **Gar nicht:** Mémorial B (per robots.txt gesperrt), Gemeinderecht, Gesetzesentwürfe,
   Einbürgerungsgesetze (personenbezogene Daten) sowie Scans, wenn XML oder HTML vorhanden ist.
 - **Größe:** ca. 24.000 Texte, ca. 300 MB Text, ca. 400.000 Abschnitte. Die Datenbank hat ohne Vektoren
-  ca. 0,7–0,9 GB, mit Mistral-Vektoren ca. 2,3–3 GB.
+  ca. 0,9–1,3 GB, mit Mistral-Vektoren ca. 2,5–3,1 GB.
 
 ## Wichtigste Entscheidungen
 

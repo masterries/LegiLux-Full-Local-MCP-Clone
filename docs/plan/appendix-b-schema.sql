@@ -8,7 +8,8 @@
 --         when the embedding stage runs; with provider=none the column stays NULL.
 -- Status: applied cleanly on pgvector/pgvector:0.8.7-pg18-trixie on 2026-10-16, incl. a fixture load,
 --         the EXCLUDE constraint, the conditional HNSW index and a pg_dump -Fc -Z zstd:9 / pg_restore
---         round trip (PLAN.md Appendix E, check P4).
+--         round trip (PLAN.md Appendix E, check P4). Re-applied after the review revision (search filters,
+--         text_md rule) with one test per filter parameter (check P11).
 -- Sections: B.1 extensions/schemas · B.2 text search · B.3 enums · B.4 release + embedding metadata
 --           B.5 reference texts · B.6 acts · B.7 versions · B.8 units/aliases · B.9 relations/recueils
 --           B.10 chunks · B.11 change log + data quality · B.12 build-only schema · B.13 functions
@@ -49,7 +50,7 @@ CREATE FUNCTION lgx.f_unaccent(text) RETURNS text
   RETURN public.unaccent('public.unaccent'::regdictionary, $1);
 
 -- ----------------------------------------------------------------------------------------------- B.3
--- Mutually exclusive serving labels (PLAN.md §2.3). Future versions are a ROLE, not a label.
+-- Mutually exclusive serving labels (PLAN.md §2.4). Future versions are a ROLE, not a label.
 CREATE TYPE lgx.text_basis AS ENUM
   ('consolidated', 'stub_fallback', 'original_never_amended', 'original_possibly_outdated', 'metadata_only');
 CREATE TYPE lgx.version_kind AS ENUM ('original', 'consolidated', 'code', 'code_recueil', 'recueil');
@@ -115,7 +116,7 @@ CREATE TABLE lgx.legal_text (                   -- attribution, disclaimer, CC B
   body text NOT NULL,
   PRIMARY KEY (code, lang)
 );
-CREATE TABLE lgx.warning_def (                  -- catalogue in PLAN.md §8.6 / Appendix D
+CREATE TABLE lgx.warning_def (                  -- catalogue in PLAN.md §8.5 / Appendix D
   code     text PRIMARY KEY,
   severity text NOT NULL CHECK (severity IN ('info', 'medium', 'high')),
   text_fr  text NOT NULL, text_de text NOT NULL, text_en text NOT NULL
@@ -235,7 +236,8 @@ CREATE TABLE lgx.unit (                          -- structural tree of stored te
   ordinal          int NOT NULL,
   depth            smallint NOT NULL,
   text_plain       text,                        -- verbatim basis for quotes; no <del> content
-  text_md          text,                        -- tables as Markdown
+  text_md          text,                        -- ONLY for units with tables/lists (Markdown); NULL otherwise, renderers
+                                                -- fall back to text_plain (minimisation: no second copy of plain text)
   text_sha256      bytea,
   is_repealed      boolean NOT NULL DEFAULT false,  -- style="del" / 'Abrogé(s) (…)' -> stub, never chunked
   repeal_note      text,
@@ -245,7 +247,8 @@ CREATE TABLE lgx.unit (                          -- structural tree of stored te
   index_terms      text[] NOT NULL DEFAULT '{}',
   page_from        int, page_to int,            -- PDF-derived units
   from_recueil_wid text,                        -- normalised wId when kept from an XML recueil
-  UNIQUE (version_id, ordinal)
+  UNIQUE (version_id, ordinal),
+  CHECK (text_md IS NULL OR text_md <> text_plain)
 );
 CREATE INDEX unit_article ON lgx.unit (act_id, num_norm) WHERE unit_type = 'article';
 CREATE INDEX unit_member  ON lgx.unit (member_act_id, num_norm) WHERE member_act_id IS NOT NULL;
@@ -297,7 +300,9 @@ CREATE TABLE lgx.chunk (
   part_no          smallint NOT NULL DEFAULT 1,
   part_count       smallint NOT NULL DEFAULT 1,
   header           text NOT NULL,               -- '{titre court} — {version} > Livre … > Art. X.' + index terms
-  body             text NOT NULL,
+  body             text NOT NULL,               -- unit text (or one part of it). Deliberate 2nd copy: the generated
+                                                -- tsv columns must read in-row text; they are not dumped and are
+                                                -- rebuilt at restore, so the dump carries no tsvectors (PLAN §4.3)
   n_tokens         int,
   doc_type         text NOT NULL,
   text_basis       lgx.text_basis NOT NULL,     -- label at T (display hint; runtime recomputes)
@@ -430,12 +435,16 @@ CREATE FUNCTION lgx.or_query(q text) RETURNS tsquery
   RETURN (SELECT NULLIF(string_agg(quote_literal(l), ' | '), '')::tsquery
             FROM unnest(tsvector_to_array(to_tsvector('lgx.fr_legal'::regconfig, q))) AS l);
 
--- Candidate generation + RRF fusion in one statement (PLAN.md §8.4). p_qvec NULL => lexical-only
+-- Candidate generation + RRF fusion in one statement (PLAN.md §8.3). p_qvec NULL => lexical-only
 -- (the default mode until vectors exist and the parity check passes). The reranker runs afterwards in
--- the MCP server on the returned candidates.
+-- the MCP server on the returned candidates. Tool filters map 1:1 (Appendix D, D.2.1) and apply to EVERY branch:
+--   filters.doc_types -> p_doc_types; filters.act_eli -> p_act_ids (resolved by the server);
+--   filters.in_force_only = false -> p_include_future = true (also stored future versions and not-yet-in-force
+--   acts, i.e. chunks with valid_from > as_of; text whose window ended before as_of is never returned).
 CREATE FUNCTION lgx.search_candidates(
     p_query text, p_qvec halfvec, p_as_of date, p_cited_units bigint[], p_exact tsquery,
-    p_doc_types text[], p_limit int DEFAULT 40)
+    p_doc_types text[], p_limit int DEFAULT 40,
+    p_act_ids bigint[] DEFAULT NULL, p_include_future boolean DEFAULT false)
   RETURNS TABLE (chunk_id bigint, score double precision, lex_rank bigint, dense_rank bigint, exact_hit boolean,
                  cited_hit boolean)
   LANGUAGE sql STABLE
@@ -448,27 +457,33 @@ CREATE FUNCTION lgx.search_candidates(
       SELECT c.chunk_id, ts_rank_cd(c.tsv, q.tsq, 32) AS s
         FROM lgx.chunk c, q
        WHERE q.tsq IS NOT NULL AND c.searchable AND c.tsv @@ q.tsq
-         AND c.valid_from <= p_as_of AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
+         AND (c.valid_from <= p_as_of OR p_include_future) AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
          AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
+         AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
        ORDER BY s DESC LIMIT 50) x),
   dense AS (
     SELECT y.chunk_id, row_number() OVER (ORDER BY y.dist) AS r FROM (
       SELECT c.chunk_id, c.embedding <=> p_qvec AS dist
         FROM lgx.chunk c
        WHERE p_qvec IS NOT NULL AND c.searchable AND c.embedding IS NOT NULL
-         AND c.valid_from <= p_as_of AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
+         AND (c.valid_from <= p_as_of OR p_include_future) AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
          AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
+         AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
        ORDER BY c.embedding <=> p_qvec LIMIT 50) y),
   exact AS (
     SELECT c.chunk_id, row_number() OVER (ORDER BY c.chunk_id) AS r
       FROM lgx.chunk c
      WHERE p_exact IS NOT NULL AND c.searchable AND c.tsv_exact @@ p_exact
-       AND c.valid_from <= p_as_of AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
+       AND (c.valid_from <= p_as_of OR p_include_future) AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
+       AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
+       AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
      LIMIT 20),
   cited AS (
     SELECT c.chunk_id, 1::bigint AS r FROM lgx.chunk c
      WHERE c.unit_id = ANY (p_cited_units)
-       AND c.valid_from <= p_as_of AND (c.valid_to IS NULL OR c.valid_to > p_as_of)),
+       AND (c.valid_from <= p_as_of OR p_include_future) AND (c.valid_to IS NULL OR c.valid_to > p_as_of)
+       AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
+       AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))),
   fused AS (
     SELECT u.chunk_id, sum(u.w / (60.0 + u.r)) AS s,
            min(u.r) FILTER (WHERE u.src = 'lex') AS lex_rank, min(u.r) FILTER (WHERE u.src = 'dense') AS dense_rank,

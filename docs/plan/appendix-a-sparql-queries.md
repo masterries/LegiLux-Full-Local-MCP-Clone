@@ -7,7 +7,7 @@ This appendix belongs to [PLAN.md](../PLAN.md) (§2.2, §6.7). Every query below
 - **[V-adapted]** — the tested text with a trivial change (a projection or an `ORDER BY` removed). These are re-run in M1 and their row counts recorded before the pipeline relies on them.
 
 **Source files**
-- Tested query files: `research/sparql-jolux-model/catalog/C01–C16`, `research/gaps-and-reconciliation/q/*`, `research/scope-sizing/*.rq`, and the plan checks `plan/verify/q_manif.rq` and `plan/verify/w/*.rq`.
+- Tested query files: `research/sparql-jolux-model/catalog/C01–C16`, `research/gaps-and-reconciliation/q/*`, `research/scope-sizing/*.rq`, and the plan checks `plan/verify/q_manif.rq` and `plan/verify/w/*.rq` (Q15 as printed: `plan/verify/w/q15_const.rq`).
 - In the repository the pipeline queries live in `sparql/` (Q01–Q18 and Q-MANIF) and `sparql/checks/` (probes and golden reproductions).
 
 ## A.0 Conventions (all queries)
@@ -16,7 +16,7 @@ This appendix belongs to [PLAN.md](../PLAN.md) (§2.2, §6.7). Every query below
 - `POST` to `https://data.legilux.public.lu/sparqlendpoint`, `application/x-www-form-urlencoded`, field `query`.
 - `Accept: text/csv` for SELECT, `application/n-triples` for CONSTRUCT.
 - User-Agent `LegiLux-Local-Clone/<version> (+mailto:<operator contact>; <=1 req/s)`.
-- Sequential requests, ≥ 1.2 s apart.
+- Sequential requests, ≥ 1.2 s apart, ≤ 2,000 requests per hour across both hosts (PLAN §3.3).
 
 **Query shape**
 - **Flat and unsorted.** The store is a union default graph, so rows repeat; always use `DISTINCT`. Join on the client: server-side joins with GROUP BY and EXISTS hit the ≈ 45 s gateway timeout [V].
@@ -69,7 +69,7 @@ PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 | Q12 | `q12_boundary_sweep.rq` | plan check P1 | Acts (dei, dnl) and consolidations (dA, dEnd) crossing [last_run, T + 60 d] | 261 rows (40 in leg), 22,452 B, 0.76 s for 2026-10-09..12-15 [V] | N |
 | Q13 | `q13_new_relations.rq` | SJ `C14` | Relations of acts published since W (monitor) | modifies 43 → 42 targets; repeals 143 → 144; basedOn 328 → 154; cites 45 → 206; rectifies 2 → 2; transposes 2 → 2 [V] | N |
 | Q14 | `checks/q14_stubs.rq` | SJ `C06` | Consolidations without expressions (stub gate) | 113 rows, 0.55 s [V] | N |
-| Q15 | `checks/q15_codes.rq` | SJ `C13` | Applicable codes, code-recueils and recueils with titles (CODE/Constitution gate) | 52 rows, 0.7 s [V] | N |
+| Q15 | `checks/q15_codes.rq` | SJ `C13` + Constitution type (P9) | Applicable codes, code-recueils, recueils and the Constitution with titles (CODE/Constitution gate) | **53 rows** (RECUEIL 37, CODE_RECUEIL 8, CODE 7, Constitution 1), 0.63 s [V] | N |
 | Q16 | `q16_construct_graphs.construct.rq` | SJ `C15` | Full refresh of the graphs of specific works | 2 graphs → 149 triples [V] | D |
 | Q17 | `checks/q17_completeness.rq` | GR `q/classes_distinct.rq` | Completeness of the unsorted pulls | Act 151,250 / 151,250; Consolidation 4,719 / 4,719 [V] | with every Q01/Q02 pull |
 | Q18 | `checks/q18_impact.rq` | GR `q/i3.rq` | `LegalResourceImpact` (hint only; partial coverage) | 379 "modifie", 5 "rectifie" [V] | W (report) |
@@ -286,16 +286,19 @@ SELECT DISTINCT ?stub ?cw ?d ?flag WHERE {
 ```
 **Gate:** stubs may not grow by more than 20 in one run.
 
-### Q15 — applicable codes and recueils (SJ `C13`) [V]
+### Q15 — applicable codes, recueils and the Constitution (SJ `C13` + Constitution type, plan check P9) [V]
 ```sparql
 SELECT DISTINCT ?c ?type ?d ?title WHERE {
   ?c a jolux:Consolidation ; jolux:inForceStatus <http://data.legilux.public.lu/resource/authority/application-status/applicable> ;
      jolux:typeDocument ?type ; jolux:dateApplicability ?d .
   FILTER(?type IN (<http://data.legilux.public.lu/resource/authority/resource-type/RECUEIL>,
                    <http://data.legilux.public.lu/resource/authority/resource-type/CODE_RECUEIL>,
-                   <http://data.legilux.public.lu/resource/authority/resource-type/CODE>))
+                   <http://data.legilux.public.lu/resource/authority/resource-type/CODE>,
+                   <http://data.legilux.public.lu/resource/authority/resource-type/Constitution>))
   OPTIONAL { ?c jolux:isRealizedBy/jolux:title ?title } } ORDER BY ?type ?c
 ```
+**Result:** 53 rows in 0.63 s, including `…/constitution/1868/10/17/n1/consolide/20260829` [V P9]. The tested C13 text lacked the Constitution type (`resource-type/Constitution`) and returned 52 rows, so it could not drive the Constitution half of the gate.
+
 Fewer than 100 rows, so the sort is safe. This query relies on the flag, but only as a **cross-check**: every CODE and the Constitution must have stored text, or the gate fails.
 
 ### Q16 — CONSTRUCT of selected graphs (SJ `C15`) [V]

@@ -18,6 +18,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
 - Every result carries `structuredContent`, valid against the tool's `outputSchema`.
 - Every result also carries one **TextContent** block: a compact French rendering of the same content. Legal text in it is wrapped in `<<<TEXTE … >>>` and labelled as data.
 - Size caps: ≈ 4k tokens per result (≈ 2.5k on the `cpu` profile). Long articles paginate with `cursor`.
+- Token counts at runtime are the tokenizer-free estimate `ceil(chars / 3.5)` from `lgx_core.textsize` [E]. No tokenizer library (tiktoken, transformers, tokenizers) is a dependency of `lgx-mcp` or `lgx-streamlit`, because such libraries download vocabulary files on first use.
 
 **`as_of` (`YYYY-MM-DD`)**
 - **Default:** the host date in Europe/Luxembourg, after the clock check.
@@ -34,7 +35,13 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
   - `OUT_OF_SCOPE` (EU text, case law, communal, Mémorial B);
   - `BAD_INPUT`;
   - `AS_OF_OUT_OF_RANGE`;
-  - `BACKEND_UNAVAILABLE` (database or reranker down; a vector failure never raises this, see `retrieval`).
+  - `BACKEND_UNAVAILABLE`: the database is down, or the reranker is down while `LGX_RERANK=on`. With the default `LGX_RERANK=auto`, an unavailable reranker gives unreranked lexical results with `retrieval.reranked = false` and a reason. A vector failure never raises this error (see `retrieval`).
+
+**Health endpoints** (custom HTTP routes outside the MCP transport; no corpus data)
+- `GET /livez` returns 200 while the process runs.
+- `GET /readyz` returns 200 **if and only if** the database is reachable and its `schema_version` is supported. Otherwise it returns 503.
+- Degraded states never make `/readyz` non-200. They are reported in its JSON body: `{"schema_ok", "vector_status", "reranker_ok", "clock_ok", "canned_query_ok", "release_id"}`. The UIs therefore start in lexical mode and show the reason in the Direct-search and Corpus tabs.
+- Both routes are exempt from bearer authentication and from the Host/Origin allowlist, which protect `/mcp` only. They are reachable only on the internal networks.
 
 **Other surfaces**
 - **Resources:** `legilux://eli/{+path}` (an act or version card as JSON), `legilux://eli/{+path}/art/{n}` (one article) and `legilux://legal/{attribution|disclaimer|cc-by-4.0}` (legal texts from `lgx.legal_text`). `https://legilux.public.lu/eli/…` appears only as display text, because it cannot be fetched offline.
@@ -81,7 +88,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
 // Retrieval block — search_legislation only
 { "mode_requested": "auto|lexical|hybrid", "mode_used": "lexical|hybrid",
   "vector_status": "ok | disabled:provider_none | disabled:parity_failed | disabled:endpoint_unreachable | disabled:dim_mismatch | disabled:model_mismatch",
-  "reason": "string|null", "reranked": true, "rerank_k": 40,
+  "reason": "string|null", "reranked": true, "rerank_status": "ok | unavailable | off", "rerank_k": 40,
   "embedding_model": { "provider": "mistral-local", "model_id": "mistral-embed-2312", "model_version": "v23.12", "dim": 1024 } | null }
 ```
 
@@ -121,6 +128,12 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
   }
 }
 ```
+
+**Filter semantics** (implemented by `lgx.search_candidates`, Appendix B §B.14; every filter applies to every candidate branch: lexical, exact, cited and dense)
+- `doc_types` → `p_doc_types`.
+- `act_eli` → `p_act_ids` (the server resolves the ELI to the act id; an unknown ELI returns `NOT_FOUND`).
+- `in_force_only = false` → `p_include_future = true`: stored future versions and not-yet-in-force acts are added, each with `W_FUTURE_VERSION` / `W_NOT_YET_IN_FORCE`. Text whose window ended before `as_of` is never returned.
+- In Streamlit chat, the sidebar values override the model's `filters.in_force_only`, `filters.doc_types`, `retrieval_mode` and `as_of`, and cap `top_k` (PLAN §9.3, tool loop step 4).
 
 **outputSchema (sketch):** Envelope + `{"hits": [{"rank": int, "score": number, "citation": Citation, "snippet": string(≤600), "breadcrumb": string}], "retrieval": Retrieval, "query_interpretation": {"citations_detected": [...], "exact_tokens": [...]}}`.
 
@@ -281,6 +294,9 @@ The server requires either `citation`, or `act_eli` + `article`. Otherwise it re
 - Every tool is called through **both** client eras: `mcp==2.3.0` `Client` (modern) and `mcp==1.27.2` `ClientSession` (handshake, as used by Open WebUI 0.12.3). The results must validate against the output schemas.
 - Every tool runs in lexical mode, and in hybrid mode with mock vectors. A parity failure must return `mode_used = lexical` with a reason, and never an error.
 - The Streamlit bridge converts each `inputSchema` into an OpenAI `function.parameters`. The JSON Schema check must pass, and there must be no top-level combinators.
+- One test per `search_legislation` filter (`doc_types` across the exact branch, `act_eli`, `in_force_only = false`), mirroring check P11 on the SQL function.
+- `/livez` and `/readyz` answer without a bearer token and with any Host header; `/readyz` stays 200 when parity fails, the embedder is down, the reranker is down or the clock is suspect, and returns 503 when the database is down or the schema is unsupported.
+- Reranking: 40 candidates against the real TEI `cpu-1.9.4` image (integration test, from M2). The client splits requests into batches of ≤ 32, and the compose command raises TEI's `--max-client-batch-size` (default 32) to 64.
 
 ## D.4 Warning catalogue (`config/warnings.yaml` → `lgx.warning_def`; French is canonical; lawyer-reviewed in M2)
 
