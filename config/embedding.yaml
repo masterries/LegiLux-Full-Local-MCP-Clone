@@ -1,0 +1,22 @@
+# Embedding stage (PLAN §6.5) — pluggable and OFF by default (user decision).
+# provider: none means: no vectors are computed or stored, vector_status = disabled:provider_none,
+# retrieval runs lexical. Secrets (API keys) never live in this file.
+provider: none                   # none | mistral-api | mistral-local | openai-compatible | tei
+
+# Default design once enabled (option A, M3): Mistral Embed via the API on the build side and the
+# user's on-prem Mistral endpoint (LGX_EMBED_URL + LGX_EMBED_MODEL) in the airgap, guarded by the
+# golden-vector parity check. Values below are only read when provider != none.
+model_id: mistral-embed-2312     # pinned id, never the alias
+model_version: v23.12
+model_aliases: [mistral-embed]   # ids an endpoint may report for the same model
+dim: 1024                        # becomes halfvec(1024) for the release (psql -v embed_dim)
+normalized: true
+batch_size: 64                   # [U] verify in M3
+max_tokens_per_request: 16000    # [U] verify in M3
+max_input_tokens: 8000
+rate_limit_rps: 1
+retry: {on_status: [429, 500, 502, 503, 504], backoff_s: [2, 4, 8, 16, 32], honour_retry_after: true}   # PLAN §6.5 writes `on:`, which YAML 1.1 reads as boolean true
+parity_threshold: 0.999
+cost_budget_usd: 25              # the run aborts before exceeding it
+# base_url: https://api.mistral.ai           # [U] verify in M3 (mistral-api)
+# api_key_file: /run/secrets/mistral_api_key # build side only; never in bundles, logs or release.json

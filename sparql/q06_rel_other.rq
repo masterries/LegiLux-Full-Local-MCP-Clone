@@ -1,0 +1,5 @@
+# Q06 — basedOn / cites / rectifies / transposes edges (plan check P2) [V]: 169,243 rows, 33 MB, 3.64 s.
+# Cadence: weekly. Out-of-scope sources are dropped client-side; EU targets kept as ELI strings.
+SELECT DISTINCT ?src ?rel ?tgt WHERE {
+  VALUES ?rel { jolux:basedOn jolux:cites jolux:rectifies jolux:transposes }
+  ?src a jolux:Act ; ?rel ?tgt . }

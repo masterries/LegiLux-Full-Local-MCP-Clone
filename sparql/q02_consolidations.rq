@@ -1,0 +1,6 @@
+# Q02 — consolidation versions (GR c1) [V]: 4,719 rows, 1.6 MB, ~1.3 s. Cadence: nightly.
+# Drives the window rule dA <= T < dEnd. Never parse dates from URIs.
+SELECT DISTINCT ?c ?cw ?d ?end ?st ?type ?created ?pub WHERE {
+ ?c a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?d .
+ OPTIONAL { ?c jolux:dateEndApplicability ?end } OPTIONAL { ?c jolux:inForceStatus ?st }
+ OPTIONAL { ?c jolux:typeDocument ?type } OPTIONAL { ?c dct:created ?created } OPTIONAL { ?c jolux:publicationDate ?pub } }

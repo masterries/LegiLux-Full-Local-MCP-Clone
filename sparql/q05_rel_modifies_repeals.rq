@@ -1,0 +1,5 @@
+# Q05 — modifies / repeals edges (GR m2) [V]: 47,428 rows, 9.9 MB. Cadence: weekly.
+# Targets are /jo act URIs. Edges may be incomplete (cross-checked against AKN refs, PLAN R4).
+SELECT DISTINCT ?src ?rel ?tgt ?dei WHERE {
+ VALUES ?rel { jolux:modifies jolux:repeals }
+ ?src ?rel ?tgt . OPTIONAL { ?src jolux:dateEntryInForce ?dei } }

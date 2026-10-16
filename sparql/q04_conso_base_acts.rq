@@ -1,0 +1,5 @@
+# Q04 — base acts of consolidated works (GR c3) [V]: 1,370 rows. Cadence: nightly.
+# RECUEIL and CODE_RECUEIL works may have no base act.
+SELECT DISTINCT ?cw ?act ?ast ?atype ?dnl WHERE {
+ ?c a jolux:Consolidation ; jolux:isMemberOf ?cw . ?act a jolux:Act ; jolux:isMemberOf ?cw .
+ OPTIONAL { ?act jolux:inForceStatus ?ast } OPTIONAL { ?act jolux:typeDocument ?atype } OPTIONAL { ?act jolux:dateNoLongerInForce ?dnl } }

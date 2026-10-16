@@ -1,0 +1,2 @@
+# A.5 probe — expected 20,000 rows (1,328,868 B): unsorted results are not capped.
+SELECT ?a WHERE { ?a a jolux:Act } LIMIT 20000

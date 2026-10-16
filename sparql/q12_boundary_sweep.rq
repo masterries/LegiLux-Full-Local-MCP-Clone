@@ -1,0 +1,8 @@
+# Q12 — date-boundary sweep, acts and consolidations (plan check P1) [V]. Nightly.
+# FROM = last_run, TO = T + 60 days. adm rows are dropped client-side.
+SELECT DISTINCT ?x ?kind ?d WHERE {
+  { ?x a jolux:Act ; jolux:dateNoLongerInForce ?d . BIND("dnl" AS ?kind) } UNION
+  { ?x a jolux:Act ; jolux:dateEntryInForce ?d . BIND("dei" AS ?kind) } UNION
+  { ?x a jolux:Consolidation ; jolux:dateApplicability ?d . BIND("da" AS ?kind) } UNION
+  { ?x a jolux:Consolidation ; jolux:dateEndApplicability ?d . BIND("dea" AS ?kind) }
+  FILTER(?d >= "{{FROM}}"^^xsd:date && ?d <= "{{TO}}"^^xsd:date) }

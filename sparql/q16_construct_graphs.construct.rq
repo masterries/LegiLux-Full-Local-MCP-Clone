@@ -1,0 +1,5 @@
+# Q16 — CONSTRUCT of selected named graphs (SJ C15) [V]. On demand. DESCRIBE is broken (SP031).
+# GRAPHS = graph IRIs (<work-or-version>/graph), <= 500 per POST. Accept: application/n-triples.
+CONSTRUCT { ?s ?p ?o } WHERE { VALUES ?g {
+    {{GRAPHS}} }
+  GRAPH ?g { ?s ?p ?o } }

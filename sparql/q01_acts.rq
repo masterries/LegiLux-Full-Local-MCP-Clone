@@ -1,0 +1,5 @@
+# Q01 — act table (GR a1) [V]: 151,253 rows / 151,250 distinct acts, 46 MB, 5.18 s. Cadence: weekly.
+# dateEntryInForce may repeat: keep dei_min, dei_count, flag entry_dates_multiple. ?st is kept raw.
+SELECT DISTINCT ?a ?cw ?type ?st ?dei ?dnl ?pub WHERE {
+ ?a a jolux:Act ; jolux:isMemberOf ?cw ; jolux:typeDocument ?type ; jolux:inForceStatus ?st .
+ OPTIONAL { ?a jolux:dateEntryInForce ?dei } OPTIONAL { ?a jolux:dateNoLongerInForce ?dnl } OPTIONAL { ?a jolux:publicationDate ?pub } }

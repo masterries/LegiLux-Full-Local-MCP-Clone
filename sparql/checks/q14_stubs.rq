@@ -1,0 +1,5 @@
+# Q14 — consolidations without expressions (SJ C06) [V]: 113 rows. Nightly gate: +20 in one run fails.
+SELECT DISTINCT ?stub ?cw ?d ?flag WHERE {
+  ?stub a jolux:Consolidation ; jolux:isMemberOf ?cw ; jolux:dateApplicability ?d .
+  OPTIONAL { ?stub jolux:inForceStatus ?flag }
+  FILTER NOT EXISTS { ?stub jolux:isRealizedBy ?e } }

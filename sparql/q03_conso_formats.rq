@@ -1,0 +1,5 @@
+# Q03 — consolidation formats, licence, language (GR c2) [V]: 13,679 rows, 3.5 MB. Cadence: nightly.
+# A consolidation with no row here is a stub (no files).
+SELECT DISTINCT ?c ?uf ?lic ?lang WHERE {
+ ?c a jolux:Consolidation ; jolux:isRealizedBy ?e . OPTIONAL { ?e jolux:language ?lang }
+ OPTIONAL { ?e jolux:isEmbodiedBy ?m . ?m jolux:userFormat ?uf . OPTIONAL { ?m jolux:license ?lic } } }

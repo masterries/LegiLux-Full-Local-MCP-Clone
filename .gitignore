@@ -1,0 +1,36 @@
+# --- build-side data: never committed, never shipped (PLAN §4.3) ---
+/data/
+/out/
+/cache/
+*.parquet
+*.dump
+*.zst
+!tests/fixtures/**/*.parquet
+!tests/golden/**/*.parquet
+!tests/golden/**/*.zst
+
+# --- secrets / local overrides ---
+.env
+.env.*
+!.env.example
+secrets/
+config/denylist_gdpr.yaml
+
+# --- Python / tooling ---
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- editors / OS ---
+.idea/
+.vscode/
+*.swp
+.DS_Store

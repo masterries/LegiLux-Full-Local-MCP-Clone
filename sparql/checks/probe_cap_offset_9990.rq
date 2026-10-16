@@ -1,0 +1,2 @@
+# A.5 probe — expected HTTP 200 (OFFSET + LIMIT <= 10,000).
+SELECT ?s WHERE { ?s a jolux:Act } ORDER BY ?s LIMIT 10 OFFSET 9990

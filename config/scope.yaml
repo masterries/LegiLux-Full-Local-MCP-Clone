@@ -1,0 +1,65 @@
+# Scope of the local clone (PLAN §2.9). Hashed into release.json (inputs_digest).
+# Loaded by lgx_core.config.ScopeConfig; `uv run lgx config-check` validates it.
+version: 1
+
+# T = sync date. `auto` = the build day in Europe/Luxembourg; a fixed date for reproducible rebuilds.
+sync_date: auto
+timezone: Europe/Luxembourg
+
+branches: [etat/leg]               # etat/adm never (robots-disallowed Mémorial B)
+metadata_scope: memorial_a_core    # memorial_a_core (no RC, no naturalisations, no denylist) | memorial_a_all
+
+# Text for these 18 normative types (PLAN D2); everything else in scope is metadata only.
+text_types: [Constitution, LOI, RGD, AGD, RMIN, AMIN, RGC, RILR, RCSF, RBCL, ST, ACC, AGC, DGC, RI, AGDR, CONV, PROT]
+consolidation_types: [CODE, CODE_RECUEIL, RECUEIL, '*']
+
+exclusions:                        # these acts get NO row at all (§2.2 step 0, §3.6)
+  branches: [etat/adm]
+  doc_types: [RC]                  # communal regulations (21,656 acts)
+  naturalisation:                  # individual naturalisation laws; lawyer-reviewed list in denylist_gdpr.yaml
+    doc_types: [LOI]
+    title_regex: '(?i)(confér|confer|accord)\w*\s+la\s+naturalisation'
+  note: >-
+    General nationality laws stay in. Titles containing "naturalisation" without the conférant/accordant
+    wording (460 in force, e.g. "qui accorde la naturalisation au sieur …") go to lawyer review, not to
+    automatic exclusion.
+
+temporary_traffic:                 # 663 in-force RGDs without dnl -> metadata_only + flag acte_temporaire
+  doc_types: [RGD]
+  title_regex: '(?i)r[ée]glementation\s+temporaire\s+de\s+la\s+circulation'
+  requires_no_dnl: true
+
+future_versions: next_one          # none | next_one | all (34 future versions over 18 works at T0)
+include_temporary_traffic: false
+include_env_annexes_text: false    # code/environnement_annexes, 239.9 MB PDF
+amending_acts_text: keep           # keep (modifying articles unindexed) | metadata_only
+licence_policy: cc_by_only         # allow_licence_scl only after written SCL confirmation (OD5)
+stub_fallback_max_age_years: 5     # older fallback -> "ne pas s'y fier pour la rédaction actuelle"
+discontinued_policy: original      # original | last_consolidation (OD12)
+pdf_codes: articles                # pages (first cut, M2) | articles (member-context segmentation)
+recueil_dedup: true
+horizon_days: 365                  # H = T + 365: no status projection beyond
+old_act_before_year: 1900          # flag old_act
+
+history:                           # point-in-time ("Stichtag") support, OD1 — OFF
+  mode: none                       # none | full_text_last_n | since_date
+  keep_versions: 0
+  since: null
+  restrict_to: [CODE, Constitution]
+  embed: false
+
+denylist_files: [config/denylist.yaml, config/denylist_gdpr.yaml]   # the GDPR list is never committed
+recueil_members_file: config/recueil_members.yaml
+
+fetch:                             # politeness (PLAN §3.3); LGX_RATE_LIMIT_S may only make it slower
+  min_spacing_s: 1.2               # one connection, <= 1 request/s across both hosts
+  max_retries: 5
+  backoff_s: [1, 2, 4, 8, 16, 32, 60]
+  retry_on: [429, 500, 502, 503, 504]   # Retry-After honoured
+  circuit_breaker_consecutive_errors: 20
+  circuit_breaker_403_per_minute: 5
+  max_file_bytes: 67108864         # 64 MB; larger files only via the allowlist
+  large_file_allowlist: []         # e.g. etat/leg/code/environnement_annexes/... when include_env_annexes_text
+  max_requests_per_hour: 2000
+  max_requests_per_day: 30000
+  nightly_window: "01:00-05:00 Europe/Luxembourg"

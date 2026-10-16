@@ -1,0 +1,9 @@
+# Template for config/denylist_gdpr.yaml (gitignored, never shipped, never committed).
+# Produced once by lawyer review of the naturalisation rule matches (PLAN §3.6) and re-reviewed when new
+# titles match. Entries carry no names, only ELIs.
+version: 1
+entries:
+  - eli: etat/leg/loi/0000/00/00/n0     # placeholder, not a real act
+    reason: individual naturalisation law (lawyer review)
+    added: 2026-10-16
+    source: lawyer

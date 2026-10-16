@@ -1,0 +1,6 @@
+# Q11 — graph watermark (SJ C09) [V-adapted]. Nightly. SINCE = last_run − 2 days (tz-aware datetime).
+# Client side: strip a trailing "/graph"; parse ?modified and drop malformed literals.
+SELECT ?g ?modified WHERE {
+  GRAPH ?g { ?g dct:modified ?modified }
+  FILTER(?modified >= "{{SINCE}}"^^xsd:dateTime)
+  FILTER(STRSTARTS(STR(?g), "http://data.legilux.public.lu/eli/etat/leg/")) }

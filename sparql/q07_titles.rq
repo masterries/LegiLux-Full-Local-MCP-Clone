@@ -1,0 +1,6 @@
+# Q07 — French expression titles of all /eli/etat/leg/ acts (plan check P3) [V]: 80,906 rows, 18.6 MB.
+# Cadence: weekly. Feeds display titles, the naturalisation rule and the temporary-traffic rule.
+SELECT DISTINCT ?a ?title WHERE {
+  ?a a jolux:Act ; jolux:isRealizedBy ?e .
+  ?e jolux:language <http://publications.europa.eu/resource/authority/language/FRA> ; jolux:title ?title .
+  FILTER(STRSTARTS(STR(?a), "http://data.legilux.public.lu/eli/etat/leg/")) }

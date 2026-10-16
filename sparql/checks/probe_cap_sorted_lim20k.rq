@@ -1,0 +1,2 @@
+# A.5 probe — expected SR353.
+SELECT ?a WHERE { ?a a jolux:Act } ORDER BY ?a LIMIT 20000

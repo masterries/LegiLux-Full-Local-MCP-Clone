@@ -1,0 +1,11 @@
+# Q-MANIF — manifestations of selected works/versions (plan/verify/q_manif.rq) [V]: 5 works → 17 rows.
+# WORKS = version or /jo act IRIs, <= 500 per POST. Nightly for changed works, monthly for all.
+# Licence-aware pick: CC-BY XML -> CC-BY HTML -> CC-BY born-digital PDF (allowlisted) -> metadata-only.
+SELECT DISTINCT ?w ?uf ?lic ?file ?mod WHERE {
+  VALUES ?w {
+    {{WORKS}} }
+  ?w jolux:isRealizedBy ?e .
+  ?e jolux:language <http://publications.europa.eu/resource/authority/language/FRA> ; jolux:isEmbodiedBy ?m .
+  ?m jolux:userFormat ?uf ; jolux:isExemplifiedBy ?file .
+  OPTIONAL { ?m jolux:license ?lic }
+  OPTIONAL { ?m dct:modified ?mod } }

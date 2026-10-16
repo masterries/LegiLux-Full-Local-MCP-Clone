@@ -1,0 +1,5 @@
+# Q17 — completeness of the unsorted pulls (GR classes_distinct) [V]: Act 151,250 / Consolidation 4,719.
+# Gate: distinct subjects of Q01/Q02 must equal ?distinct, else switch to partitioned pulls.
+SELECT ?c (COUNT(?s) AS ?rows) (COUNT(DISTINCT ?s) AS ?distinct) WHERE {
+ VALUES ?c { jolux:Act jolux:Consolidation }
+ ?s a ?c } GROUP BY ?c

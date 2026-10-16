@@ -1,0 +1,6 @@
+# Manual takedowns (PLAN §3.2). Each entry: ELI prefix (work level), reason, date added, source.
+# robots.txt-derived entries are generated every run into data/robots/<T>/ and are not listed here.
+# The lawyer-reviewed naturalisation list lives in config/denylist_gdpr.yaml, which is gitignored and
+# never shipped (it would list personal-data ELIs); see denylist_gdpr.example.yaml.
+version: 1
+entries: []

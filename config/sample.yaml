@@ -1,0 +1,292 @@
+# Stratified dev/CI sample (PLAN §6.2, D13). Development NEVER runs the full crawl.
+#
+# `lgx ingest --sample` still pulls the FULL SPARQL metadata (selection must see all of it), then fetches
+# only the files of the works below. Entries with `stage: m2` (PDF codes/consolidations) are selected but
+# not fetched until M2 (`lgx fetch --include-m2`).
+#
+# Fields
+#   work     relative ELI of the jolux:ComplexWork (the isMemberOf target; codes belong to their base act)
+#   version  relative ELI of the version expected to serve at `snapshot_date` (role current or fallback)
+#   extra_versions  other versions whose text is stored (e.g. the next version, role future)
+#   group    core | code_recueil | consolidation | jo | parser_fixture | selection_fixture | metadata_only
+#   expect   expected selection at `snapshot_date` on the frozen 2026-10-16 snapshot:
+#            text_basis (exact), format (xml|html|pdf|none), flags (must be present; others may be added),
+#            metadata_reason (exact, metadata_only only)
+#   why      what the entry exercises
+# Expectations were computed offline from the frozen research snapshot (a1, c1, c2, c3, m2, b1, l4, titles)
+# by an M0 scratch script. If `lgx select` disagrees, triage the rule or the expectation — never edit
+# silently. With a live T other than 2026-10-16 some expectations may legitimately drift.
+# No personal-data acts (naturalisation laws) are sampled.
+version: 1
+snapshot_date: 2026-10-16
+description: ~50 works over codes, consolidations by type, JO originals (CC-BY XML and CC-BY HTML paths), parser and selection fixtures.
+works:
+  # ---------------------------------------------------------------------------------------------- core
+  - work: etat/leg/constitution/1868/10/17/n1
+    version: etat/leg/constitution/1868/10/17/n1/consolide/20260829
+    group: core
+    expect: {text_basis: consolidated, format: xml}
+    why: Constitution, 132 articles; CODE/Constitution gate
+  - work: etat/leg/loi/2006/07/31/n2
+    version: etat/leg/code/travail/20260726
+    group: core
+    expect: {text_basis: consolidated, format: xml}
+    why: Code du travail, 1,196 articles (1,179 with ELI); art_l_121-1 (M1 acceptance); provenance headings; index terms
+  - work: etat/leg/loi/1804/03/21/n1
+    version: etat/leg/code/civil/20251226
+    group: core
+    expect: {text_basis: consolidated, format: xml}
+    why: Code civil, 2,301 articles; « Art. 9 et 10. » / « 17 à 20 » aliases
+  - work: etat/leg/loi/1879/06/18/n1
+    version: etat/leg/code/penal/20251219
+    group: core
+    expect: {text_basis: consolidated, format: xml}
+    why: Code pénal
+  - work: etat/leg/rgd/1998/08/03/n4
+    version: etat/leg/code/procedure_civile/20251219
+    group: core
+    expect: {text_basis: consolidated, format: xml}
+    why: Nouveau Code de procédure civile (NCPC alias; base act is an RGD)
+
+  # -------------------------------------------------------------------------------------- code-recueils
+  - work: etat/leg/code/fonction_publique
+    version: etat/leg/code/fonction_publique/20261011
+    group: code_recueil
+    expect: {text_basis: consolidated, format: xml}
+    why: XML code-recueil (6.5 MB), wId dedup (404 of 478), generated art_N ids never anchors; dedup itself is M2
+  - work: etat/leg/loi/1925/12/17/n1
+    version: etat/leg/code/securite_sociale/20260101
+    group: code_recueil
+    stage: m2
+    expect: {text_basis: consolidated, format: pdf, flags: [pdf_extracted]}
+    why: Code de la sécurité sociale, CODE_RECUEIL of base act loi/1925/12/17/n1, PDF-only (838 pages, 5.06 MB)
+  - work: etat/leg/code/route
+    version: etat/leg/code/route/20260612
+    group: code_recueil
+    stage: m2
+    expect: {text_basis: consolidated, format: pdf, flags: [pdf_extracted]}
+    why: Code de la route, PDF-only (969 pages, 35.5 MB), member-act context; no base act
+
+  # ------------------------------------------------------------------------- consolidations (fixtures)
+  - work: etat/leg/loi/2018/08/01/a686
+    version: etat/leg/loi/2018/08/01/a686/consolide/20251226
+    group: parser_fixture
+    expect: {text_basis: consolidated, format: xml}
+    why: GDPR implementing / CNPD law; Art. 56 style="del" -> repealed stub without chunk; textualMod source loi/2025/12/19/a619/jo
+  - work: etat/leg/loi/2013/07/12/n1
+    version: etat/leg/loi/2013/07/12/n1/consolide/20260416
+    group: parser_fixture
+    expect: {text_basis: consolidated, format: xml}
+    why: AIFM law; 229 article units, 59 id-less embeddedStructure articles are not units, 140 textualMod; next version 20270416 is a file-less stub (metadata row only)
+  - work: etat/leg/loi/2001/04/18/n2
+    version: etat/leg/loi/2001/04/18/n2/consolide/20220409
+    group: parser_fixture
+    expect: {text_basis: consolidated, format: xml}
+    why: Copyright law; Art. 10, 8° (actes officiels) list items with scl:symbol
+
+  # --------------------------------------------------------------- consolidations (stratified by type)
+  - work: etat/leg/loi/2008/05/13/n1
+    version: etat/leg/loi/2008/05/13/n1/consolide/20130101
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: LOI consolidation, old window (2013) still current
+  - work: etat/leg/loi/2015/07/30/n2
+    version: etat/leg/loi/2015/07/30/n2/consolide/20240916
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: LOI consolidation (2010s)
+  - work: etat/leg/loi/2018/08/09/a882
+    version: etat/leg/loi/2018/08/09/a882/consolide/20260915
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: LOI consolidation, recent window (2026-09-15), large sample file (169 KB)
+  - work: etat/leg/rgd/1991/01/24/n2
+    version: etat/leg/rgd/1991/01/24/n2/consolide/20250413
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: RGD consolidation (tariffs; tables)
+  - work: etat/leg/rgd/2017/03/08/a324
+    version: etat/leg/rgd/2017/03/08/a324/consolide/20211205
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: RGD consolidation (2010s)
+  - work: etat/leg/rgd/2024/03/07/a106
+    version: etat/leg/rgd/2024/03/07/a106/consolide/20240318
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: RGD consolidation (2020s)
+  - work: etat/leg/agd/1913/02/14/n1
+    version: etat/leg/agd/1913/02/14/n1/consolide/20220522
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: AGD consolidation (pre-war base act)
+  - work: etat/leg/rmin/1985/01/28/n1
+    version: etat/leg/rmin/1985/01/28/n1/consolide/19860923
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: RMIN consolidation (open-ended window since 1986)
+  - work: etat/leg/amin/2022/07/15/a355
+    version: etat/leg/amin/2022/07/15/a355/consolide/20250714
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: AMIN consolidation
+  - work: etat/leg/ri/2023/11/27/a779
+    version: etat/leg/ri/2023/11/27/a779/consolide/20260416
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: RI consolidation (règlement interne)
+  - work: etat/leg/recueil/presse_medias
+    version: etat/leg/recueil/presse_medias/20260802
+    group: consolidation
+    expect: {text_basis: consolidated, format: xml}
+    why: XML RECUEIL without base act
+
+  # ------------------------------------------------------------------------------- selection fixtures
+  - work: etat/leg/loi/1993/04/05/n1
+    version: etat/leg/loi/1993/04/05/n1/consolide/20031001
+    group: selection_fixture
+    stage: m2
+    expect: {text_basis: stub_fallback, format: pdf, role: fallback}
+    why: Secteur financier; window version 20260711 is a stub, fallback 2003-10-01 is PDF and > 5 years old (W_STUB "ne pas s'y fier")
+  - work: etat/leg/loi/2018/05/30/a446
+    version: etat/leg/loi/2018/05/30/a446/consolide/20260403
+    group: selection_fixture
+    expect: {text_basis: stub_fallback, format: xml, role: fallback}
+    why: MiFID law; window version 20260606 is a stub, recent XML fallback (< 5 years)
+  - work: etat/leg/rgd/2025/12/22/a629
+    version: etat/leg/rgd/2025/12/22/a629/jo
+    group: selection_fixture
+    expect: {text_basis: original_possibly_outdated, format: xml, flags: [stub_no_text]}
+    why: Drones RGD; window consolidation 20251227 is a stub and no version has files -> JO original
+  - work: etat/leg/rgd/2001/04/25/n1
+    version: etat/leg/rgd/2001/04/25/n1/consolide/20211119
+    group: selection_fixture
+    expect: {text_basis: consolidated, format: xml, flags: [consolidation_lags]}
+    why: Lagging consolidation (a live amending act entered into force after its dateApplicability)
+  - work: etat/leg/loi/2014/07/04/n2
+    version: etat/leg/loi/2014/07/04/n2/consolide/20241231
+    extra_versions: [etat/leg/loi/2014/07/04/n2/consolide/20261020]
+    group: selection_fixture
+    expect: {text_basis: consolidated, format: xml}
+    why: Next version with files (role future) switching on 2026-10-20 = T+4 (time-travel test d-1/d/d+1)
+  - work: etat/leg/rgd/1988/07/15/n3
+    version: etat/leg/rgd/1988/07/15/n3/consolide/20260520
+    extra_versions: [etat/leg/rgd/1988/07/15/n3/consolide/20261101]
+    group: selection_fixture
+    expect: {text_basis: consolidated, format: xml}
+    why: Next version with files switching on 2026-11-01; the one after (20270501) is a file-less stub (metadata row only)
+  - work: etat/leg/loi/1999/05/31/n8
+    group: selection_fixture
+    expect: {text_basis: metadata_only, format: none, metadata_reason: repealed_base}
+    why: Window-current consolidation 20180918 whose base act was repealed on 2026-08-01
+  - work: etat/leg/rmin/2026/05/06/a230
+    group: selection_fixture
+    expect: {text_basis: metadata_only, format: none, metadata_reason: repealed_base}
+    why: Consolidation 20260516 still flagged applicable and open-ended, but its base act ceased on 2026-05-18
+  - work: etat/leg/loi/1922/03/05/n1
+    version: etat/leg/loi/1922/03/05/n1/jo
+    group: selection_fixture
+    expect: {text_basis: original_possibly_outdated, format: xml, flags: [consolidation_discontinued]}
+    why: Discontinued consolidation (19650531 ended 2004-06-21, no successor, base live) -> JO original + amending list
+  - work: etat/leg/rgd/2017/11/30/a1010
+    version: etat/leg/rgd/2017/11/30/a1010/jo
+    group: selection_fixture
+    expect: {text_basis: original_possibly_outdated, format: xml, flags: [consolidation_discontinued]}
+    why: Second discontinued consolidation (ended 2020), JO original amended 8 times
+  - work: etat/leg/rgd/2025/07/11/a319
+    group: selection_fixture
+    expect: {text_basis: metadata_only, format: none, metadata_reason: temporary, flags: [acte_temporaire]}
+    why: Temporary traffic RGD without dnl (title rule)
+  - work: etat/leg/rgd/2000/07/24/n3
+    version: etat/leg/rgd/2000/07/24/n3/jo
+    group: selection_fixture
+    expect: {text_basis: original_possibly_outdated, format: html, flags: [base_legale_abrogee]}
+    why: Every basedOn target repealed; XML is licenceSCL so the CC-BY HTML is served
+  - work: etat/leg/loi/2025/11/20/a510
+    version: etat/leg/loi/2025/11/20/a510/jo
+    group: selection_fixture
+    expect: {text_basis: original_never_amended, format: xml}
+    why: Not yet in force at T (dateEntryInForce 2026-10-20 = T+4); text stored with valid_from = dei
+
+  # ------------------------------------------------------------------------------------- JO originals
+  - work: etat/leg/loi/2001/06/20/n5
+    version: etat/leg/loi/2001/06/20/n5/jo
+    group: jo
+    expect: {text_basis: original_possibly_outdated, format: html}
+    why: Amended, never consolidated (extradition law); CC-BY HTML path (XML is licenceSCL)
+  - work: etat/leg/rgd/1993/02/10/n4
+    version: etat/leg/rgd/1993/02/10/n4/jo
+    group: jo
+    expect: {text_basis: original_possibly_outdated, format: xml}
+    why: Amended, never consolidated; CC-BY XML path
+  - work: etat/leg/loi/1889/01/02/n1
+    version: etat/leg/loi/1889/01/02/n1/jo
+    group: jo
+    expect: {text_basis: original_possibly_outdated, format: html, flags: [old_act]}
+    why: Pre-1900 original (saisie immobilière), amended; HTML path
+  - work: etat/leg/rgd/1989/03/24/n1
+    version: etat/leg/rgd/1989/03/24/n1/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: html}
+    why: Never amended RGD; CC-BY HTML path (XML is licenceSCL)
+  - work: etat/leg/agd/1939/09/25/n2
+    version: etat/leg/agd/1939/09/25/n2/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: html}
+    why: AGD original; CC-BY HTML path
+  - work: etat/leg/rgd/2018/08/17/a1153
+    version: etat/leg/rgd/2018/08/17/a1153/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: xml}
+    why: Never amended RGD; CC-BY xml-akomantoso
+  - work: etat/leg/loi/2023/07/29/a504
+    version: etat/leg/loi/2023/07/29/a504/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: xml}
+    why: Never amended LOI; CC-BY XML
+  - work: etat/leg/rmin/2024/02/08/a56
+    version: etat/leg/rmin/2024/02/08/a56/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: xml}
+    why: RMIN original; CC-BY XML
+  - work: etat/leg/loi/2023/04/19/a203
+    version: etat/leg/loi/2023/04/19/a203/jo
+    group: jo
+    expect: {text_basis: original_never_amended, format: xml}
+    why: Pure amending act (arbitration reform of the NCPC); modifying articles stored but not chunked (is_amending_act rule decided in M1)
+
+  # ----------------------------------------------------------------------------- JO parser fixtures
+  - work: etat/leg/loi/2026/02/25/a88
+    version: etat/leg/loi/2026/02/25/a88/jo
+    group: parser_fixture
+    expect: {text_basis: original_never_amended, format: xml}
+    why: 11 articles + an annex without articles; stale <meta> (docDate 2999-01-01) ignored
+  - work: etat/leg/rgd/2018/10/02/a936
+    version: etat/leg/rgd/2018/10/02/a936/jo
+    group: parser_fixture
+    expect: {text_basis: original_never_amended, format: xml}
+    why: "1.9 MB of base64 images -> [image: alt]"
+  - work: etat/leg/loi/1978/07/14/n1
+    version: etat/leg/loi/1978/07/14/n1/jo
+    group: parser_fixture
+    expect: {text_basis: original_never_amended, format: html}
+    why: Retro-converted act (memorialPage 1050 in its XML); the XML is licenceSCL, so cc_by_only serves the HTML
+  - work: etat/leg/loi/2016/12/23/n25
+    version: etat/leg/loi/2016/12/23/n25/jo
+    group: parser_fixture
+    expect: {text_basis: original_never_amended, format: xml}
+    why: Journal officiel law, Art. 5 « fait seul foi » (disclaimer source)
+
+  # --------------------------------------------------------------------------------- metadata only
+  - work: etat/leg/loi/1976/08/29/n5
+    group: metadata_only
+    expect: {text_basis: metadata_only, format: none, metadata_reason: repealed}
+    why: Repealed act (dnl 1998-09-21, repealer loi/1998/08/28/n1) -> "abrogé par … le …"
+  - work: etat/leg/rgd/2004/02/13/n6
+    group: metadata_only
+    expect: {text_basis: metadata_only, format: none, metadata_reason: repealed}
+    why: Repealed RGD
+  - work: etat/leg/rgd/2003/01/24/n2
+    group: metadata_only
+    expect: {text_basis: metadata_only, format: none, metadata_reason: licence}
+    why: Text only under licenceSCL (CC-BY only on the robots-disallowed DOCX)

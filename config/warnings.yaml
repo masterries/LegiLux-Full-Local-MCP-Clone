@@ -1,0 +1,191 @@
+# Warning catalogue (PLAN §8.5, Appendix D.4) -> lgx.warning_def. French is canonical; lawyer review in M2.
+# Texts are Python str.format templates; every {placeholder} must be listed in `params` and supplied by
+# the caller (lgx_core.warnings.Catalogue.render). A `variant` REPLACES the base text for that case
+# (Appendix D writes these as optional [ ] / { } fragments). Warnings are computed by code, never by the LLM.
+version: 1
+warnings:
+  W_NOT_OFFICIAL:
+    severity: info
+    note: Always, in every envelope (Art. 5 disclaimer).
+    fr: "Information non officielle. « Le Journal officiel publié fait seul foi et produit des effets juridiques » (loi du 23 décembre 2016, art. 5)."
+    de: "Nicht amtliche Information. Allein das veröffentlichte Amtsblatt (Journal officiel) ist maßgeblich und rechtsverbindlich (Gesetz vom 23. Dezember 2016, Art. 5)."
+    en: "Unofficial information. Only the published Journal officiel is authentic and has legal effect (Law of 23 December 2016, Art. 5)."
+
+  W_SNAPSHOT:
+    severity: info
+    params: [T, as_of]
+    note: Always.
+    fr: "Données Legilux arrêtées au {T} ; statut calculé au {as_of} à partir des dates connues au {T}."
+    de: "Legilux-Daten mit Stand {T}; Status zum {as_of} aus den am {T} bekannten Daten berechnet."
+    en: "Legilux data as of {T}; status computed for {as_of} from dates known on {T}."
+
+  W_DATA_STALE:
+    severity: medium
+    params: [n, T]
+    note: as_of - T > 30 days (level 1, medium) or > 90 days (level 2, raised to high by code).
+    fr: "Données de plus de {n} jours : les textes publiés depuis le {T} ne sont pas pris en compte."
+    de: "Daten älter als {n} Tage: seit dem {T} veröffentlichte Texte sind nicht berücksichtigt."
+    en: "Data older than {n} days: texts published since {T} are not included."
+
+  W_CLOCK_SUSPECT:
+    severity: high
+    params: [now, T]
+    note: Host clock < T, or > H.
+    fr: "L'horloge du serveur ({now}) est incohérente avec la date des données ({T}) : aucun statut n'est affirmé."
+    de: "Die Serveruhr ({now}) passt nicht zum Datenstand ({T}): es wird kein Status angegeben."
+    en: "The server clock ({now}) is inconsistent with the data date ({T}): no status is asserted."
+
+  W_NOT_CONSOLIDATED:
+    severity: high
+    params: [memorial, acts]
+    note: original_possibly_outdated; the amending-act list is mandatory (data.amending_acts).
+    fr: "Texte non consolidé : texte original ({memorial}), modifié depuis par : {acts} — la rédaction citée peut être dépassée."
+    de: "Nicht konsolidierter Text: Originalfassung ({memorial}), seither geändert durch: {acts} — der zitierte Wortlaut kann überholt sein."
+    en: "Not consolidated: original text ({memorial}), since amended by: {acts} — the quoted wording may be outdated."
+
+  W_STUB:
+    severity: high
+    params: [d, shown]
+    note: stub_fallback or stub_no_text; variant old_fallback when the fallback is older than stub_fallback_max_age_years.
+    fr: "Consolidation annoncée au {d}, texte non disponible ; texte affiché : {shown}."
+    de: "Konsolidierung zum {d} angekündigt, Text nicht verfügbar; angezeigt: {shown}."
+    en: "Consolidation announced for {d}, text not available; shown: {shown}."
+    variants:
+      old_fallback:
+        fr: "Consolidation annoncée au {d}, texte non disponible ; texte affiché : {shown}. Ne pas s'y fier pour la rédaction actuelle."
+        de: "Konsolidierung zum {d} angekündigt, Text nicht verfügbar; angezeigt: {shown}. Für den aktuellen Wortlaut nicht verlässlich."
+        en: "Consolidation announced for {d}, text not available; shown: {shown}. Do not rely on it for the current wording."
+
+  W_CONSO_LAGGING:
+    severity: medium
+    params: [d, acts, dates]
+    note: consolidation_lags; lists the pending acts.
+    fr: "La version consolidée au {d} n'intègre pas nécessairement : {acts} (en vigueur le {dates})."
+    de: "Die konsolidierte Fassung vom {d} berücksichtigt möglicherweise nicht: {acts} (in Kraft am {dates})."
+    en: "The consolidation of {d} may not include: {acts} (in force on {dates})."
+
+  W_CONSO_DISCONTINUED:
+    severity: medium
+    params: [a, b]
+    note: consolidation_discontinued.
+    fr: "Dernière consolidation disponible : applicable du {a} au {b} (non poursuivie) ; texte original affiché."
+    de: "Letzte verfügbare Konsolidierung: anwendbar vom {a} bis {b} (nicht fortgeführt); Originalfassung angezeigt."
+    en: "Last available consolidation: applicable {a} to {b} (discontinued); original text shown."
+
+  W_REPEALED:
+    severity: high
+    params: [dnl, act, as_of]
+    note: Act not in force at as_of. Variants when the repealer is unknown or the repeal is implicit.
+    fr: "Acte abrogé le {dnl} par {act} ; il n'est pas en vigueur au {as_of}."
+    de: "Am {dnl} durch {act} aufgehoben; am {as_of} nicht in Kraft."
+    en: "Repealed on {dnl} by {act}; not in force on {as_of}."
+    variants:
+      date_only:
+        fr: "Acte abrogé le {dnl} ; il n'est pas en vigueur au {as_of}."
+        de: "Am {dnl} aufgehoben; am {as_of} nicht in Kraft."
+        en: "Repealed on {dnl}; not in force on {as_of}."
+      implicit:
+        fr: "Acte abrogé (abrogation implicite) ; il n'est pas en vigueur au {as_of}."
+        de: "Stillschweigend aufgehoben; am {as_of} nicht in Kraft."
+        en: "Implicitly repealed; not in force on {as_of}."
+
+  W_NOT_YET_IN_FORCE:
+    severity: medium
+    params: [dei]
+    fr: "Publié, pas encore en vigueur (entrée en vigueur le {dei})."
+    de: "Veröffentlicht, noch nicht in Kraft (Inkrafttreten am {dei})."
+    en: "Published, not yet in force (entry into force on {dei})."
+
+  W_SUNSET:
+    severity: medium
+    params: [dnl]
+    note: dnl <= as_of + 90 days.
+    fr: "Cessera d'être en vigueur le {dnl}."
+    de: "Tritt am {dnl} außer Kraft."
+    en: "Ceases to be in force on {dnl}."
+
+  W_FUTURE_VERSION:
+    severity: info
+    params: [d]
+    note: Base text = next version already published (stored); variant announced = announced without text.
+    fr: "Nouvelle rédaction applicable à partir du {d} (déjà publiée)."
+    de: "Neue Fassung ab {d} anwendbar (bereits veröffentlicht)."
+    en: "New wording applicable from {d} (already published)."
+    variants:
+      announced:
+        fr: "Nouvelle rédaction applicable à partir du {d} (annoncée sans texte)."
+        de: "Neue Fassung ab {d} anwendbar (ohne Text angekündigt)."
+        en: "New wording applicable from {d} (announced without text)."
+
+  W_ARTICLE_REPEALED:
+    severity: high
+    params: [act]
+    note: Article stub; variant by_act when the repealing act is known.
+    fr: "Article abrogé."
+    de: "Artikel aufgehoben."
+    en: "Article repealed."
+    variants:
+      by_act:
+        fr: "Article abrogé par {act}."
+        de: "Artikel aufgehoben durch {act}."
+        en: "Article repealed by {act}."
+
+  W_BASE_LEGALE_ABROGEE:
+    severity: medium
+    fr: "Toutes les bases légales nationales de ce règlement sont abrogées ; son maintien dépend de dispositions transitoires — à vérifier."
+    de: "Alle nationalen Rechtsgrundlagen dieser Verordnung sind aufgehoben; ihr Fortbestand hängt von Übergangsbestimmungen ab — zu prüfen."
+    en: "All national legal bases of this regulation are repealed; whether it survives depends on transitional provisions — to be checked."
+
+  W_TEMPORARY_ACT:
+    severity: medium
+    note: acte_temporaire (only if its text is enabled).
+    fr: "Acte temporaire sans date de fin connue dans les métadonnées."
+    de: "Befristeter Rechtsakt ohne bekanntes Enddatum in den Metadaten."
+    en: "Temporary act with no end date in the metadata."
+
+  W_PDF_EXTRACTED:
+    severity: medium
+    params: [pages]
+    fr: "Texte extrait d'un PDF (p. {pages}) ; mise en page et numérotation à vérifier sur le PDF officiel."
+    de: "Aus einem PDF extrahierter Text (S. {pages}); Layout und Nummerierung am amtlichen PDF prüfen."
+    en: "Text extracted from a PDF (p. {pages}); check layout and numbering against the official PDF."
+
+  W_SUPERSEDED_BY_CODE:
+    severity: medium
+    params: [code]
+    fr: "Acte intégré au {code} ; la version à jour figure dans le code (texte original affiché à titre d'information)."
+    de: "In {code} eingegliedert; die aktuelle Fassung steht im Kodex (Originalfassung nur zur Information)."
+    en: "Incorporated in {code}; the current wording is in the code (original shown for information only)."
+
+  W_PARTIAL_REPEAL_UNKNOWN:
+    severity: info
+    note: Any original text.
+    fr: "« En vigueur » signifie « non connu comme abrogé » : les abrogations partielles ne sont pas signalées par les métadonnées."
+    de: "„In Kraft“ bedeutet „nicht als aufgehoben bekannt“: Teilaufhebungen sind in den Metadaten nicht ausgewiesen."
+    en: "\"In force\" means \"not known to be repealed\": partial repeals are not flagged in the metadata."
+
+  W_DERIVED_ELI:
+    severity: info
+    fr: "Identifiant d'article dérivé localement, non officiel."
+    de: "Lokal abgeleitete, nicht amtliche Artikelkennung."
+    en: "Locally derived, non-official article identifier."
+
+  W_DATA_QUALITY:
+    severity: info
+    params: [detail]
+    fr: "Incohérence relevée dans les métadonnées source : {detail}."
+    de: "Unstimmigkeit in den Quellmetadaten: {detail}."
+    en: "Inconsistency in the source metadata: {detail}."
+
+  W_TRANSLATION:
+    severity: info
+    fr: "Traduction non officielle ; seul le texte français publié fait foi."
+    de: "Nicht amtliche Übersetzung; maßgeblich ist allein der veröffentlichte französische Text."
+    en: "Unofficial translation; only the published French text is authentic."
+
+  W_OUT_OF_SCOPE:
+    severity: info
+    params: [what]
+    fr: "Hors du périmètre de cette copie locale ({what}) : droit de l'UE, jurisprudence, règlements communaux, Mémorial B et projets de loi ne sont pas couverts."
+    de: "Außerhalb des Umfangs dieser lokalen Kopie ({what}): EU-Recht, Rechtsprechung, Gemeindereglemente, Mémorial B und Gesetzentwürfe sind nicht enthalten."
+    en: "Outside the scope of this local copy ({what}): EU law, case law, communal regulations, Mémorial B and bills are not covered."

@@ -1,0 +1,5 @@
+# Q13 non-aggregated form: the targets whose text_basis may change (Appendix A Q13). Nightly.
+SELECT DISTINCT ?new ?rel ?target WHERE {
+  VALUES ?rel { jolux:modifies jolux:repeals jolux:rectifies jolux:basedOn jolux:cites jolux:transposes }
+  ?new a jolux:Act ; jolux:publicationDate ?pd ; ?rel ?target .
+  FILTER(?pd >= "{{SINCE_DATE}}"^^xsd:date) }

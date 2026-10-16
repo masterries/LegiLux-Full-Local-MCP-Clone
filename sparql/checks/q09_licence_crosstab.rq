@@ -1,0 +1,10 @@
+# Q09 — licence × format for in-force LOI/RGD/AGD/RMIN (GR l4) [V, DISTINCT added]. Weekly gate.
+# 8,115 CC-BY XML; 15,502 CC-BY HTML only; 619 text only licenceSCL; 4,442 PDF-only SCL; 25 PDF-only CC-BY.
+SELECT DISTINCT ?a ?uf ?lic WHERE {
+ ?a a jolux:Act ; jolux:inForceStatus <http://data.legilux.public.lu/resource/authority/application-status/in-force> ;
+    jolux:typeDocument ?t ; jolux:isRealizedBy ?e . ?e jolux:isEmbodiedBy ?m . ?m jolux:userFormat ?uf .
+ FILTER(?t IN (<http://data.legilux.public.lu/resource/authority/resource-type/LOI>,<http://data.legilux.public.lu/resource/authority/resource-type/RGD>,
+               <http://data.legilux.public.lu/resource/authority/resource-type/AGD>,<http://data.legilux.public.lu/resource/authority/resource-type/RMIN>))
+ FILTER(?uf IN (<http://data.legilux.public.lu/resource/authority/user-format/html>,<http://data.legilux.public.lu/resource/authority/user-format/xml>,
+                <http://data.legilux.public.lu/resource/authority/user-format/xml-akomantoso>,<http://data.legilux.public.lu/resource/authority/user-format/pdf>))
+ OPTIONAL { ?m jolux:license ?lic } }

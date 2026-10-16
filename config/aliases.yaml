@@ -1,0 +1,67 @@
+# Lawyer-curated abbreviations and acronyms for the citation resolver (PLAN §8.3, §6.3) -> lgx.act_alias.
+# SEED ONLY: every entry is `reviewed: false` until a lawyer signs it off (M4, ≈ 2 lawyer-days).
+# target = relative ELI of the jolux:ComplexWork that carries the text (codes are members of their base
+# act, e.g. code/travail/* versions belong to work loi/2006/07/31/n2). Out-of-scope references (EU law)
+# have no target but an `out_of_scope` reason so the resolver can answer "not covered" instead of guessing.
+# Targets were checked against the frozen 2026-10-16 SPARQL snapshot (consolidation isMemberOf / act titles).
+version: 1
+aliases:
+  # --- codes (kind code_abbrev) -------------------------------------------------------------------
+  - {alias: "C. trav.", target: etat/leg/loi/2006/07/31/n2, kind: code_abbrev, note: "Code du travail (code/travail)"}
+  - {alias: "Code du travail", target: etat/leg/loi/2006/07/31/n2, kind: short_title}
+  - {alias: "C. civ.", target: etat/leg/loi/1804/03/21/n1, kind: code_abbrev, note: "Code civil (code/civil)"}
+  - {alias: "Code civil", target: etat/leg/loi/1804/03/21/n1, kind: short_title}
+  - {alias: "C. pén.", target: etat/leg/loi/1879/06/18/n1, kind: code_abbrev, note: "Code pénal (code/penal)"}
+  - {alias: "Code pénal", target: etat/leg/loi/1879/06/18/n1, kind: short_title}
+  - {alias: "C. com.", target: etat/leg/loi/1807/09/15/n2, kind: code_abbrev, note: "Code de commerce (code/commerce)"}
+  - {alias: "Code de commerce", target: etat/leg/loi/1807/09/15/n2, kind: short_title}
+  - {alias: "C. proc. pén.", target: etat/leg/loi/1808/11/17/n1, kind: code_abbrev, note: "Code de procédure pénale (code/procedure_penale)"}
+  - {alias: "CPP", target: etat/leg/loi/1808/11/17/n1, kind: acronym, note: "ambiguous in practice (also \"Code de procédure pénale\" FR); lawyer to confirm"}
+  - {alias: "Code de procédure pénale", target: etat/leg/loi/1808/11/17/n1, kind: short_title}
+  - {alias: "NCPC", target: etat/leg/rgd/1998/08/03/n4, kind: code_abbrev, note: "Nouveau Code de procédure civile (code/procedure_civile)"}
+  - {alias: "Nouveau Code de procédure civile", target: etat/leg/rgd/1998/08/03/n4, kind: short_title}
+  - {alias: "C. consom.", target: etat/leg/loi/2011/04/08/n2, kind: code_abbrev, note: "Code de la consommation (code/consommation)"}
+  - {alias: "Code de la consommation", target: etat/leg/loi/2011/04/08/n2, kind: short_title}
+  - {alias: "CSS", target: etat/leg/loi/1925/12/17/n1, kind: acronym, note: "Code de la sécurité sociale (code/securite_sociale, CODE_RECUEIL, PDF)"}
+  - {alias: "Code de la sécurité sociale", target: etat/leg/loi/1925/12/17/n1, kind: short_title}
+  - {alias: "C. route", target: etat/leg/code/route, kind: code_abbrev, note: "Code de la route (CODE_RECUEIL without base act, PDF)"}
+  - {alias: "Code de la route", target: etat/leg/code/route, kind: short_title}
+  - {alias: "Code de la fonction publique", target: etat/leg/code/fonction_publique, kind: short_title}
+  - {alias: "Code de la santé", target: etat/leg/code/sante, kind: short_title}
+  - {alias: "Constitution", target: etat/leg/constitution/1868/10/17/n1, kind: short_title}
+  - {alias: "Const.", target: etat/leg/constitution/1868/10/17/n1, kind: code_abbrev}
+
+  # --- acronyms of laws and institutions (kind acronym) --------------------------------------------
+  - alias: "RGPD"
+    target: null
+    kind: acronym
+    out_of_scope: "EU law: règlement (UE) 2016/679 (CELEX 32016R0679)"
+    related: [etat/leg/loi/2018/08/01/a686]
+    note: The national implementing/organisation law is loi/2018/08/01/a686 (CNPD).
+  - alias: "CNPD"
+    target: etat/leg/loi/2018/08/01/a686
+    kind: acronym
+    note: Loi du 1er août 2018 portant organisation de la Commission nationale pour la protection des données.
+  - alias: "CSSF"
+    target: etat/leg/loi/1998/12/23/n2
+    kind: acronym
+    note: Loi du 23 décembre 1998 portant création d'une commission de surveillance du secteur financier.
+  - alias: "ADEM"
+    target: etat/leg/loi/2012/01/18/n1
+    kind: acronym
+    note: Loi du 18 janvier 2012 portant création de l'Agence pour le développement de l'emploi.
+  - alias: "loi AIFM"
+    target: etat/leg/loi/2013/07/12/n1
+    kind: curated
+    note: Loi du 12 juillet 2013 relative aux gestionnaires de fonds d'investissement alternatifs.
+  - alias: "LSF"
+    target: etat/leg/loi/1993/04/05/n1
+    kind: acronym
+    note: Loi du 5 avril 1993 relative au secteur financier (current consolidation is a stub).
+  - alias: "loi sur le secteur financier"
+    target: etat/leg/loi/1993/04/05/n1
+    kind: curated
+  - alias: "loi sur le secteur des assurances"
+    target: etat/leg/loi/2015/12/07/n1
+    kind: curated
+    note: Loi du 7 décembre 2015 sur le secteur des assurances (the 1991 law is a different, older act).

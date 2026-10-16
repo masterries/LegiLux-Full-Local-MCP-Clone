@@ -1,0 +1,10 @@
+# Code-recueil membership and routing (PLAN §2.6). Derived from XML wIds / part headings and PDF
+# headings, reviewed by a lawyer, frozen here (M2). Members without their own consolidation get the
+# superseded_by_code flag and are routed to the code text.
+version: 1
+members: []
+# - recueil: etat/leg/code/route              # work ELI of the code-recueil
+#   member: etat/leg/agd/1955/11/23/n1        # member act (modified 162x, no own consolidation)
+#   part_heading: "Arrêté grand-ducal modifié du 23 novembre 1955 portant règlement de la circulation …"
+#   method: heading                           # wid | heading | curated
+#   reviewed_by: null

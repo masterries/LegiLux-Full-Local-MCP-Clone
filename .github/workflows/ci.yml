@@ -1,0 +1,85 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.11.32"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  lint-test:
+    name: lint + unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install (locked)
+        run: uv sync --locked --all-extras
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Config check
+        run: uv run lgx config-check
+      - name: Unit tests (offline; db tests run in the schema job)
+        run: uv run pytest -q -m "not db and not live"
+
+  schema:
+    name: schema on pgvector 0.8.7 / PostgreSQL 18
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        # Same digest as db/Dockerfile and deploy/images.lock (mirror.gcr.io avoids Docker Hub rate limits)
+        image: mirror.gcr.io/pgvector/pgvector:0.8.7-pg18-trixie@sha256:9d9c930220cb9bf2f956d10a8f909cf9973d9672ca0278aef2c1e6facccad2e0
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install unaccented French stopwords into the service container
+        run: >-
+          docker cp db/tsearch/french_unaccent.stop
+          ${{ job.services.postgres.id }}:/usr/share/postgresql/18/tsearch_data/french_unaccent.stop
+      - name: Install psql client
+        run: |
+          command -v psql || (sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client)
+      - name: Apply schema from scratch (twice)
+        run: |
+          scripts/db_apply.sh --dbname legilux_ci_a --recreate
+          scripts/db_apply.sh --dbname legilux_ci_b --recreate
+          scripts/db_apply.sh --dbname legilux_ci_b --postload-only
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install (locked)
+        run: uv sync --locked --all-extras
+      - name: Schema tests
+        env:
+          LGX_TEST_PG_DSN: postgresql://postgres:postgres@localhost:5432/postgres
+        run: uv run pytest -q -m db
+      - name: Build the lgx-db image
+        run: docker build -t lgx.local/lgx-db:ci db

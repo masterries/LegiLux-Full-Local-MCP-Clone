@@ -1,0 +1,2 @@
+# A.5 probe — expected HTTP 500 "Virtuoso 22023 Error SR353" (sorted TOP capped at 10,000 rows).
+SELECT ?a WHERE { ?a a jolux:Act } ORDER BY ?a LIMIT 10000 OFFSET 10000

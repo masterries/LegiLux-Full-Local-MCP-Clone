@@ -1,0 +1,6 @@
+# Q07-fallback — titles by year window (scope-sizing qa.rq) [V, DISTINCT added]: ~8-9k rows per window.
+# Used only if single-request pulls break (Appendix A.0). Placeholders: Y0, Y1 (inclusive years).
+SELECT DISTINCT ?jo ?w ?t ?status ?d ?dnl ?title WHERE { ?jo a jolux:Act ; jolux:typeDocument ?t ; jolux:inForceStatus ?status ;
+  jolux:isMemberOf ?w ; jolux:dateDocument ?d . OPTIONAL { ?jo jolux:dateNoLongerInForce ?dnl }
+  OPTIONAL { ?jo jolux:isRealizedBy ?e . ?e jolux:title ?title }
+  FILTER(CONTAINS(STR(?jo),"/eli/etat/leg/")) FILTER(YEAR(?d) >= {{Y0}} && YEAR(?d) <= {{Y1}}) }

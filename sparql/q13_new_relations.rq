@@ -1,0 +1,5 @@
+# Q13 — relations of acts published since SINCE_DATE (SJ C14) [V]. Nightly monitor (aggregated).
+SELECT ?rel (COUNT(DISTINCT ?new) AS ?newActs) (COUNT(DISTINCT ?target) AS ?affected) WHERE {
+  VALUES ?rel { jolux:modifies jolux:repeals jolux:rectifies jolux:basedOn jolux:cites jolux:transposes }
+  ?new a jolux:Act ; jolux:publicationDate ?pd ; ?rel ?target .
+  FILTER(?pd >= "{{SINCE_DATE}}"^^xsd:date) } GROUP BY ?rel

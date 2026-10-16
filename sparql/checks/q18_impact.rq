@@ -1,0 +1,4 @@
+# Q18 — LegalResourceImpact (GR i3) [V], hint only (384 impacts since 2023-07). Weekly report.
+SELECT ?type ?lbl (COUNT(DISTINCT ?s) AS ?n) (MIN(?p) AS ?minPub) (MAX(?p) AS ?maxPub) (SUM(IF(BOUND(?cb),1,0)) AS ?consolidated) WHERE {
+ ?s a jolux:LegalResourceImpact ; jolux:legalResourceImpactHasType ?type ; jolux:publicationDate ?p .
+ OPTIONAL { ?type skos:prefLabel ?lbl } OPTIONAL { ?s jolux:impactConsolidatedBy ?cb } } GROUP BY ?type ?lbl
