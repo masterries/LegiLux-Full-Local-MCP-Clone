@@ -22,9 +22,11 @@ Steps (:func:`run_load`):
    no denylisted ELI may be present. Any constraint violation aborts with :class:`LoadError` naming the
    table, the constraint and the offending record.
 
-Embeddings stay off (provider ``none``): ``lgx.embedding_model`` keeps ZERO rows (its CHECK has no
-``none`` provider) and every ``chunk.embedding`` is NULL; the provider and ``vector_status`` are recorded in
-``lgx_meta.release.config``.
+Embeddings are off by default (provider ``none``): ``lgx.embedding_model`` keeps ZERO rows and every
+``chunk.embedding`` is NULL. With provider ``mistral`` and an embedding cache that covers every searchable chunk
+(``lgx embed``, :mod:`lgx_ingest.embed`), the vectors and the model row (with the startup probe) are attached
+after the COPY and before the post-load (which then builds the HNSW index); otherwise the release is lexical-only.
+The provider and ``vector_status`` are recorded in ``lgx_meta.release.config``.
 """
 
 from __future__ import annotations
@@ -46,7 +48,7 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.types.json import Jsonb
 from psycopg.types.range import Range
 
-from lgx_core.config import REPO_ROOT, ProjectConfig
+from lgx_core.config import REPO_ROOT, EmbeddingConfig, ProjectConfig
 from lgx_core.eli import ELI_BASE, expand
 from lgx_core.io import atomic_write_text, read_jsonl
 from lgx_core.models import (
@@ -70,12 +72,14 @@ from lgx_core.models import (
 )
 from lgx_core.normalise import alias_norm, num_aliases
 from lgx_ingest.context import StageContext, StageResult
+from lgx_ingest.embed import ReleaseVectors, attach_vectors, release_vectors
 
 SCHEMA_VERSION = 1
 LOADER_VERSION = "load-1"
 SCHEMA_DIR = REPO_ROOT / "db" / "schema"
 CC_BY_LEGALCODE = REPO_ROOT / "LICENSES" / "CC-BY-4.0.txt"
 VECTOR_STATUS_NONE = "disabled:provider_none"
+VECTOR_STATUS_NOT_LOADED = "disabled:no_vectors_loaded"
 DB_NAME_RE = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 POSTLOAD_PART = "90_postload.sql"
 ROLES_PART = "95_roles.sql"
@@ -783,8 +787,15 @@ def build_plan(
     release_id: str,
     built_at: dt.datetime,
     pipeline_git_sha: str,
+    embedding: EmbeddingConfig | None = None,
+    vectors: ReleaseVectors | None = None,
 ) -> LoadPlan:
-    """Pure transformation of the inputs into COPY rows for every table (ids assigned in ELI order)."""
+    """Pure transformation of the inputs into COPY rows for every table (ids assigned in ELI order).
+
+    ``embedding`` is the effective embedding configuration (``config/embedding.yaml`` + ``LGX_EMBED_*``) and
+    ``vectors`` the cached vectors that :func:`load_release` attaches after the COPY (``None``: lexical release).
+    """
+    emb_cfg = embedding or config.embedding
     t = inputs.sync_date
     deny = inputs.denylist
     messages: list[str] = []
@@ -1179,7 +1190,7 @@ def build_plan(
         variants = {k: {lang.value: txt for lang, txt in v.items()} for k, v in sorted(d.variants.items())}
         warning_table.add(code.value, code.value, d.severity.value, d.text_fr, d.text_de, d.text_en, Jsonb(variants))
     legal_table = Table("lgx.legal_text", ("code", "lang", "body"))
-    for code, lang, body in legal_text_rows(config, t, with_vectors=config.embedding.enabled):
+    for code, lang, body in legal_text_rows(config, t, with_vectors=vectors is not None):
         legal_table.add(f"{code}/{lang}", code, lang, body)
 
     # ---- build-only tables (excluded from the dump)
@@ -1240,7 +1251,12 @@ def build_plan(
             "by_flag": selection_counts.get("by_flag", {}),
             "stored_texts": selection_counts.get("stored_texts"),
         },
-        "embedding": {"vectors": 0, "embedding_model_rows": 0},
+        "embedding": {
+            "vectors": searchable if vectors is not None else 0,
+            "embedding_model_rows": 1 if vectors is not None else 0,
+            "model_id": vectors.model_id if vectors is not None else None,
+            "dim": vectors.dim if vectors is not None else None,
+        },
     }
     digest = content_digest(tables)
     config_digest = config.digest()
@@ -1253,8 +1269,10 @@ def build_plan(
         "manifestations_scope": inputs.snapshot.get("manifestations_scope"),
         "denylist_count": len(deny),
         "scope": config.scope.model_dump(mode="json"),
-        "embedding": config.embedding.model_dump(mode="json", exclude={"api_key_file"}),
-        "vector_status": VECTOR_STATUS_NONE if not config.embedding.enabled else "disabled:no_vectors_loaded",
+        "embedding": emb_cfg.model_dump(mode="json", exclude={"api_key_file"}),
+        "vector_status": "ok"
+        if vectors is not None
+        else (VECTOR_STATUS_NONE if not emb_cfg.enabled else VECTOR_STATUS_NOT_LOADED),
         "sample_works": [w.work for w in config.sample.works] if inputs.sample else [],
     }
     release_table = Table(
@@ -1382,11 +1400,13 @@ def load_release(
     timings: dict[str, float] = {}
     rid = release_id or ctx.opt("release_id") or release_id_for(ctx.sync_date, ctx.sample)
     inputs = _timed(timings, "read_inputs", lambda: read_inputs(ctx))
-    if ctx.config.embedding.enabled:
-        result.messages.append(
-            f"embedding provider {ctx.config.embedding.provider.value}: vectors arrive with M3; "
-            "this release is loaded without vectors (lexical only)"
-        )
+    emb_cfg = ctx.config.embedding.with_env()
+    searchable = {c.content_sha256 for tv in inputs.texts.values() for c in tv.chunks if c.searchable}
+    vectors, why = release_vectors(emb_cfg, ctx.layout.emb_dir, searchable)
+    if emb_cfg.enabled and vectors is None:
+        result.messages.append(f"embedding provider mistral: {why}; this release is loaded lexical-only")
+    elif vectors is not None:
+        result.messages.append(f"vectors of {vectors.model_id} (dim {vectors.dim}) attached from {vectors.cache.name}")
     plan = _timed(
         timings,
         "build_plan",
@@ -1396,6 +1416,8 @@ def load_release(
             release_id=rid,
             built_at=dt.datetime.now(dt.UTC).replace(microsecond=0),
             pipeline_git_sha=git_sha(),
+            embedding=emb_cfg,
+            vectors=vectors,
         ),
     )
     result.messages += plan.messages
@@ -1404,12 +1426,16 @@ def load_release(
         result.details = {"release_id": rid, "db_name": db_name, "dry_run": True, "counts": plan.counts}
         return result
     _timed(timings, "create_database", lambda: create_database(dsn, db_name, recreate=recreate))
-    dim = ctx.config.embedding.dim
+    dim = emb_cfg.dim
     with connect(target_dsn(dsn, db_name), autocommit=True) as conn:
         result.details["schema_parts"] = _timed(timings, "schema", lambda: apply_schema(conn, embed_dim=dim))
     with connect(target_dsn(dsn, db_name)) as conn:
         _timed(timings, "copy", lambda: copy_plan(conn, plan, progress=lambda m: ctx.console.print(f"  COPY {m}")))
     with connect(target_dsn(dsn, db_name), autocommit=True) as conn:
+        if vectors is not None:
+            attached = _timed(timings, "vectors", lambda: attach_vectors(conn, vectors))
+            if attached != len([1 for tv in inputs.texts.values() for c in tv.chunks if c.searchable]):
+                raise LoadError(f"vectors attached to {attached} chunks, expected every searchable chunk")
         _timed(timings, "postload", lambda: apply_schema(conn, embed_dim=dim, only=[POSTLOAD_PART]))
         violations = invariant_violations(conn)
         denied = {k: v for k, v in denylisted_in_db(conn, inputs.denylist).items() if v}

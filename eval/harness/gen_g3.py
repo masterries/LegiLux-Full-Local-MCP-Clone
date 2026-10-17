@@ -189,7 +189,23 @@ class _Gen:
             words = " ".join(((u["num_raw"] or "") + " ").split()[:1])
             text = self.q("SELECT left(body, 200) AS b FROM lgx.chunk WHERE unit_id = %s LIMIT 1", [u["unit_id"]])
             query = " ".join((text[0]["b"] if text else words).split()[:8])
-            if len(query) >= 3:
+            if len(query) >= 3 and "superseded_by_code" in set(s["flags"] or []):
+                # PLAN §6.4 / §2.6 (4): the original is not searchable; the search runs in the code's text and its
+                # hits (that member's articles) carry W_SUPERSEDED_BY_CODE + the code's own warnings (PDF)
+                code = self.q(
+                    "SELECT v.source_format FROM lgx.act a JOIN lgx.act c ON c.act_id = a.superseded_by_act_id"
+                    " JOIN lgx.act_version v ON v.version_id = c.basis_version_id WHERE a.act_id = %s",
+                    [a["act_id"]],
+                )
+                pdf = bool(code) and code[0]["source_format"] == "pdf"
+                cw = ["W_SUPERSEDED_BY_CODE", *(["W_PDF_EXTRACTED"] if pdf else [])]
+                self.add(
+                    "search:superseded_by_code",
+                    "search_legislation",
+                    {"query": query, "filters": {"act_eli": a["eli_work"]}, "top_k": 3},
+                    {"warnings": cw, "absent": ["W_REPEALED", "W_NOT_CONSOLIDATED"]},
+                )
+            elif len(query) >= 3:
                 aw = [c for c in want if c not in ("W_DATA_QUALITY",)]
                 self.add(
                     f"search:{a['text_basis']}",
@@ -214,16 +230,18 @@ class _Gen:
 
     def derived_elis(self) -> None:
         rows = self.q(
-            "SELECT a.eli_work, u.eli_unit FROM lgx.unit u JOIN lgx.act a ON a.act_id = u.act_id"
+            "SELECT a.eli_work, u.eli_unit, v.kind FROM lgx.unit u JOIN lgx.act a ON a.act_id = u.act_id"
+            " JOIN lgx.act_version v ON v.version_id = u.version_id"
             " WHERE u.version_id = a.basis_version_id AND u.eli_unit_derived AND u.unit_type = 'article'"
             " AND NOT u.is_repealed ORDER BY md5(u.unit_id::text) LIMIT 4"
         )
-        for r in rows:
+        for r in rows:  # « partial repeals unknown » is a property of original texts only (PLAN §8.5)
+            original = ["W_PARTIAL_REPEAL_UNKNOWN"] if r["kind"] == "original" else []
             self.add(
                 "article:derived_eli_citation",
                 "get_article",
                 {"citation": r["eli_unit"]},
-                {"warnings": ["W_DERIVED_ELI", "W_PARTIAL_REPEAL_UNKNOWN"]},
+                {"warnings": ["W_DERIVED_ELI", *original], "absent": [] if original else ["W_PARTIAL_REPEAL_UNKNOWN"]},
             )
 
     def metadata_status(self) -> None:

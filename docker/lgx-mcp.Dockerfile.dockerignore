@@ -7,5 +7,6 @@
 !lgx_core/**
 !lgx_mcp/**
 !config/aliases.yaml
+!config/embedding.yaml
 **/__pycache__
 **/*.pyc

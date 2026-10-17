@@ -44,6 +44,12 @@ async def resolve_citation(rt: Runtime, ctx: CallContext, args: dict[str, Any]) 
     # (e2e 2026-10-17). The resolver's own status decides, not the article-adjusted one.
     for c in res.candidates[:1] if res.status == "resolved" else res.candidates[:3]:
         await _warn_status(rt, ctx, facts, c)
+    if res.redirected_from is not None:  # the article is the code's (superseded member act, PLAN §2.6)
+        from lgx_mcp.annotate import Annotator
+
+        await Annotator(ctx, facts).superseded_by_code(
+            res.redirected_from, ref=res.redirected_from.eli_work, variant="redirected"
+        )
     structured: dict[str, Any] = {
         "status": status,
         "text": text,

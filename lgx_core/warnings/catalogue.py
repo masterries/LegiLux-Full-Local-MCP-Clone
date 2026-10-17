@@ -39,11 +39,15 @@ class Catalogue:
     def render(
         self,
         code: WarningCode | str,
+        /,
         lang: Lang | str = Lang.FR,
         variant: str | None = None,
         **params: Any,
     ) -> str:
-        """Fill a template; every placeholder must be supplied (missing values are a bug, not blank)."""
+        """Fill a template; every placeholder must be supplied (missing values are a bug, not blank).
+
+        ``code`` is positional-only: a template may have a ``{code}`` placeholder (W_SUPERSEDED_BY_CODE).
+        """
         template = self.template(code, lang, variant)
         needed = {name for _, name, _, _ in Formatter().parse(template) if name}
         missing = needed - params.keys()
@@ -54,6 +58,7 @@ class Catalogue:
     def warning(
         self,
         code: WarningCode | str,
+        /,
         lang: Lang | str = Lang.FR,
         variant: str | None = None,
         refs: list[str] | None = None,

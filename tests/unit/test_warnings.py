@@ -29,6 +29,20 @@ def test_render_and_variants(cat) -> None:  # type: ignore[no-untyped-def]
     )
 
 
+def test_a_code_placeholder_is_a_template_parameter(cat) -> None:  # type: ignore[no-untyped-def]
+    """W_SUPERSEDED_BY_CODE has a ``{code}`` placeholder: it used to collide with the ``code`` argument (M2 crash
+    of get_act on loi/1955/02/14/n3, routed to the Code de la route)."""
+    from lgx_mcp.context import WarningBag
+
+    assert cat.render("W_SUPERSEDED_BY_CODE", "fr", code="Code de la route").startswith("Acte intégré au Code de la")
+    w = cat.warning(WarningCode.W_SUPERSEDED_BY_CODE, "en", "redirected", code="Code de la route")
+    assert "shown: the article as it stands in the code" in w.message
+    bag = WarningBag(cat)
+    bag.add(WarningCode.W_SUPERSEDED_BY_CODE, ref="C1", variant="no_text", code="Code de la route")
+    assert bag.codes_for("C1") == ["W_SUPERSEDED_BY_CODE"]
+    assert "aucun texte propre" in bag.as_list()[0]["message"]
+
+
 def test_missing_parameter_is_an_error(cat) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(ValueError, match="missing"):
         cat.render("W_NOT_CONSOLIDATED", "fr", memorial="Mém. A n° 12/2015")

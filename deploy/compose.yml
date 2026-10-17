@@ -1,18 +1,25 @@
 # =====================================================================================================
 # deploy/compose.yml — AIRGAPPED RUNTIME (PLAN §10.2; Appendix C document 1).
 #
-# M1b scope: the services the dev stack exercises today — db, mcp, llm-cpu (profile cpu) and lgx-streamlit
-# (profile testui); M2 adds rerank (TEI, profile rerank). Still to come from Appendix C: llm-gpu / llm-vllm (gpu24 / gpu48),
-# proxy (Caddy basic auth on :8443 in front of lgx-streamlit), webui, egress-sentinel, lgx-ctl, prometheus,
-# db-bm25, oxigraph, embed-local. Until the proxy exists, lgx-streamlit here has no published port (by design:
+# Scope today: db, mcp, rerank (TEI, profile rerank) and lgx-streamlit (profile testui). Still to come from
+# Appendix C: proxy (Caddy basic auth on :8443 in front of lgx-streamlit), webui, egress-sentinel, lgx-ctl,
+# prometheus, db-bm25, oxigraph. Until the proxy exists, lgx-streamlit here has no published port (by design:
 # Streamlit has no authentication and must only be reached through Caddy in the airgap).
 #
-#   docker compose -f compose.yml --profile cpu --profile testui up -d        (after `lgx install`)
+#   docker compose -f compose.yml --profile testui up -d                      (after `lgx install`)
+#   docker compose -f compose.yml --profile rerank --profile testui up -d     (+ the reranker)
 # For the connected dev host use compose.dev.yml (standalone, dev defaults, 127.0.0.1 ports).
 #
+# No LLM runtime is bundled (user decision 2026-10-17): the chat LLM and, when enabled, the query embeddings are the
+# user's on-prem Mistral endpoint (same API as Mistral SaaS, another domain) — OPENAI_BASE_URL / LGX_LLM_MODEL and
+# LGX_EMBED_BASE_URL in deploy/.env. lgx-streamlit and mcp reach it over `enclave`, the only routed network next to
+# the proxy's `edge`; the DOCKER-USER rule admits NEW connections from br-lgx-encl only to LGX_MISTRAL_IP:443 and
+# drops everything else. The airgap has no upstream DNS: the domain resolves through extra_hosts
+# (LGX_MISTRAL_HOST -> LGX_MISTRAL_IP) or the enclave's own resolver.
+#
 # Conventions (Appendix C): images lgx.local/<name>:<tag> loaded from the signed platform bundle and verified by
-# image ID (pins in images.lock); pull_policy never; networks backend/front are internal, edge is the only network
-# with a gateway.
+# image ID (pins in images.lock); pull_policy never; networks backend/front are internal, edge and enclave are the
+# only networks with a gateway.
 # Secrets are files under ${LGX_HOME}/secrets written by `lgx install` (M5). Outside Swarm a compose secret is a
 # plain bind mount that keeps the host owner and mode (long-syntax uid/gid/mode are ignored), and mcp /
 # lgx-streamlit run as 10001:10001 with cap_drop ALL, so ownership is part of the contract (tests/unit/
@@ -20,6 +27,7 @@
 #   pg_superuser_pw  root:root   0600   db (the postgres entrypoint reads it as root)
 #   pg_ro_pw         10001:10001 0400   mcp
 #   mcp_token        10001:10001 0400   mcp, lgx-streamlit
+#   embed_api_key    10001:10001 0400   mcp            (empty file = no key: vector_status disabled:no_api_key)
 #   llm_api_key      10001:10001 0400   lgx-streamlit
 # e.g. install -o 10001 -g 10001 -m 0400 /dev/stdin "${LGX_HOME}/secrets/mcp_token" <<< "$TOKEN". A secret that
 # uid 10001 cannot read stops mcp (SettingsError) and lgx-streamlit (UiSettingsError) at start.
@@ -41,14 +49,7 @@ x-offline-env: &offline
   DO_NOT_TRACK: "1"
   NO_PROXY: "*"
 
-x-ollama-env: &ollama_env
-  <<: *offline
-  OLLAMA_NO_CLOUD: "1"
-  OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-32768}"
-  OLLAMA_KEEP_ALIVE: "-1"
-  OLLAMA_NUM_PARALLEL: "${LGX_LLM_PARALLEL:-2}"
-  OLLAMA_HOST: "0.0.0.0:11434"
-  OLLAMA_MODELS: /models/ollama
+x-mistral-host: &mistral_host ["${LGX_MISTRAL_HOST:-mistral.invalid}:${LGX_MISTRAL_IP:-192.0.2.10}"]
 
 networks:
   backend:
@@ -62,16 +63,19 @@ networks:
   edge:
     driver_opts: { com.docker.network.bridge.name: br-lgx-edge }
     ipam: { config: [{ subnet: 172.30.1.0/24 }] }
+  enclave:                                              # routed: only to the on-prem Mistral endpoint (DOCKER-USER)
+    driver_opts: { com.docker.network.bridge.name: br-lgx-encl }
+    ipam: { config: [{ subnet: 172.30.3.0/24 }] }
 
 volumes:
   pgdata: {}
-  ollama-models: {}
   audit: {}
 
 secrets:
   pg_superuser_pw: { file: "${LGX_HOME:-/opt/legilux}/secrets/pg_superuser_pw" }
   pg_ro_pw: { file: "${LGX_HOME:-/opt/legilux}/secrets/pg_ro_pw" }
   mcp_token: { file: "${LGX_HOME:-/opt/legilux}/secrets/mcp_token" }
+  embed_api_key: { file: "${LGX_HOME:-/opt/legilux}/secrets/embed_api_key" }
   llm_api_key: { file: "${LGX_HOME:-/opt/legilux}/secrets/llm_api_key" }
 
 # No compose `configs` with inline content: compose copies them into the container, which fails for read_only
@@ -111,22 +115,26 @@ services:
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
       LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 with the rerank profile (deploy/.env, lgx install)
       LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto: unavailable -> unreranked + reason | on: BACKEND_UNAVAILABLE | off
-      LGX_RERANK_K: "${LGX_RERANK_K:-40}"               # cpu profile: 16 (written to .env by lgx install)
+      LGX_RERANK_K: "${LGX_RERANK_K:-40}"               # 16 on a small CPU host (deploy/.env, lgx install)
       LGX_RERANK_BATCH: "32"                            # client-side split, <= TEI --max-client-batch-size (defence in depth)
       LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-1800}"  # body cut per candidate (PLAN §8.3: ~512 tokens)
       LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-30}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
-      LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"
-      LGX_EMBED_URL: "${LGX_EMBED_URL:-}"
-      LGX_EMBED_MODEL: "${LGX_EMBED_MODEL:-}"
-      LGX_EMBED_TIMEOUT_S: "5"
+      LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"   # none (default) | mistral: query embeddings, startup probe
+      LGX_EMBED_BASE_URL: "${LGX_EMBED_BASE_URL:-https://mistral.invalid}"   # the on-prem domain (no /v1)
+      LGX_EMBED_MODEL: "${LGX_EMBED_MODEL:-mistral-embed}"   # the reported id must equal lgx.embedding_model.model_id
+      LGX_EMBED_API_KEY_FILE: /run/secrets/embed_api_key
+      LGX_EMBED_MAX_CONCURRENCY: "${LGX_EMBED_MAX_CONCURRENCY:-5}"   # throttle (config/embedding.yaml)
+      LGX_EMBED_COOLDOWN_S: "${LGX_EMBED_COOLDOWN_S:-20}"
+      LGX_EMBED_TIMEOUT_S: "5"                          # a query waits at most this long, then runs lexical
       LGX_TZ: Europe/Luxembourg
       LGX_STALENESS_WARN_DAYS: "30"
       LGX_STALENESS_CRITICAL_DAYS: "90"
       LGX_MAX_RESULT_TOKENS: "${LGX_MAX_RESULT_TOKENS:-4000}"
       LGX_AUDIT_QUERY_TEXT: "false"
       LGX_TRUSTED_PROXIES: "${LGX_TRUSTED_PROXIES:-}"   # IP/CIDR of Open WebUI: its user headers key rate limit + audit
-    secrets: [pg_ro_pw, mcp_token]
+    secrets: [pg_ro_pw, mcp_token, embed_api_key]
+    extra_hosts: *mistral_host
     volumes: ["audit:/var/log/lgx"]
     depends_on:
       db: { condition: service_healthy }
@@ -135,10 +143,10 @@ services:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/readyz', timeout=3)"]
       interval: 15s
       retries: 20
-    networks: [backend]
+    networks: [backend, enclave]                        # enclave: query embeddings (only with provider mistral)
 
   rerank:                                               # TEI cross-encoder (PLAN §8.3 step 3; Appendix C). Profile rerank:
-    <<: *base                                           # opt-in until the cpu/gpu installers write COMPOSE_PROFILES (M5)
+    <<: *base                                           # opt-in until lgx install writes COMPOSE_PROFILES (M5)
     profiles: [rerank]
     image: lgx.local/tei:cpu-1.9.4                      # text-embeddings-inference:cpu-1.9.4@sha256:2538ea1c… (images.lock)
     user: "10001:10001"
@@ -161,15 +169,6 @@ services:
       start_period: 300s
     networks: [backend]
 
-  llm-cpu:                                              # TEST FIRST: gemma4:26b-a4b; dev fallback ministral-3:8b
-    <<: *base
-    profiles: [cpu]
-    image: lgx.local/ollama:0.40.5                      # ollama/ollama:0.40.5@sha256:5d3a2f25…
-    environment: { <<: *ollama_env, OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-16384}" }
-    volumes: ["ollama-models:/models/ollama"]
-    networks: { backend: { aliases: [llm] } }
-    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, retries: 10 }
-
   lgx-streamlit:                                        # tester UI (profile testui): chat + direct search + eval + corpus
     <<: *base
     profiles: [testui]
@@ -179,19 +178,16 @@ services:
     tmpfs: ["/tmp"]
     environment:
       <<: *offline
-      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-http://llm:11434/v1}"
+      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-https://mistral.invalid/v1}"   # the user's on-prem Mistral endpoint
       OPENAI_API_KEY_FILE: /run/secrets/llm_api_key
-      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-gemma4:26b-a4b}"
-      LGX_LLM_PRESETS: "ollama,vllm,mistral-onprem"     # 'cloud' exists only in compose.dev.yml (opt-in)
+      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-mistral-small-latest}"   # [U] the model the endpoint serves
       LGX_MCP_URL: http://mcp:8000/mcp
       LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
       LGX_MCP_TIMEOUT_S: "20"
-      # sized for the cpu profile (docs/dev/e2e-2026-10-17.md: 237-359 s per call at 5-7k prompt tokens on CPU;
-      # 120 s timed out); gpu profiles may lower them in deploy/.env
-      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-600}"
-      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-1200}"
-      LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"   # PLAN §9.1 cpu: ≤ 2.5k retrieved tokens
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
+      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-600}"
+      LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-4000}"
       LGX_EVAL_DIR: /data/eval
       LGX_HOSTNAME: "${LGX_HOSTNAME:-legilux.intra}"
       STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
@@ -201,10 +197,11 @@ services:
       STREAMLIT_SERVER_FILE_WATCHER_TYPE: "none"
       STREAMLIT_CLIENT_SHOW_ERROR_DETAILS: "none"
     secrets: [mcp_token, llm_api_key]
+    extra_hosts: *mistral_host
     volumes: ["${LGX_HOME:-/opt/legilux}/bundles/current/eval:/data/eval:ro"]
     depends_on: { mcp: { condition: service_healthy } }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
       interval: 30s
       retries: 10
-    networks: [backend, front]                          # internal only; users reach it through the proxy (M1b: Caddy)
+    networks: [backend, front, enclave]                 # users reach it through the proxy (Caddy); enclave: the LLM

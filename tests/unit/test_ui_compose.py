@@ -1,4 +1,4 @@
-"""Compose lint for the dev stack and the runtime base (PLAN §10.3, M1b "compose lint for the cloudllm profile").
+"""Compose lint for the dev stack and the runtime base (PLAN §10.3). No LLM runtime is bundled (2026-10-17).
 
 ``docker compose config`` only renders files locally (no daemon call, no pull); the test is skipped when the
 docker CLI with the compose plugin is not installed.
@@ -42,32 +42,32 @@ def rendered(file: Path, profiles: tuple[str, ...] = ()) -> dict[str, Any]:
     return json.loads(proc.stdout)
 
 
-def test_dev_default_command_never_starts_the_cloud_ui() -> None:
+def test_dev_services_and_the_external_llm_endpoint() -> None:
     default = rendered(DEV)
     assert set(default["services"]) == {"db", "db-load", "mcp", "lgx-streamlit"}
-    cpu = rendered(DEV, ("cpu",))
-    assert "ollama" in cpu["services"] and "lgx-streamlit-cloud" not in cpu["services"]
-    cloud = rendered(DEV, ("cloudllm",))
-    svc = cloud["services"]["lgx-streamlit-cloud"]
-    assert svc["profiles"] == ["cloudllm"], "extends must not merge in a default profile"
-    assert svc["environment"]["LGX_ALLOW_CLOUD_LLM"] == "1"
-    assert set(svc["networks"]) == {"backend", "dev-egress"}
-    assert [p["published"] for p in svc["ports"]] == ["8502"]
+    assert set(rendered(DEV, ("rerank",))["services"]) == {"db", "db-load", "mcp", "lgx-streamlit", "rerank"}
+    ui = default["services"]["lgx-streamlit"]
+    env = ui["environment"]
+    assert env["OPENAI_BASE_URL"] == "https://api.mistral.ai/v1"  # the user's Mistral endpoint by default
+    assert env["OPENAI_API_KEY_FILE"] == "/run/secrets/llm_api_key" and "OPENAI_API_KEY" not in env
+    assert env["LGX_LLM_MODEL"] and env["NO_PROXY"] != "*"
+    assert set(ui["networks"]) == {"backend", "edge", "llm-egress"}  # the external LLM needs a route
+    assert default["networks"]["llm-egress"].get("internal") is not True
 
 
 def test_dev_ports_are_loopback_only_and_backend_is_internal() -> None:
-    cfg = rendered(DEV, ("cpu", "cloudllm", "ollama-pull"))
+    cfg = rendered(DEV, ("rerank",))
     assert cfg["networks"]["backend"]["internal"] is True
     published = {name: s.get("ports", []) for name, s in cfg["services"].items() if s.get("ports")}
-    assert set(published) == {"mcp", "lgx-streamlit", "lgx-streamlit-cloud"}
+    assert set(published) == {"mcp", "lgx-streamlit", "rerank"}
     for name, ports in published.items():
         assert all(p["host_ip"] == "127.0.0.1" for p in ports), name
-    for name in ("db", "db-load", "ollama"):
+    for name in ("db", "db-load"):
         assert set(cfg["services"][name]["networks"]) == {"backend"}, name
-    assert set(cfg["services"]["ollama-pull"]["networks"]) == {"dev-egress"}
+    assert set(cfg["services"]["mcp"]["networks"]) == {"backend", "edge"}
 
 
-def test_dev_hardening_and_no_secrets_required() -> None:
+def test_dev_hardening_and_no_secret_files_required() -> None:
     cfg = rendered(DEV)
     for name, svc in cfg["services"].items():
         assert svc.get("cap_drop") == ["ALL"], name
@@ -76,20 +76,26 @@ def test_dev_hardening_and_no_secrets_required() -> None:
             # compose copies inline-content configs into the container: impossible on a read-only rootfs
             assert not svc.get("configs"), f"{name}: read_only service with configs"
             assert svc.get("user") == "10001:10001", name
-        assert not svc.get("secrets"), f"{name}: the default dev stack must start without secret files"
+    # API keys are files only; by default /dev/null (= no key), so the dev stack starts without any secret file
+    assert {k: v["file"] for k, v in cfg["secrets"].items() if k != "build_ca_bundle"} == {
+        "llm_api_key": "/dev/null",
+        "embed_api_key": "/dev/null",
+    }
     ui = cfg["services"]["lgx-streamlit"]["environment"]
     assert ui["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] == "false"
     assert ui["STREAMLIT_LOGGER_HIDE_WELCOME_MESSAGE"] == "true"
     assert ui["STREAMLIT_BROWSER_SERVER_ADDRESS"]
     assert ui["LGX_MCP_TOKEN"] == cfg["services"]["mcp"]["environment"]["LGX_MCP_TOKEN"]
-    assert cfg["services"]["mcp"]["environment"]["LGX_EMBED_PROVIDER"] == "none"
+    mcp = cfg["services"]["mcp"]["environment"]
+    assert mcp["LGX_EMBED_PROVIDER"] == "none"  # user decision: embeddings off
+    assert (mcp["LGX_EMBED_MAX_CONCURRENCY"], mcp["LGX_EMBED_COOLDOWN_S"]) == ("5", "20")
     deps = cfg["services"]["mcp"]["depends_on"]["db-load"]["condition"]
     assert deps == "service_completed_successfully"
 
 
 def test_runtime_base_is_offline_by_construction() -> None:
-    cfg = rendered(RUNTIME, ("cpu", "testui"))
-    assert set(cfg["services"]) == {"db", "mcp", "llm-cpu", "lgx-streamlit"}
+    cfg = rendered(RUNTIME, ("testui",))
+    assert set(cfg["services"]) == {"db", "mcp", "lgx-streamlit"}  # no LLM runtime
     for name, svc in cfg["services"].items():
         assert svc.get("pull_policy") == "never", name
         assert not svc.get("ports"), f"{name}: only the proxy may publish ports in the airgap"
@@ -98,23 +104,23 @@ def test_runtime_base_is_offline_by_construction() -> None:
             assert not svc.get("configs"), name
     for net in ("backend", "front"):
         assert cfg["networks"][net]["internal"] is True
-    assert set(cfg["services"]["lgx-streamlit"]["networks"]) == {"backend", "front"}
-    assert set(cfg["services"]["mcp"]["networks"]) == {"backend"}
+    # the only routed network of these services leads to the on-prem Mistral endpoint (DOCKER-USER allowlist)
+    assert cfg["networks"]["enclave"]["driver_opts"]["com.docker.network.bridge.name"] == "br-lgx-encl"
+    assert set(cfg["services"]["lgx-streamlit"]["networks"]) == {"backend", "front", "enclave"}
+    assert set(cfg["services"]["mcp"]["networks"]) == {"backend", "enclave"}
+    assert set(cfg["services"]["db"]["networks"]) == {"backend"}
+    ui = cfg["services"]["lgx-streamlit"]
+    assert ui["environment"]["OPENAI_API_KEY_FILE"] == "/run/secrets/llm_api_key"
+    assert ui["extra_hosts"] == cfg["services"]["mcp"]["extra_hosts"]  # the domain resolves without upstream DNS
+    assert cfg["services"]["mcp"]["environment"]["LGX_EMBED_PROVIDER"] == "none"
 
 
 def test_dev_edge_network_has_no_outbound_nat() -> None:
     """Review 2026-10-17: lgx-streamlit / mcp reached the internet through `edge` (default route, NAT)."""
-    cfg = rendered(DEV, ("cpu",))
+    cfg = rendered(DEV)
     opts = cfg["networks"]["edge"].get("driver_opts") or {}
     assert opts.get("com.docker.network.bridge.enable_ip_masquerade") == "false"
-    assert "edge" not in cfg["services"]["ollama"]["networks"]
-
-
-def test_dev_down_stops_every_profile() -> None:
-    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-    line = next(x for x in makefile.splitlines() if "down $(DEV_DOWN_FLAGS)" in x)
-    for profile in ("cpu", "ollama-pull", "cloudllm"):
-        assert f"--profile {profile}" in line, profile
+    assert "llm-egress" not in cfg["services"]["mcp"]["networks"]
 
 
 def test_runtime_secret_ownership_table_matches_the_services() -> None:
@@ -126,7 +132,7 @@ def test_runtime_secret_ownership_table_matches_the_services() -> None:
         m.group(1): (m.group(2), m.group(3))
         for m in re.finditer(r"^#   (\w+)\s+(\S+:\S+)\s+(0[0-7]{3})\s+\S", text, re.MULTILINE)
     }
-    cfg = rendered(RUNTIME, ("cpu", "testui"))
+    cfg = rendered(RUNTIME, ("testui",))
     assert set(table) == set(cfg["secrets"])
     for name, svc in cfg["services"].items():
         for sec in svc.get("secrets", []):
@@ -138,8 +144,22 @@ def test_runtime_secret_ownership_table_matches_the_services() -> None:
                 assert readable, f"{name}: secret {secret} ({owner} {mode}) is not readable by uid 10001"
 
 
-def test_runtime_cpu_ui_timeouts_fit_measured_cpu_latency() -> None:
-    env = rendered(RUNTIME, ("cpu", "testui"))["services"]["lgx-streamlit"]["environment"]
-    assert float(env["LGX_LLM_TIMEOUT_S"]) >= 600  # 237-359 s per call measured on CPU (e2e 2026-10-17)
-    assert float(env["LGX_TURN_BUDGET_S"]) >= 2 * float(env["LGX_LLM_TIMEOUT_S"])
-    assert int(env["LGX_TOOL_RESULT_TOKENS"]) <= 2500
+def test_rerank_is_an_opt_in_offline_internal_profile() -> None:
+    """M2 reranker (PLAN §8.3, Appendix C): profile ``rerank`` only, offline, read-only model mount, no route out."""
+    assert "rerank" not in rendered(DEV)["services"] and "rerank" not in rendered(RUNTIME)["services"]
+    dev = rendered(DEV, ("rerank",))["services"]["rerank"]
+    assert "@sha256:" in dev["image"] and dev["read_only"] is True
+    assert all(p["host_ip"] == "127.0.0.1" for p in dev["ports"])
+    runtime = rendered(RUNTIME, ("rerank",))["services"]["rerank"]
+    assert set(runtime["networks"]) == {"backend"} and not runtime.get("ports")
+    for svc in (dev, runtime):
+        assert svc["profiles"] == ["rerank"] and svc["environment"]["HF_HUB_OFFLINE"] == "1"
+        assert any(v["target"] == "/models/hf" and v.get("read_only") for v in svc["volumes"])
+        assert "--auto-truncate" in svc["command"]
+
+
+@pytest.mark.skipif(shutil.which("make") is None, reason="make not installed")
+def test_dev_down_stops_every_profile() -> None:
+    """`make dev-down` covers every profile (before M2 it left the rerank container and the networks behind)."""
+    out = subprocess.run(["make", "-n", "-s", "dev-down"], cwd=ROOT, capture_output=True, text=True, timeout=30).stdout
+    assert "--profile rerank" in out

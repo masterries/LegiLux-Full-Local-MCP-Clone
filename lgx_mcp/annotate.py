@@ -7,6 +7,7 @@ unit (repealed stub, derived ELI, PDF pages) and ``lgx.data_quality_issue`` — 
 from __future__ import annotations
 
 import datetime as dt
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -87,6 +88,24 @@ class Annotated:
     effective: Serving  # at the date the cited text serves (as_of, or the start of a future window)
 
 
+_ACT_TITLE = re.compile(r"(?i)^\s*(loi|règlement|reglement|arrêté|arrete|décret|decret|convention)\b")
+
+
+def of_member(title: str | None, limit: int = 160) -> str | None:
+    """« de la loi du … », « de l'arrêté grand-ducal du … », « du règlement grand-ducal du … » from a member title."""
+    t = (title or "").strip().rstrip(".").strip()
+    if not t:
+        return None
+    t = clip(t[0].lower() + t[1:], limit)
+    if t.startswith(("règlement", "reglement", "décret", "decret")):
+        return "du " + t
+    if t.startswith(("loi", "convention")):
+        return "de la " + t
+    if t[0] in "aeiouéèêh":
+        return "de l'" + t
+    return "de " + t
+
+
 class Annotator:
     def __init__(self, ctx: CallContext, facts: Facts) -> None:
         self.ctx = ctx
@@ -99,6 +118,26 @@ class Annotator:
         if key not in self._amending:
             self._amending[key] = await self.facts.amending_since(act.act_id, since, self.ctx.as_of)
         return self._amending[key]
+
+    async def superseded_by_code(self, act: Act, *, ref: str | None, variant: str | None = None) -> None:
+        """W_SUPERSEDED_BY_CODE naming the code; ``variant`` redirected / no_text when the release has it (older
+        releases carry only the base text: their ``lgx.warning_def`` is the catalogue)."""
+        code = await self.facts.act(act.superseded_by_act_id) if act.superseded_by_act_id else None
+        name = "code"
+        if code is not None:
+            name = short_title_of(code)
+            serving = await self.facts.serving_at(code.act_id, self.ctx.as_of)
+            version = await self.facts.version(serving.text_version_id) if serving and serving.text_version_id else None
+            if version is not None:
+                name = (await self.facts.short_titles([version], {code.act_id: code})).get(code.act_id) or name
+        known = self.ctx.bag.catalogue[WarningCode.W_SUPERSEDED_BY_CODE].variants
+        self.ctx.bag.add(
+            WarningCode.W_SUPERSEDED_BY_CODE,
+            ref=ref,
+            variant=variant if variant in known else None,
+            data={"act_eli": act.eli_work, "code_eli": code.eli_work if code else None},
+            code=name,
+        )
 
     async def prepare(self, items: list[tuple[Act, Version, Unit | None]]) -> None:
         """Batch the serving lookups of a result page."""
@@ -127,9 +166,15 @@ class Annotator:
         if text_basis == "metadata_only":
             text_basis = act.text_basis if act.text_basis != "metadata_only" else "original_never_amended"
         member_eli = None
+        member_of = None
         if unit is not None and unit.member_act_id:
             member = await self.facts.act(unit.member_act_id)
             member_eli = member.eli_work if member else None
+            member_of = of_member(member.title) if member else None
+        elif unit is not None and version.source_format == "pdf":
+            in_part, heading = await self.facts.member_part(unit.unit_id)
+            if in_part:  # never cite a member's article as the code's own
+                member_of = of_member(heading) if _ACT_TITLE.match(heading or "") else "d'un acte membre non identifié"
         article = article_short(unit.num_raw) if unit else None
         article_eli = unit.eli_unit if unit else None
         if unit is not None and unit.num_norm:
@@ -165,21 +210,34 @@ class Annotator:
             "source_sha256": version.sha256,
             "warnings": [],
         }
-        cit["citation_string"] = self.citation_string(article, short, version, act, text_basis, article_eli)
+        cit["citation_string"] = self.citation_string(
+            article, short, version, act, text_basis, article_eli, member=member_of
+        )
         await self.add_warnings(key, act, version, unit, serving, effective, text_basis)
         cit["warnings"] = ctx.bag.codes_for(key)
         return Annotated(citation=cit, act=act, version=version, unit=unit, serving=serving, effective=effective)
 
     @staticmethod
     def citation_string(
-        article: str | None, short: str, version: Version, act: Act, text_basis: str, article_eli: str | None
+        article: str | None,
+        short: str,
+        version: Version,
+        act: Act,
+        text_basis: str,
+        article_eli: str | None,
+        *,
+        member: str | None = None,
     ) -> str:
-        """« Art. L. 121-1, Code du travail (version consolidée applicable au 26/07/2026) — <ELI> » (PLAN §8.6)."""
+        """« Art. L. 121-1, Code du travail (version consolidée applicable au 26/07/2026) — <ELI> » (PLAN §8.6); an
+        article of a member act in a code-recueil names that act (PLAN §2.6): « Art. 2 de l'arrêté grand-ducal du 23
+        novembre 1955 … (Code de la route, version consolidée applicable au 12/06/2026) — <ELI> »."""
         if version.is_original:
             mem = act.memorial_short or "Mém. A"
             label = f"texte original, {mem} — non consolidé" if text_basis != "consolidated" else "texte original"
         else:
             label = version.display_label
+        if article and member:
+            return f"{article} {member} ({short}, {label}) — {article_eli or version.eli_version}"
         head = f"{article}, {short}" if article else short
         return f"{head} ({label}) — {article_eli or version.eli_version}"
 
@@ -302,8 +360,7 @@ class Annotator:
                 )
             bag.add(WarningCode.W_PDF_EXTRACTED, ref=key, pages=pages)
         if "superseded_by_code" in flags:
-            code = await self.facts.act(act.superseded_by_act_id) if act.superseded_by_act_id else None
-            bag.add(WarningCode.W_SUPERSEDED_BY_CODE, ref=key, code=short_title_of(code) if code else "code")
+            await self.superseded_by_code(act, ref=key)
         if version.is_original:
             bag.add(WarningCode.W_PARTIAL_REPEAL_UNKNOWN, ref=key)
         if unit is not None and unit.eli_unit_derived:

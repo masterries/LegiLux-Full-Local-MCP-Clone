@@ -1,8 +1,8 @@
 """OpenAI-compatible Chat Completions client (official ``openai==3.24.0``; PLAN §9.3 "LLM access").
 
-Works against Ollama ``/v1``, vLLM, the user's Mistral on-prem endpoint or, on the connected dev host only,
-a cloud endpoint (opt-in ``cloudllm`` profile). The transport is an ``httpx2.AsyncClient`` with
-``trust_env=False`` by default, so internal endpoints are never reached through a proxy.
+Works against any OpenAI-compatible endpoint; by default the user's Mistral endpoint (the Mistral SaaS API, or the
+same API under the on-prem domain in the airgap). The transport is an ``httpx2.AsyncClient`` with
+``trust_env=False`` by default, so the endpoint is never reached through a proxy unless ``LGX_LLM_TRUST_ENV=1``.
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ class LlmError(RuntimeError):
 
 
 class ToolsUnsupportedError(LlmError):
-    """The endpoint rejected the ``tools`` parameter (e.g. Ollama: "model does not support tools")."""
+    """The endpoint rejected the ``tools`` parameter (e.g. "model does not support tools")."""
 
 
 class ChatModel(Protocol):

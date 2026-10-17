@@ -1,9 +1,82 @@
 # M2 baseline — lexical vs lexical + reranker (sample release)
 
 - Date: 2026-10-17. Gold sets: G0, G1, G2 v1, G3 — all **`draft_unvalidated`** (lawyer review pending).
-- Release `data-20261016-sample` (sync date 2026-10-16; 10,220 searchable chunks), embeddings **off**
-  (`LGX_EMBED_PROVIDER=none`, lexical mode only). Decision drawn from these numbers: `docs/adr/0001-lexical-ranker.md`.
-- Machine-readable reports next to this file: `G{0,1,2,3}-*.json` (per-item results, config, latency) and `.md`.
+- Two data states of release `data-20261016-sample` (sync date 2026-10-16), embeddings **off** (`LGX_EMBED_PROVIDER=none`):
+  **before** = the M1 sample data with the M2 search functions (`legilux_eval_m2`, 10,220 searchable chunks, Task B,
+  sections below « Initial baseline »); **after** = the M2 integration release in the runtime database `legilux`
+  (`lgx ingest --sample --include-m2`: + the 5 PDF code texts, recueil dedup and routing; 20,529 searchable chunks).
+  Decision drawn from these numbers: `docs/adr/0001-lexical-ranker.md`. M2 acceptance check: `m2-acceptance.md`.
+- Machine-readable reports next to this file: `G{0,1,2,3}-*.json` (per-item results, config, latency) and `.md`;
+  `*-m2data.*` are the « after » runs.
+
+## Final M2 baseline (frozen 2026-10-17, release with the PDF codes)
+
+| set | metric (gate) | before (Task B, 10,220 chunks) | **after (M2 release, 20,529 chunks)** |
+|---|---|---|---|
+| G0 smoke (20) | checks passed (20/20) | 20/20 lexical, 20/20 rerank | **20/20 lexical, 20/20 rerank** |
+| G1 citations, v1 (566) | exact accuracy (≥ 0.95) | 0.997 (564/566) | 0.995 (563/566): + G1-204, made stale by the recueil dedup (below) |
+| G1 citations, **v2** (564, regenerated on the M2 release) | exact / ambiguity recall / not-found | — | **0.996 (562/564) / 1.000 / 1.000** (the two known resolver gaps G1-285 « …, art. unique », G1-562 RGPD spelled out) |
+| G2 retrieval (205), lexical bm25 | R@1 / R@5 / R@10 / R@20 | 0.541 / 0.778 / 0.849 / 0.885 | **0.556 / 0.773 / 0.844 / 0.878** |
+| G2, lexical bm25 | MRR@10 / nDCG@10 / act R@10 | 0.657 / 0.698 / 0.961 | **0.662 / 0.702 / 0.961** |
+| G2, lexical rank_cd (= M1 ordering) | R@10 / MRR@10 | 0.434 / 0.302 | 0.356 / 0.239 |
+| G2 subset (40), lexical bm25 | R@1 / R@10 / R@20 / MRR@10 / nDCG@10 | 0.463 / 0.800 / 0.850 / 0.598 / 0.647 | 0.463 / 0.825 / 0.825 / 0.597 / 0.650 |
+| G2 subset (40), **lexical + rerank** (k = 16, 600 chars) | R@1 / R@10 / R@20 / MRR@10 / nDCG@10 | 0.713 / 0.825 / 0.850 / 0.749 / 0.766 (Task B's full run, same items) | **0.713 / 0.825 / 0.825 / 0.745 / 0.763** (40/40 reranked, 0 errors) |
+| G3 warnings | mandatory coverage (100 %) / forbidden (0) / status (≥ 98 %) | v1 (184): 1.000 (563/563) / 0 / 1.000 | **v2 (199, regenerated): 1.000 (628/628) / 0 / 1.000** lexical; rerank subset (10 search items): 1.000 (32/32) / 0 |
+| latency, lexical search tool | p50 / p95 | 0.22 / 0.41 s | 0.30 / 0.59 s (SQL p50 0.25 s) |
+| latency, reranked search tool (subset, idle host) | p50 / p95 / max | 17.9 / 34.6 s (busy host, full G2) | 17.1 / 22.6 / 25.3 s (rerank p50 16.7 s) |
+
+**Frozen for the M4 gates (PLAN §11.3 « no drop > 2 / 3 points »):** G2 lexical (205 items) **R@10 0.844, MRR@10 0.662**;
+G2 lexical + rerank on the fixed subset `eval/gold/subsets/G2-rerank-40.json` **R@10 0.825, MRR@10 0.745** (the full-set
+reranked reference stays Task B's 0.880 / 0.823 on the pre-PDF data: re-ranking all 205 items costs ≈ 1 h of CPU on this
+host, the subset moved by 0.000 / −0.004 between the two data states).
+
+Reproduce (dev stack with `DEV_PROFILES=rerank`, TEI at :8090; never two reranked runs at a time):
+
+```sh
+python -m eval.harness run --set G0 --tag G0-lexical-m2data              # and G1 (v1 / v2), G3; in process against legilux
+python -m eval.harness run --set G2 --tag G2-lexical-bm25-m2data
+python -m eval.harness run --set G2 --ranker rank_cd --tag G2-lexical-rank_cd-m2data
+python -m eval.harness run --set G2 --mode rerank --rerank-k 16 --rerank-body-chars 600 \
+    --subset eval/gold/subsets/G2-rerank-40.json --tag G2-rerank-bm25-subset40-m2data     # 674 s
+python -m eval.harness run --set G0 --mode rerank --tag G0-rerank-m2data                  # 73 s
+python -m eval.harness run --set G3 --mode rerank --subset eval/gold/subsets/G3-rerank-search.json \
+    --tag G3-rerank-search-subset-m2data                                                 # 149 s
+python -m eval.harness compare --subset eval/gold/subsets/G2-rerank-40.json eval/reports/G2-lexical-bm25.json \
+    eval/reports/G2-rerank-bm25.json eval/reports/G2-lexical-bm25-m2data.json eval/reports/G2-rerank-bm25-subset40-m2data.json
+```
+
+**Subsets (fixed, results never looked at; `python -m eval.harness subset`).** G2-rerank-40: language (≥ 5 each) ×
+first target act, every k-th item by id — 29 FR, 6 DE, 5 EN over 23 strata (codes, Constitution, CNPD law, copyright,
+press law, AIFM, …), so DE/EN weigh more than in the full set (absolute numbers are lower; compare runs on the same ids
+only). Ids: G2-001, G2-007, G2-014, G2-020, G2-027, G2-033, G2-040, G2-047, G2-052, G2-058, G2-064, G2-070, G2-076, G2-082, G2-088, G2-094, G2-100, G2-106, G2-112, G2-118, G2-124, G2-131, G2-139, G2-148, G2-155, G2-161, G2-165, G2-172, G2-177, G2-186, G2-188, G2-189, G2-190, G2-191, G2-195, G2-196, G2-198, G2-199, G2-200, G2-204. G3-rerank-search (the G3 items whose hits can change under re-ranking: no act filter, PDF
+code texts, superseded members routed to the code; act-filtered items expect act-level warnings only, identical for
+any order of that act's articles): G3-008, G3-009, G3-010, G3-011, G3-023, G3-026, G3-032, G3-050, G3-056, G3-120.
+
+**What changed with the M2 data.**
+
+- **G2 lexical held** with twice the chunks: −0.5 points R@10, +0.5 MRR, +1.5 R@1. Per item 17 better, 13 worse, 175
+  unchanged (MRR@10); 8 of the 13 worse have a PDF-code article in their new top 5 (school, social security and road
+  codes on labour-law questions: G2-018, -034, -035, -036, -049, -143, -145, -205) — new texts competing, not a ranking
+  defect. The M1 ordering (`rank_cd`, no IDF) loses 8 points R@10 on the same data, which confirms OD7 (ADR 0001).
+- **G2 re-validation (PLAN §11.1 drift rule):** `freeze-g2` found no changed text hash, but G2-181 / G2-182 targeted the
+  JO original of `rgd/2000/07/24/n3`, which the M2 recueil routing marks `superseded_by_code` (Code de l'éducation
+  nationale): originals of such acts are not searchable (PLAN §6.4), the search returns the code's articles of that
+  member (rank 1). Both targets now point at the member's art. 7 / art. 5 in the code text (`revalidated` note in the
+  item). Without the re-validation the after-run reads R@10 0.834, MRR 0.656.
+- **G1 v1 → v2:** the XML recueil dedup removed the Constitution and Code du travail copies from
+  `code/fonction_publique`, so « article 106 du Code de la fonction publique » is no longer ambiguous (G1-204, a correct
+  resolution against a stale expectation). `gen-g1` on the M2 release: 564 items, no changed expectation; 10 items left
+  and 8 entered by the md5 sampling (ELIs of the PDF codes `code/route`, `code/communal`, a new member number).
+- **G3 v2** (`gen-g3` on the M2 release, 199 items) covers the M2 codes: W_PDF_EXTRACTED 15 pairs, W_SUPERSEDED_BY_CODE 3,
+  W_STUB 9 (the PDF stub fallback of the secteur financier law). The first v2 run found 3 misses, all fixed: a generator rule
+  (`W_PARTIAL_REPEAL_UNKNOWN` expected on a consolidated derived-ELI article: only originals carry it), a search of an
+  article that starts with its provenance « (Loi du 21 novembre 1997) « … » (the citation span emptied the lexical query;
+  `retrieval/expansion.py` now keeps the words) and a search filtered to a superseded member (now searched in the code
+  text, `docs/dev/INTERFACES.md` § 11). W_TEMPORARY_ACT stays untriggerable (temporary RGDs are metadata-only, OD10).
+- **TEI** on the idle host: container start → ready ≈ 95 s (model load 3 s, warm-up 92 s); Task B measured 5 min 53 s on a
+  busy host.
+
+# Initial baseline (Task B, before the M2 ingest data)
 
 ## Setup
 
@@ -196,4 +269,4 @@ with the act named) did not return L. 124-3 at `top_k` 10 under M1.
   their numbers move by 0.1 per item.
 - W_PDF_EXTRACTED, W_SUPERSEDED_BY_CODE and W_TEMPORARY_ACT cannot be triggered by the sample release yet (no PDF
   text, recueil routing or temporary-act flags loaded); G3 is regenerated (`gen-g3`) once the M2 ingest is
-  rebuilt.
+  rebuilt. → Done in the final baseline above (G3 v2); W_TEMPORARY_ACT stays untriggerable (OD10).

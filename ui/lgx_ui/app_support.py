@@ -13,6 +13,7 @@ from collections.abc import Callable, Mapping, Sequence
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlsplit
 
 from lgx_core.urls import is_internal_url
 from lgx_ui.llm import ChatModel, LlmConfig, OpenAICompatChat
@@ -49,7 +50,6 @@ KEEP = "session"
 # entrypoint and the next one to the default page, a pseudo page switch that persist_state does not cover (the chat
 # then found an empty base URL and model: e2e 2026-10-17).
 SIDEBAR_KEYS = (
-    "llm_preset",
     "llm_base_url",
     "llm_model",
     "llm_temperature",
@@ -86,7 +86,6 @@ def default_deps() -> UiDeps:
 @dataclass
 class SidebarState:
     llm: LlmConfig | None
-    preset_key: str
     chat_mode: str
     max_iterations: int
     prompt_lang: str
@@ -103,12 +102,6 @@ class SidebarState:
 
 
 # ------------------------------------------------------------------------------------------- state
-
-
-def endpoint_allowed(cfg: UiSettings, base_url: str) -> bool:
-    """A configured / preset URL, an internal service URL, or anything only with LGX_ALLOW_CLOUD_LLM=1: a URL
-    typed into the sidebar must not send questions and retrieved texts to a public endpoint (review 2026-10-17)."""
-    return base_url.rstrip("/") in cfg.known_llm_urls() or cfg.allow_cloud or is_internal_url(base_url)
 
 
 def settings(st: Any) -> UiSettings:
@@ -223,15 +216,6 @@ def search_schema_info(specs: Sequence[ToolSpec]) -> tuple[list[str], int, int, 
 # ------------------------------------------------------------------------------------------- sidebar
 
 
-def _apply_preset(st: Any) -> None:
-    cfg = settings(st)
-    preset = cfg.preset(st.session_state.get("llm_preset", ""))
-    if preset is not None:
-        st.session_state["llm_base_url"] = preset.base_url
-        if preset.model:
-            st.session_state["llm_model"] = preset.model
-
-
 def render_sidebar(st: Any) -> SidebarState:
     state = st.session_state
     for key in SIDEBAR_KEYS:  # re-save (see SIDEBAR_KEYS): turns last run's widget values into set values
@@ -262,23 +246,8 @@ def render_sidebar(st: Any) -> SidebarState:
         st.rerun()
 
     sb.markdown("### LLM (OpenAI-compatible)")
-    presets = list(cfg.presets)
-    st.session_state.setdefault("llm_preset", presets[0].key if presets else "custom")
-    st.session_state.setdefault("llm_base_url", presets[0].base_url if presets else cfg.llm_base_url)
-    st.session_state.setdefault("llm_model", presets[0].model if presets else cfg.llm_model)
-    labels = {p.key: p.label for p in presets}
-    sb.selectbox(
-        "Préréglage",
-        list(labels),
-        format_func=lambda k: labels.get(k, k),
-        key="llm_preset",
-        persist_state=KEEP,
-        on_change=_apply_preset,
-        args=(st,),
-    )
-    preset = cfg.preset(st.session_state["llm_preset"])
-    if preset is not None and preset.note:
-        sb.caption(preset.note)
+    st.session_state.setdefault("llm_base_url", cfg.llm_base_url)
+    st.session_state.setdefault("llm_model", cfg.llm_model)
     base_url = sb.text_input("Base URL", key="llm_base_url", persist_state=KEEP).strip()
     model = sb.text_input("Modèle", key="llm_model", persist_state=KEEP).strip()
     state.setdefault("llm_temperature", float(cfg.llm_temperature))
@@ -292,8 +261,7 @@ def render_sidebar(st: Any) -> SidebarState:
     )
     st.session_state.setdefault("prompt_lang", cfg.ui_lang if cfg.ui_lang in ("fr", "de", "en") else "fr")
     prompt_lang = sb.selectbox("Langue du prompt système", ["fr", "de", "en"], key="prompt_lang", persist_state=KEEP)
-    key_ok = base_url.rstrip("/") in cfg.known_llm_urls()
-    allowed = endpoint_allowed(cfg, base_url) if base_url else True
+    key_ok = cfg.key_allowed(base_url)
     llm = (
         LlmConfig(
             base_url=base_url,
@@ -303,16 +271,13 @@ def render_sidebar(st: Any) -> SidebarState:
             timeout_s=cfg.llm_timeout_s,
             trust_env=cfg.llm_trust_env,
         )
-        if base_url and model and allowed
+        if base_url and model
         else None
     )
-    if not allowed:
-        sb.error(
-            "Endpoint externe refusé : seuls les services internes (nom de service, localhost, IP privée, *.internal…)"
-            " sont autorisés. Un LLM cloud passe uniquement par le profil cloudllm (LGX_ALLOW_CLOUD_LLM=1)."
-        )
     if llm is not None and not key_ok:
         sb.caption("URL saisie librement : la clé API configurée n'est pas envoyée.")
+    if llm is not None and not is_internal_url(base_url):
+        sb.caption(f"Endpoint externe : questions et textes récupérés sont envoyés à {urlsplit(base_url).hostname}.")
     probe: ProbeResult | None = st.session_state.get("lgx_probe")
     if sb.button("Tester l'appel d'outils", key="probe", disabled=llm is None or not specs):
         probe = run_probe(st, llm, specs) if llm is not None else None
@@ -358,7 +323,6 @@ def render_sidebar(st: Any) -> SidebarState:
 
     return SidebarState(
         llm=llm,
-        preset_key=st.session_state["llm_preset"],
         chat_mode=chat_mode,
         max_iterations=max_iter,
         prompt_lang=prompt_lang,
@@ -558,12 +522,12 @@ def sidebar_defaults(spec: ToolSpec, ov: SidebarOverrides) -> dict[str, Any]:
 
 
 def page_banner(st: Any) -> None:
-    """Art. 5 disclaimer on every page (R26) and the red cloud banner (R14)."""
+    """Art. 5 disclaimer on every page (R26) and, for an LLM endpoint outside the stack, where questions go (R14)."""
     cfg = settings(st)
-    if cfg.allow_cloud:
-        st.error(
-            "Profil cloudllm (hôte de développement connecté) : les questions et les textes publics récupérés "
-            "quittent cet hôte vers le fournisseur LLM. Jamais dans un bundle airgap."
+    if cfg.llm_external:
+        st.warning(
+            f"LLM externe ({urlsplit(cfg.llm_base_url).hostname}) : les questions et les textes publics récupérés "
+            "sont envoyés à cet endpoint OpenAI-compatible (Mistral par défaut)."
         )
     st.caption(
         "Information non officielle — « Le Journal officiel publié fait seul foi et produit des effets juridiques » "

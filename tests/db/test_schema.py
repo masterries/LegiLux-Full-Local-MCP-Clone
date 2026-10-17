@@ -70,7 +70,6 @@ def test_key_objects_exist(db: psycopg.Connection) -> None:
     expected = {
         "lgx_meta.release",
         "lgx.embedding_model",
-        "lgx.embedding_probe",
         "lgx.vocab",
         "lgx.legal_text",
         "lgx.warning_def",
@@ -153,7 +152,7 @@ def _check_values(db: psycopg.Connection, table: str, column: str) -> set[str]:
         )
     ]
     for d in defs:
-        if re.search(rf"\(\(?{column}\b", d) and ("ANY" in d or "<@" in d):
+        if re.search(rf"\(\(?{column}\b", d) and ("ANY" in d or "<@" in d or f"{column} = '" in d):  # IN (one)
             return set(re.findall(r"'([^']+)'::text", d))
     raise AssertionError(f"no CHECK list on {table}.{column}: {defs}")
 
@@ -488,15 +487,17 @@ def test_invariants_clean_and_conditional_hnsw(
     assert db.execute("SELECT check_name, n FROM lgx_meta.invariant_violations WHERE n <> 0").fetchall() == []
     pg_server.apply_schema("lgx_test_b", "--postload-only")
     assert scalar(db, "SELECT count(*) FROM pg_indexes WHERE indexname LIKE 'chunk_hnsw%'") == 0
-    # optional embedding stage: model + probe + vectors -> post-load creates the HNSW index (idempotently)
+    # optional embedding stage: model row (with its startup probe) + vectors -> post-load creates HNSW (idempotently)
     db.execute(
-        "INSERT INTO lgx.embedding_model (embedding_set_id, provider, model_id, model_version, dim, normalized, "
-        "chunk_count) VALUES (1, 'mistral-api', 'mistral-embed-2312', 'v23.12', 1024, true, 3)"
+        "INSERT INTO lgx.embedding_model (embedding_set_id, provider, model_id, model_requested, dim, probe_text,"
+        " probe_vector, chunk_count) VALUES (1, 'mistral', 'mistral-embed', 'mistral-embed', 1024, 'probe',"
+        " (SELECT array_agg(random()::real) FROM generate_series(1, 1024)), 3)"
     )
-    db.execute(
-        "INSERT INTO lgx.embedding_probe VALUES (1, 1, 'probe', '\\x00', "
-        "(SELECT array_agg(random()::real) FROM generate_series(1, 1024)))"
-    )
+    with pytest.raises(psycopg.errors.CheckViolation), db.transaction():  # probe length = dim
+        db.execute(
+            "INSERT INTO lgx.embedding_model (embedding_set_id, provider, model_id, model_requested, dim, probe_text,"
+            " probe_vector, chunk_count) VALUES (2, 'mistral', 'm', 'm', 1024, 'p', '{1,2}', 0)"
+        )
     db.execute(
         "UPDATE lgx.chunk SET embedding_set_id = 1, "
         "embedding = (SELECT array_agg(random())::real[] FROM generate_series(1, 1024))::halfvec(1024)"
@@ -505,3 +506,33 @@ def test_invariants_clean_and_conditional_hnsw(
     pg_server.apply_schema("lgx_test_b", "--postload-only")
     assert scalar(db, "SELECT count(*) FROM pg_indexes WHERE indexname = 'chunk_hnsw'") == 1
     assert db.execute("SELECT check_name, n FROM lgx_meta.invariant_violations WHERE n <> 0").fetchall() == []
+
+
+def _axis(i: int, dim: int = 1024) -> str:
+    return "[" + ",".join("1" if k == i else "0" for k in range(dim)) + "]"
+
+
+def test_hybrid_rrf_with_fake_vectors(db: psycopg.Connection, loaded: dict[str, int]) -> None:
+    """Dense + lexical in one statement (PLAN §8.3): RRF k = 60, the dense branch obeys the validity window."""
+    for key, axis in (("c_cur", 0), ("c_fut", 1), ("c_rgd", 2)):
+        db.execute("UPDATE lgx.chunk SET embedding = %s::halfvec, embedding_set_id = 1 WHERE chunk_id = %s",
+                   (_axis(axis), loaded[key]))  # fmt: skip
+
+    def run(query: str, qvec: str | None, as_of: dt.date = T) -> list[tuple]:
+        return db.execute(
+            "SELECT chunk_id, score, lex_rank, dense_rank FROM lgx.search_candidates(%s, %s::halfvec, %s, '{}',"
+            " NULL, NULL, 10)",
+            (query, qvec, as_of),
+        ).fetchall()
+
+    lexical = run("gestionnaires de fonds alternatifs", None)
+    assert [r[0] for r in lexical] == [loaded["c_cur"]] and lexical[0][3] is None
+    hybrid = {r[0]: r for r in run("gestionnaires de fonds alternatifs", _axis(2))}
+    # the RGD chunk comes in through the dense branch only (rank 1); the AIFM chunk keeps lex rank 1 + dense rank 2
+    assert hybrid[loaded["c_rgd"]][2:] == (None, 1)
+    assert hybrid[loaded["c_cur"]][2:] == (1, 2)
+    assert loaded["c_fut"] not in hybrid  # a future window is outside the dense branch too
+    assert hybrid[loaded["c_cur"]][1] > hybrid[loaded["c_rgd"]][1]  # 1/61 + 1/62 > 1/61
+    assert hybrid[loaded["c_rgd"]][1] == pytest.approx(1 / 61, rel=1e-3)
+    dense_only = run("zzzz", _axis(0))
+    assert dense_only[0][0] == loaded["c_cur"] and dense_only[0][3] == 1

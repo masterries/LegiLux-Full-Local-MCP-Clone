@@ -7,6 +7,8 @@
 --     Appendix D writes them as optional [ ]/{ } fragments).
 --   * lgx.act.metadata_reason gains 'not_loaded': the selection chose a text for the act, but this build
 --     holds none (a sample release, or a file that could not be fetched/parsed; reported by the gates).
+--   * lgx.embedding_model is reduced to the one provider (mistral) and one startup probe (2026-10-17 user decision:
+--     no golden-vector table lgx.embedding_probe, no aliases/prefixes/binary-quantised variants).
 --   * lgx.relation: the natural key (src_eli, rel_type, dst_eli, source) collapsed AKN edges (one row per
 --     modifying act and target work, although a textualMod targets one article and an akn-ref belongs to one
 --     citing unit: 6,452 sample edges -> 1,618). It now has a surrogate `relation_id`, a resolved
@@ -46,31 +48,22 @@ CREATE TABLE lgx_meta.release (                 -- exactly one row per shipped d
 );
 
 -- Embedding stage metadata. ZERO rows when provider=none (the shipped default until the user enables it).
+-- One row when the release carries vectors (provider mistral, PLAN §6.5). The startup probe of lgx-mcp embeds
+-- probe_text through the runtime endpoint: the reported model id must equal model_id, the vector length dim,
+-- and the cosine to probe_vector must be >= probe_min_cosine; otherwise retrieval stays lexical with a reason.
 CREATE TABLE lgx.embedding_model (
   embedding_set_id smallint PRIMARY KEY,
-  provider         text NOT NULL CHECK (provider IN ('mistral-api', 'mistral-local', 'openai-compatible', 'tei')),
-  model_id         text NOT NULL,               -- 'mistral-embed-2312' (pinned id, never the alias)
-  model_version    text NOT NULL,               -- 'v23.12'
-  model_aliases    text[] NOT NULL DEFAULT '{}',-- ids the runtime endpoint may report for the same model
-  dim              int  NOT NULL CHECK (dim > 0),
-  normalized       boolean NOT NULL,            -- Mistral: unit norm, so cosine = dot product
-  distance         text NOT NULL DEFAULT 'cosine' CHECK (distance IN ('cosine', 'inner_product', 'l2')),
-  vector_type      text NOT NULL DEFAULT 'halfvec' CHECK (vector_type IN ('halfvec', 'bit+halfvec')),
-  doc_prefix       text NOT NULL DEFAULT '',    -- none for Mistral
-  query_prefix     text NOT NULL DEFAULT '',    -- none for Mistral
-  parity_threshold real NOT NULL DEFAULT 0.999 CHECK (parity_threshold > 0 AND parity_threshold <= 1),
+  provider         text NOT NULL CHECK (provider IN ('mistral')),
+  model_id         text NOT NULL,               -- the id the build-side API reported (e.g. 'mistral-embed')
+  model_requested  text NOT NULL,               -- the id the build side asked for (config/embedding.yaml model)
+  dim              int  NOT NULL CHECK (dim > 0 AND dim <= 4000),   -- halfvec HNSW limit
+  normalized       boolean NOT NULL DEFAULT true,   -- Mistral: unit norm, so cosine = dot product
+  probe_text       text NOT NULL,
+  probe_vector     real[] NOT NULL,             -- full precision, as the build-side API returned it
+  probe_min_cosine real NOT NULL DEFAULT 0.99 CHECK (probe_min_cosine > 0 AND probe_min_cosine <= 1),
   chunk_count      int  NOT NULL,
-  created_at       timestamptz NOT NULL DEFAULT now()
-);
--- Golden-vector probes: fixed texts + their full-precision (float4) document-side vectors.
--- At MCP start the runtime adapter embeds the same texts; every cosine must be >= parity_threshold.
-CREATE TABLE lgx.embedding_probe (
-  embedding_set_id smallint NOT NULL REFERENCES lgx.embedding_model ON DELETE CASCADE,
-  probe_no         smallint NOT NULL,
-  probe_text       text  NOT NULL,
-  text_sha256      bytea NOT NULL,
-  vector           real[] NOT NULL,
-  PRIMARY KEY (embedding_set_id, probe_no)
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  CHECK (cardinality(probe_vector) = dim)
 );
 
 -- ----------------------------------------------------------------------------------------------- B.5

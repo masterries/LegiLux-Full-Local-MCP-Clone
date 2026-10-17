@@ -1,10 +1,12 @@
-"""``python -m eval.harness …`` — the evaluation CLI (PLAN §11; ``lgx eval`` once the hook exists in lgx_ingest/cli.py).
+"""``python -m eval.harness …`` = ``lgx eval …`` — the evaluation CLI (PLAN §11).
 
 python -m eval.harness run --set G2 --mode lexical            # in process, dev runtime DB, reranker off
 python -m eval.harness run --set G2 --mode rerank --rerank-k 16 --rerank-body-chars 600
 python -m eval.harness run --set G1 --url http://127.0.0.1:8000/mcp --token …   # a running server
 python -m eval.harness compare eval/reports/G2-*.json          # side-by-side Markdown
 python -m eval.harness gen-g1 | gen-g3 | freeze-g2              # (re)build the generated sets from the DB
+python -m eval.harness subset --set G2 --size 40                # fixed stratified subset (CPU-bound rerank runs)
+python -m eval.harness run --set G2 --mode rerank --subset eval/gold/subsets/G2-rerank-40.json
 """
 
 from __future__ import annotations
@@ -43,6 +45,9 @@ def run(
     expansion: Annotated[bool, typer.Option(help="curated query expansion")] = True,
     opts: Annotated[str, typer.Option(help="ranker knobs as JSON, e.g. '{\"length_b\": 0.4}'")] = "",
     limit: Annotated[int | None, typer.Option(help="first N items only")] = None,
+    subset: Annotated[
+        str | None, typer.Option(help="only these item ids: a subset file (`subset` command) or a comma list")
+    ] = None,
     out_dir: Annotated[Path, typer.Option()] = gold.REPORTS_DIR,
     tag: Annotated[str | None, typer.Option(help="report name suffix")] = None,
 ) -> None:
@@ -50,8 +55,17 @@ def run(
     if mode not in ("lexical", "rerank"):
         raise typer.BadParameter("--mode must be lexical or rerank")
     items, meta = gold.load_set(set_name)
+    subset_info: dict[str, Any] | None = None
+    if subset:
+        try:
+            ids = gold.subset_ids(subset, set_name)
+            items = gold.select_ids(items, ids)
+        except gold.GoldError as exc:
+            raise typer.BadParameter(str(exc)) from exc
+        subset_info = {"source": subset, "ids": ids}
     if limit:
         items = items[:limit]
+        subset_info = {"source": f"first {limit}", "ids": [str(i["id"]) for i in items]}
     options = Options(
         mode=mode,
         dsn=dsn,
@@ -69,6 +83,7 @@ def run(
         "items_total": len(items),
         "gold_status": ", ".join(meta["status"]),
         "gold_files": meta["files"],
+        "subset": subset_info,
         "config": result.pop("config"),
         **result,
     }
@@ -87,10 +102,31 @@ async def _run(set_name: str, items: list[dict[str, Any]], opts: Options, url: s
     return out
 
 
+@app.command("subset")
+def subset_cmd(
+    set_name: Annotated[str, typer.Option("--set", help="G2 (strata: language x target act)")] = "G2",
+    size: Annotated[int, typer.Option(help="items in the subset")] = 40,
+    out: Annotated[Path | None, typer.Option(help="default eval/gold/subsets/<set>-rerank-<size>.json")] = None,
+) -> None:
+    """Write a fixed, stratified subset of a gold set (deterministic; outcomes are never looked at)."""
+    items, _ = gold.load_set(set_name)
+    doc = gold.stratified_subset(items, size, set_name)
+    path = out or gold.GOLD_DIR / "subsets" / f"{set_name}-rerank-{size}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"wrote {len(doc['ids'])} ids to {path}: {doc['strata']}", file=sys.stderr)
+
+
 @app.command("compare")
-def compare(reports: Annotated[list[Path], typer.Argument(help="report JSON files")]) -> None:
+def compare(
+    reports: Annotated[list[Path], typer.Argument(help="report JSON files")],
+    subset: Annotated[str | None, typer.Option(help="G2: score every report on these ids only")] = None,
+) -> None:
     """Markdown tables of several runs (stdout)."""
     loaded = [json.loads(p.read_text(encoding="utf-8")) for p in reports]
+    if subset:
+        ids = gold.subset_ids(subset, "G2")
+        loaded = [report.restrict(r, ids) if r["set"] == "G2" else r for r in loaded]
     print(report.compare_markdown(loaded))
 
 

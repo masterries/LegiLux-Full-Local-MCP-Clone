@@ -2019,15 +2019,6 @@
   },
   {
    "id": "G1-204",
-   "text": "article 106 du Code de la fonction publique",
-   "style": "code_recueil:member_number",
-   "expect": {
-    "status": "ambiguous",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
-   }
-  },
-  {
-   "id": "G1-205",
    "text": "article 49 du Code de la fonction publique",
    "style": "code_recueil:member_number",
    "expect": {
@@ -2036,7 +2027,7 @@
    }
   },
   {
-   "id": "G1-206",
+   "id": "G1-205",
    "text": "article 92 du Code de la fonction publique",
    "style": "code_recueil:member_number",
    "expect": {
@@ -2045,8 +2036,17 @@
    }
   },
   {
-   "id": "G1-207",
+   "id": "G1-206",
    "text": "article 46 du Code de la fonction publique",
+   "style": "code_recueil:member_number",
+   "expect": {
+    "status": "ambiguous",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
+   }
+  },
+  {
+   "id": "G1-207",
+   "text": "article 45 du Code de la fonction publique",
    "style": "code_recueil:member_number",
    "expect": {
     "status": "ambiguous",
@@ -2138,6 +2138,33 @@
   },
   {
    "id": "G1-217",
+   "text": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+   "style": "eli:work",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
+   }
+  },
+  {
+   "id": "G1-218",
+   "text": "http://data.legilux.public.lu/eli/etat/leg/code/communal/20260801",
+   "style": "eli:version",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
+   }
+  },
+  {
+   "id": "G1-219",
+   "text": "https://legilux.public.lu/eli/etat/leg/code/communal/20260801",
+   "style": "eli:display_url",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
+   }
+  },
+  {
+   "id": "G1-220",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106",
    "style": "eli:work",
    "expect": {
@@ -2146,7 +2173,7 @@
    }
   },
   {
-   "id": "G1-218",
+   "id": "G1-221",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/consolide/20240318",
    "style": "eli:version",
    "expect": {
@@ -2155,7 +2182,7 @@
    }
   },
   {
-   "id": "G1-219",
+   "id": "G1-222",
    "text": "https://legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/consolide/20240318",
    "style": "eli:display_url",
    "expect": {
@@ -2164,7 +2191,7 @@
    }
   },
   {
-   "id": "G1-220",
+   "id": "G1-223",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/jo",
    "style": "eli:jo",
    "expect": {
@@ -2173,7 +2200,7 @@
    }
   },
   {
-   "id": "G1-221",
+   "id": "G1-224",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/art_2",
    "style": "eli:article",
    "expect": {
@@ -2183,7 +2210,7 @@
    }
   },
   {
-   "id": "G1-222",
+   "id": "G1-225",
    "text": "legilux://eli/etat/leg/rgd/2024/03/07/a106/art/2",
    "style": "eli:resource_uri",
    "expect": {
@@ -2193,7 +2220,7 @@
    }
   },
   {
-   "id": "G1-223",
+   "id": "G1-226",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510",
    "style": "eli:work",
    "expect": {
@@ -2202,7 +2229,7 @@
    }
   },
   {
-   "id": "G1-224",
+   "id": "G1-227",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510/jo",
    "style": "eli:version",
    "expect": {
@@ -2211,7 +2238,7 @@
    }
   },
   {
-   "id": "G1-225",
+   "id": "G1-228",
    "text": "https://legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510/jo",
    "style": "eli:display_url",
    "expect": {
@@ -2220,7 +2247,7 @@
    }
   },
   {
-   "id": "G1-226",
+   "id": "G1-229",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
    "style": "eli:work",
    "expect": {
@@ -2229,7 +2256,7 @@
    }
   },
   {
-   "id": "G1-227",
+   "id": "G1-230",
    "text": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/20251219",
    "style": "eli:version",
    "expect": {
@@ -2238,7 +2265,7 @@
    }
   },
   {
-   "id": "G1-228",
+   "id": "G1-231",
    "text": "https://legilux.public.lu/eli/etat/leg/code/procedure_civile/20251219",
    "style": "eli:display_url",
    "expect": {
@@ -2247,7 +2274,7 @@
    }
   },
   {
-   "id": "G1-229",
+   "id": "G1-232",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4/jo",
    "style": "eli:jo",
    "expect": {
@@ -2256,7 +2283,7 @@
    }
   },
   {
-   "id": "G1-230",
+   "id": "G1-233",
    "text": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1185",
    "style": "eli:article",
    "expect": {
@@ -2266,7 +2293,7 @@
    }
   },
   {
-   "id": "G1-231",
+   "id": "G1-234",
    "text": "legilux://eli/etat/leg/rgd/1998/08/03/n4/art/1185",
    "style": "eli:resource_uri",
    "expect": {
@@ -2276,7 +2303,7 @@
    }
   },
   {
-   "id": "G1-232",
+   "id": "G1-235",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
    "style": "eli:work",
    "expect": {
@@ -2285,7 +2312,7 @@
    }
   },
   {
-   "id": "G1-233",
+   "id": "G1-236",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/jo",
    "style": "eli:version",
    "expect": {
@@ -2294,7 +2321,7 @@
    }
   },
   {
-   "id": "G1-234",
+   "id": "G1-237",
    "text": "https://legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/jo",
    "style": "eli:display_url",
    "expect": {
@@ -2303,7 +2330,7 @@
    }
   },
   {
-   "id": "G1-235",
+   "id": "G1-238",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
    "style": "eli:work",
    "expect": {
@@ -2312,7 +2339,7 @@
    }
   },
   {
-   "id": "G1-236",
+   "id": "G1-239",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/jo",
    "style": "eli:version",
    "expect": {
@@ -2321,7 +2348,7 @@
    }
   },
   {
-   "id": "G1-237",
+   "id": "G1-240",
    "text": "https://legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/jo",
    "style": "eli:display_url",
    "expect": {
@@ -2330,7 +2357,7 @@
    }
   },
   {
-   "id": "G1-238",
+   "id": "G1-241",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324",
    "style": "eli:work",
    "expect": {
@@ -2339,7 +2366,7 @@
    }
   },
   {
-   "id": "G1-239",
+   "id": "G1-242",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324/consolide/20211205",
    "style": "eli:version",
    "expect": {
@@ -2348,7 +2375,7 @@
    }
   },
   {
-   "id": "G1-240",
+   "id": "G1-243",
    "text": "https://legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324/consolide/20211205",
    "style": "eli:display_url",
    "expect": {
@@ -2357,7 +2384,7 @@
    }
   },
   {
-   "id": "G1-241",
+   "id": "G1-244",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324/jo",
    "style": "eli:jo",
    "expect": {
@@ -2366,7 +2393,7 @@
    }
   },
   {
-   "id": "G1-242",
+   "id": "G1-245",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324/art_1er",
    "style": "eli:article",
    "expect": {
@@ -2376,7 +2403,7 @@
    }
   },
   {
-   "id": "G1-243",
+   "id": "G1-246",
    "text": "legilux://eli/etat/leg/rgd/2017/03/08/a324/art/1",
    "style": "eli:resource_uri",
    "expect": {
@@ -2386,7 +2413,7 @@
    }
   },
   {
-   "id": "G1-244",
+   "id": "G1-247",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1",
    "style": "eli:work",
    "expect": {
@@ -2395,7 +2422,7 @@
    }
   },
   {
-   "id": "G1-245",
+   "id": "G1-248",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/consolide/20130101",
    "style": "eli:version",
    "expect": {
@@ -2404,7 +2431,7 @@
    }
   },
   {
-   "id": "G1-246",
+   "id": "G1-249",
    "text": "https://legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/consolide/20130101",
    "style": "eli:display_url",
    "expect": {
@@ -2413,7 +2440,7 @@
    }
   },
   {
-   "id": "G1-247",
+   "id": "G1-250",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/jo",
    "style": "eli:jo",
    "expect": {
@@ -2422,7 +2449,7 @@
    }
   },
   {
-   "id": "G1-248",
+   "id": "G1-251",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/art_20",
    "style": "eli:article",
    "expect": {
@@ -2432,7 +2459,7 @@
    }
   },
   {
-   "id": "G1-249",
+   "id": "G1-252",
    "text": "legilux://eli/etat/leg/loi/2008/05/13/n1/art/20",
    "style": "eli:resource_uri",
    "expect": {
@@ -2442,7 +2469,7 @@
    }
   },
   {
-   "id": "G1-250",
+   "id": "G1-253",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203",
    "style": "eli:work",
    "expect": {
@@ -2451,7 +2478,7 @@
    }
   },
   {
-   "id": "G1-251",
+   "id": "G1-254",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203/jo",
    "style": "eli:version",
    "expect": {
@@ -2460,7 +2487,7 @@
    }
   },
   {
-   "id": "G1-252",
+   "id": "G1-255",
    "text": "https://legilux.public.lu/eli/etat/leg/loi/2023/04/19/a203/jo",
    "style": "eli:display_url",
    "expect": {
@@ -2469,7 +2496,7 @@
    }
   },
   {
-   "id": "G1-253",
+   "id": "G1-256",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
    "style": "eli:work",
    "expect": {
@@ -2478,7 +2505,7 @@
    }
   },
   {
-   "id": "G1-254",
+   "id": "G1-257",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/consolide/20251226",
    "style": "eli:version",
    "expect": {
@@ -2487,7 +2514,7 @@
    }
   },
   {
-   "id": "G1-255",
+   "id": "G1-258",
    "text": "https://legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/consolide/20251226",
    "style": "eli:display_url",
    "expect": {
@@ -2496,7 +2523,7 @@
    }
   },
   {
-   "id": "G1-256",
+   "id": "G1-259",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/jo",
    "style": "eli:jo",
    "expect": {
@@ -2505,7 +2532,7 @@
    }
   },
   {
-   "id": "G1-257",
+   "id": "G1-260",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_67",
    "style": "eli:article",
    "expect": {
@@ -2515,7 +2542,7 @@
    }
   },
   {
-   "id": "G1-258",
+   "id": "G1-261",
    "text": "legilux://eli/etat/leg/loi/2018/08/01/a686/art/67",
    "style": "eli:resource_uri",
    "expect": {
@@ -2525,7 +2552,7 @@
    }
   },
   {
-   "id": "G1-259",
+   "id": "G1-262",
    "text": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779",
    "style": "eli:work",
    "expect": {
@@ -2534,7 +2561,7 @@
    }
   },
   {
-   "id": "G1-260",
+   "id": "G1-263",
    "text": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779/consolide/20260416",
    "style": "eli:version",
    "expect": {
@@ -2543,7 +2570,7 @@
    }
   },
   {
-   "id": "G1-261",
+   "id": "G1-264",
    "text": "https://legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779/consolide/20260416",
    "style": "eli:display_url",
    "expect": {
@@ -2552,7 +2579,7 @@
    }
   },
   {
-   "id": "G1-262",
+   "id": "G1-265",
    "text": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779/jo",
    "style": "eli:jo",
    "expect": {
@@ -2561,7 +2588,7 @@
    }
   },
   {
-   "id": "G1-263",
+   "id": "G1-266",
    "text": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779/art_18",
    "style": "eli:article",
    "expect": {
@@ -2571,7 +2598,7 @@
    }
   },
   {
-   "id": "G1-264",
+   "id": "G1-267",
    "text": "legilux://eli/etat/leg/ri/2023/11/27/a779/art/18",
    "style": "eli:resource_uri",
    "expect": {
@@ -2581,90 +2608,34 @@
    }
   },
   {
-   "id": "G1-265",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1",
-   "style": "eli:work",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1"
-   }
-  },
-  {
-   "id": "G1-266",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1/jo",
-   "style": "eli:version",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1"
-   }
-  },
-  {
-   "id": "G1-267",
-   "text": "https://legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1/jo",
-   "style": "eli:display_url",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1"
-   }
-  },
-  {
    "id": "G1-268",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+   "text": "http://data.legilux.public.lu/eli/etat/leg/code/route",
    "style": "eli:work",
    "expect": {
     "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
    }
   },
   {
    "id": "G1-269",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829",
+   "text": "http://data.legilux.public.lu/eli/etat/leg/code/route/20260612",
    "style": "eli:version",
    "expect": {
     "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
    }
   },
   {
    "id": "G1-270",
-   "text": "https://legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/consolide/20260829",
+   "text": "https://legilux.public.lu/eli/etat/leg/code/route/20260612",
    "style": "eli:display_url",
    "expect": {
     "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
    }
   },
   {
    "id": "G1-271",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/jo",
-   "style": "eli:jo",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
-   }
-  },
-  {
-   "id": "G1-272",
-   "text": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_78",
-   "style": "eli:article",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
-    "unit_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_78"
-   }
-  },
-  {
-   "id": "G1-273",
-   "text": "legilux://eli/etat/leg/constitution/1868/10/17/n1/art/78",
-   "style": "eli:resource_uri",
-   "expect": {
-    "status": "resolved",
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
-    "unit_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_78"
-   }
-  },
-  {
-   "id": "G1-274",
    "text": "http://data.legilux.public.lu/eli/etat/leg/loi/2099/01/01/a1",
    "style": "not_found:eli",
    "expect": {
@@ -2672,7 +2643,7 @@
    }
   },
   {
-   "id": "G1-275",
+   "id": "G1-272",
    "text": "http://data.legilux.public.lu/eli/etat/leg/rgd/1950/02/30/n1",
    "style": "not_found:eli",
    "expect": {
@@ -2680,7 +2651,7 @@
    }
   },
   {
-   "id": "G1-276",
+   "id": "G1-273",
    "text": "arrêté grand-ducal du 14 février 1913 réglant le transport des cadavres",
    "style": "dated:title",
    "expect": {
@@ -2689,7 +2660,7 @@
    }
   },
   {
-   "id": "G1-277",
+   "id": "G1-274",
    "text": "article 8 de l'arrêté grand-ducal du 14 février 1913 réglant le transport des cadavres",
    "style": "dated:article_title",
    "expect": {
@@ -2699,7 +2670,7 @@
    }
   },
   {
-   "id": "G1-278",
+   "id": "G1-275",
    "text": "AGD du 14 février 1913 réglant le transport des cadavres, art. 8",
    "style": "dated:backward",
    "expect": {
@@ -2709,7 +2680,7 @@
    }
   },
   {
-   "id": "G1-279",
+   "id": "G1-276",
    "text": "arrêté grand-ducal du 14 février 1913",
    "style": "dated:unique_date",
    "expect": {
@@ -2718,7 +2689,7 @@
    }
   },
   {
-   "id": "G1-280",
+   "id": "G1-277",
    "text": "arrêté grand-ducal du 25 septembre 1939",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -2731,7 +2702,7 @@
    }
   },
   {
-   "id": "G1-281",
+   "id": "G1-278",
    "text": "arrêté ministériel du 15 juillet 2022 portant autorisation du maintien de la vidéosurveillance",
    "style": "dated:title",
    "expect": {
@@ -2740,7 +2711,7 @@
    }
   },
   {
-   "id": "G1-282",
+   "id": "G1-279",
    "text": "article 2 de l'arrêté ministériel du 15 juillet 2022 portant autorisation du maintien de la vidéosurveillance",
    "style": "dated:article_title",
    "expect": {
@@ -2750,7 +2721,7 @@
    }
   },
   {
-   "id": "G1-283",
+   "id": "G1-280",
    "text": "arrêté ministériel du 15 juillet 2022",
    "style": "dated:unique_date",
    "expect": {
@@ -2759,7 +2730,7 @@
    }
   },
   {
-   "id": "G1-284",
+   "id": "G1-281",
    "text": "loi du 2 janvier 1889",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -2771,7 +2742,7 @@
    }
   },
   {
-   "id": "G1-285",
+   "id": "G1-282",
    "text": "loi du 5 mars 1922 portant approbation de la Convention d'Union économique",
    "style": "dated:title",
    "expect": {
@@ -2780,7 +2751,7 @@
    }
   },
   {
-   "id": "G1-286",
+   "id": "G1-283",
    "text": "loi modifiée du 5 mars 1922 portant approbation de la Convention d'Union économique",
    "style": "dated:modifiee_title",
    "expect": {
@@ -2789,7 +2760,7 @@
    }
   },
   {
-   "id": "G1-287",
+   "id": "G1-284",
    "text": "article unique de la loi du 5 mars 1922 portant approbation de la Convention d'Union économique",
    "style": "dated:article_title",
    "expect": {
@@ -2799,7 +2770,7 @@
    }
   },
   {
-   "id": "G1-288",
+   "id": "G1-285",
    "text": "Loi du 5 mars 1922 portant approbation de la Convention d'Union économique, art. unique",
    "style": "dated:backward",
    "expect": {
@@ -2809,7 +2780,7 @@
    }
   },
   {
-   "id": "G1-289",
+   "id": "G1-286",
    "text": "loi du 5 mars 1922",
    "style": "dated:unique_date",
    "expect": {
@@ -2818,7 +2789,7 @@
    }
   },
   {
-   "id": "G1-290",
+   "id": "G1-287",
    "text": "loi du 14 juillet 1978 portant institution d'un conseil national de coordination",
    "style": "dated:title",
    "expect": {
@@ -2827,7 +2798,7 @@
    }
   },
   {
-   "id": "G1-291",
+   "id": "G1-288",
    "text": "loi modifiée du 14 juillet 1978 portant institution d'un conseil national de coordination",
    "style": "dated:modifiee_title",
    "expect": {
@@ -2836,7 +2807,7 @@
    }
   },
   {
-   "id": "G1-292",
+   "id": "G1-289",
    "text": "article 7 de la loi du 14 juillet 1978 portant institution d'un conseil national de coordination",
    "style": "dated:article_title",
    "expect": {
@@ -2846,7 +2817,7 @@
    }
   },
   {
-   "id": "G1-293",
+   "id": "G1-290",
    "text": "Loi du 14 juillet 1978 portant institution d'un conseil national de coordination, art. 7",
    "style": "dated:backward",
    "expect": {
@@ -2856,7 +2827,7 @@
    }
   },
   {
-   "id": "G1-294",
+   "id": "G1-291",
    "text": "loi du 14 juillet 1978",
    "style": "dated:unique_date",
    "expect": {
@@ -2865,7 +2836,16 @@
    }
   },
   {
-   "id": "G1-295",
+   "id": "G1-292",
+   "text": "loi du 5 avril 1993",
+   "style": "dated:unique_date",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1"
+   }
+  },
+  {
+   "id": "G1-293",
    "text": "loi du 18 avril 2001 sur les droits d’auteur, les droits voisins",
    "style": "dated:title",
    "expect": {
@@ -2874,7 +2854,7 @@
    }
   },
   {
-   "id": "G1-296",
+   "id": "G1-294",
    "text": "loi modifiée du 18 avril 2001 sur les droits d’auteur, les droits voisins",
    "style": "dated:modifiee_title",
    "expect": {
@@ -2883,7 +2863,7 @@
    }
   },
   {
-   "id": "G1-297",
+   "id": "G1-295",
    "text": "article 7 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins",
    "style": "dated:article_title",
    "expect": {
@@ -2893,7 +2873,7 @@
    }
   },
   {
-   "id": "G1-298",
+   "id": "G1-296",
    "text": "Loi du 18 avril 2001 sur les droits d’auteur, les droits voisins, art. 7",
    "style": "dated:backward",
    "expect": {
@@ -2903,7 +2883,7 @@
    }
   },
   {
-   "id": "G1-299",
+   "id": "G1-297",
    "text": "loi du 18 avril 2001",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -2917,7 +2897,7 @@
    }
   },
   {
-   "id": "G1-300",
+   "id": "G1-298",
    "text": "loi du 20 juin 2001",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -2932,7 +2912,7 @@
    }
   },
   {
-   "id": "G1-301",
+   "id": "G1-299",
    "text": "loi du 13 mai 2008 portant introduction d’un statut unique pour les",
    "style": "dated:title",
    "expect": {
@@ -2941,7 +2921,7 @@
    }
   },
   {
-   "id": "G1-302",
+   "id": "G1-300",
    "text": "loi modifiée du 13 mai 2008 portant introduction d’un statut unique pour les",
    "style": "dated:modifiee_title",
    "expect": {
@@ -2950,7 +2930,7 @@
    }
   },
   {
-   "id": "G1-303",
+   "id": "G1-301",
    "text": "article 20 de la loi du 13 mai 2008 portant introduction d’un statut unique pour les",
    "style": "dated:article_title",
    "expect": {
@@ -2960,7 +2940,7 @@
    }
   },
   {
-   "id": "G1-304",
+   "id": "G1-302",
    "text": "Loi du 13 mai 2008 portant introduction d’un statut unique pour les, art. 20",
    "style": "dated:backward",
    "expect": {
@@ -2970,7 +2950,7 @@
    }
   },
   {
-   "id": "G1-305",
+   "id": "G1-303",
    "text": "loi du 13 mai 2008",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -2983,7 +2963,7 @@
    }
   },
   {
-   "id": "G1-306",
+   "id": "G1-304",
    "text": "loi du 12 juillet 2013 relative aux gestionnaires de fonds d'investissement alternatifs",
    "style": "dated:title",
    "expect": {
@@ -2992,7 +2972,7 @@
    }
   },
   {
-   "id": "G1-307",
+   "id": "G1-305",
    "text": "loi modifiée du 12 juillet 2013 relative aux gestionnaires de fonds d'investissement alternatifs",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3001,7 +2981,7 @@
    }
   },
   {
-   "id": "G1-308",
+   "id": "G1-306",
    "text": "article 151 de la loi du 12 juillet 2013 relative aux gestionnaires de fonds d'investissement alternatifs",
    "style": "dated:article_title",
    "expect": {
@@ -3011,7 +2991,7 @@
    }
   },
   {
-   "id": "G1-309",
+   "id": "G1-307",
    "text": "Loi du 12 juillet 2013 relative aux gestionnaires de fonds d'investissement alternatifs, art. 151",
    "style": "dated:backward",
    "expect": {
@@ -3021,7 +3001,7 @@
    }
   },
   {
-   "id": "G1-310",
+   "id": "G1-308",
    "text": "loi du 12 juillet 2013",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3034,7 +3014,7 @@
    }
   },
   {
-   "id": "G1-311",
+   "id": "G1-309",
    "text": "loi du 4 juillet 2014 portant réorganisation de l’Institut luxembourgeois de la",
    "style": "dated:title",
    "expect": {
@@ -3043,7 +3023,7 @@
    }
   },
   {
-   "id": "G1-312",
+   "id": "G1-310",
    "text": "loi modifiée du 4 juillet 2014 portant réorganisation de l’Institut luxembourgeois de la",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3052,7 +3032,7 @@
    }
   },
   {
-   "id": "G1-313",
+   "id": "G1-311",
    "text": "article 30 de la loi du 4 juillet 2014 portant réorganisation de l’Institut luxembourgeois de la",
    "style": "dated:article_title",
    "expect": {
@@ -3062,7 +3042,7 @@
    }
   },
   {
-   "id": "G1-314",
+   "id": "G1-312",
    "text": "Loi du 4 juillet 2014 portant réorganisation de l’Institut luxembourgeois de la, art. 30",
    "style": "dated:backward",
    "expect": {
@@ -3072,7 +3052,7 @@
    }
   },
   {
-   "id": "G1-315",
+   "id": "G1-313",
    "text": "loi du 4 juillet 2014",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3084,7 +3064,7 @@
    }
   },
   {
-   "id": "G1-316",
+   "id": "G1-314",
    "text": "loi du 30 juillet 2015 portant création d'un Institut de formation de",
    "style": "dated:title",
    "expect": {
@@ -3093,7 +3073,7 @@
    }
   },
   {
-   "id": "G1-317",
+   "id": "G1-315",
    "text": "loi modifiée du 30 juillet 2015 portant création d'un Institut de formation de",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3102,7 +3082,7 @@
    }
   },
   {
-   "id": "G1-318",
+   "id": "G1-316",
    "text": "loi du 30 juillet 2015",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3114,7 +3094,7 @@
    }
   },
   {
-   "id": "G1-319",
+   "id": "G1-317",
    "text": "loi du 23 décembre 2016",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3144,7 +3124,7 @@
    }
   },
   {
-   "id": "G1-320",
+   "id": "G1-318",
    "text": "loi du 30 mai 2018 relative aux marchés d’instruments financiers et portant",
    "style": "dated:title",
    "expect": {
@@ -3153,7 +3133,7 @@
    }
   },
   {
-   "id": "G1-321",
+   "id": "G1-319",
    "text": "loi modifiée du 30 mai 2018 relative aux marchés d’instruments financiers et portant",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3162,7 +3142,7 @@
    }
   },
   {
-   "id": "G1-322",
+   "id": "G1-320",
    "text": "article 52 de la loi du 30 mai 2018 relative aux marchés d’instruments financiers et portant",
    "style": "dated:article_title",
    "expect": {
@@ -3172,7 +3152,7 @@
    }
   },
   {
-   "id": "G1-323",
+   "id": "G1-321",
    "text": "Loi du 30 mai 2018 relative aux marchés d’instruments financiers et portant, art. 52",
    "style": "dated:backward",
    "expect": {
@@ -3182,7 +3162,7 @@
    }
   },
   {
-   "id": "G1-324",
+   "id": "G1-322",
    "text": "loi du 30 mai 2018",
    "style": "dated:unique_date",
    "expect": {
@@ -3191,7 +3171,7 @@
    }
   },
   {
-   "id": "G1-325",
+   "id": "G1-323",
    "text": "loi du 1er août 2018",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3221,7 +3201,7 @@
    }
   },
   {
-   "id": "G1-326",
+   "id": "G1-324",
    "text": "loi du 9 août 2018 relative à un régime d’aides en faveur",
    "style": "dated:title",
    "expect": {
@@ -3230,7 +3210,7 @@
    }
   },
   {
-   "id": "G1-327",
+   "id": "G1-325",
    "text": "loi modifiée du 9 août 2018 relative à un régime d’aides en faveur",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3239,7 +3219,7 @@
    }
   },
   {
-   "id": "G1-328",
+   "id": "G1-326",
    "text": "article 5 de la loi du 9 août 2018 relative à un régime d’aides en faveur",
    "style": "dated:article_title",
    "expect": {
@@ -3249,7 +3229,7 @@
    }
   },
   {
-   "id": "G1-329",
+   "id": "G1-327",
    "text": "Loi du 9 août 2018 relative à un régime d’aides en faveur, art. 5",
    "style": "dated:backward",
    "expect": {
@@ -3259,7 +3239,7 @@
    }
   },
   {
-   "id": "G1-330",
+   "id": "G1-328",
    "text": "loi du 9 août 2018",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3271,7 +3251,7 @@
    }
   },
   {
-   "id": "G1-331",
+   "id": "G1-329",
    "text": "loi du 19 avril 2023 portant modification de la deuxième partie, livre",
    "style": "dated:title",
    "expect": {
@@ -3280,7 +3260,7 @@
    }
   },
   {
-   "id": "G1-332",
+   "id": "G1-330",
    "text": "loi modifiée du 19 avril 2023 portant modification de la deuxième partie, livre",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3289,7 +3269,7 @@
    }
   },
   {
-   "id": "G1-333",
+   "id": "G1-331",
    "text": "article 1er de la loi du 19 avril 2023 portant modification de la deuxième partie, livre",
    "style": "dated:article_title",
    "expect": {
@@ -3299,7 +3279,7 @@
    }
   },
   {
-   "id": "G1-334",
+   "id": "G1-332",
    "text": "Loi du 19 avril 2023 portant modification de la deuxième partie, livre, art. 1er",
    "style": "dated:backward",
    "expect": {
@@ -3309,7 +3289,7 @@
    }
   },
   {
-   "id": "G1-335",
+   "id": "G1-333",
    "text": "loi du 19 avril 2023",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3321,7 +3301,7 @@
    }
   },
   {
-   "id": "G1-336",
+   "id": "G1-334",
    "text": "loi du 29 juillet 2023 autorisant le Gouvernement à financer les frais",
    "style": "dated:title",
    "expect": {
@@ -3330,7 +3310,7 @@
    }
   },
   {
-   "id": "G1-337",
+   "id": "G1-335",
    "text": "loi modifiée du 29 juillet 2023 autorisant le Gouvernement à financer les frais",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3339,7 +3319,7 @@
    }
   },
   {
-   "id": "G1-338",
+   "id": "G1-336",
    "text": "article 1er de la loi du 29 juillet 2023 autorisant le Gouvernement à financer les frais",
    "style": "dated:article_title",
    "expect": {
@@ -3349,7 +3329,7 @@
    }
   },
   {
-   "id": "G1-339",
+   "id": "G1-337",
    "text": "Loi du 29 juillet 2023 autorisant le Gouvernement à financer les frais, art. 1er",
    "style": "dated:backward",
    "expect": {
@@ -3359,7 +3339,7 @@
    }
   },
   {
-   "id": "G1-340",
+   "id": "G1-338",
    "text": "loi du 29 juillet 2023",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3380,7 +3360,7 @@
    }
   },
   {
-   "id": "G1-341",
+   "id": "G1-339",
    "text": "loi du 20 novembre 2025",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3393,7 +3373,7 @@
    }
   },
   {
-   "id": "G1-342",
+   "id": "G1-340",
    "text": "loi du 25 février 2026 relative à l’établissement d’un titre de voyage",
    "style": "dated:title",
    "expect": {
@@ -3402,7 +3382,7 @@
    }
   },
   {
-   "id": "G1-343",
+   "id": "G1-341",
    "text": "loi modifiée du 25 février 2026 relative à l’établissement d’un titre de voyage",
    "style": "dated:modifiee_title",
    "expect": {
@@ -3411,7 +3391,7 @@
    }
   },
   {
-   "id": "G1-344",
+   "id": "G1-342",
    "text": "article 3 de la loi du 25 février 2026 relative à l’établissement d’un titre de voyage",
    "style": "dated:article_title",
    "expect": {
@@ -3421,7 +3401,7 @@
    }
   },
   {
-   "id": "G1-345",
+   "id": "G1-343",
    "text": "Loi du 25 février 2026 relative à l’établissement d’un titre de voyage, art. 3",
    "style": "dated:backward",
    "expect": {
@@ -3431,7 +3411,7 @@
    }
   },
   {
-   "id": "G1-346",
+   "id": "G1-344",
    "text": "loi du 25 février 2026",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3445,7 +3425,7 @@
    }
   },
   {
-   "id": "G1-347",
+   "id": "G1-345",
    "text": "règlement grand-ducal du 15 juillet 1988",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3460,7 +3440,7 @@
    }
   },
   {
-   "id": "G1-348",
+   "id": "G1-346",
    "text": "règlement grand-ducal du 24 mars 1989 précisant le secret bancaire en matière fiscale",
    "style": "dated:title",
    "expect": {
@@ -3469,7 +3449,7 @@
    }
   },
   {
-   "id": "G1-349",
+   "id": "G1-347",
    "text": "article 7 du règlement grand-ducal du 24 mars 1989 précisant le secret bancaire en matière fiscale",
    "style": "dated:article_title",
    "expect": {
@@ -3479,7 +3459,7 @@
    }
   },
   {
-   "id": "G1-350",
+   "id": "G1-348",
    "text": "RGD du 24 mars 1989 précisant le secret bancaire en matière fiscale, art. 7",
    "style": "dated:backward",
    "expect": {
@@ -3489,7 +3469,7 @@
    }
   },
   {
-   "id": "G1-351",
+   "id": "G1-349",
    "text": "règlement grand-ducal du 24 mars 1989",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3510,7 +3490,7 @@
    }
   },
   {
-   "id": "G1-352",
+   "id": "G1-350",
    "text": "règlement grand-ducal du 24 janvier 1991",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3523,7 +3503,7 @@
    }
   },
   {
-   "id": "G1-353",
+   "id": "G1-351",
    "text": "règlement grand-ducal du 10 février 1993 fixant les principes relatifs à l'organisation des",
    "style": "dated:title",
    "expect": {
@@ -3532,7 +3512,7 @@
    }
   },
   {
-   "id": "G1-354",
+   "id": "G1-352",
    "text": "article 19 du règlement grand-ducal du 10 février 1993 fixant les principes relatifs à l'organisation des",
    "style": "dated:article_title",
    "expect": {
@@ -3542,7 +3522,7 @@
    }
   },
   {
-   "id": "G1-355",
+   "id": "G1-353",
    "text": "RGD du 10 février 1993 fixant les principes relatifs à l'organisation des, art. 19",
    "style": "dated:backward",
    "expect": {
@@ -3552,7 +3532,7 @@
    }
   },
   {
-   "id": "G1-356",
+   "id": "G1-354",
    "text": "règlement grand-ducal du 10 février 1993",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3566,7 +3546,7 @@
    }
   },
   {
-   "id": "G1-357",
+   "id": "G1-355",
    "text": "règlement grand-ducal du 24 juillet 2000",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3580,7 +3560,7 @@
    }
   },
   {
-   "id": "G1-358",
+   "id": "G1-356",
    "text": "règlement grand-ducal du 25 avril 2001 concernant la commercialisation des matériels de multiplication",
    "style": "dated:title",
    "expect": {
@@ -3589,7 +3569,7 @@
    }
   },
   {
-   "id": "G1-359",
+   "id": "G1-357",
    "text": "article 7 du règlement grand-ducal du 25 avril 2001 concernant la commercialisation des matériels de multiplication",
    "style": "dated:article_title",
    "expect": {
@@ -3599,7 +3579,7 @@
    }
   },
   {
-   "id": "G1-360",
+   "id": "G1-358",
    "text": "RGD du 25 avril 2001 concernant la commercialisation des matériels de multiplication, art. 7",
    "style": "dated:backward",
    "expect": {
@@ -3609,7 +3589,7 @@
    }
   },
   {
-   "id": "G1-361",
+   "id": "G1-359",
    "text": "règlement grand-ducal du 25 avril 2001",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3621,7 +3601,7 @@
    }
   },
   {
-   "id": "G1-362",
+   "id": "G1-360",
    "text": "règlement grand-ducal du 8 mars 2017",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3644,7 +3624,7 @@
    }
   },
   {
-   "id": "G1-363",
+   "id": "G1-361",
    "text": "règlement grand-ducal du 30 novembre 2017 arrêtant la nomenclature des actes et services",
    "style": "dated:title",
    "expect": {
@@ -3653,7 +3633,7 @@
    }
   },
   {
-   "id": "G1-364",
+   "id": "G1-362",
    "text": "article 3 du règlement grand-ducal du 30 novembre 2017 arrêtant la nomenclature des actes et services",
    "style": "dated:article_title",
    "expect": {
@@ -3663,7 +3643,7 @@
    }
   },
   {
-   "id": "G1-365",
+   "id": "G1-363",
    "text": "RGD du 30 novembre 2017 arrêtant la nomenclature des actes et services, art. 3",
    "style": "dated:backward",
    "expect": {
@@ -3673,7 +3653,7 @@
    }
   },
   {
-   "id": "G1-366",
+   "id": "G1-364",
    "text": "règlement grand-ducal du 30 novembre 2017",
    "style": "dated:unique_date",
    "expect": {
@@ -3682,7 +3662,7 @@
    }
   },
   {
-   "id": "G1-367",
+   "id": "G1-365",
    "text": "règlement grand-ducal du 17 août 2018 déterminant les caractéristiques techniques du câblage adapté",
    "style": "dated:title",
    "expect": {
@@ -3691,7 +3671,7 @@
    }
   },
   {
-   "id": "G1-368",
+   "id": "G1-366",
    "text": "article 1er du règlement grand-ducal du 17 août 2018 déterminant les caractéristiques techniques du câblage adapté",
    "style": "dated:article_title",
    "expect": {
@@ -3701,7 +3681,7 @@
    }
   },
   {
-   "id": "G1-369",
+   "id": "G1-367",
    "text": "RGD du 17 août 2018 déterminant les caractéristiques techniques du câblage adapté, art. 1er",
    "style": "dated:backward",
    "expect": {
@@ -3711,7 +3691,7 @@
    }
   },
   {
-   "id": "G1-370",
+   "id": "G1-368",
    "text": "règlement grand-ducal du 17 août 2018",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3726,7 +3706,7 @@
    }
   },
   {
-   "id": "G1-371",
+   "id": "G1-369",
    "text": "règlement grand-ducal du 2 octobre 2018",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3747,7 +3727,7 @@
    }
   },
   {
-   "id": "G1-372",
+   "id": "G1-370",
    "text": "règlement grand-ducal du 7 mars 2024 déterminant les localités de vote qui ne",
    "style": "dated:title",
    "expect": {
@@ -3756,7 +3736,7 @@
    }
   },
   {
-   "id": "G1-373",
+   "id": "G1-371",
    "text": "article 2 du règlement grand-ducal du 7 mars 2024 déterminant les localités de vote qui ne",
    "style": "dated:article_title",
    "expect": {
@@ -3766,7 +3746,7 @@
    }
   },
   {
-   "id": "G1-374",
+   "id": "G1-372",
    "text": "RGD du 7 mars 2024 déterminant les localités de vote qui ne, art. 2",
    "style": "dated:backward",
    "expect": {
@@ -3776,7 +3756,7 @@
    }
   },
   {
-   "id": "G1-375",
+   "id": "G1-373",
    "text": "règlement grand-ducal du 7 mars 2024",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3788,7 +3768,7 @@
    }
   },
   {
-   "id": "G1-376",
+   "id": "G1-374",
    "text": "règlement grand-ducal du 22 décembre 2025",
    "style": "ambiguous:dated_text",
    "expect": {
@@ -3803,7 +3783,7 @@
    }
   },
   {
-   "id": "G1-377",
+   "id": "G1-375",
    "text": "règlement ministériel du 28 janvier 1985 déterminant les mesures nécessaires pour parer à",
    "style": "dated:title",
    "expect": {
@@ -3812,7 +3792,7 @@
    }
   },
   {
-   "id": "G1-378",
+   "id": "G1-376",
    "text": "article 10 du règlement ministériel du 28 janvier 1985 déterminant les mesures nécessaires pour parer à",
    "style": "dated:article_title",
    "expect": {
@@ -3822,7 +3802,7 @@
    }
   },
   {
-   "id": "G1-379",
+   "id": "G1-377",
    "text": "règlement ministériel du 28 janvier 1985",
    "style": "dated:unique_date",
    "expect": {
@@ -3831,7 +3811,7 @@
    }
   },
   {
-   "id": "G1-380",
+   "id": "G1-378",
    "text": "règlement ministériel du 8 février 2024 fixant les facteurs de correction climatique en",
    "style": "dated:title",
    "expect": {
@@ -3840,7 +3820,7 @@
    }
   },
   {
-   "id": "G1-381",
+   "id": "G1-379",
    "text": "article 2 du règlement ministériel du 8 février 2024 fixant les facteurs de correction climatique en",
    "style": "dated:article_title",
    "expect": {
@@ -3850,7 +3830,7 @@
    }
   },
   {
-   "id": "G1-382",
+   "id": "G1-380",
    "text": "règlement ministériel du 8 février 2024",
    "style": "dated:unique_date",
    "expect": {
@@ -3859,7 +3839,7 @@
    }
   },
   {
-   "id": "G1-383",
+   "id": "G1-381",
    "text": "loi du 1er avril 1976",
    "style": "dated:unique_date",
    "expect": {
@@ -3868,7 +3848,7 @@
    }
   },
   {
-   "id": "G1-384",
+   "id": "G1-382",
    "text": "arrêté grand-ducal du 1er juin 2018",
    "style": "dated:unique_date",
    "expect": {
@@ -3877,7 +3857,7 @@
    }
   },
   {
-   "id": "G1-385",
+   "id": "G1-383",
    "text": "loi du 3 septembre 1913",
    "style": "dated:unique_date",
    "expect": {
@@ -3886,7 +3866,7 @@
    }
   },
   {
-   "id": "G1-386",
+   "id": "G1-384",
    "text": "règlement grand-ducal du 31 août 1979",
    "style": "dated:unique_date",
    "expect": {
@@ -3895,7 +3875,7 @@
    }
   },
   {
-   "id": "G1-387",
+   "id": "G1-385",
    "text": "arrêté grand-ducal du 26 mars 1947",
    "style": "dated:unique_date",
    "expect": {
@@ -3904,7 +3884,7 @@
    }
   },
   {
-   "id": "G1-388",
+   "id": "G1-386",
    "text": "règlement grand-ducal du 18 décembre 1972",
    "style": "dated:unique_date",
    "expect": {
@@ -3913,7 +3893,7 @@
    }
   },
   {
-   "id": "G1-389",
+   "id": "G1-387",
    "text": "règlement grand-ducal du 27 janvier 1973",
    "style": "dated:unique_date",
    "expect": {
@@ -3922,7 +3902,7 @@
    }
   },
   {
-   "id": "G1-390",
+   "id": "G1-388",
    "text": "arrêté grand-ducal du 25 janvier 1935",
    "style": "dated:unique_date",
    "expect": {
@@ -3931,7 +3911,7 @@
    }
   },
   {
-   "id": "G1-391",
+   "id": "G1-389",
    "text": "règlement grand-ducal du 8 mars 1984",
    "style": "dated:unique_date",
    "expect": {
@@ -3940,7 +3920,7 @@
    }
   },
   {
-   "id": "G1-392",
+   "id": "G1-390",
    "text": "règlement grand-ducal du 22 janvier 1999",
    "style": "dated:unique_date",
    "expect": {
@@ -3949,7 +3929,7 @@
    }
   },
   {
-   "id": "G1-393",
+   "id": "G1-391",
    "text": "arrêté grand-ducal du 21 mars 1903",
    "style": "dated:unique_date",
    "expect": {
@@ -3958,7 +3938,7 @@
    }
   },
   {
-   "id": "G1-394",
+   "id": "G1-392",
    "text": "loi du 11 décembre 1863",
    "style": "dated:unique_date",
    "expect": {
@@ -3967,7 +3947,7 @@
    }
   },
   {
-   "id": "G1-395",
+   "id": "G1-393",
    "text": "arrêté grand-ducal du 5 mars 1958",
    "style": "dated:unique_date",
    "expect": {
@@ -3976,7 +3956,7 @@
    }
   },
   {
-   "id": "G1-396",
+   "id": "G1-394",
    "text": "arrêté grand-ducal du 27 avril 1894",
    "style": "dated:unique_date",
    "expect": {
@@ -3985,7 +3965,7 @@
    }
   },
   {
-   "id": "G1-397",
+   "id": "G1-395",
    "text": "arrêté grand-ducal du 15 novembre 1920",
    "style": "dated:unique_date",
    "expect": {
@@ -3994,7 +3974,7 @@
    }
   },
   {
-   "id": "G1-398",
+   "id": "G1-396",
    "text": "loi du 18 juin 1844",
    "style": "dated:unique_date",
    "expect": {
@@ -4003,7 +3983,7 @@
    }
   },
   {
-   "id": "G1-399",
+   "id": "G1-397",
    "text": "loi du 18 avril 1851",
    "style": "dated:unique_date",
    "expect": {
@@ -4012,7 +3992,7 @@
    }
   },
   {
-   "id": "G1-400",
+   "id": "G1-398",
    "text": "arrêté grand-ducal du 9 septembre 1939",
    "style": "dated:unique_date",
    "expect": {
@@ -4021,7 +4001,7 @@
    }
   },
   {
-   "id": "G1-401",
+   "id": "G1-399",
    "text": "loi du 2 juin 1897",
    "style": "dated:unique_date",
    "expect": {
@@ -4030,7 +4010,7 @@
    }
   },
   {
-   "id": "G1-402",
+   "id": "G1-400",
    "text": "règlement grand-ducal du 27 novembre 1986",
    "style": "dated:unique_date",
    "expect": {
@@ -4039,7 +4019,7 @@
    }
   },
   {
-   "id": "G1-403",
+   "id": "G1-401",
    "text": "règlement grand-ducal du 14 août 1985",
    "style": "dated:unique_date",
    "expect": {
@@ -4048,7 +4028,7 @@
    }
   },
   {
-   "id": "G1-404",
+   "id": "G1-402",
    "text": "arrêté grand-ducal du 18 juin 1911",
    "style": "dated:unique_date",
    "expect": {
@@ -4057,7 +4037,7 @@
    }
   },
   {
-   "id": "G1-405",
+   "id": "G1-403",
    "text": "arrêté grand-ducal du 5 décembre 1958",
    "style": "dated:unique_date",
    "expect": {
@@ -4066,7 +4046,7 @@
    }
   },
   {
-   "id": "G1-406",
+   "id": "G1-404",
    "text": "arrêté grand-ducal du 26 juillet 2000",
    "style": "dated:unique_date",
    "expect": {
@@ -4075,7 +4055,7 @@
    }
   },
   {
-   "id": "G1-407",
+   "id": "G1-405",
    "text": "arrêté grand-ducal du 4 avril 1953",
    "style": "dated:unique_date",
    "expect": {
@@ -4084,7 +4064,7 @@
    }
   },
   {
-   "id": "G1-408",
+   "id": "G1-406",
    "text": "règlement grand-ducal du 29 octobre 2009",
    "style": "dated:unique_date",
    "expect": {
@@ -4093,7 +4073,7 @@
    }
   },
   {
-   "id": "G1-409",
+   "id": "G1-407",
    "text": "règlement grand-ducal du 30 novembre 2001",
    "style": "dated:unique_date",
    "expect": {
@@ -4102,7 +4082,7 @@
    }
   },
   {
-   "id": "G1-410",
+   "id": "G1-408",
    "text": "arrêté grand-ducal du 6 juillet 1898",
    "style": "dated:unique_date",
    "expect": {
@@ -4111,7 +4091,7 @@
    }
   },
   {
-   "id": "G1-411",
+   "id": "G1-409",
    "text": "règlement grand-ducal du 12 mars 2004",
    "style": "dated:unique_date",
    "expect": {
@@ -4120,7 +4100,7 @@
    }
   },
   {
-   "id": "G1-412",
+   "id": "G1-410",
    "text": "arrêté grand-ducal du 7 avril 1952",
    "style": "dated:unique_date",
    "expect": {
@@ -4129,7 +4109,7 @@
    }
   },
   {
-   "id": "G1-413",
+   "id": "G1-411",
    "text": "arrêté grand-ducal du 30 janvier 1939",
    "style": "dated:unique_date",
    "expect": {
@@ -4138,7 +4118,7 @@
    }
   },
   {
-   "id": "G1-414",
+   "id": "G1-412",
    "text": "arrêté grand-ducal du 28 mars 1960",
    "style": "dated:unique_date",
    "expect": {
@@ -4147,7 +4127,7 @@
    }
   },
   {
-   "id": "G1-415",
+   "id": "G1-413",
    "text": "règlement grand-ducal du 11 novembre 1969",
    "style": "dated:unique_date",
    "expect": {
@@ -4156,7 +4136,7 @@
    }
   },
   {
-   "id": "G1-416",
+   "id": "G1-414",
    "text": "loi du 28 octobre 1980",
    "style": "dated:unique_date",
    "expect": {
@@ -4165,7 +4145,7 @@
    }
   },
   {
-   "id": "G1-417",
+   "id": "G1-415",
    "text": "arrêté grand-ducal du 24 mars 1913",
    "style": "dated:unique_date",
    "expect": {
@@ -4174,7 +4154,7 @@
    }
   },
   {
-   "id": "G1-418",
+   "id": "G1-416",
    "text": "règlement grand-ducal du 4 novembre 2020",
    "style": "ambiguous:dated",
    "expect": {
@@ -4186,7 +4166,7 @@
    }
   },
   {
-   "id": "G1-419",
+   "id": "G1-417",
    "text": "arrêté grand-ducal du 9 avril 1920",
    "style": "ambiguous:dated",
    "expect": {
@@ -4198,7 +4178,7 @@
    }
   },
   {
-   "id": "G1-420",
+   "id": "G1-418",
    "text": "arrêté grand-ducal du 28 juillet 1947",
    "style": "ambiguous:dated",
    "expect": {
@@ -4210,7 +4190,7 @@
    }
   },
   {
-   "id": "G1-421",
+   "id": "G1-419",
    "text": "règlement grand-ducal du 9 janvier 1991",
    "style": "ambiguous:dated",
    "expect": {
@@ -4223,7 +4203,7 @@
    }
   },
   {
-   "id": "G1-422",
+   "id": "G1-420",
    "text": "loi du 30 juin 2003",
    "style": "ambiguous:dated",
    "expect": {
@@ -4236,7 +4216,7 @@
    }
   },
   {
-   "id": "G1-423",
+   "id": "G1-421",
    "text": "loi du 17 juin 1966",
    "style": "ambiguous:dated",
    "expect": {
@@ -4248,7 +4228,7 @@
    }
   },
   {
-   "id": "G1-424",
+   "id": "G1-422",
    "text": "règlement grand-ducal du 21 juin 1984",
    "style": "ambiguous:dated",
    "expect": {
@@ -4263,7 +4243,7 @@
    }
   },
   {
-   "id": "G1-425",
+   "id": "G1-423",
    "text": "règlement grand-ducal du 25 mai 1989",
    "style": "ambiguous:dated",
    "expect": {
@@ -4275,7 +4255,7 @@
    }
   },
   {
-   "id": "G1-426",
+   "id": "G1-424",
    "text": "arrêté grand-ducal du 27 octobre 2009",
    "style": "ambiguous:dated",
    "expect": {
@@ -4287,7 +4267,7 @@
    }
   },
   {
-   "id": "G1-427",
+   "id": "G1-425",
    "text": "règlement grand-ducal du 14 mars 2002",
    "style": "ambiguous:dated",
    "expect": {
@@ -4299,7 +4279,7 @@
    }
   },
   {
-   "id": "G1-428",
+   "id": "G1-426",
    "text": "règlement grand-ducal du 6 octobre 1996",
    "style": "ambiguous:dated",
    "expect": {
@@ -4314,7 +4294,7 @@
    }
   },
   {
-   "id": "G1-429",
+   "id": "G1-427",
    "text": "règlement grand-ducal du 20 février 2006",
    "style": "ambiguous:dated",
    "expect": {
@@ -4326,7 +4306,7 @@
    }
   },
   {
-   "id": "G1-430",
+   "id": "G1-428",
    "text": "loi du 16 décembre 2008",
    "style": "ambiguous:dated",
    "expect": {
@@ -4341,7 +4321,7 @@
    }
   },
   {
-   "id": "G1-431",
+   "id": "G1-429",
    "text": "loi du 25 mars 1991",
    "style": "ambiguous:dated",
    "expect": {
@@ -4354,7 +4334,7 @@
    }
   },
   {
-   "id": "G1-432",
+   "id": "G1-430",
    "text": "règlement grand-ducal du 4 novembre 2010",
    "style": "ambiguous:dated",
    "expect": {
@@ -4366,7 +4346,7 @@
    }
   },
   {
-   "id": "G1-433",
+   "id": "G1-431",
    "text": "loi du 29 juin 2022",
    "style": "ambiguous:dated",
    "expect": {
@@ -4378,7 +4358,7 @@
    }
   },
   {
-   "id": "G1-434",
+   "id": "G1-432",
    "text": "règlement grand-ducal du 21 janvier 1994",
    "style": "ambiguous:dated",
    "expect": {
@@ -4392,7 +4372,7 @@
    }
   },
   {
-   "id": "G1-435",
+   "id": "G1-433",
    "text": "règlement grand-ducal du 12 décembre 1974",
    "style": "ambiguous:dated",
    "expect": {
@@ -4410,7 +4390,7 @@
    }
   },
   {
-   "id": "G1-436",
+   "id": "G1-434",
    "text": "loi du 17 décembre 2021",
    "style": "ambiguous:dated",
    "expect": {
@@ -4437,7 +4417,7 @@
    }
   },
   {
-   "id": "G1-437",
+   "id": "G1-435",
    "text": "arrêté grand-ducal du 30 décembre 1957",
    "style": "ambiguous:dated",
    "expect": {
@@ -4449,7 +4429,7 @@
    }
   },
   {
-   "id": "G1-438",
+   "id": "G1-436",
    "text": "règlement grand-ducal du 31 octobre 2007",
    "style": "ambiguous:dated",
    "expect": {
@@ -4464,7 +4444,7 @@
    }
   },
   {
-   "id": "G1-439",
+   "id": "G1-437",
    "text": "règlement grand-ducal du 11 juillet 1988",
    "style": "ambiguous:dated",
    "expect": {
@@ -4477,7 +4457,7 @@
    }
   },
   {
-   "id": "G1-440",
+   "id": "G1-438",
    "text": "loi du 4 mars 1994",
    "style": "ambiguous:dated",
    "expect": {
@@ -4491,7 +4471,7 @@
    }
   },
   {
-   "id": "G1-441",
+   "id": "G1-439",
    "text": "arrêté grand-ducal du 13 février 1914",
    "style": "ambiguous:dated",
    "expect": {
@@ -4503,7 +4483,7 @@
    }
   },
   {
-   "id": "G1-442",
+   "id": "G1-440",
    "text": "loi du 17 juillet 2026",
    "style": "ambiguous:dated",
    "expect": {
@@ -4518,7 +4498,7 @@
    }
   },
   {
-   "id": "G1-443",
+   "id": "G1-441",
    "text": "règlement grand-ducal du 16 août 1982",
    "style": "ambiguous:dated",
    "expect": {
@@ -4535,7 +4515,7 @@
    }
   },
   {
-   "id": "G1-444",
+   "id": "G1-442",
    "text": "règlement grand-ducal du 10 septembre 2009",
    "style": "ambiguous:dated",
    "expect": {
@@ -4548,7 +4528,7 @@
    }
   },
   {
-   "id": "G1-445",
+   "id": "G1-443",
    "text": "règlement grand-ducal du 13 mai 1994",
    "style": "ambiguous:dated",
    "expect": {
@@ -4560,7 +4540,7 @@
    }
   },
   {
-   "id": "G1-446",
+   "id": "G1-444",
    "text": "arrêté grand-ducal du 3 août 1998",
    "style": "ambiguous:dated",
    "expect": {
@@ -4572,7 +4552,7 @@
    }
   },
   {
-   "id": "G1-447",
+   "id": "G1-445",
    "text": "règlement grand-ducal du 27 juillet 2003",
    "style": "ambiguous:dated",
    "expect": {
@@ -4593,7 +4573,7 @@
    }
   },
   {
-   "id": "G1-448",
+   "id": "G1-446",
    "text": "règlement grand-ducal du 8 décembre 2010",
    "style": "ambiguous:dated",
    "expect": {
@@ -4611,7 +4591,7 @@
    }
   },
   {
-   "id": "G1-449",
+   "id": "G1-447",
    "text": "arrêté grand-ducal du 19 juillet 1905",
    "style": "ambiguous:dated",
    "expect": {
@@ -4623,7 +4603,7 @@
    }
   },
   {
-   "id": "G1-450",
+   "id": "G1-448",
    "text": "règlement grand-ducal du 18 août 1988",
    "style": "ambiguous:dated",
    "expect": {
@@ -4638,7 +4618,7 @@
    }
   },
   {
-   "id": "G1-451",
+   "id": "G1-449",
    "text": "règlement grand-ducal du 22 juin 1966",
    "style": "ambiguous:dated",
    "expect": {
@@ -4651,7 +4631,7 @@
    }
   },
   {
-   "id": "G1-452",
+   "id": "G1-450",
    "text": "règlement grand-ducal du 22 juin 2010",
    "style": "ambiguous:dated",
    "expect": {
@@ -4675,7 +4655,7 @@
    }
   },
   {
-   "id": "G1-453",
+   "id": "G1-451",
    "text": "règlement grand-ducal du 5 février 2001",
    "style": "ambiguous:dated",
    "expect": {
@@ -4695,7 +4675,7 @@
    }
   },
   {
-   "id": "G1-454",
+   "id": "G1-452",
    "text": "arrêté grand-ducal du 25 mars 1908",
    "style": "ambiguous:dated",
    "expect": {
@@ -4707,7 +4687,7 @@
    }
   },
   {
-   "id": "G1-455",
+   "id": "G1-453",
    "text": "arrêté grand-ducal du 4 avril 1958",
    "style": "ambiguous:dated",
    "expect": {
@@ -4720,7 +4700,7 @@
    }
   },
   {
-   "id": "G1-456",
+   "id": "G1-454",
    "text": "loi du 11 avril 1936",
    "style": "ambiguous:dated",
    "expect": {
@@ -4732,7 +4712,7 @@
    }
   },
   {
-   "id": "G1-457",
+   "id": "G1-455",
    "text": "arrêté grand-ducal du 30 mai 1893",
    "style": "ambiguous:dated",
    "expect": {
@@ -4744,7 +4724,7 @@
    }
   },
   {
-   "id": "G1-458",
+   "id": "G1-456",
    "text": "loi du 29 juin 1997",
    "style": "ambiguous:dated",
    "expect": {
@@ -4757,7 +4737,7 @@
    }
   },
   {
-   "id": "G1-459",
+   "id": "G1-457",
    "text": "loi du 25 juillet 1990",
    "style": "ambiguous:dated",
    "expect": {
@@ -4769,7 +4749,7 @@
    }
   },
   {
-   "id": "G1-460",
+   "id": "G1-458",
    "text": "loi du 21 juin 2023",
    "style": "ambiguous:dated",
    "expect": {
@@ -4781,7 +4761,7 @@
    }
   },
   {
-   "id": "G1-461",
+   "id": "G1-459",
    "text": "loi du 19 juin 1984",
    "style": "ambiguous:dated",
    "expect": {
@@ -4794,7 +4774,7 @@
    }
   },
   {
-   "id": "G1-462",
+   "id": "G1-460",
    "text": "loi du 23 décembre 1958",
    "style": "ambiguous:dated",
    "expect": {
@@ -4807,7 +4787,7 @@
    }
   },
   {
-   "id": "G1-463",
+   "id": "G1-461",
    "text": "règlement grand-ducal du 15 octobre 1992",
    "style": "ambiguous:dated",
    "expect": {
@@ -4823,7 +4803,7 @@
    }
   },
   {
-   "id": "G1-464",
+   "id": "G1-462",
    "text": "arrêté grand-ducal du 3 mars 1947",
    "style": "ambiguous:dated",
    "expect": {
@@ -4835,7 +4815,7 @@
    }
   },
   {
-   "id": "G1-465",
+   "id": "G1-463",
    "text": "règlement grand-ducal du 22 janvier 2011",
    "style": "ambiguous:dated",
    "expect": {
@@ -4859,7 +4839,7 @@
    }
   },
   {
-   "id": "G1-466",
+   "id": "G1-464",
    "text": "arrêté grand-ducal du 30 mars 1955",
    "style": "ambiguous:dated",
    "expect": {
@@ -4871,7 +4851,7 @@
    }
   },
   {
-   "id": "G1-467",
+   "id": "G1-465",
    "text": "règlement grand-ducal du 6 juillet 2020",
    "style": "ambiguous:dated",
    "expect": {
@@ -4884,7 +4864,7 @@
    }
   },
   {
-   "id": "G1-468",
+   "id": "G1-466",
    "text": "loi du 28 novembre 2009",
    "style": "ambiguous:dated",
    "expect": {
@@ -4903,7 +4883,7 @@
    }
   },
   {
-   "id": "G1-469",
+   "id": "G1-467",
    "text": "loi du 18 mars 2024",
    "style": "ambiguous:dated",
    "expect": {
@@ -4915,7 +4895,7 @@
    }
   },
   {
-   "id": "G1-470",
+   "id": "G1-468",
    "text": "loi du 13 février 2011",
    "style": "ambiguous:dated",
    "expect": {
@@ -4929,7 +4909,7 @@
    }
   },
   {
-   "id": "G1-471",
+   "id": "G1-469",
    "text": "règlement grand-ducal du 3 mars 2017",
    "style": "ambiguous:dated",
    "expect": {
@@ -4944,7 +4924,7 @@
    }
   },
   {
-   "id": "G1-472",
+   "id": "G1-470",
    "text": "règlement grand-ducal du 19 août 1989",
    "style": "ambiguous:dated",
    "expect": {
@@ -4957,7 +4937,7 @@
    }
   },
   {
-   "id": "G1-473",
+   "id": "G1-471",
    "text": "règlement grand-ducal du 8 avril 2000 portant création d'une section environnement naturel dans",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -4966,7 +4946,7 @@
    }
   },
   {
-   "id": "G1-474",
+   "id": "G1-472",
    "text": "règlement grand-ducal du 24 décembre 1970 fixant les modalités d'octroi de la prime",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -4975,7 +4955,7 @@
    }
   },
   {
-   "id": "G1-475",
+   "id": "G1-473",
    "text": "loi du 2 avril 1930 ayant pour objet d'approuver la déclaration du",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -4984,7 +4964,7 @@
    }
   },
   {
-   "id": "G1-476",
+   "id": "G1-474",
    "text": "loi du 12 décembre 2025 relative à la construction de l’extension du",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -4993,7 +4973,7 @@
    }
   },
   {
-   "id": "G1-477",
+   "id": "G1-475",
    "text": "loi du 21 mars 1985 portant approbation de la Convention sur la",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5002,7 +4982,7 @@
    }
   },
   {
-   "id": "G1-478",
+   "id": "G1-476",
    "text": "règlement grand-ducal du 17 juillet 1984 modifiant le règlement grand-ducal du 14 juillet",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5011,7 +4991,7 @@
    }
   },
   {
-   "id": "G1-479",
+   "id": "G1-477",
    "text": "règlement grand-ducal du 15 février 2002 abrogeant le règlement grand-ducal du 3 août",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5020,7 +5000,7 @@
    }
   },
   {
-   "id": "G1-480",
+   "id": "G1-478",
    "text": "règlement grand-ducal du 25 mai 2005 fixant les conditions et modalités d'octroi et",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5029,7 +5009,7 @@
    }
   },
   {
-   "id": "G1-481",
+   "id": "G1-479",
    "text": "règlement grand-ducal du 10 juillet 2000 portant modification du règlement grand-ducal du 31",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5038,7 +5018,7 @@
    }
   },
   {
-   "id": "G1-482",
+   "id": "G1-480",
    "text": "règlement grand-ducal du 19 juin 1996 fixant les modalités d'exécution du titre V",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5047,7 +5027,7 @@
    }
   },
   {
-   "id": "G1-483",
+   "id": "G1-481",
    "text": "règlement grand-ducal du 24 mars 2015 modifiant le règlement grand-ducal du 3 août",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5056,7 +5036,7 @@
    }
   },
   {
-   "id": "G1-484",
+   "id": "G1-482",
    "text": "loi du 24 avril 1991 modifiant l'article 14 de la loi modifiée",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5065,7 +5045,7 @@
    }
   },
   {
-   "id": "G1-485",
+   "id": "G1-483",
    "text": "règlement grand-ducal du 5 juillet 1995 portant déclaration d'obligation générale du quatrième avenant",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5074,7 +5054,7 @@
    }
   },
   {
-   "id": "G1-486",
+   "id": "G1-484",
    "text": "règlement grand-ducal du 22 décembre 1995 fixant la clé de répartition des frais",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5083,7 +5063,7 @@
    }
   },
   {
-   "id": "G1-487",
+   "id": "G1-485",
    "text": "règlement grand-ducal du 19 juin 1998 fixant le nombre des emplois des différentes",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5092,7 +5072,7 @@
    }
   },
   {
-   "id": "G1-488",
+   "id": "G1-486",
    "text": "règlement grand-ducal du 20 juin 1984 modifiant 1) l'arrêté grand-ducal modifié du 29",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5101,7 +5081,7 @@
    }
   },
   {
-   "id": "G1-489",
+   "id": "G1-487",
    "text": "loi du 8 juin 2022 : 1° modifiant : a) le Code",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5110,7 +5090,7 @@
    }
   },
   {
-   "id": "G1-490",
+   "id": "G1-488",
    "text": "règlement grand-ducal du 18 octobre 1971 relatif à la perception et à l'octroi",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5119,7 +5099,7 @@
    }
   },
   {
-   "id": "G1-491",
+   "id": "G1-489",
    "text": "règlement grand-ducal du 28 avril 2021 modifiant le règlement grand-ducal du 17 novembre",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5128,7 +5108,7 @@
    }
   },
   {
-   "id": "G1-492",
+   "id": "G1-490",
    "text": "loi du 29 décembre 1983 autorisant le Gouvernement à émettre, selon les",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5137,7 +5117,7 @@
    }
   },
   {
-   "id": "G1-493",
+   "id": "G1-491",
    "text": "règlement grand-ducal du 31 octobre 1979 régissant les conditions d'établissement et d'utilisation des",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5146,7 +5126,7 @@
    }
   },
   {
-   "id": "G1-494",
+   "id": "G1-492",
    "text": "règlement grand-ducal du 12 juin 1965 remplaçant le dernier alinéa de l'article 34",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5155,7 +5135,7 @@
    }
   },
   {
-   "id": "G1-495",
+   "id": "G1-493",
    "text": "loi du 12 décembre 1960 concernant la suppression des fractions de franc",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5164,7 +5144,7 @@
    }
   },
   {
-   "id": "G1-496",
+   "id": "G1-494",
    "text": "règlement grand-ducal du 13 décembre 2007 modifiant le règlement grand-ducal modifié du 21",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5173,7 +5153,7 @@
    }
   },
   {
-   "id": "G1-497",
+   "id": "G1-495",
    "text": "loi du 10 mars 2026 portant création d’une plateforme commune de transmission",
    "style": "dated:title_among_same_date",
    "expect": {
@@ -5182,7 +5162,7 @@
    }
   },
   {
-   "id": "G1-498",
+   "id": "G1-496",
    "text": "loi du 3 janvier 2017",
    "style": "not_found:date",
    "expect": {
@@ -5190,7 +5170,7 @@
    }
   },
   {
-   "id": "G1-499",
+   "id": "G1-497",
    "text": "loi du 9 février 2017",
    "style": "not_found:date",
    "expect": {
@@ -5198,7 +5178,7 @@
    }
   },
   {
-   "id": "G1-500",
+   "id": "G1-498",
    "text": "loi du 18 mars 2017",
    "style": "not_found:date",
    "expect": {
@@ -5206,7 +5186,7 @@
    }
   },
   {
-   "id": "G1-501",
+   "id": "G1-499",
    "text": "loi du 31 mai 2017",
    "style": "not_found:date",
    "expect": {
@@ -5214,7 +5194,7 @@
    }
   },
   {
-   "id": "G1-502",
+   "id": "G1-500",
    "text": "Mém. A n° 33 de 1890",
    "style": "memorial:short",
    "expect": {
@@ -5226,7 +5206,7 @@
    }
   },
   {
-   "id": "G1-503",
+   "id": "G1-501",
    "text": "Mémorial A n° 272 de 2011",
    "style": "memorial:long",
    "expect": {
@@ -5235,7 +5215,7 @@
    }
   },
   {
-   "id": "G1-504",
+   "id": "G1-502",
    "text": "Mém. A n° 15 de 1917",
    "style": "memorial:short",
    "expect": {
@@ -5247,7 +5227,7 @@
    }
   },
   {
-   "id": "G1-505",
+   "id": "G1-503",
    "text": "Mém. A n° 97 de 1982",
    "style": "memorial:short",
    "expect": {
@@ -5263,7 +5243,7 @@
    }
   },
   {
-   "id": "G1-506",
+   "id": "G1-504",
    "text": "Mémorial A n° 40 de 1970",
    "style": "memorial:long",
    "expect": {
@@ -5275,7 +5255,7 @@
    }
   },
   {
-   "id": "G1-507",
+   "id": "G1-505",
    "text": "Mém. A n° 227 de 2012",
    "style": "memorial:short",
    "expect": {
@@ -5296,7 +5276,7 @@
    }
   },
   {
-   "id": "G1-508",
+   "id": "G1-506",
    "text": "Mémorial A n° 26 de 2005",
    "style": "memorial:long",
    "expect": {
@@ -5309,7 +5289,7 @@
    }
   },
   {
-   "id": "G1-509",
+   "id": "G1-507",
    "text": "Mém. A n° 97 de 1939",
    "style": "memorial:short",
    "expect": {
@@ -5323,7 +5303,7 @@
    }
   },
   {
-   "id": "G1-510",
+   "id": "G1-508",
    "text": "Mém. A n° 41 de 1845",
    "style": "memorial:short",
    "expect": {
@@ -5335,7 +5315,7 @@
    }
   },
   {
-   "id": "G1-511",
+   "id": "G1-509",
    "text": "Mémorial A n° 50 de 1946",
    "style": "memorial:long",
    "expect": {
@@ -5352,7 +5332,7 @@
    }
   },
   {
-   "id": "G1-512",
+   "id": "G1-510",
    "text": "Mém. A n° 37 de 1967",
    "style": "memorial:short",
    "expect": {
@@ -5368,7 +5348,7 @@
    }
   },
   {
-   "id": "G1-513",
+   "id": "G1-511",
    "text": "Mémorial A n° 54 de 2014",
    "style": "memorial:long",
    "expect": {
@@ -5384,7 +5364,7 @@
    }
   },
   {
-   "id": "G1-514",
+   "id": "G1-512",
    "text": "Mémorial A n° 28 de 1849",
    "style": "memorial:long",
    "expect": {
@@ -5396,7 +5376,7 @@
    }
   },
   {
-   "id": "G1-515",
+   "id": "G1-513",
    "text": "Mém. A n° 33 de 2001",
    "style": "memorial:short",
    "expect": {
@@ -5412,7 +5392,7 @@
    }
   },
   {
-   "id": "G1-516",
+   "id": "G1-514",
    "text": "Mém. A n° 15 de 1894",
    "style": "memorial:short",
    "expect": {
@@ -5421,7 +5401,7 @@
    }
   },
   {
-   "id": "G1-517",
+   "id": "G1-515",
    "text": "Mém. A n° 75 de 2007",
    "style": "memorial:short",
    "expect": {
@@ -5430,7 +5410,7 @@
    }
   },
   {
-   "id": "G1-518",
+   "id": "G1-516",
    "text": "Mém. A n° 7 de 1944",
    "style": "memorial:short",
    "expect": {
@@ -5439,7 +5419,7 @@
    }
   },
   {
-   "id": "G1-519",
+   "id": "G1-517",
    "text": "Mém. A n° 61 de 1955",
    "style": "memorial:short",
    "expect": {
@@ -5451,7 +5431,7 @@
    }
   },
   {
-   "id": "G1-520",
+   "id": "G1-518",
    "text": "Mém. A n° 35 de 1963",
    "style": "memorial:short",
    "expect": {
@@ -5471,7 +5451,7 @@
    }
   },
   {
-   "id": "G1-521",
+   "id": "G1-519",
    "text": "Mém. A n° 51 de 1850",
    "style": "memorial:short",
    "expect": {
@@ -5483,7 +5463,7 @@
    }
   },
   {
-   "id": "G1-522",
+   "id": "G1-520",
    "text": "Mémorial A n° 24 de 1999",
    "style": "memorial:long",
    "expect": {
@@ -5498,7 +5478,7 @@
    }
   },
   {
-   "id": "G1-523",
+   "id": "G1-521",
    "text": "Mém. A n° 183 de 2014",
    "style": "memorial:short",
    "expect": {
@@ -5519,7 +5499,7 @@
    }
   },
   {
-   "id": "G1-524",
+   "id": "G1-522",
    "text": "Mémorial A n° 100 de 1987",
    "style": "memorial:long",
    "expect": {
@@ -5532,7 +5512,7 @@
    }
   },
   {
-   "id": "G1-525",
+   "id": "G1-523",
    "text": "Mém. A n° 5 de 1979",
    "style": "memorial:short",
    "expect": {
@@ -5546,7 +5526,7 @@
    }
   },
   {
-   "id": "G1-526",
+   "id": "G1-524",
    "text": "Mémorial A n° 58 de 2001",
    "style": "memorial:long",
    "expect": {
@@ -5560,7 +5540,7 @@
    }
   },
   {
-   "id": "G1-527",
+   "id": "G1-525",
    "text": "Mém. A n° 7 de 1846",
    "style": "memorial:short",
    "expect": {
@@ -5569,7 +5549,7 @@
    }
   },
   {
-   "id": "G1-528",
+   "id": "G1-526",
    "text": "Mémorial A n° 36 de 1881",
    "style": "memorial:long",
    "expect": {
@@ -5581,7 +5561,7 @@
    }
   },
   {
-   "id": "G1-529",
+   "id": "G1-527",
    "text": "Mémorial A n° 44 de 1981",
    "style": "memorial:long",
    "expect": {
@@ -5593,7 +5573,7 @@
    }
   },
   {
-   "id": "G1-530",
+   "id": "G1-528",
    "text": "Mémorial A n° 6 de 1991",
    "style": "memorial:long",
    "expect": {
@@ -5605,7 +5585,7 @@
    }
   },
   {
-   "id": "G1-531",
+   "id": "G1-529",
    "text": "Mém. A n° 125 de 2009",
    "style": "memorial:short",
    "expect": {
@@ -5614,7 +5594,7 @@
    }
   },
   {
-   "id": "G1-532",
+   "id": "G1-530",
    "text": "Mém. A n° 9876 de 2018",
    "style": "not_found:memorial",
    "expect": {
@@ -5622,7 +5602,7 @@
    }
   },
   {
-   "id": "G1-533",
+   "id": "G1-531",
    "text": "ADEM",
    "style": "alias:acronym",
    "expect": {
@@ -5631,7 +5611,7 @@
    }
   },
   {
-   "id": "G1-534",
+   "id": "G1-532",
    "text": "c. civ.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5640,7 +5620,7 @@
    }
   },
   {
-   "id": "G1-535",
+   "id": "G1-533",
    "text": "c. com.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5649,7 +5629,7 @@
    }
   },
   {
-   "id": "G1-536",
+   "id": "G1-534",
    "text": "c. consom.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5658,7 +5638,7 @@
    }
   },
   {
-   "id": "G1-537",
+   "id": "G1-535",
    "text": "CNPD",
    "style": "alias:acronym",
    "expect": {
@@ -5667,7 +5647,7 @@
    }
   },
   {
-   "id": "G1-538",
+   "id": "G1-536",
    "text": "code civil",
    "style": "alias:short_title",
    "expect": {
@@ -5676,7 +5656,7 @@
    }
   },
   {
-   "id": "G1-539",
+   "id": "G1-537",
    "text": "code de commerce",
    "style": "alias:short_title",
    "expect": {
@@ -5685,7 +5665,7 @@
    }
   },
   {
-   "id": "G1-540",
+   "id": "G1-538",
    "text": "code de la consommation",
    "style": "alias:short_title",
    "expect": {
@@ -5694,7 +5674,7 @@
    }
   },
   {
-   "id": "G1-541",
+   "id": "G1-539",
    "text": "code de la fonction publique",
    "style": "alias:short_title",
    "expect": {
@@ -5703,7 +5683,7 @@
    }
   },
   {
-   "id": "G1-542",
+   "id": "G1-540",
    "text": "code de la route",
    "style": "alias:short_title",
    "expect": {
@@ -5712,7 +5692,7 @@
    }
   },
   {
-   "id": "G1-543",
+   "id": "G1-541",
    "text": "code de la sante",
    "style": "alias:short_title",
    "expect": {
@@ -5721,7 +5701,7 @@
    }
   },
   {
-   "id": "G1-544",
+   "id": "G1-542",
    "text": "code de la securite sociale",
    "style": "alias:short_title",
    "expect": {
@@ -5730,7 +5710,7 @@
    }
   },
   {
-   "id": "G1-545",
+   "id": "G1-543",
    "text": "code de procedure penale",
    "style": "alias:short_title",
    "expect": {
@@ -5739,7 +5719,7 @@
    }
   },
   {
-   "id": "G1-546",
+   "id": "G1-544",
    "text": "code du travail",
    "style": "alias:short_title",
    "expect": {
@@ -5748,7 +5728,7 @@
    }
   },
   {
-   "id": "G1-547",
+   "id": "G1-545",
    "text": "code penal",
    "style": "alias:short_title",
    "expect": {
@@ -5757,7 +5737,7 @@
    }
   },
   {
-   "id": "G1-548",
+   "id": "G1-546",
    "text": "const.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5766,7 +5746,7 @@
    }
   },
   {
-   "id": "G1-549",
+   "id": "G1-547",
    "text": "constitution",
    "style": "alias:short_title",
    "expect": {
@@ -5775,7 +5755,7 @@
    }
   },
   {
-   "id": "G1-550",
+   "id": "G1-548",
    "text": "c. pen.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5784,7 +5764,7 @@
    }
   },
   {
-   "id": "G1-551",
+   "id": "G1-549",
    "text": "CPP",
    "style": "alias:acronym",
    "expect": {
@@ -5793,7 +5773,7 @@
    }
   },
   {
-   "id": "G1-552",
+   "id": "G1-550",
    "text": "c. proc. pen.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5802,7 +5782,7 @@
    }
   },
   {
-   "id": "G1-553",
+   "id": "G1-551",
    "text": "c. route",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5811,7 +5791,7 @@
    }
   },
   {
-   "id": "G1-554",
+   "id": "G1-552",
    "text": "CSS",
    "style": "alias:acronym",
    "expect": {
@@ -5820,7 +5800,7 @@
    }
   },
   {
-   "id": "G1-555",
+   "id": "G1-553",
    "text": "CSSF",
    "style": "alias:acronym",
    "expect": {
@@ -5829,7 +5809,7 @@
    }
   },
   {
-   "id": "G1-556",
+   "id": "G1-554",
    "text": "c. trav.",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5838,7 +5818,7 @@
    }
   },
   {
-   "id": "G1-557",
+   "id": "G1-555",
    "text": "loi aifm",
    "style": "alias:curated",
    "expect": {
@@ -5847,7 +5827,7 @@
    }
   },
   {
-   "id": "G1-558",
+   "id": "G1-556",
    "text": "loi sur le secteur des assurances",
    "style": "alias:curated",
    "expect": {
@@ -5856,7 +5836,7 @@
    }
   },
   {
-   "id": "G1-559",
+   "id": "G1-557",
    "text": "loi sur le secteur financier",
    "style": "alias:curated",
    "expect": {
@@ -5865,7 +5845,7 @@
    }
   },
   {
-   "id": "G1-560",
+   "id": "G1-558",
    "text": "LSF",
    "style": "alias:acronym",
    "expect": {
@@ -5874,7 +5854,7 @@
    }
   },
   {
-   "id": "G1-561",
+   "id": "G1-559",
    "text": "ncpc",
    "style": "alias:code_abbrev",
    "expect": {
@@ -5883,7 +5863,7 @@
    }
   },
   {
-   "id": "G1-562",
+   "id": "G1-560",
    "text": "nouveau code de procedure civile",
    "style": "alias:short_title",
    "expect": {
@@ -5892,7 +5872,7 @@
    }
   },
   {
-   "id": "G1-563",
+   "id": "G1-561",
    "text": "RGPD",
    "style": "out_of_scope:alias",
    "expect": {
@@ -5900,7 +5880,7 @@
    }
   },
   {
-   "id": "G1-564",
+   "id": "G1-562",
    "text": "règlement général sur la protection des données",
    "style": "out_of_scope:alias",
    "expect": {
@@ -5908,7 +5888,7 @@
    }
   },
   {
-   "id": "G1-565",
+   "id": "G1-563",
    "text": "règlement (UE) 2016/679",
    "style": "out_of_scope:alias",
    "expect": {
@@ -5916,7 +5896,7 @@
    }
   },
   {
-   "id": "G1-566",
+   "id": "G1-564",
    "text": "directive (UE) 2019/1152",
    "style": "out_of_scope:alias",
    "expect": {

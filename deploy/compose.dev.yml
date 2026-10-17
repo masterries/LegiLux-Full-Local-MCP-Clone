@@ -3,31 +3,34 @@
 #
 # Standalone file (it does not need compose.yml): `docker compose -f deploy/compose.dev.yml config` validates.
 #   docker compose -f deploy/compose.dev.yml up -d --build          # db + db-load + mcp + lgx-streamlit
-#   docker compose -f deploy/compose.dev.yml --profile cpu up -d     # + Ollama (LLM on the internal network)
-#   docker compose -f deploy/compose.dev.yml --profile ollama-pull run --rm ollama-pull   # fetch the dev model once
-#   (Makefile wrappers: make dev-up | dev-down | dev-logs | ollama-pull MODEL=<tag> | e2e | egress-check)
-#   docker compose -f deploy/compose.dev.yml --profile cloudllm up -d lgx-streamlit-cloud # OPT-IN cloud LLM (:8502)
+#   docker compose -f deploy/compose.dev.yml --profile rerank up -d  # + the TEI reranker (LGX_RERANK=auto)
+#   (Makefile wrappers: make dev-up | dev-down | dev-logs | rerank-up | rerank-down | e2e | egress-check)
 # UI: http://127.0.0.1:8501 · MCP: http://127.0.0.1:8000/mcp (/livez, /readyz).
 #
+# - No LLM runtime is bundled (user decision 2026-10-17). The chat LLM is one EXTERNAL OpenAI-compatible endpoint:
+#   OPENAI_BASE_URL (LGX_LLM_BASE_URL) + the key file LGX_LLM_KEY_FILE + LGX_LLM_MODEL, by default the user's Mistral
+#   endpoint (Mistral SaaS here; the same API under the on-prem domain in the airgap). lgx-streamlit therefore also
+#   joins `llm-egress` (internet-capable) and shows a banner when the endpoint is outside the stack. Without a key,
+#   point the UI at any OpenAI-compatible URL (e.g. scripts/openai_stub.py, `make e2e`) — or use Direct search.
+# - Embeddings stay OFF (LGX_EMBED_PROVIDER=none). With LGX_EMBED_PROVIDER=mistral the mcp container needs a route to
+#   LGX_EMBED_BASE_URL too (add it to llm-egress in an override) and the key file LGX_EMBED_KEY_FILE.
 # - No secrets are required to start: dev defaults (override with LGX_DEV_* variables, deploy/.env.example) reach
-#   the read-only services as the plain dev variables LGX_DB_PASSWORD / LGX_MCP_TOKEN / OPENAI_API_KEY that both
-#   lgx-mcp and lgx-streamlit accept in development. Compose `configs` with inline `content` cannot be used there:
-#   compose copies them into the container, which fails on a read_only root filesystem ("`file` is the sole
-#   supported option"). The airgap (compose.yml) uses file-based Docker secrets, which are bind mounts.
+#   the read-only services as the plain dev variables LGX_DB_PASSWORD / LGX_MCP_TOKEN that both lgx-mcp and
+#   lgx-streamlit accept in development; API keys are only ever files (an empty /dev/null default = no key). Compose
+#   `configs` with inline `content` cannot be used there: compose copies them into the container, which fails on a
+#   read_only root filesystem ("`file` is the sole supported option"). The airgap (compose.yml) uses file-based
+#   Docker secrets, which are bind mounts.
 # - Streamlit reads the offline config.toml baked into the image (ui/.streamlit/config.toml); per-deployment values
 #   come from STREAMLIT_* variables, which take precedence over the file.
-# - `backend` is internal (db <-> mcp <-> ui <-> llm, no route out). Docker does not publish ports of containers
-#   that sit only on internal networks, so mcp and lgx-streamlit also join `edge`, published on 127.0.0.1 only.
-#   `edge` has IP masquerading off: published ports keep working, but nothing on it is NATed to the internet.
-#   The full egress gates still run on the offline VM (PLAN §11.6).
+# - `backend` is internal (db <-> mcp <-> ui, no route out). Docker does not publish ports of containers that sit
+#   only on internal networks, so mcp and lgx-streamlit also join `edge`, published on 127.0.0.1 only. `edge` has IP
+#   masquerading off: published ports keep working, but nothing on it is NATed to the internet. The full egress gates
+#   still run on the offline VM (PLAN §11.6).
 # - The database is its own volume, filled once by `db-load` from the sample bundle built by
 #   `lgx ingest --sample --offline --package` (data/bundles/data-2026-10-16-sample.dump). It is independent of the
 #   host-side lgx-dev-db container. To reuse that container's volume instead, STOP lgx-dev-db first and set
 #   LGX_DEV_PGDATA_VOLUME=lgx-dev-pgdata: two servers must never share a data directory, and the db service then
 #   refuses to start while a postmaster.pid is present (LGX_DEV_DB_FORCE=1 overrides after a crash).
-# - A cloud LLM is possible ONLY through the explicit `cloudllm` profile (red banner in the UI); the default
-#   command never starts lgx-streamlit-cloud. The default UI also refuses a free-typed non-internal LLM URL
-#   (lgx_ui.app_support.endpoint_allowed). `make dev-down` stops the cloudllm profile too.
 # =====================================================================================================
 name: legilux-dev
 
@@ -45,7 +48,6 @@ x-offline-env: &offline
   DO_NOT_TRACK: "1"
   NO_PROXY: "*"
 
-x-ollama-image: &ollama_image "${LGX_OLLAMA_IMAGE:-mirror.gcr.io/ollama/ollama:0.40.5@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241}"
 # TEI cpu-1.9.4 (images.lock tei-cpu): index digest 2538ea1c…, linux/amd64 manifest 8419f533…, created 2026-09-15
 x-tei-image: &tei_image "${LGX_TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-1.9.4@sha256:2538ea1c9640d3763b15af668039d24172d063b42337b0c27796fc2be180c78d}"
 
@@ -54,19 +56,16 @@ networks:
     internal: true                                      # no gateway, no route out
   edge:                                                 # only for the 127.0.0.1-published ports: no outbound NAT
     driver_opts: { com.docker.network.bridge.enable_ip_masquerade: "false" }
-  dev-egress: {}                                        # internet-capable; only ollama-pull and lgx-streamlit-cloud
+  llm-egress: {}                                        # internet-capable: lgx-streamlit -> the external LLM endpoint
 
 volumes:
   pgdata:
     name: "${LGX_DEV_PGDATA_VOLUME:-legilux-dev-pgdata}"
-  ollama-models:
-    name: "${LGX_DEV_OLLAMA_VOLUME:-legilux-dev-ollama}"
 
 x-dev-credentials:                                      # dev defaults only; the airgap uses 0600 Docker secrets
   pg_superuser_pw: &pg_superuser_pw "${LGX_DEV_PG_PASSWORD:-lgx-dev-only}"
   pg_ro_pw: &pg_ro_pw "${LGX_DEV_RO_PASSWORD:-lgx-ro-dev-only}"
   mcp_token: &mcp_token "${LGX_DEV_MCP_TOKEN:-lgx-dev-mcp-token}"
-  llm_api_key: &llm_api_key "${LGX_DEV_LLM_API_KEY:-sk-no-key}"
 
 configs:
   db_load_script:                                       # one-shot restore of the sample bundle (`lgx dev-load` light)
@@ -100,8 +99,10 @@ configs:
       echo "db-load: lgx_ro password set (LGX_DEV_RO_PASSWORD)"
 
 secrets:
-  cloud_llm_api_key:                                    # cloudllm profile only; repo-root secrets/ (gitignored, 0600)
-    file: "${LGX_CLOUD_LLM_KEY_FILE:-../secrets/cloud_llm_api_key}"
+  llm_api_key:                                          # key of the external LLM endpoint; repo-root secrets/ (0600,
+    file: "${LGX_LLM_KEY_FILE:-/dev/null}"            # gitignored), e.g. LGX_LLM_KEY_FILE=../secrets/llm_api_key
+  embed_api_key:                                        # Mistral embeddings key (only with LGX_EMBED_PROVIDER=mistral)
+    file: "${LGX_EMBED_KEY_FILE:-/dev/null}"
   build_ca_bundle:                                      # image builds: CA bundle of a TLS-intercepting proxy (empty default)
     file: "${LGX_DEV_CA_BUNDLE:-/dev/null}"           # e.g. LGX_DEV_CA_BUNDLE=/root/.ccr/ca-bundle.crt
 
@@ -179,12 +180,18 @@ services:
       LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 4 vCPU fp32: 16 x 600 chars ~ 19 s (1,800: 60 s)
       LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-60}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
-      LGX_EMBED_PROVIDER: none                          # user decision: embeddings off (lexical-only)
+      LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"  # user decision: embeddings off (lexical-only)
+      LGX_EMBED_BASE_URL: "${LGX_EMBED_BASE_URL:-https://api.mistral.ai}"
+      LGX_EMBED_API_KEY_FILE: /run/secrets/embed_api_key   # empty file = no key (vector_status disabled:no_api_key)
+      LGX_EMBED_MAX_CONCURRENCY: "${LGX_EMBED_MAX_CONCURRENCY:-5}"   # throttle: in flight
+      LGX_EMBED_COOLDOWN_S: "${LGX_EMBED_COOLDOWN_S:-20}"            # throttle: per-slot wait after a request
+      LGX_EMBED_TIMEOUT_S: "5"                          # a query waits at most this long (slot + request)
       LGX_TZ: Europe/Luxembourg
       LGX_STALENESS_WARN_DAYS: "30"
       LGX_STALENESS_CRITICAL_DAYS: "90"
       LGX_MAX_RESULT_TOKENS: "${LGX_MAX_RESULT_TOKENS:-2500}"   # cpu profile budget (PLAN §9.1)
       LGX_AUDIT_QUERY_TEXT: "false"
+    secrets: [embed_api_key]
     depends_on: { db-load: { condition: service_completed_successfully } }
     healthcheck:                                        # /readyz: 200 iff DB reachable + schema supported
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/readyz', timeout=3)"]
@@ -222,41 +229,6 @@ services:
     ports: ["127.0.0.1:${LGX_DEV_RERANK_PORT:-8090}:8080"]   # host-side eval / contract tests (LGX_TEST_RERANK_URL)
     networks: [backend, edge]
 
-  # -------------------------------------------------------------------------------------------- LLM (optional)
-  ollama:                                               # profile cpu: dev model qwen3:4b-instruct-2507-q4_K_M (2.5 GB)
-    <<: *base
-    profiles: [cpu]
-    image: *ollama_image
-    environment:
-      <<: *offline
-      OLLAMA_NO_CLOUD: "1"
-      OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-16384}"        # always set: Ollama's default depends on VRAM (PLAN §9.2)
-      OLLAMA_KEEP_ALIVE: "-1"
-      OLLAMA_NUM_PARALLEL: "${LGX_LLM_PARALLEL:-1}"
-      OLLAMA_HOST: "0.0.0.0:11434"
-      OLLAMA_MODELS: /models/ollama
-    volumes: ["ollama-models:/models/ollama"]
-    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, timeout: 10s, retries: 10, start_period: 60s,
-                   start_interval: 2s }
-    networks: { backend: { aliases: [llm] } }
-
-  ollama-pull:                                          # one-shot, connected dev host only: model into the volume
-    <<: *base
-    profiles: [ollama-pull]
-    restart: "no"
-    image: *ollama_image
-    entrypoint: ["/bin/sh", "/opt/lgx/pull-models.sh"]
-    environment:
-      OLLAMA_MODELS: /models/ollama
-      OLLAMA_HOST: "127.0.0.1:11434"
-      LGX_OLLAMA_PULL: "${LGX_OLLAMA_PULL:-${LGX_LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}}"
-      LGX_OLLAMA_ALIAS: "${LGX_OLLAMA_ALIAS:-}"
-    volumes:
-      - "ollama-models:/models/ollama"
-      - "./ollama:/opt/lgx:ro"
-      - "${LGX_DEV_CA_BUNDLE:-/dev/null}:/run/lgx/ca-bundle.crt:ro"   # used only when non-empty (TLS proxy)
-    networks: [dev-egress]
-
   # -------------------------------------------------------------------------------------------- UI
   lgx-streamlit:                                        # on by default in dev (PLAN §9.3)
     <<: *base
@@ -270,18 +242,18 @@ services:
     tmpfs: ["/tmp"]
     environment:
       <<: *offline
-      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-http://llm:11434/v1}"   # Ollama /v1 | vLLM | on-prem Mistral
-      OPENAI_API_KEY: *llm_api_key                      # dev only (airgap: OPENAI_API_KEY_FILE secret)
-      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}"   # validated on cpu (docs/dev/e2e-2026-10-17.md)
-      LGX_LLM_PRESETS: "ollama,vllm,mistral-onprem"      # 'cloud' only in lgx-streamlit-cloud
-      LGX_MISTRAL_ONPREM_URL: "${LGX_MISTRAL_ONPREM_URL:-}"
-      LGX_MISTRAL_ONPREM_MODEL: "${LGX_MISTRAL_ONPREM_MODEL:-}"
+      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-https://api.mistral.ai/v1}"   # any OpenAI-compatible endpoint (Mistral)
+      OPENAI_API_KEY_FILE: /run/secrets/llm_api_key     # empty file (default) = no key
+      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-mistral-small-latest}"   # [U] the model the endpoint serves
+      LGX_LLM_TRUST_ENV: "${LGX_LLM_TRUST_ENV:-0}"      # 1 = reach the LLM through LGX_LLM_HTTPS_PROXY (proxied host)
+      HTTPS_PROXY: "${LGX_LLM_HTTPS_PROXY:-}"
+      NO_PROXY: "mcp,localhost,127.0.0.1"              # not "*": a configured proxy applies to the LLM endpoint only
       LGX_MCP_URL: "${LGX_DEV_MCP_URL:-http://mcp:8000/mcp}"
       LGX_MCP_TOKEN: *mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
       LGX_MCP_TIMEOUT_S: "20"
-      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-600}"     # cpu: one call = 2-7k prompt tokens at ~25 tok/s + answer
-      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-1200}"   # (docs/dev/e2e-2026-10-17.md: 120 s timed out on 4 vCPUs)
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"    # per LLM call
+      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-600}"    # whole chat turn
       LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"
       LGX_HOSTNAME: "${LGX_HOSTNAME:-localhost}"
       STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
@@ -292,6 +264,7 @@ services:
       STREAMLIT_SERVER_ADDRESS: "0.0.0.0"               # inside the container; published on 127.0.0.1 only
       STREAMLIT_CLIENT_SHOW_ERROR_DETAILS: "full"       # dev; the image default is "none"
     extra_hosts: ["host.docker.internal:host-gateway"]  # LGX_DEV_MCP_URL=http://host.docker.internal:8000/mcp
+    secrets: [llm_api_key]
     depends_on: { mcp: { condition: service_healthy } }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
@@ -301,20 +274,4 @@ services:
       start_period: 60s
       start_interval: 2s
     ports: ["127.0.0.1:${LGX_DEV_UI_PORT:-8501}:8501"]
-    networks: [backend, edge]
-
-  lgx-streamlit-cloud:                                  # OPT-IN (profile cloudllm): quick tests against a cloud API
-    extends: { service: lgx-streamlit }
-    profiles: [cloudllm]
-    ports: !override ["127.0.0.1:${LGX_DEV_CLOUD_UI_PORT:-8502}:8501"]
-    environment:
-      LGX_ALLOW_CLOUD_LLM: "1"                          # red banner: questions + retrieved public texts leave the host
-      OPENAI_BASE_URL: "${LGX_CLOUD_LLM_BASE_URL:-}"
-      OPENAI_API_KEY_FILE: /run/secrets/cloud_llm_api_key   # file-based secret (bind mount): fine on read_only
-      LGX_LLM_MODEL: "${LGX_CLOUD_LLM_MODEL:-}"
-      LGX_LLM_PRESETS: "cloud"
-      LGX_LLM_TRUST_ENV: "1"                            # may use the host's HTTPS proxy settings
-      NO_PROXY: "mcp,llm,localhost,127.0.0.1"
-    secrets: [cloud_llm_api_key]
-    depends_on: { mcp: { condition: service_healthy } }
-    networks: !override [backend, dev-egress]
+    networks: [backend, edge, llm-egress]

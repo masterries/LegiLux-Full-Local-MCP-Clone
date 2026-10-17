@@ -158,7 +158,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         print(f"[{n}/{len(questions)}] ({lang}) {question}", file=sys.stderr, flush=True)
         sb = ui.SidebarState(
             llm=llm,
-            preset_key="e2e",
             chat_mode=args.mode,
             max_iterations=args.max_iterations or cfg.max_tool_iterations,
             prompt_lang=lang,

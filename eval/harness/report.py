@@ -116,6 +116,22 @@ def markdown(r: Mapping[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def restrict(report: Mapping[str, Any], ids: Sequence[str]) -> dict[str, Any]:
+    """A G2 report scored again on a subset of its items (same per-item ranks; tool latency from the items,
+    SQL / rerank latency are not per item and are dropped)."""
+    from eval.harness import metrics
+
+    want = set(ids)
+    rows = [r for r in report["items"] if str(r["id"]) in want]
+    summary: dict[str, Any] = {"all": metrics.summarise_retrieval(rows)}
+    for lang in sorted({r["lang"] for r in rows}):
+        summary[lang] = metrics.summarise_retrieval([r for r in rows if r["lang"] == lang])
+    summary["errors"] = sum(1 for r in rows if r.get("error"))
+    summary["reranked_items"] = sum(1 for r in rows if r.get("reranked"))
+    summary["latency"] = {"tool": metrics.latency_summary([r["latency_ms"] for r in rows])}
+    return {**report, "items": rows, "summary": summary, "subset": {"ids": sorted(want), "restricted": True}}
+
+
 def compare_markdown(reports: Sequence[Mapping[str, Any]]) -> str:
     """One table per set, one row per run (e.g. lexical vs lexical + rerank)."""
     out: list[str] = []

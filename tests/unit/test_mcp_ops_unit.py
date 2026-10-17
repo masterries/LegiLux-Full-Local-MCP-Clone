@@ -44,7 +44,7 @@ def test_settings_from_compose_style_env(tmp_path: Path) -> None:
     assert s.token == TOKEN and "password=s3cret" in s.pg_conninfo and "host=db" in s.pg_conninfo
     assert s.allowed_hosts == ("mcp:8000", "localhost:8000") and s.rerank_k == 16
     assert "s3cret" not in json.dumps(s.describe()) and TOKEN not in repr(s)
-    assert s.embed_provider is EmbeddingProvider.NONE and s.audit_query_text is False
+    assert s.embedding.provider is EmbeddingProvider.NONE and s.audit_query_text is False
 
 
 def test_settings_dsn_and_validation() -> None:
@@ -228,12 +228,14 @@ def test_decide_mode(requested: str, status: str, used: str, reason: str | None)
     assert (m.mode_requested, m.mode_used, m.vector_status, m.reason) == (requested, used, status, reason)
 
 
-def test_unimplemented_embedding_provider_degrades_to_lexical() -> None:
+def test_mistral_without_a_key_degrades_to_lexical() -> None:
     from lgx_mcp.runtime import create_runtime
 
-    s = McpSettings.from_env({"LGX_MCP_AUTH": "off", "LGX_EMBED_PROVIDER": "mistral-local"})
+    s = McpSettings.from_env({"LGX_MCP_AUTH": "off", "LGX_EMBED_PROVIDER": "mistral"})
+    assert s.embedding.enabled and s.embed_api_key is None  # never a reason to refuse the start
     rt = create_runtime(s)
-    assert rt.vector_status(None) == "disabled:endpoint_unreachable"
+    assert rt.vectors.config_problem() == ("disabled:no_api_key", rt.vectors.config_problem()[1])  # type: ignore[index]
+    assert rt.vector_status(None) == "disabled:not_probed"
     assert decide_mode("hybrid", rt.vector_status(None)).mode_used == "lexical"
 
 

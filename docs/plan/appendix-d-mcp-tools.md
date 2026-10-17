@@ -17,7 +17,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
 **Results**
 - Every result carries `structuredContent`, valid against the tool's `outputSchema`.
 - Every result also carries one **TextContent** block: a compact French rendering of the same content. Legal text in it is wrapped in `<<<TEXTE … >>>` and labelled as data.
-- Size caps: ≈ 4k tokens per result (≈ 2.5k on the `cpu` profile). Long articles paginate with `cursor`.
+- Size caps: ≈ 4k tokens per result (`LGX_MAX_RESULT_TOKENS`; ≈ 2.5k for small models). Long articles paginate with `cursor`.
 - Token counts at runtime are the tokenizer-free estimate `ceil(chars / 3.5)` from `lgx_core.textsize` [E]. No tokenizer library (tiktoken, transformers, tokenizers) is a dependency of `lgx-mcp` or `lgx-streamlit`, because such libraries download vocabulary files on first use.
 
 **`as_of` (`YYYY-MM-DD`)**
@@ -40,7 +40,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
 **Health endpoints** (custom HTTP routes outside the MCP transport; no corpus data)
 - `GET /livez` returns 200 while the process runs.
 - `GET /readyz` returns 200 **if and only if** the database is reachable and its `schema_version` is supported. Otherwise it returns 503.
-- Degraded states never make `/readyz` non-200. They are reported in its JSON body: `{"schema_ok", "vector_status", "reranker_ok", "clock_ok", "canned_query_ok", "release_id"}`. The UIs therefore start in lexical mode and show the reason in the Direct-search and Corpus tabs.
+- Degraded states never make `/readyz` non-200. They are reported in its JSON body: `{"schema_ok", "vector_status", "vector_reason", "reranker_ok", "clock_ok", "canned_query_ok", "release_id"}`. The UIs therefore start in lexical mode and show the reason in the Direct-search and Corpus tabs.
 - Both routes are exempt from bearer authentication and from the Host/Origin allowlist, which protect `/mcp` only. They are reachable only on the internal networks.
 
 **Other surfaces**
@@ -87,9 +87,9 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
 
 // Retrieval block — search_legislation only
 { "mode_requested": "auto|lexical|hybrid", "mode_used": "lexical|hybrid",
-  "vector_status": "ok | disabled:provider_none | disabled:parity_failed | disabled:endpoint_unreachable | disabled:dim_mismatch | disabled:model_mismatch",
+  "vector_status": "ok | disabled:provider_none | disabled:no_vectors | disabled:not_probed | disabled:no_api_key | disabled:endpoint_unreachable | disabled:endpoint_timeout | disabled:unauthorized | disabled:rate_limited | disabled:dim_mismatch | disabled:model_mismatch | disabled:probe_mismatch | …",
   "reason": "string|null", "reranked": true, "rerank_status": "ok | unavailable | off", "rerank_k": 40,
-  "embedding_model": { "provider": "mistral-local", "model_id": "mistral-embed-2312", "model_version": "v23.12", "dim": 1024 } | null }
+  "embedding_model": { "provider": "mistral", "model_id": "mistral-embed", "dim": 1024 } | null }
 ```
 
 ## D.2 Tools
@@ -124,7 +124,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
     "as_of": {"type": "string", "format": "date"},
     "top_k": {"type": "integer", "minimum": 1, "maximum": 20, "default": 8},
     "retrieval_mode": {"enum": ["auto", "lexical", "hybrid"], "default": "auto",
-                       "description": "auto = hybrid when vectors are available and parity-checked, else lexical."}
+                       "description": "auto = hybrid when the release has vectors and the embedding probe passed, else lexical."}
   }
 }
 ```
@@ -285,17 +285,17 @@ The server requires either `citation`, or `act_eli` + `article`. Otherwise it re
 - `counts {acts, versions, by_text_basis {…}, by_flag {…}, future_versions, chunks}`;
 - `scope {branches, text_types, metadata_scope, exclusions[]}`;
 - `known_gaps {stub_consolidations[] {work_eli, announced_date, fallback}, pdf_codes[], licence_restricted, scan_only, out_of_scope[]}`;
-- `embedding {provider, model_id, model_version, dim, vector_status, parity {checked_at, min_cosine, threshold}}`;
+- `embedding {provider, model_id, dim, vector_status, reason, vectors, probe {status, reason, checked_at, cosine, model_reported, min_cosine} | null, throttle {max_concurrency, cooldown_s} | null}`;
 - `retrieval_defaults {mode, rerank, rerank_k}`;
 - `licences {data: "CC BY 4.0", texts_path: "legilux://legal/cc-by-4.0"}`;
 - `versions {schema, rules, parser, platform}`.
 
 ## D.3 Contract tests (CI, every commit)
 - Every tool is called through **both** client eras: `mcp==2.3.0` `Client` (modern) and `mcp==1.27.2` `ClientSession` (handshake, as used by Open WebUI 0.12.3). The results must validate against the output schemas.
-- Every tool runs in lexical mode, and in hybrid mode with mock vectors. A parity failure must return `mode_used = lexical` with a reason, and never an error.
+- Every tool runs in lexical mode, and in hybrid mode with fake vectors (a fake embeddings endpoint, never a real API call). A failed startup probe (wrong model id, wrong dim, low probe cosine, endpoint down, no key) must return `mode_used = lexical` with a reason, and never an error.
 - The Streamlit bridge converts each `inputSchema` into an OpenAI `function.parameters`. The JSON Schema check must pass, and there must be no top-level combinators.
 - One test per `search_legislation` filter (`doc_types` across the exact branch, `act_eli`, `in_force_only = false`), mirroring check P11 on the SQL function.
-- `/livez` and `/readyz` answer without a bearer token and with any Host header; `/readyz` stays 200 when parity fails, the embedder is down, the reranker is down or the clock is suspect, and returns 503 when the database is down or the schema is unsupported.
+- `/livez` and `/readyz` answer without a bearer token and with any Host header; `/readyz` stays 200 when the embedding probe fails, the embeddings endpoint is down, the reranker is down or the clock is suspect, and returns 503 when the database is down or the schema is unsupported.
 - Reranking: 40 candidates against the real TEI `cpu-1.9.4` image (integration test, from M2). The client splits requests into batches of ≤ 32, and the compose command raises TEI's `--max-client-batch-size` (default 32) to 64.
 
 ## D.4 Warning catalogue (`config/warnings.yaml` → `lgx.warning_def`; French is canonical; lawyer-reviewed in M2)

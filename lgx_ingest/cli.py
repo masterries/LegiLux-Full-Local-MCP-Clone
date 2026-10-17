@@ -219,19 +219,17 @@ def chunk(ctx: typer.Context, sample: Sample = True) -> None:
 
 
 @app.command()
-def embed(ctx: typer.Context) -> None:
-    """S7: embedding stage — OFF by default (provider none): reports the status and does nothing."""
-    stage_ctx = _context(ctx)
-    provider = stage_ctx.config.embedding.provider
-    if not stage_ctx.config.embedding.enabled:
-        typer.echo(
-            StageResult(stage="embed", messages=["provider=none: no vectors are computed (PLAN §6.5)"]).model_dump_json(
-                indent=2
-            )
-        )
-        return
-    err.print(f"[yellow]not implemented yet:[/yellow] embedding provider {provider.value!r} arrives in M3")
-    raise typer.Exit(EXIT_NOT_IMPLEMENTED)
+def embed(
+    ctx: typer.Context,
+    dry_run: Annotated[
+        bool, typer.Option(help="Print the plan (chunks, requests, tokens, duration under the throttle); no request")
+    ] = False,
+    latency_s: Annotated[
+        float, typer.Option(help="Assumed seconds per request for the duration estimate [E]", min=0.0)
+    ] = 2.0,
+) -> None:
+    """S7: embed the searchable chunks of T (Mistral API, throttled, resumable cache); OFF by default."""
+    _run("lgx_ingest.embed:run_embed", _context(ctx, dry_run=dry_run), latency_s=latency_s)
 
 
 @app.command()
@@ -260,6 +258,14 @@ def report(ctx: typer.Context, sample: Sample = True) -> None:
 from lgx_ingest import cli_content as _cli_content  # noqa: E402, F401  — `lgx content fetch|parse` (agent B)
 from lgx_ingest import cli_ingest as _cli_ingest  # noqa: E402, F401  — `lgx ingest`, `lgx package` (loader stage)
 from lgx_ingest import cli_meta as _cli_meta  # noqa: E402, F401  — `lgx meta …`, `lgx robots check` (agent A)
+
+# `lgx eval run|compare|subset|gen-g1|gen-g3|freeze-g2` (PLAN §6.1 S9): the harness lives in the repo, not the wheel
+try:
+    from eval.harness.cli import app as _eval_app
+
+    app.add_typer(_eval_app, name="eval", help="Evaluation harness (PLAN §11): gold sets G0–G3 → eval/reports")
+except ImportError:  # pragma: no cover - installed without the repository's eval/ package
+    pass
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(app())

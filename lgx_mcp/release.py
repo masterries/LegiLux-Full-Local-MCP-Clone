@@ -46,6 +46,11 @@ class ReleaseInfo:
     def vectors_present(self) -> bool:
         return bool(self.embedding_models)
 
+    @property
+    def embedding_model(self) -> dict[str, Any] | None:
+        """The release's ``lgx.embedding_model`` row (model id, dim, startup probe), or ``None`` (lexical)."""
+        return self.embedding_models[0] if self.embedding_models else None
+
 
 async def load_release(db: Database) -> ReleaseInfo:
     row = await db.fetchone(
@@ -76,10 +81,11 @@ async def load_release(db: Database) -> ReleaseInfo:
     for r in await db.fetch("SELECT alias_norm, act_id, kind FROM lgx.act_alias ORDER BY alias_norm, act_id"):
         aliases.setdefault(r["alias_norm"], []).append(int(r["act_id"]))
         kinds[r["alias_norm"]] = r["kind"]
-    models = await db.fetch(
-        "SELECT embedding_set_id, provider, model_id, model_version, model_aliases, dim, parity_threshold"
-        " FROM lgx.embedding_model ORDER BY embedding_set_id"
-    )
+    # to_jsonb: whatever columns the release's schema generation has (releases are rebuilt, never migrated)
+    models = [
+        dict(r["m"])
+        for r in await db.fetch("SELECT to_jsonb(m) AS m FROM lgx.embedding_model m ORDER BY embedding_set_id")
+    ]
     api = await db.fetchone(
         "SELECT max(p.pronargs) AS n FROM pg_proc p WHERE p.proname = 'search_candidates'"
         " AND p.pronamespace = 'lgx'::regnamespace"

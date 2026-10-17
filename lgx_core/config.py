@@ -73,7 +73,6 @@ class Settings(_Cfg):
     rate_limit_s: float = Field(default=1.2, ge=1.0, description="min spacing between requests (<=1 req/s)")
     http_timeout_s: float = 60.0
     pg_dsn: str | None = None
-    embed_provider: EmbeddingProvider = EmbeddingProvider.NONE
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
@@ -87,7 +86,6 @@ class Settings(_Cfg):
             "rate_limit_s": "LGX_RATE_LIMIT_S",
             "http_timeout_s": "LGX_HTTP_TIMEOUT_S",
             "pg_dsn": "LGX_PG_DSN",
-            "embed_provider": "LGX_EMBED_PROVIDER",
         }
         values = {field: env[var] for field, var in mapping.items() if env.get(var)}
         return cls.model_validate(values)
@@ -241,34 +239,96 @@ class SampleConfig(_Cfg):
 
 
 # ----------------------------------------------------------------------------------------- embedding
-class RetryPolicy(_Cfg):
-    on_status: list[int] = Field(default_factory=lambda: [429, 500, 502, 503, 504])
-    backoff_s: list[float] = Field(default_factory=lambda: [2, 4, 8, 16, 32])
-    honour_retry_after: bool = True
+EMBED_ENV: dict[str, str] = {  # LGX_EMBED_* override config/embedding.yaml (lgx embed and lgx-mcp alike)
+    "LGX_EMBED_PROVIDER": "provider",
+    "LGX_EMBED_BASE_URL": "base_url",
+    "LGX_EMBED_MODEL": "model",
+    "LGX_EMBED_DIM": "dim",
+    "LGX_EMBED_API_KEY_FILE": "api_key_file",
+    "LGX_EMBED_MAX_CONCURRENCY": "max_concurrency",
+    "LGX_EMBED_COOLDOWN_S": "cooldown_s",
+    "LGX_EMBED_BATCH_SIZE": "batch_size",
+    "LGX_EMBED_MAX_TOKENS_PER_REQUEST": "max_tokens_per_request",
+    "LGX_EMBED_TIMEOUT_S": "timeout_s",
+    "LGX_EMBED_RETRIES": "retries",
+    "LGX_EMBED_PROBE_MIN_COSINE": "probe_min_cosine",
+}
+EMBED_RUNTIME_FIELDS = frozenset(  # operational knobs: not part of the release's config digest
+    {"base_url", "api_key_file", "max_concurrency", "cooldown_s", "timeout_s", "retries", "backoff_s"}
+)
 
 
 class EmbeddingConfig(_Cfg):
-    """``config/embedding.yaml`` (PLAN §6.5). ``provider: none`` is the default: no vectors."""
+    """``config/embedding.yaml`` (PLAN §6.5), overridable by ``LGX_EMBED_*`` (:meth:`with_env`).
+
+    ``provider: none`` (the default) computes and stores no vectors; retrieval runs lexical. ``mistral`` is the
+    Mistral embeddings API (``POST {base_url}/v1/embeddings``, Bearer key) — the same API on the build side (SaaS,
+    documents) and in the airgap (the on-prem domain, queries); only ``base_url`` differs. Every request goes
+    through one throughput limiter (:mod:`lgx_core.embed.limiter`): at most ``max_concurrency`` requests in flight,
+    and each request slot waits ``cooldown_s`` after its request completed before it is reused. The API key lives
+    in a file (``api_key_file`` / ``LGX_EMBED_API_KEY_FILE``) or, for development, ``LGX_EMBED_API_KEY`` — never
+    in this file, a bundle, a log or ``release.json``.
+    """
 
     provider: EmbeddingProvider = EmbeddingProvider.NONE
-    model_id: str = "mistral-embed-2312"
-    model_version: str = "v23.12"
-    model_aliases: list[str] = Field(default_factory=list)
-    dim: int = 1024
-    normalized: bool = True
-    batch_size: int = 64
-    max_tokens_per_request: int = 16000
-    max_input_tokens: int = 8000
-    rate_limit_rps: float = 1
-    retry: RetryPolicy = Field(default_factory=RetryPolicy)
-    parity_threshold: float = Field(default=0.999, gt=0, le=1)
-    cost_budget_usd: float = 25
-    base_url: str | None = None
+    base_url: str = "https://api.mistral.ai"
+    model: str = Field(default="mistral-embed", min_length=1, description="requested id; the reported id is stored")
+    dim: int = Field(default=1024, ge=1, le=4000, description="halfvec(dim); HNSW on halfvec supports <= 4,000")
     api_key_file: str | None = None
+    max_concurrency: int = Field(default=5, ge=1, le=64)
+    cooldown_s: float = Field(default=20.0, ge=0)
+    batch_size: int = Field(default=64, ge=1, le=1024, description="texts per request")
+    max_tokens_per_request: int = Field(default=16000, ge=100, description="estimated tokens; batches split below")
+    timeout_s: float = Field(default=60.0, gt=0)
+    retries: int = Field(default=5, ge=0, le=20)
+    backoff_s: list[float] = Field(default_factory=lambda: [2.0, 4.0, 8.0, 16.0, 32.0])
+    retry_on_status: list[int] = Field(default_factory=lambda: [429, 500, 502, 503, 504])
+    probe_min_cosine: float = Field(default=0.99, gt=0, le=1)
+
+    @field_validator("base_url")
+    @classmethod
+    def _url(cls, v: str) -> str:
+        v = v.strip().rstrip("/")
+        if not re.match(r"^https?://[^/\s]+", v):
+            raise ValueError(f"base_url must be an http(s) URL, got {v!r}")
+        return v.removesuffix("/v1")
 
     @property
     def enabled(self) -> bool:
         return self.provider is not EmbeddingProvider.NONE
+
+    @property
+    def endpoint(self) -> str:
+        return f"{self.base_url}/v1/embeddings"
+
+    def with_env(self, env: Mapping[str, str] | None = None) -> EmbeddingConfig:
+        """A copy with the ``LGX_EMBED_*`` variables of ``env`` (default: the process environment) applied."""
+        env = os.environ if env is None else env
+        values = {field: env[var].strip() for var, field in EMBED_ENV.items() if env.get(var, "").strip()}
+        return self.model_validate({**self.model_dump(), **values}) if values else self
+
+    def api_key(self, env: Mapping[str, str] | None = None) -> str | None:
+        """The Bearer key: ``api_key_file`` (a 0600 file / Docker secret) wins over ``LGX_EMBED_API_KEY``."""
+        env = os.environ if env is None else env
+        if self.api_key_file:
+            try:
+                return Path(self.api_key_file).read_text(encoding="utf-8").strip() or None
+            except OSError as exc:
+                raise ValueError(f"cannot read the embedding API key file {self.api_key_file}: {exc}") from exc
+        return env.get("LGX_EMBED_API_KEY", "").strip() or None
+
+    def throughput_texts_per_s(self, latency_s: float) -> float:
+        """Upper bound under the limiter: max_concurrency x batch_size / (latency + cooldown_s) texts/s."""
+        return self.max_concurrency * self.batch_size / max(latency_s + self.cooldown_s, 1e-9)
+
+
+def load_embedding_config(
+    config_dir: Path = DEFAULT_CONFIG_DIR, env: Mapping[str, str] | None = None
+) -> EmbeddingConfig:
+    """``<config_dir>/embedding.yaml`` (defaults when absent, e.g. a runtime image) + ``LGX_EMBED_*``."""
+    path = config_dir / "embedding.yaml"
+    base = EmbeddingConfig.model_validate(load_yaml(path) or {}) if path.exists() else EmbeddingConfig()
+    return base.with_env(env)
 
 
 # ------------------------------------------------------------------------------------------ warnings
@@ -464,7 +524,9 @@ class ProjectConfig(_Cfg):
 
     def digest(self) -> str:
         """sha256 over the canonical JSON of the scope-relevant configuration (no secrets in it)."""
-        payload = self.model_dump(mode="json", exclude={"config_dir", "denylist"})
+        payload = self.model_dump(
+            mode="json", exclude={"config_dir": True, "denylist": True, "embedding": set(EMBED_RUNTIME_FIELDS)}
+        )
         payload["denylist_count"] = len(self.denylist.entries)  # never hash/ship personal-data ELIs
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         return "sha256:" + hashlib.sha256(blob.encode("utf-8")).hexdigest()
@@ -599,6 +661,11 @@ class DataLayout:
     def chunks_path(self, eli_version: str) -> Path:
         return self.chunks_dir / f"{eli_slug(eli_version)}.jsonl"
 
+    # S7 embed: content-addressed vector cache shared by all T (build side only, never shipped)
+    @property
+    def emb_dir(self) -> Path:
+        return self.root / "emb"
+
     # S9 gates / reports
     @property
     def reports_dir(self) -> Path:
@@ -620,5 +687,6 @@ class DataLayout:
             "parsed": str(self.parsed_dir),
             "units": str(self.units_dir),
             "chunks": str(self.chunks_dir),
+            "emb": str(self.emb_dir),
             "reports": str(self.reports_dir),
         }

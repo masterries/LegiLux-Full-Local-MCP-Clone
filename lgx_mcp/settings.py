@@ -17,8 +17,7 @@ from typing import Literal
 
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
-from lgx_core.config import DEFAULT_CONFIG_DIR
-from lgx_core.models import EmbeddingProvider
+from lgx_core.config import DEFAULT_CONFIG_DIR, EmbeddingConfig, load_embedding_config
 from lgx_core.urls import is_internal_url
 
 RerankMode = Literal["auto", "on", "off"]
@@ -95,10 +94,9 @@ class McpSettings:
     query_expansion: bool = True  # curated French legal synonyms / DE-EN glossary (lgx_mcp/retrieval/expansion)
     lexical_opts: dict[str, float] = field(default_factory=dict)  # ranker knobs (40_search.sql p_opts; eval, tuning)
     retrieval_mode_default: RetrievalMode = "auto"
-    embed_provider: EmbeddingProvider = EmbeddingProvider.NONE
-    embed_url: str | None = None
-    embed_model: str | None = None
-    embed_timeout_s: float = 5.0
+    # query embeddings (PLAN §6.5): config/embedding.yaml of LGX_CONFIG_DIR + LGX_EMBED_*; provider none = lexical
+    embedding: EmbeddingConfig = field(default_factory=EmbeddingConfig)
+    embed_api_key: str | None = field(default=None, repr=False)
     tz: str = "Europe/Luxembourg"
     staleness_warn_days: int = 30
     staleness_critical_days: int = 90
@@ -154,6 +152,12 @@ class McpSettings:
         mode = (g("LGX_RETRIEVAL_MODE_DEFAULT") or "auto").strip().lower()
         if mode not in ("auto", "lexical", "hybrid"):
             raise SettingsError(f"LGX_RETRIEVAL_MODE_DEFAULT must be auto|lexical|hybrid, got {mode!r}")
+        config_dir = Path(g("LGX_CONFIG_DIR") or DEFAULT_CONFIG_DIR)
+        try:
+            embedding = load_embedding_config(config_dir, env)
+            embed_key = embedding.api_key(env) if embedding.enabled else None
+        except ValueError as exc:  # pydantic ValidationError is a ValueError too
+            raise SettingsError(f"embedding configuration: {exc}") from exc
         values: dict[str, object] = {
             "pg_conninfo": make_conninfo(**info),
             "host": g("LGX_MCP_HOST", "0.0.0.0"),
@@ -173,10 +177,8 @@ class McpSettings:
             "query_expansion": _bool(g("LGX_QUERY_EXPANSION"), True),
             "lexical_opts": _opts(g("LGX_LEXICAL_OPTS")),
             "retrieval_mode_default": mode,
-            "embed_provider": EmbeddingProvider(g("LGX_EMBED_PROVIDER") or "none"),
-            "embed_url": (g("LGX_EMBED_URL") or "").strip() or None,
-            "embed_model": (g("LGX_EMBED_MODEL") or "").strip() or None,
-            "embed_timeout_s": float(g("LGX_EMBED_TIMEOUT_S", "5")),
+            "embedding": embedding,
+            "embed_api_key": embed_key,
             "tz": g("LGX_TZ", "Europe/Luxembourg"),
             "staleness_warn_days": int(g("LGX_STALENESS_WARN_DAYS", "30")),
             "staleness_critical_days": int(g("LGX_STALENESS_CRITICAL_DAYS", "90")),
@@ -190,7 +192,7 @@ class McpSettings:
             "rate_per_client_min": int(g("LGX_RATE_PER_CLIENT_MIN", "30")),
             "rate_global_min": int(g("LGX_RATE_GLOBAL_MIN", "300")),
             "trusted_proxies": _list(g("LGX_TRUSTED_PROXIES"), ()),
-            "config_dir": Path(g("LGX_CONFIG_DIR") or DEFAULT_CONFIG_DIR),
+            "config_dir": config_dir,
             "log_level": (g("LGX_LOG_LEVEL") or "INFO").upper(),
             "allow_external_urls": _bool(g("LGX_ALLOW_EXTERNAL_URLS"), False),
             "clock_override": g("LGX_CLOCK_OVERRIDE") or None,
@@ -208,11 +210,13 @@ class McpSettings:
             raise SettingsError("LGX_RERANK_K must be 1..100")
         if self.rerank_body_chars < 100 or self.rerank_body_chars > 8000:
             raise SettingsError("LGX_RERANK_BODY_CHARS must be 100..8000")
-        for name, url in (("LGX_RERANK_URL", self.rerank_url), ("LGX_EMBED_URL", self.embed_url)):
-            if url and not self.allow_external_urls and not is_internal_url(url):
-                raise SettingsError(
-                    f"{name}={url} is not an internal service URL (set LGX_ALLOW_EXTERNAL_URLS=1 in dev)"
-                )
+        url = self.rerank_url
+        if url and not self.allow_external_urls and not is_internal_url(url):
+            raise SettingsError(
+                f"LGX_RERANK_URL={url} is not an internal service URL (set LGX_ALLOW_EXTERNAL_URLS=1 in dev)"
+            )
+        # The embeddings endpoint (the operator's on-prem domain) is never a reason to refuse the start: a missing
+        # key or a plain-http public URL keeps retrieval lexical with a reason (lgx_mcp.vectors).
         if transport == "http" and self.auth and not self.token:
             raise SettingsError(
                 "bearer token missing: set LGX_MCP_TOKEN_FILE (Docker secret) or LGX_MCP_TOKEN,"
@@ -242,5 +246,18 @@ class McpSettings:
             "lexical_ranker": self.lexical_ranker,
             "query_expansion": self.query_expansion,
             "retrieval_mode_default": self.retrieval_mode_default,
-            "embed_provider": self.embed_provider.value,
+            "embedding": {
+                "provider": self.embedding.provider.value,
+                **(
+                    {
+                        "endpoint": self.embedding.endpoint,
+                        "model": self.embedding.model,
+                        "max_concurrency": self.embedding.max_concurrency,
+                        "cooldown_s": self.embedding.cooldown_s,
+                        "timeout_s": self.embedding.timeout_s,
+                    }
+                    if self.embedding.enabled
+                    else {}
+                ),
+            },
         }

@@ -108,6 +108,8 @@ async def get_act(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> ToolOu
     else:
         await annot.status_warnings(act, serving, ref="C1")
         await annot.data_quality_warnings([act.eli_work, act.eli_jo], ref="C1")
+        if act.superseded_by_act_id:  # a member without any version of its own (e.g. agd/1955/11/23/n1)
+            await annot.superseded_by_code(act, ref="C1", variant="no_text")
     repealed_by = None
     if serving.status == "no-longer-in-force" or act.dnl:
         rep = await facts.repealer(act)
@@ -136,10 +138,11 @@ async def get_act(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> ToolOu
         if code is not None:
             cs = await facts.serving_at(code.act_id, ctx.as_of)
             cv = await facts.version(cs.text_version_id) if cs else None
+            heading = await facts.recueil_part_heading(cv.version_id, act.act_id) if cv else None
             superseded = {
                 "code_eli": code.eli_work,
                 "version_eli": cv.eli_version if cv else None,
-                "member_context": clip(code.title, 200),
+                "member_context": clip(heading or code.title or act.title, 200),
             }
     toc: list[dict[str, Any]] = []
     toc_total = None

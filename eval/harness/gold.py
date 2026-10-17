@@ -70,3 +70,80 @@ def write_set(path: Path, name: str, items: list[dict[str, Any]], **meta: Any) -
     doc = {"set": name, **meta, "items": items}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+
+# ------------------------------------------------------------------------------------------ subsets
+def subset_ids(spec: str, set_name: str) -> list[str]:
+    """Item ids from a subset file (``{"set", "ids": [...]}``, see :func:`stratified_subset`) or ``"G2-001,G2-007"``."""
+    path = Path(spec)
+    if path.suffix == ".json" or path.exists():
+        if not path.exists():
+            raise GoldError(f"subset file not found: {path}")
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if doc.get("set") not in (None, set_name):
+            raise GoldError(f"{path} is a subset of {doc.get('set')}, not {set_name}")
+        ids = [str(i) for i in doc.get("ids") or []]
+    else:
+        ids = [i.strip() for i in spec.split(",") if i.strip()]
+    if not ids:
+        raise GoldError(f"empty subset: {spec}")
+    return ids
+
+
+def select_ids(items: list[dict[str, Any]], ids: list[str]) -> list[dict[str, Any]]:
+    by_id = {str(i["id"]): i for i in items}
+    unknown = [i for i in ids if i not in by_id]
+    if unknown:
+        raise GoldError(f"subset ids not in the set: {unknown[:5]}")
+    return [by_id[i] for i in ids]
+
+
+def _stratum(it: dict[str, Any]) -> str:
+    """G2: language × the act of the first target (codes and the Constitution are their own strata)."""
+    lang = str(it.get("lang") or "?")
+    targets = it.get("targets") or [{}]
+    act = str(targets[0].get("act_eli") or targets[0].get("act") or "?").rsplit("/eli/etat/leg/", 1)[-1]
+    return f"{lang}:{act}"
+
+
+def stratified_subset(items: list[dict[str, Any]], size: int, set_name: str = "G2") -> dict[str, Any]:
+    """A fixed subset: per language a share proportional to its items but at least 5 (DE/EN are few), and inside a
+    language an even spread over the target acts (largest-remainder allocation, then every k-th item by id).
+    Deterministic for a given gold file; it never looks at results, so it cannot favour a ranker."""
+    import math
+    from collections import defaultdict
+
+    by_lang: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for it in sorted(items, key=lambda i: str(i["id"])):
+        by_lang[str(it.get("lang") or "?")].append(it)
+    floor = {lang: min(5, len(v)) for lang, v in by_lang.items()}
+    rest = size - sum(floor.values())
+    big = {lang: len(v) - floor[lang] for lang, v in by_lang.items()}
+    total = sum(big.values()) or 1
+    quota = {lang: floor[lang] + math.floor(rest * big[lang] / total) for lang in by_lang}
+    for lang in sorted(by_lang, key=lambda x: -(rest * big[x] / total) % 1)[: size - sum(quota.values())]:
+        quota[lang] += 1
+    chosen: list[str] = []
+    strata: dict[str, int] = {}
+    for lang, its in sorted(by_lang.items()):
+        groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for it in its:
+            groups[_stratum(it)].append(it)
+        n = min(quota[lang], len(its))
+        share = {g: n * len(v) / len(its) for g, v in groups.items()}
+        alloc = {g: math.floor(x) for g, x in share.items()}
+        for g in sorted(groups, key=lambda g: (-(share[g] % 1), g))[: n - sum(alloc.values())]:
+            alloc[g] += 1
+        for g, v in sorted(groups.items()):
+            k = alloc[g]
+            if k:
+                step = len(v) / k
+                chosen += [str(v[int(i * step)]["id"]) for i in range(k)]
+                strata[g] = k
+    return {
+        "set": set_name,
+        "size": len(chosen),
+        "method": "stratified: language (≥ 5 each) × first target act, every k-th item by id; results never used",
+        "strata": dict(sorted(strata.items())),
+        "ids": sorted(chosen),
+    }

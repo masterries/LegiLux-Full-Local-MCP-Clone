@@ -103,8 +103,8 @@ CREATE VIEW lgx_meta.invariant_violations AS
   UNION ALL SELECT 'vector_without_embedding_model', count(*)
     FROM lgx.chunk c WHERE c.embedding IS NOT NULL
      AND NOT EXISTS (SELECT 1 FROM lgx.embedding_model m WHERE m.embedding_set_id = c.embedding_set_id)
-  UNION ALL SELECT 'embedding_model_without_probes', count(*)
-    FROM lgx.embedding_model m WHERE NOT EXISTS (SELECT 1 FROM lgx.embedding_probe p WHERE p.embedding_set_id = m.embedding_set_id)
+  UNION ALL SELECT 'embedding_model_dim_mismatch', count(*)
+    FROM lgx.chunk c JOIN lgx.embedding_model m USING (embedding_set_id) WHERE vector_dims(c.embedding) <> m.dim
   UNION ALL SELECT 'missing_legal_texts', 4 - count(DISTINCT code)
     FROM lgx.legal_text WHERE code IN ('attribution', 'disclaimer', 'cc_by_4_0', 'notice') AND lang = 'fr'
   UNION ALL SELECT 'release_row_missing', 1 - count(*) FROM lgx_meta.release;

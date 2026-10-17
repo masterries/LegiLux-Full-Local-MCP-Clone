@@ -147,8 +147,8 @@ This appendix belongs to [PLAN.md](../PLAN.md). It maps each key fact to its sou
 |---|---|---|---|---|
 | E84 | Mistral Embed | "Premier" (API-only), v23.12; model id `mistral-embed-2312`; 8k context; $0.1/M tokens; `/v1/embeddings`; released 2023-12-11; 1024-d; unit-norm vectors; per-request batch and token limits not stated | J6 (docs.mistral.ai) | V (limits U) |
 | E85 | No open-weights Mistral embedder on HF | `huggingface.co/api/models?author=mistralai&search=embed` returns nothing | User verification 2026-10-16 (task brief) | V |
-| E86 | Option B | `intfloat/e5-mistral-7b-instruct`: MIT, 4096-d, 7B; SFR-Embedding-Mistral and Linq-Embed-Mistral are CC-BY-NC | User facts (task brief); J7 for the pgvector limit | V (as provided) |
-| E87 | Option C | `Qwen/Qwen3-Embedding-0.6B` @ `97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3`, Apache-2.0, `model.safetensors`, 1024-d; bge-m3 has only `pytorch_model.bin` + ONNX | J2; GR verified facts | V |
+| E86 | Option B (embeddings) | Withdrawn 2026-10-17 (user decision: no bundled LLM runtime, one embedding provider); the dated evidence stays in `docs/research/` | — | — |
+| E87 | Option C (embeddings) | Withdrawn 2026-10-17 (user decision: no bundled LLM runtime, one embedding provider); the dated evidence stays in `docs/research/` | — | — |
 | E88 | TEI | 1.9.4 (`cpu-1.9.4`, `86-1.9.4`, `89-1.9.4`, `1.9.4`, `hopper-1.9.4`); GPU images are per architecture (README: Ampere 8.6 → `86-1.9`, Ada → `89-1.9`, Hopper → `hopper-1.9`, Blackwell → `100-1.9`/`120-1.9` experimental); local `--model-id`; `--port`; `/rerank`; `--max-client-batch-size` default **32**; `--auto-truncate` default true; "OpenAI-compatible endpoints" (exact path U) | DB verified facts; J8; `out/tei_readme.md` l.190–223, 345–352; RV (manifest HEAD 200 for 86/89/hopper/100-1.9.4; v1.9.4 `router/src/main.rs` default 32) | V / U (path) |
 | E89 | Reranker | `BAAI/bge-reranker-v2-m3` @ `953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e`, Apache-2.0, `model.safetensors` | J2 | V |
 
@@ -162,12 +162,12 @@ This appendix belongs to [PLAN.md](../PLAN.md). It maps each key fact to its sou
 | E93 | Streamlit | 1.65.0 (2026-10-02), 1.66.0 (2026-10-14); Apache-2.0; Python ≥ 3.11; config keys `browser.gatherUsageStats`, `server.headless`, `server.fileWatcherType`, `client.toolbarMode`, `client.showErrorDetails`, `server.enableXsrfProtection`, `server.enableStaticServing`, `theme.font`, `global.developmentMode`; metrics only when gatherUsageStats is true; the first-run e-mail prompt is suppressed by headless. **With `server.headless=true`, `bootstrap._print_url` calls `net_util.get_external_ip()` (GET `http://checkip.amazonaws.com`, then https) unless `logger.hideWelcomeMessage=true` or `browser.serverAddress` / a non-wildcard `server.address` is set** | J3, J5; P10 (wheel read); RV (sentinel test: 1 lookup without, 0 with `hideWelcomeMessage`) | V |
 | E94 | Streamlit `StaticConnection` | Fetches `data.streamlit.io/static.json` in static-app mode; trigger not established | J5 | U → HAR gate |
 | E95 | openai (Python) | 3.32.0 latest (2026-10-16), Apache-2.0; 3.25–3.31 released 10-06…10-14; **3.24.0 released 2026-10-02T15:55Z** (newest ≥ 14 days old → pin), 3.23.0 2026-10-01 | J3; P10 (PyPI JSON) | V |
-| E96 | Ollama | 0.40.5; default context depends on VRAM (< 24 GiB: 4k; 24–48 GiB: 32k; ≥ 48 GiB: 256k), so it is always set explicitly; `OLLAMA_NO_CLOUD=1`; GGUF import via Modelfile without re-quantisation; tags `qwen3.8:27b-q4_K_M` 18 GB, `gemma4:26b-a4b` **18.73 GB** (model 17.07 GB + vision projector 1.19 GB + MTP draft 0.46 GB), `gemma4:26b-a4b-it-qat` 15.63 GB (no draft layer), `ministral-3:8b` 6.0 GB, `qwen3.6:35b-a3b-q4_K_M` 24 GB | AG verified facts; `research/airgap-llm-mcp-stack/ol_*.html`; P10 (registry manifests, docs.ollama.com/context-length) | V |
-| E97 | vLLM | v0.31.0 on CUDA 13.0.2 (`-cu129` variant); usage stats off via `VLLM_NO_USAGE_STATS`/`DO_NOT_TRACK`; Qwen3.6 card documents `qwen3_coder` / `qwen3` parsers | AG verified facts | V |
-| E98 | Models | Qwen3.8-27B (Apache-2.0, 27.8B, 262,144 ctx, KV ≈ 64 KiB/token) @ `1d4bf0f2…`; -FP8 @ `017b9c7a…` (30.9 GB); Gemma 4 26B-A4B (Apache-2.0, 25.2B / 3.8B active); Mistral-Medium-3.5 revenue cap; Qwen3.8-Flash-Next community licence | AG verified facts; J2 | V |
-| E99 | Image digests (AG) | ollama `5d3a2f25…`, vllm `c1c9f6fd…`, open-webui `a537bbe1…`, TEI cpu `2538ea1c…`, TEI 89 `1a284d9c…`, TEI 1.9.4 `02864b69…`, paradedb `c552094b…`, registry `ddf75434…` | `research/airgap-llm-mcp-stack/digests.txt` | V |
+| E96 | Local LLM server (former `cpu`/`gpu24` runtime) | Withdrawn 2026-10-17 (user decision: no bundled LLM runtime, one embedding provider); the dated evidence stays in `docs/research/` | AG verified facts | — |
+| E97 | Local LLM server (former `gpu48` runtime) | Withdrawn 2026-10-17 (user decision: no bundled LLM runtime, one embedding provider); the dated evidence stays in `docs/research/` | AG verified facts | — |
+| E98 | Local LLM models | Withdrawn 2026-10-17 (user decision: no bundled LLM runtime, one embedding provider); the dated evidence stays in `docs/research/`; the chat model is now the user's Mistral deployment (§9.1) | AG verified facts; J2 | — |
+| E99 | Image digests (AG) | open-webui `a537bbe1…`, TEI cpu `2538ea1c…`, paradedb `c552094b…`, registry `ddf75434…` (the LLM-runtime and TEI GPU digests were dropped with those images, 2026-10-17) | `research/airgap-llm-mcp-stack/digests.txt` | V |
 | E100 | Image digests (re-verified) | caddy 2.11.7-alpine `d8542f48…`, python 3.13.16-slim-trixie `70729b46…`, coredns 1.14.7 `7efd3c63…`, prometheus v3.15.0-distroless `b2a413d5…`; the `postgres:18.6` digest `74935e72…` belongs to tag `18.6`, not `18.6-trixie` (not used) | J1 | V |
-| E101 | Image sizes (amd64 compressed) | vLLM 9.04 GB; Ollama 3.79 GB; Open WebUI 1.62 GB; TEI cpu 0.24 GB (GPU ≈ 3.1 GB); pgvector 0.17 GB; ParadeDB 0.37 GB | AG verified facts | V |
+| E101 | Image sizes (amd64 compressed) | Open WebUI 1.62 GB; TEI cpu 0.24 GB; pgvector 0.17 GB; ParadeDB 0.37 GB | AG verified facts | V |
 | E102 | Supply-chain tools | syft v1.54.1, grype v0.120.1, cosign v3.1.3, MCP Inspector 2.11.0, LibreChat v0.8.8 (MIT), FastMCP 4.1.0 (Apache-2.0, `JWTVerifier`) | AG verified facts | V |
 | E103 | Parser oracle | `SFHAJJI/lex-articles` parquet 61,644,220 B, CC BY 4.0, 1,334 works / 96,793 anchors, 2026-08-15 | PA verified facts | V |
 | E104 | psycopg 3.3.6 / lxml 6.1.3 / prometheus-client 0.26.0 licences | LGPL-3.0-only / BSD-3-Clause / Apache-2.0 AND BSD-2-Clause | P7 (PyPI JSON) | V |
@@ -185,7 +185,7 @@ This appendix belongs to [PLAN.md](../PLAN.md). It maps each key fact to its sou
 | P7 | PyPI licence check | psycopg 3.3.6 LGPL-3.0-only; lxml 6.1.3 BSD-3-Clause; prometheus-client 0.26.0 Apache-2.0 AND BSD-2-Clause | `plan/verify/plan-checks.txt` |
 | P8 | Offline recount on the frozen snapshot | leg acts 80,918 (not-yet-in-force 14; implicit 48); RC 21,656; LOI with "naturalisation" in the title 951 (918 strict rule) → metadata scope ≈ 58,311 before review | `plan/verify/plan-checks.txt` |
 | P9 | Q15 with the Constitution type added (live, one request) | 53 rows in 0.63 s: RECUEIL 37, CODE_RECUEIL 8, CODE 7, Constitution 1 (`constitution/1868/10/17/n1/consolide/20260829`); the C13 text without it gave 52 | `plan/verify/w/q15_const.rq/.csv` |
-| P10 | Revision re-checks of Appendix C and its inputs | All six compose documents pass `docker compose config -q` (v5.6.0) per profile combination; `--profile cpu --profile testui` on the dev overlay does not list `lgx-streamlit-cloud`; `builder` runs without `secrets/mistral_api_key`, `embedder` refuses to start without it; a missing `LGX_TESTUI_BCRYPT` or `LGX_TEI_TAG` (gpu48) fails interpolation; the Caddyfile passes `caddy validate` (2.11.7) with a bcrypt hash and fails with an empty one; ports of a container only on an `internal` network are not published (Docker 29.8.2); Streamlit 1.65.0 wheel `_print_url` read; PyPI dates of openai/streamlit; Ollama registry manifests and context-length docs | `plan/revise/ctest/`; this table |
+| P10 | Revision re-checks of Appendix C and its inputs | The compose documents of that revision passed `docker compose config -q` (v5.6.0) per profile combination (re-validated 2026-10-17 after the simplification: four documents, no LLM profiles); a missing `LGX_TESTUI_BCRYPT` fails interpolation; the Caddyfile passes `caddy validate` (2.11.7) with a bcrypt hash and fails with an empty one; ports of a container only on an `internal` network are not published (Docker 29.8.2); Streamlit 1.65.0 wheel `_print_url` read; PyPI dates of openai/streamlit | `plan/revise/ctest/`; this table |
 | P11 | Appendix B re-applied after the revision (pgvector 0.8.7-pg18) | DDL applies; P4 fixtures unchanged; `search_candidates` filter tests: default window, `p_include_future`, `p_act_ids`, `doc_types` on the exact branch, act filter on the cited branch, ended windows never returned; `text_md = text_plain` rejected by CHECK | `plan/verify/w/filters_p11.sql/.out`, `fixture_p11.out` |
 
 ## E.11 Unverified items: build-time check and fallback
@@ -193,20 +193,20 @@ This appendix belongs to [PLAN.md](../PLAN.md). It maps each key fact to its sou
 | # | Item | Verify in | Fallback |
 |---|---|---|---|
 | U1 | Mistral API per-request batch and token limits; API host `https://api.mistral.ai` | M3 (sample run) | Configurable batch/rate; backoff on 429; resume from cache |
-| U2 | Mistral on-prem: API compatibility (`/v1/embeddings`), model id/version parity, quantisation effect on probe cosine | When the user provides the endpoint (OD2) | Parity check → lexical; recalibrated threshold (documented); options B/C |
+| U2 | Mistral on-prem: same API as SaaS (user statement 2026-10-17), the embedding model id it reports, quantisation effect on the probe cosine | When the user provides the endpoint (OD2) | Startup probe → lexical with the reason; `probe_min_cosine` recalibrated (documented) |
 | U3 | Mistral on-prem chat endpoint tool calling | M1b/M5 with the user's endpoint | Streamlit retrieve-first mode |
-| U4 | Ollama model-store copy between hosts | M0 spike | GGUF + Modelfile + `ollama create` (documented) |
-| U5 | Resolved: `gemma4:26b-a4b-it-qat` exists (15.63 GB, P10). Still open: QAT vs default answer quality on G4 | M0 spike | Plain `gemma4:26b-a4b` |
-| U6 | Ollama `/v1` tool calling for the chosen models | M1b | Retrieve-first mode |
+| U4 | Withdrawn 2026-10-17 (no bundled LLM runtime) | — | — |
+| U5 | Withdrawn 2026-10-17 (no bundled LLM runtime) | — | — |
+| U6 | Tool calling of the user's Mistral chat model through the OpenAI-compatible route | M1b/M5 with the user's endpoint | Retrieve-first mode |
 | U7 | mcp 2.x bearer-auth hook; MCP tool annotation names in 2026-07-28 | M0 | ASGI middleware or FastMCP 4.1.0 `JWTVerifier`; annotations are advisory |
 | U8 | Exact call signatures of the mcp 2.3.0 `Client` (`list_tools`, `call_tool`) | M0 | Use `ClientSession` from the same SDK |
 | U9 | Open WebUI `ENABLE_PERSISTENT_CONFIG=false` behaviour; header-template field names; admin provisioning API; data path | M5 | Provisioning job; manual admin checklist |
-| U10 | Qwen3.8 vLLM parser names; CUDA 13 driver minimum | M5 | Qwen3.6-35B-A3B-FP8; `-cu129` image; Ollama on gpu48 |
+| U10 | Withdrawn 2026-10-17 (no bundled LLM runtime) | — | — |
 | U11 | pg_textsearch v1.5.1 build in `lgx-db` | M2 bake-off | Native FTS + reranker |
 | U12 | `docker save`/`load` keeping repository digests (classic vs containerd store) | M5 | Image-ID verification + local tags; `registry` profile |
 | U13 | OpenSSL Ed25519 `-rawin` on target OSes; cosign v3 offline flags | M5 | OpenSSL ≥ 3.0 prerequisite; sha256 + gpg detached signature |
 | U14 | CoreDNS template syntax; Postgres minimal `cap_add` (the Caddyfile, incl. `basic_auth` and the global options, passed `caddy validate` in P10) | M5 | Adjust config; documented exceptions in SECURITY.md |
-| U15 | TEI OpenAI-compatible path (only for the generic adapter / option C) | M3 | TEI native `/embed` |
+| U15 | Withdrawn 2026-10-17 (one embedding provider, the Mistral API) | — | — |
 | U16 | Streamlit `StaticConnection` fetch and bundled fonts; `/_stcore/health` endpoint | M1b HAR test | Config change; patched static asset; TCP health check |
 | U17 | HTML instruction-pattern heuristic for modifying articles | M2 | Treat all articles of HTML amending acts as autonomous, with `rank_prior` 0.8 |
 | U18 | Q-MANIF at 500 IRIs per POST (tested with 5) | M1 | Batches of 100 |

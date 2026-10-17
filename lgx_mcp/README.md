@@ -39,7 +39,7 @@ Clients: `mcp.Client(streamable_http_client(url, http_client=httpx2.AsyncClient(
 |---|---|---|
 | `POST /mcp` | `Authorization: Bearer`, Host + Origin allowlists | MCP, stateless, JSON responses, both protocol eras |
 | `GET /livez`, `GET /healthz` | none, any Host | 200 while the process runs |
-| `GET /readyz` | none, any Host | 200 iff the DB answers and `schema_version` ∈ {1}; else 503. Body: `status, db_ok, schema_ok, release_id, vector_status, reranker_ok, rerank_status, rerank_reason, clock_ok, canned_query_ok, sync_date, error` — degraded optional parts never make it 503 |
+| `GET /readyz` | none, any Host | 200 iff the DB answers and `schema_version` ∈ {1}; else 503. Body: `status, db_ok, schema_ok, release_id, vector_status, vector_reason, reranker_ok, rerank_status, rerank_reason, clock_ok, canned_query_ok, sync_date, error` — degraded optional parts never make it 503 |
 
 Resources: `legilux://legal/{attribution|disclaimer|cc-by-4.0|notice}` (text), templates
 `legilux://eli/{+path}` (act card = `get_act`, JSON) and `legilux://eli/{+path}/art/{n}` (article = `get_article`,
@@ -58,14 +58,16 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 | `LGX_RERANK_BODY_CHARS` / `LGX_RERANK_TIMEOUT_S` | 1800 / 10 | body cut per candidate (the header is compacted, version label dropped); per-call timeout. Dev host (4 vCPU): 600 / 60 |
 | `LGX_LEXICAL_RANKER` / `LGX_QUERY_EXPANSION` / `LGX_LEXICAL_OPTS` | bm25 / on / `{}` | M2 releases: IDF-weighted lexical ranking in SQL (`rank_cd` = the M1 ordering); curated FR synonyms + DE/EN glossary (`retrieval/query_expansion.yaml`, override `$LGX_CONFIG_DIR/query_expansion.yaml`); ranker knobs as JSON (`40_search.sql` `p_opts`, eval/tuning only) |
 | `LGX_RETRIEVAL_MODE_DEFAULT` | auto | auto \| lexical \| hybrid |
-| `LGX_EMBED_PROVIDER` | none | embeddings OFF: `vector_status = disabled:provider_none`, `mode_used = lexical` |
+| `LGX_EMBED_PROVIDER` | none | embeddings OFF: `vector_status = disabled:provider_none`, `mode_used = lexical`. `mistral` = query embeddings from the Mistral embeddings API (the on-prem domain), used only for a release with vectors whose startup probe passed |
+| `LGX_EMBED_BASE_URL` / `LGX_EMBED_MODEL` / `LGX_EMBED_API_KEY_FILE` | `https://api.mistral.ai` / mistral-embed / — | `POST {base_url}/v1/embeddings`, Bearer key from the file (`LGX_EMBED_API_KEY` in dev); no key or a plain-http public URL → lexical with the reason |
+| `LGX_EMBED_MAX_CONCURRENCY` / `LGX_EMBED_COOLDOWN_S` / `LGX_EMBED_TIMEOUT_S` | 5 / 20 / 60 (compose: 5 s) | the shared throttle (`config/embedding.yaml`): ≤ N requests in flight, each slot waits the cooldown after its request; a query that finds no slot within the timeout runs lexical (`throttled`) |
 | `LGX_TZ` / `LGX_STALENESS_WARN_DAYS` / `LGX_STALENESS_CRITICAL_DAYS` | Europe/Luxembourg / 30 / 90 | default `as_of` and `W_DATA_STALE` |
 | `LGX_MAX_RESULT_TOKENS` | 4000 | text budget (cpu: 2500; article pages shrink with it) |
 | `LGX_AUDIT_FILE` / `LGX_AUDIT_QUERY_TEXT` / `LGX_AUDIT_HMAC_KEY_FILE` | stderr / false / token | JSONL audit; question text off by default |
 | `LGX_STATEMENT_TIMEOUT_MS` / `LGX_DB_POOL_MAX` / `LGX_DB_TIMEOUT_S` | 5000 / 8 / 3 | read-only pool (every session `default_transaction_read_only=on`) |
 | `LGX_RATE_PER_CLIENT_MIN` / `LGX_RATE_GLOBAL_MIN` | 30 / 300 | tool calls per minute (0 = off) |
 | `LGX_TRUSTED_PROXIES` | none | IPs / CIDRs (Open WebUI) whose `x-openwebui-user-*` / `x-lgx-user` headers key the rate limit and audit; every other caller is keyed by its peer address |
-| `LGX_CONFIG_DIR` | repo `config/` | only `aliases.yaml` (out-of-scope aliases such as RGPD) |
+| `LGX_CONFIG_DIR` | repo `config/` | `aliases.yaml` (out-of-scope aliases such as RGPD) and `embedding.yaml` (provider + throttle defaults; both baked into the image) |
 
 ## Retrieval (PLAN §8.3)
 
@@ -80,7 +82,10 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
    « Kündigungsfrist », « notice period » → « délai de préavis licenciement ») — shown in
    `query_interpretation.lexical`.
 3. One `lgx.search_candidates(...)` call with every filter on every branch (`doc_types`, `act_eli` → act ids,
-   `in_force_only`, `as_of`); dense only when `vector_status = ok`. **Search API 2** (M2 `40_search.sql`): the
+   `in_force_only`, `as_of`); dense (fused by RRF, k = 60) only when the release has vectors **and** the startup
+   probe passed (`vector_status = ok`, `lgx_mcp/vectors.py`: the endpoint's reported model id and dim equal the
+   release's `lgx.embedding_model` row and the probe text's vector has cosine ≥ `probe_min_cosine` to the recorded
+   one; anything else, or a failing query embedding, runs lexical with the reason). **Search API 2** (M2 `40_search.sql`): the
    lexical branch is BM25-like (idf × saturated tf, header matches weighted, proximity of adjacent query terms,
    soft length normalisation, act boost; formula and knobs in the SQL header, decision in
    `docs/adr/0001-lexical-ranker.md`). **Search API 1** (releases built before M2): `ts_rank_cd` + the M1
@@ -108,7 +113,9 @@ answers.
 
 ## Tests
 
-`tests/unit/test_mcp*.py`, `tests/unit/test_citeparse.py` (offline); `tests/contract/test_mcp_m2.py` (M2 ranking on a
+`tests/unit/test_mcp*.py`, `tests/unit/test_citeparse.py`, `tests/unit/test_embed.py` (offline; limiter with a fake
+clock, retries, probe, lexical fallback); `tests/contract/test_mcp_vectors.py` (hybrid through the real server with a
+fake embeddings endpoint); `tests/contract/test_mcp_m2.py` (M2 ranking on a
 search-API-2 release, the real TEI container at `LGX_TEST_RERANK_URL`); `tests/contract/` (server in a thread
 against the dev DB, official 2.3.0 client in both eras, G0 smoke set, health/auth/degraded states, stdio, and the
 real `mcp==1.27.2` client via `uv run --isolated`). They skip when the dev DB is not reachable

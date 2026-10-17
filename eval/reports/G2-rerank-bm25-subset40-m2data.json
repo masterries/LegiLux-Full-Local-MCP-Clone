@@ -1,0 +1,1381 @@
+{
+ "set": "G2",
+ "started_at": "20261017T085648Z",
+ "items_total": 40,
+ "gold_status": "draft_unvalidated",
+ "gold_files": [
+  "retrieval.json"
+ ],
+ "subset": {
+  "source": "eval/gold/subsets/G2-rerank-40.json",
+  "ids": [
+   "G2-001",
+   "G2-007",
+   "G2-014",
+   "G2-020",
+   "G2-027",
+   "G2-033",
+   "G2-040",
+   "G2-047",
+   "G2-052",
+   "G2-058",
+   "G2-064",
+   "G2-070",
+   "G2-076",
+   "G2-082",
+   "G2-088",
+   "G2-094",
+   "G2-100",
+   "G2-106",
+   "G2-112",
+   "G2-118",
+   "G2-124",
+   "G2-131",
+   "G2-139",
+   "G2-148",
+   "G2-155",
+   "G2-161",
+   "G2-165",
+   "G2-172",
+   "G2-177",
+   "G2-186",
+   "G2-188",
+   "G2-189",
+   "G2-190",
+   "G2-191",
+   "G2-195",
+   "G2-196",
+   "G2-198",
+   "G2-199",
+   "G2-200",
+   "G2-204"
+  ]
+ },
+ "config": {
+  "backend": "in-process",
+  "mode": "rerank",
+  "ranker": "bm25",
+  "expansion": true,
+  "lexical_opts": {},
+  "rerank_k": 16,
+  "rerank_body_chars": 600,
+  "rerank_url": "http://127.0.0.1:8090",
+  "release_id": "data-20261016-sample",
+  "sync_date": "2026-10-16",
+  "search_api": 2,
+  "clock": "2026-10-16T12:00:00+02:00",
+  "reranker": {
+   "status": "ok",
+   "reason": null
+  }
+ },
+ "summary": {
+  "all": {
+   "n": 40,
+   "recall@1": 0.7125,
+   "recall@3": 0.75,
+   "recall@5": 0.75,
+   "recall@10": 0.825,
+   "recall@20": 0.825,
+   "mrr@10": 0.7452,
+   "ndcg@10": 0.7627,
+   "act_recall@10": 0.95
+  },
+  "de": {
+   "n": 6,
+   "recall@1": 0.3333,
+   "recall@3": 0.3333,
+   "recall@5": 0.3333,
+   "recall@10": 0.5,
+   "recall@20": 0.5,
+   "mrr@10": 0.3571,
+   "ndcg@10": 0.3889,
+   "act_recall@10": 0.6667
+  },
+  "en": {
+   "n": 5,
+   "recall@1": 0.4,
+   "recall@3": 0.4,
+   "recall@5": 0.4,
+   "recall@10": 0.4,
+   "recall@20": 0.4,
+   "mrr@10": 0.4,
+   "ndcg@10": 0.4,
+   "act_recall@10": 1.0
+  },
+  "fr": {
+   "n": 29,
+   "recall@1": 0.8448,
+   "recall@3": 0.8966,
+   "recall@5": 0.8966,
+   "recall@10": 0.9655,
+   "recall@20": 0.9655,
+   "mrr@10": 0.8851,
+   "ndcg@10": 0.9026,
+   "act_recall@10": 1.0
+  },
+  "errors": 0,
+  "reranked_items": 40,
+  "latency": {
+   "tool": {
+    "p50_ms": 17076.4,
+    "p95_ms": 22609.1,
+    "max_ms": 25280.3
+   },
+   "sql": {
+    "p50_ms": 257.6,
+    "p95_ms": 676.2,
+    "max_ms": 1050.3
+   },
+   "rerank": {
+    "p50_ms": 16736.4,
+    "p95_ms": 22405.6,
+    "max_ms": 25061.6
+   }
+  }
+ },
+ "items": [
+  {
+   "id": "G2-001",
+   "lang": "fr",
+   "query": "Quel est le délai de préavis en cas de licenciement selon le Code du travail ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-5",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-8",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-9"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18465.9
+  },
+  {
+   "id": "G2-007",
+   "lang": "fr",
+   "query": "Que doit verser la partie qui rompt un contrat à durée indéterminée sans respecter le délai de préavis ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-6"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-7",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-13",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-16",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-1"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 19674.7
+  },
+  {
+   "id": "G2-014",
+   "lang": "fr",
+   "query": "Un contrat à durée déterminée peut-il être rompu avant son échéance ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-13"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-13",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-12",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-7",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-3"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 20005.8
+  },
+  {
+   "id": "G2-020",
+   "lang": "fr",
+   "query": "Le congé parental doit-il suivre immédiatement le congé de maternité ?",
+   "ranks": [
+    3
+   ],
+   "recall@1": 0.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 0.3333333333333333,
+   "ndcg@10": 0.5,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-45"
+   ],
+   "top5": [
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/l234-45|http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+    "legilux://eli/etat/leg/code/fonction_publique/art/29quater|http://data.legilux.public.lu/eli/etat/leg/loi/1979/04/16/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-45",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-46",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/308|"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 20479.4
+  },
+  {
+   "id": "G2-027",
+   "lang": "fr",
+   "query": "Un salarié qui a plusieurs emplois doit-il les déclarer à l'Inspection du travail ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_213-1"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_213-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_344-3",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_312-5",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-21"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 19345.3
+  },
+  {
+   "id": "G2-033",
+   "lang": "fr",
+   "query": "À quel moment un licenciement collectif prend-il effet ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-5",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-8",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-4"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 16784.0
+  },
+  {
+   "id": "G2-040",
+   "lang": "fr",
+   "query": "Que faut-il entendre par transfert d'entreprise pour le maintien des droits des salariés ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-2"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-2",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-3",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-5"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18773.7
+  },
+  {
+   "id": "G2-047",
+   "lang": "fr",
+   "query": "Celui qui cause un dommage à autrui par sa faute doit-il le réparer ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1382"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1382",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_489-2",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/1|http://data.legilux.public.lu/eli/etat/leg/loi/1950/02/25/n1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_528"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 19247.9
+  },
+  {
+   "id": "G2-052",
+   "lang": "fr",
+   "query": "Un mineur peut-il se marier et qui doit donner son consentement ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_148"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_148",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1398",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1095",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_351-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18513.6
+  },
+  {
+   "id": "G2-058",
+   "lang": "fr",
+   "query": "Comment le Code civil définit-il le droit de propriété ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_544"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_544",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_546",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1583",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_543",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_550"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 14018.4
+  },
+  {
+   "id": "G2-064",
+   "lang": "fr",
+   "query": "Quelles conditions doit remplir un testament écrit à la main pour être valable ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_970"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_970",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_972",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_979",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_976",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1007"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18729.7
+  },
+  {
+   "id": "G2-070",
+   "lang": "fr",
+   "query": "Où un enfant mineur est-il domicilié lorsque ses parents ont des domiciles différents ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_108"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_108",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1007-2",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_378-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_373",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/273|"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18838.7
+  },
+  {
+   "id": "G2-076",
+   "lang": "fr",
+   "query": "Qui supporte les frais d'inscription d'une hypothèque ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2155"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2155",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2146",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2148",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2153",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2161"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15814.4
+  },
+  {
+   "id": "G2-082",
+   "lang": "fr",
+   "query": "Comment le vol est-il défini dans le Code pénal ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_462",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_467",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_471",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_475"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15727.2
+  },
+  {
+   "id": "G2-088",
+   "lang": "fr",
+   "query": "Harceler quelqu'un de façon répétée est-il une infraction ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_442-2"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_442-2",
+    "legilux://eli/etat/leg/loi/2006/07/31/n2/art/l246-2|",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-4",
+    "legilux://eli/etat/leg/loi/2006/07/31/n2/art/l246-7|",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/4|http://data.legilux.public.lu/eli/etat/leg/rgd/2015/01/08/n1"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18651.2
+  },
+  {
+   "id": "G2-094",
+   "lang": "fr",
+   "query": "La profanation de tombes et l'atteinte à l'intégrité d'un cadavre sont-elles punies ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_453"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_453",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_340",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_372ter",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_372bis",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_376"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 24764.1
+  },
+  {
+   "id": "G2-100",
+   "lang": "fr",
+   "query": "Tuer sans nécessité l'animal domestique d'autrui constitue-t-il une infraction ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_541"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_541",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_540",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_559",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_402",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_560"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 25280.3
+  },
+  {
+   "id": "G2-106",
+   "lang": "fr",
+   "query": "Constitution liberté d'expression",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/6|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_24",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/32|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/34|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 12577.7
+  },
+  {
+   "id": "G2-112",
+   "lang": "fr",
+   "query": "La Constitution reconnaît-elle un droit au travail ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_38"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_38",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_123-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_253-1",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_111-12",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_144-8"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 22609.1
+  },
+  {
+   "id": "G2-118",
+   "lang": "fr",
+   "query": "Un député peut-il être arrêté ou poursuivi pénalement ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_85"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_85",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_84",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_158",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_275",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_17"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 17631.9
+  },
+  {
+   "id": "G2-124",
+   "lang": "fr",
+   "query": "Qui contrôle la conformité des lois à la Constitution ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_112"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_112",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/24|http://data.legilux.public.lu/eli/etat/leg/rgd/2008/12/19/n30",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_78",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/26|http://data.legilux.public.lu/eli/etat/leg/rgd/2008/12/19/n30",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/8|http://data.legilux.public.lu/eli/etat/leg/rgd/2006/12/22/n9"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15348.7
+  },
+  {
+   "id": "G2-131",
+   "lang": "fr",
+   "query": "Le juge civil peut-il ordonner d'office une mesure d'instruction ?",
+   "ranks": [
+    6
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 0.16666666666666666,
+   "ndcg@10": 0.3562071871080222,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_348"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_59",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_349",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_353",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_370",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_359"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 16006.3
+  },
+  {
+   "id": "G2-139",
+   "lang": "fr",
+   "query": "Combien de membres composent la Commission nationale pour la protection des données ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_34",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_17",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_18",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_20"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 16743.9
+  },
+  {
+   "id": "G2-148",
+   "lang": "fr",
+   "query": "Pendant combien de temps les droits d'auteur durent-ils après la mort de l'auteur ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_28",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_8",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_97",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_54"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15637.5
+  },
+  {
+   "id": "G2-155",
+   "lang": "fr",
+   "query": "Un journaliste entendu comme témoin peut-il refuser de dévoiler ses sources ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "legilux://eli/etat/leg/recueil/presse_medias/art/7|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4"
+   ],
+   "top5": [
+    "legilux://eli/etat/leg/recueil/presse_medias/art/7|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/4|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_411",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_382-8",
+    "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_405"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 16503.1
+  },
+  {
+   "id": "G2-161",
+   "lang": "fr",
+   "query": "Qui délivre l'agrément aux gestionnaires de fonds d'investissement alternatifs au Luxembourg ?",
+   "ranks": [
+    6
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 0.16666666666666666,
+   "ndcg@10": 0.3562071871080222,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_6"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_38",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_44",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_28-2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_34",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_9"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 16180.3
+  },
+  {
+   "id": "G2-165",
+   "lang": "fr",
+   "query": "Quand une loi publiée au Journal officiel devient-elle obligatoire ?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_5",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/16|http://data.legilux.public.lu/eli/etat/leg/loi/2021/07/30/a601",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_9",
+    "legilux://eli/etat/leg/code/communal/art/5|http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 13672.8
+  },
+  {
+   "id": "G2-172",
+   "lang": "fr",
+   "query": "Faut-il une autorisation pour transporter le corps d'un défunt vers le cimetière d'une autre commune ?",
+   "ranks": [
+    1,
+    3
+   ],
+   "recall@1": 0.5,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 0.9639404333166532,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_1er",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_2"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_1er",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_10",
+    "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_2",
+    "legilux://eli/etat/leg/code/communal/art/25|http://data.legilux.public.lu/eli/etat/leg/loi/1972/08/01/n3",
+    "legilux://eli/etat/leg/code/communal/art/13|http://data.legilux.public.lu/eli/etat/leg/loi/1972/08/01/n3"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 17368.8
+  },
+  {
+   "id": "G2-177",
+   "lang": "fr",
+   "query": "Le Luxembourg extrade-t-il ses propres ressortissants ?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_22",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/art_4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_572-2",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_574-2",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/170|"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18300.4
+  },
+  {
+   "id": "G2-186",
+   "lang": "de",
+   "query": "Welche Kündigungsfrist gilt, wenn der Arbeitgeber einem Arbeitnehmer kündigt?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-5",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-9"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 17420.9
+  },
+  {
+   "id": "G2-188",
+   "lang": "de",
+   "query": "Wie lange gilt das Urheberrecht nach dem Tod des Urhebers?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_28",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_8",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_11",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_7"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 10708.8
+  },
+  {
+   "id": "G2-189",
+   "lang": "de",
+   "query": "Garantiert die Verfassung die Meinungsfreiheit und die Pressefreiheit?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/23|http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/32|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/24|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+    "legilux://eli/etat/leg/recueil/presse_medias/art/25|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 13253.0
+  },
+  {
+   "id": "G2-190",
+   "lang": "de",
+   "query": "Ab welchem Alter darf man in Luxemburg heiraten?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 0.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_168",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_163",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_167",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_166",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_213"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 19964.2
+  },
+  {
+   "id": "G2-191",
+   "lang": "de",
+   "query": "Wie definiert das Strafgesetzbuch den Diebstahl?",
+   "ranks": [
+    7
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 0.14285714285714285,
+   "ndcg@10": 0.3333333333333333,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_462",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_464",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_471",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_478",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_472"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15849.2
+  },
+  {
+   "id": "G2-195",
+   "lang": "de",
+   "query": "Liefert Luxemburg eigene Staatsangehörige aus?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 0.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7"
+   ],
+   "top5": [
+    "legilux://eli/etat/leg/code/communal/art/4|http://data.legilux.public.lu/eli/etat/leg/rmin/1989/06/12/n2",
+    "legilux://eli/etat/leg/code/communal/art/13|http://data.legilux.public.lu/eli/etat/leg/loi/1988/05/27/n1",
+    "legilux://eli/etat/leg/loi/1925/12/17/n1/art/2|",
+    "legilux://eli/etat/leg/code/communal/art/15|http://data.legilux.public.lu/eli/etat/leg/rgd/2010/11/25/n2",
+    "legilux://eli/etat/leg/code/communal/art/28|http://data.legilux.public.lu/eli/etat/leg/loi/2014/12/19/n11"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 5832.1
+  },
+  {
+   "id": "G2-196",
+   "lang": "en",
+   "query": "What notice period must an employer give when dismissing an employee?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-9",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-4",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+    "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-8"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 18071.9
+  },
+  {
+   "id": "G2-198",
+   "lang": "en",
+   "query": "How long does copyright last after the death of the author?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_28",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_8",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_2",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_11",
+    "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_12"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 9647.8
+  },
+  {
+   "id": "G2-199",
+   "lang": "en",
+   "query": "Does the constitution protect the right to privacy?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_20"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_130",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_19",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_34",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_128",
+    "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_42"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 8691.7
+  },
+  {
+   "id": "G2-200",
+   "lang": "en",
+   "query": "On what grounds can a divorce be granted under the Civil Code?",
+   "ranks": [
+    null
+   ],
+   "recall@1": 0.0,
+   "recall@3": 0.0,
+   "recall@5": 0.0,
+   "recall@10": 0.0,
+   "recall@20": 0.0,
+   "mrr@10": 0.0,
+   "ndcg@10": 0.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_229"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_242",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_245",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_227",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1442",
+    "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1441"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 15661.4
+  },
+  {
+   "id": "G2-204",
+   "lang": "en",
+   "query": "Is self-defence a justification for injuring an attacker?",
+   "ranks": [
+    1
+   ],
+   "recall@1": 1.0,
+   "recall@3": 1.0,
+   "recall@5": 1.0,
+   "recall@10": 1.0,
+   "recall@20": 1.0,
+   "mrr@10": 1.0,
+   "ndcg@10": 1.0,
+   "act_recall@10": 1.0,
+   "targets": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416"
+   ],
+   "top5": [
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_417",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_72",
+    "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_71-1",
+    "legilux://eli/etat/leg/code/fonction_publique/art/4|http://data.legilux.public.lu/eli/etat/leg/rgd/2004/03/05/n9"
+   ],
+   "reranked": true,
+   "rerank_status": "ok",
+   "lexical_ranker": "bm25",
+   "error": null,
+   "latency_ms": 14812.0
+  }
+ ]
+}

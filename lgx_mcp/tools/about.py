@@ -54,9 +54,7 @@ async def about_corpus(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> T
     pdf_codes = await db.fetch(
         "SELECT a.eli_work, a.title FROM lgx.act a WHERE 'pdf_extracted' = ANY (a.flags) ORDER BY a.eli_work LIMIT 60"
     )
-    emb = rt.embedder.info
     vector_status = rt.vector_status(rel)
-    model = rel.embedding_models[0] if rel.embedding_models else None
     scope = (rel.config or {}).get("scope") or {}
     rr = rt.reranker
     structured: dict[str, Any] = {
@@ -104,17 +102,7 @@ async def about_corpus(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> T
             "texts_missing": counts.get("texts_missing"),
             "out_of_scope": OUT_OF_SCOPE,
         },
-        "embedding": {
-            "provider": emb.provider.value,
-            "model_id": (model or {}).get("model_id") or emb.model_id,
-            "model_version": (model or {}).get("model_version") or emb.model_version,
-            "dim": (model or {}).get("dim") or emb.dim,
-            "vector_status": vector_status,
-            "vectors": int(live["vectors"]),
-            "parity": None
-            if model is None
-            else {"checked_at": None, "min_cosine": None, "threshold": model.get("parity_threshold")},
-        },
+        "embedding": {**rt.vectors.describe(rel), "vectors": int(live["vectors"])},
         "retrieval_defaults": {
             "mode": rt.settings.retrieval_mode_default,
             "mode_used": "hybrid"

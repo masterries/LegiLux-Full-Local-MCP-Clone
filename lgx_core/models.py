@@ -272,13 +272,11 @@ class RecueilMethod(StrEnum):
 
 
 class EmbeddingProvider(StrEnum):
-    """Embedding adapters (PLAN §6.5). ``none`` is the default and the first shipped mode."""
+    """Embedding providers (PLAN §6.5): ``none`` (the default, no vectors) or ``mistral`` — the Mistral embeddings
+    API, identical on the build side (SaaS) and in the airgap (on-prem); only the base URL differs."""
 
     NONE = "none"
-    MISTRAL_API = "mistral-api"
-    MISTRAL_LOCAL = "mistral-local"
-    OPENAI_COMPATIBLE = "openai-compatible"
-    TEI = "tei"
+    MISTRAL = "mistral"
 
 
 class Lang(StrEnum):

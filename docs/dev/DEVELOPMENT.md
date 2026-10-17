@@ -1,8 +1,11 @@
 # Development quick start
 
 Build-zone development on one Linux host with Docker. Development and CI use the **stratified sample**
-(`config/sample.yaml`, ~50 works); the full crawl (`lgx ingest --full`, ≈ 25k GETs) is an operator command
-and is never run in development. Embeddings are off (`config/embedding.yaml: provider: none`).
+(`config/sample.yaml`, ~50 works, since M2 including the PDF code-recueils marked `stage: m2`); the full crawl
+(`lgx ingest --full`, ≈ 25.6k GETs, [§ Full ingest](#full-ingest-operator-step-never-in-development)) is an operator
+command and is never run in development. Embeddings are off (`config/embedding.yaml: provider: none`); no LLM runtime
+is bundled: the chat LLM is one external OpenAI-compatible endpoint, by default the user's Mistral endpoint
+([§ Dev stack](#dev-stack-one-command-each), [§ Embeddings](#embeddings-off-by-default)).
 
 ## Prerequisites
 
@@ -38,7 +41,7 @@ docker volume create lgx-dev-pgdata
 docker run -d --name lgx-dev-db --restart unless-stopped -e POSTGRES_PASSWORD=lgx-dev-only \
   -v lgx-dev-pgdata:/var/lib/postgresql -p 127.0.0.1:55432:5432 lgx.local/lgx-db:dev
 export LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres     # build/owner role
-uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --package --container lgx-dev-db --restore-to legilux
+uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --include-m2 --package --container lgx-dev-db --restore-to legilux
 docker exec lgx-dev-db psql -U postgres -c "ALTER ROLE lgx_ro PASSWORD 'lgx-ro-dev-only'"   # once per cluster
 psql postgresql://lgx_ro:lgx-ro-dev-only@127.0.0.1:55432/legilux                     # what the MCP server uses
 ```
@@ -55,14 +58,77 @@ and `PGHOST/PGPORT/PGUSER/PGPASSWORD`. Each release is a fresh database ("rebuil
 
 ## Dev stack (one command each)
 
-`make ingest-sample` (offline sample ingest + package into `lgx-dev-db`, which `make dev-db` creates if needed),
-`make dev-up` / `dev-down` / `dev-logs` / `dev-ps` (`deploy/compose.dev.yml`, profile `cpu`, waits until healthy),
-`make ollama-pull MODEL=<tag>`, `make e2e` (scripted questions through the UI container), `make egress-check`
-(airgap egress check), and host runs `make mcp` (:8001) / `make ui` (:8511). Behind a TLS-intercepting proxy pass
-`LGX_DEV_CA_BUNDLE=/path/ca-bundle.crt` to `dev-up` (image builds) and `ollama-pull`. `db-load` restores the bundle only while the stack's
-`legilux` database is missing: after a new `make ingest-sample` run `make dev-down`, `docker volume rm legilux-dev-pgdata`
-and `make dev-up` (the model volume stays). Results of the first CPU run
-and the egress check: `docs/dev/e2e-2026-10-17.md`.
+`make ingest-sample` (offline sample ingest incl. the m2 PDF codes + package into `lgx-dev-db`, which `make dev-db`
+creates if needed; ≈ 2 min with warm caches, the first PDF parse of the 5 sample PDFs ≈ 7 min on 4 CPUs),
+`make dev-up` / `dev-down` / `dev-logs` / `dev-ps` (`deploy/compose.dev.yml`: db, db-load, mcp, lgx-streamlit; waits
+until healthy; `make dev-up DEV_PROFILES=rerank` adds the TEI reranker and `LGX_RERANK=auto`), `make fetch-models` (pinned reranker into `data/models/hf`, once, connected host;
+`FETCH_MODELS_ARGS=--verify-only` checks `deploy/models.lock` offline), `make rerank-up` / `rerank-down` (start or stop
+TEI on a running stack and switch the dev `mcp` to `LGX_RERANK=auto` / `off`; TEI is ready ≈ 1.5 min after start on an
+idle 4-vCPU host, ≈ 6 min on a busy one), `make eval` (below),
+`make e2e` (scripted questions through the UI container; `E2E_STUB=1` runs them against `scripts/openai_stub.py`, a
+deterministic keyless OpenAI-compatible stub started inside the UI container), `make embed-plan` (`lgx embed --dry-run`),
+`make egress-check` (airgap egress check; the chat goes to the stub on the internal network), and host runs `make mcp`
+(:8001) / `make ui` (:8511). Behind a TLS-intercepting proxy pass `LGX_DEV_CA_BUNDLE=/path/ca-bundle.crt` to `dev-up`
+(image builds). `db-load` restores the bundle only while the stack's `legilux` database is missing: after a new
+`make ingest-sample` run `make dev-down`, `docker volume rm legilux-dev-pgdata` and `make dev-up`. Results of the first
+end-to-end run and the egress check: `docs/dev/e2e-2026-10-17.md`.
+
+**Chat LLM.** No LLM runtime is bundled (user decision 2026-10-17). The UI talks to one external OpenAI-compatible
+endpoint: `OPENAI_BASE_URL` (`LGX_LLM_BASE_URL`, default `https://api.mistral.ai/v1`), the key file `LGX_LLM_KEY_FILE`
+(`make dev-up` uses `secrets/llm_api_key` when it exists; default `/dev/null` = no key) and `LGX_LLM_MODEL` (default
+`mistral-small-latest`, [U]: whatever the endpoint serves). In the airgap the same variables name the user's on-prem
+Mistral domain (same API as Mistral SaaS). The sidebar's Base URL / model fields accept any OpenAI-compatible URL; the
+key is only ever sent to the configured one. Open WebUI (optional, M5) points to the same URL.
+
+## Evaluation (PLAN §11, `eval/README.md`)
+
+```sh
+make eval                                   # G0 G1 G2 G3, lexical, in process against legilux (lgx_ro)
+make eval EVAL_SETS=G2 EVAL_MODE=rerank EVAL_ARGS="--subset eval/gold/subsets/G2-rerank-40.json --tag G2-rerank-subset40"
+uv run python -m eval.harness compare --subset eval/gold/subsets/G2-rerank-40.json eval/reports/G2-*.json
+```
+
+Reranked runs cost 10–45 s per search on 4 vCPU: run them on the fixed stratified subset (`python -m eval.harness subset`)
+and never two at a time. Results and the M2 acceptance check: `eval/reports/m2-baseline.md`, `eval/reports/m2-acceptance.md`.
+
+## Embeddings (off by default)
+
+`config/embedding.yaml` holds `provider: none` (user decision): nothing is computed, nothing is sent, `vector_status =
+disabled:provider_none`, retrieval runs lexical (+ reranker). The one provider is `mistral` — the Mistral embeddings API
+(`POST {base_url}/v1/embeddings`, model `mistral-embed`, 1024 dims, Bearer key from `LGX_EMBED_API_KEY_FILE`), the
+**same** API for documents on the build side (`base_url: https://api.mistral.ai`) and for queries in the airgap (the
+on-prem domain in `LGX_EMBED_BASE_URL`). Every key of the file can be overridden by `LGX_EMBED_*`.
+
+```sh
+uv run lgx --t 2026-10-16 embed --dry-run         # = make embed-plan: the plan, never a request (any provider)
+LGX_EMBED_PROVIDER=mistral LGX_EMBED_API_KEY_FILE=secrets/mistral_api_key uv run lgx --t 2026-10-16 embed
+uv run lgx --t 2026-10-16 load                     # attaches the vectors (all searchable chunks or none) + HNSW
+```
+
+- **Throttle** (one limiter, `lgx_core/embed/limiter.py`, shared by `lgx embed` and the MCP server's query embedding):
+  at most `max_concurrency` (5) requests in flight, and each request slot waits `cooldown_s` (20 s) after its request
+  completed before it is reused; `batch_size` (64) texts per request, split earlier at `max_tokens_per_request`
+  (16,000 estimated tokens); `timeout_s` (60; lgx-mcp 5); `retries` (5) on 429 / 5xx / network errors with
+  `backoff_s` and `Retry-After` (the longer wins; every retry takes a slot too).
+- **Throughput** ≈ `max_concurrency × texts_per_request / (latency + cooldown_s)` texts/s. With the defaults and an
+  assumed 2 s per request [E]: ≤ 5 × 64 / 22 ≈ **14.5 texts/s** at full batches. On the dev sample the token budget
+  binds first (≈ 374 estimated tokens per chunk → 41.8 texts per request), so `lgx embed --dry-run` (2026-10-17, T =
+  2026-10-16) reports 20,529 searchable chunks → 20,477 distinct texts, 490 requests, ≈ 7.7M estimated tokens,
+  **≈ 9.5 texts/s, ≈ 36 min** (98 waves × 22 s). **Full corpus** (≈ 400k chunks [E], PLAN §0): ≈ 9,600 requests ≈
+  **11.7 h** at the default throttle (7.6 h if every request carried 64 texts); the cooldown dominates — with
+  `LGX_EMBED_COOLDOWN_S=0` the same run would take ≈ 1.1 h at 2 s latency. Resumable: re-run the same command.
+- **Cache** `data/emb/<model>-<dim>.sqlite` (build side only, never shipped): `content_sha256 → float16 vector` plus
+  the model id the API reported; every finished request is committed, so an interrupted run resumes and a re-run only
+  embeds new or changed chunks. A second reported model id stops the run (`model_changed`).
+- **Load**: with `provider: mistral` and a cache that covers *every* searchable chunk, `lgx load` writes
+  `lgx.embedding_model` (reported model id, dim, the startup probe text + vector) and `chunk.embedding`; the post-load
+  builds the HNSW index; gate `embedding_vectors`. Otherwise the release is lexical-only with a message.
+- **Runtime** (`lgx_mcp/vectors.py`): one startup probe — the endpoint's reported model id and dim must equal the
+  release's `lgx.embedding_model` row and the probe vector's cosine must be ≥ `probe_min_cosine` (0.99). Hybrid (dense +
+  lexical, RRF k = 60) only when the release has vectors **and** the probe passed; a failed probe, a missing key, an
+  unreachable endpoint or a throttled query gives lexical with the reason (`retrieval.reason`, `/readyz`
+  `vector_reason`), never an error. Tests use fake endpoints only (`tests/unit/test_embed.py`,
+  `tests/contract/test_mcp_vectors.py`); no real embedding is ever computed in development.
 
 ## Tests and lint
 
@@ -102,18 +168,63 @@ Politeness is built in: ≤ 1 request/s (`LGX_RATE_LIMIT_S`, default 1.2 s), Use
 `LegiLux-Local-Clone/0.1 (+https://github.com/masterries/LegiLux-Full-Local-MCP-Clone)`, robots.txt checked
 every run, only `https://legilux.public.lu/filestore/eli/etat/leg/…` is ever fetched.
 
+## Full ingest (operator step, never in development)
+
+`lgx ingest --full` builds the release from the whole metadata scope (PLAN §6.2): every act with a text basis gets its
+file, not only the sample works. It is run by the operator on the build host; development and CI never run it.
+
+**1. Plan first (no request at all):**
+
+```sh
+uv run lgx --t 2026-10-16 ingest --full --dry-run     # robots + snapshot reused, select, plan → reports/<T>/fetch_plan_full.json
+```
+
+Dry run of 2026-10-17 on the T = 2026-10-16 snapshot (26 s, 0 requests):
+
+| | |
+|---|---|
+| Versions that get a file | 25,569 (17,396 HTML JO originals, 7,034 XML originals, 1,065 XML consolidations, 21 XML recueils, 9 XML codes, 33 PDF: 5 code-recueils, 16 recueils, 12 consolidations); 49 already cached (the sample) |
+| Requests | 25,520 file GETs + 52 Q-MANIF SPARQL requests (the snapshot's file list covers the sample works only; a real `--full` run pulls Q-MANIF for every served version first) + 2 robots.txt; ≈ 12 flat SPARQL pulls (≈ 140 MB) only with `--refresh` |
+| Duration | 7.1 h at exactly 1 req/s; 8.5 h at the default 1.2 s spacing; **12.8 h of fetching under the 2,000 requests/hour ceiling = 4 nightly windows** (01:00–05:00 Europe/Luxembourg, ≤ 8,000 GETs each); ≤ 30,000 per day |
+| Disk | raw files ≈ 2.9 GB [E] (sample means per format and kind; `code/environnement_annexes` 239.9 MB excluded), parsed/units/chunks caches ≈ 1–1.5× that, build database ≈ 0.9–1.3 GB and dump ≈ 0.2–0.5 GB (PLAN §4.2): **keep ≥ 8 GB free** in `data/` and the PostgreSQL volume |
+| Parse | the 33 PDFs dominate (the 5 sample PDFs: 7 min on 4 CPUs); XML/HTML parse ≈ minutes |
+
+**2. Run (on the build host, inside the window):**
+
+```sh
+export LGX_PG_DSN=postgresql://postgres:…@127.0.0.1:55432/postgres
+uv run lgx --t <T> ingest --full --confirm-full-crawl --package --container lgx-dev-db --restore-to legilux
+```
+
+- **Window.** File GETs run only inside `scope.fetch.nightly_window` (01:00–05:00 Europe/Luxembourg); outside it the
+  fetch stops before the next request with « outside the nightly window … » (exit 1, resumable).
+  `--ignore-window` is the operator opt-in for one ≈ 13 h session; every rate limit stays (≥ 1.2 s spacing, ≤ 2,000/h,
+  ≤ 30,000/day, backoff, circuit breaker).
+- **Resumable.** Completed URLs are listed in `data/logs/fetch_progress_<T>.txt` and skipped; files already in
+  `data/raw/` are reused (`--revalidate` sends conditional GETs for them). Re-run the same command after the window
+  closed, an hourly/daily ceiling, the circuit breaker or an interruption; nothing is fetched twice for T. The parse and
+  chunk caches are keyed by file hash + parser version, the load rebuilds the database from the caches ("rebuild,
+  don't migrate"). The gates decide whether the release is packaged.
+- **What it fetches:** robots.txt of both hosts (every run that fetches), the SPARQL endpoint (Q-MANIF; the flat pulls only
+  with `--refresh`), and files under `https://legilux.public.lu/filestore/eli/etat/leg/…` — nothing else
+  (`lgx_core.eli.assert_fetchable` before every request), one connection, User-Agent `LegiLux-Local-Clone/…`.
+- **What it never fetches:** URLs outside that filestore branch; robots-disallowed paths and denylisted ELIs (GDPR list);
+  Mémorial B, RC, naturalisation acts, EU texts, drafts and closed versions' text (not selected); DOCX / PDF-A duplicates
+  (one file per version); `code/environnement_annexes` (239.9 MB, metadata-only unless `include_env_annexes_text` +
+  the allowlist); files above 64 MB that are not allow-listed.
+
 ## Layout
 
 ```text
 lgx_core/     shared legal logic: models, config, ELI helpers, rules, normalise, warnings, embed, citeparse, verify
 lgx_ingest/   build pipeline + `lgx` CLI (robots, sparql, select, fetch, parse/, structure, chunk, load, gates)
-lgx_mcp/      runtime MCP server (M1)
+lgx_mcp/      runtime MCP server (M1; query embeddings + startup probe: vectors.py)
 ui/lgx_ui/    Streamlit tester UI helpers (M1b)
 config/       scope, sample, embedding, warnings, legal_texts, aliases, denylist, recueil_members
 sparql/       Appendix A queries ({{PLACEHOLDER}} syntax, sparql/README.md)
 db/           lgx-db Dockerfile, schema/*.sql, tsearch/french_unaccent.stop
-deploy/       images.lock (compose files follow in M1/M5)
-scripts/      db_apply.sh, make_french_unaccent_stop.py
+deploy/       compose.yml (airgap), compose.dev.yml (dev), images.lock, models.lock, .env.example
+scripts/      db_apply.sh, fetch_models.sh, e2e_chat.py, openai_stub.py, egress_check.sh, …
 tests/        unit/, db/, live/, contract/, fixtures/
 data/         build-side caches and outputs (gitignored, never shipped)
 ```

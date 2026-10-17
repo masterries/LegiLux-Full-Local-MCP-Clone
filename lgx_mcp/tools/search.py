@@ -11,7 +11,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from lgx_core.embed import EmbeddingDisabledError
+from lgx_core.embed import EmbeddingError
 from lgx_core.models import ToolErrorCode, WarningCode
 from lgx_mcp.annotate import Annotator, clip
 from lgx_mcp.context import CallContext, ToolFailure
@@ -24,6 +24,7 @@ from lgx_mcp.retrieval import (
     decide_mode,
     search_candidates,
 )
+from lgx_mcp.retrieval.candidates import ModeDecision
 from lgx_mcp.retrieval.expansion import load_expander
 from lgx_mcp.runtime import Runtime
 from lgx_mcp.tools.base import ToolOutput
@@ -99,6 +100,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
 
     # --- filters
     act_ids = None
+    member_filter = None
     if filters.get("act_eli"):
         fres = await resolver.resolve_eli(filters["act_eli"])
         if fres.status == "ambiguous":  # a truncated dated ELI: never narrow to one act of that date silently
@@ -114,18 +116,23 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
                 f"filters.act_eli inconnu dans cette base : {filters['act_eli']}",
                 hint="Utilisez resolve_citation pour trouver l'ELI de l'acte.",
             )
-        act_ids = [fres.candidates[0].act.act_id]
+        filter_act = fres.candidates[0].act
+        act_ids = [filter_act.act_id]
+        if filter_act.superseded_by_act_id:  # PLAN §2.6 (4): a member act is searched in the code's text
+            act_ids.append(filter_act.superseded_by_act_id)
+            member_filter = filter_act
 
-    # --- mode (vectors are behind the adapter; provider none -> lexical with the reason)
+    # --- mode: hybrid only for a release with vectors whose startup probe passed (provider none -> lexical + reason)
     vector_status = rt.vector_status(ctx.release)
     mode = decide_mode(requested, vector_status)
     qvec = None
+    t_emb = time.perf_counter()
     if mode.mode_used == "hybrid":
         try:
-            qvec = rt.embedder.embed([query], "query")[0]
-        except EmbeddingDisabledError as exc:
-            mode = decide_mode("lexical", vector_status)
-            mode = type(mode)(requested, "lexical", vector_status, f"query embedding failed: {exc}")
+            qvec = await rt.vectors.embed_query(query, ctx.release)
+        except EmbeddingError as exc:  # never an error: this search runs lexical and says why
+            mode = ModeDecision(requested, "lexical", rt.vector_status(ctx.release), f"query embedding failed: {exc}")
+    emb_ms = (time.perf_counter() - t_emb) * 1000
 
     # --- lexical query (search API 2): citation spans and noise out, curated expansions in
     api = ctx.release.search_api
@@ -166,6 +173,10 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             hits = coverage_order(hits)
             lexical_order = "coverage"
     units = best_per_unit(hits)
+    if member_filter is not None and units:  # of the code's articles, only that member's
+        rows = await facts.units([h.unit_id for h in units])
+        keep = member_filter.act_id
+        units = [h for h in units if h.act_id == keep or (h.unit_id in rows and rows[h.unit_id].member_act_id == keep)]
 
     # --- rerank
     reranked = False
@@ -205,6 +216,8 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
     await annot.prepare([(acts[h.act_id], versions[h.version_id], unit_rows.get(h.unit_id)) for h in selected])
     out_hits = []
     for i, h in enumerate(selected, 1):
+        if member_filter is not None and h.act_id != member_filter.act_id:
+            await annot.superseded_by_code(member_filter, ref=f"C{i}", variant="redirected")
         a = await annot.citation(f"C{i}", acts[h.act_id], versions[h.version_id], unit_rows.get(h.unit_id))
         unit = unit_rows.get(h.unit_id)
         out_hits.append(
@@ -228,7 +241,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             }
         )
     total_ms = (time.perf_counter() - t0) * 1000
-    emb = rt.embedder.info
+    model = ctx.release.embedding_model or {}
     structured: dict[str, Any] = {
         "query": query,
         "hits": out_hits,
@@ -239,12 +252,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             "rerank_reason": rerank_reason,
             "rerank_k": rerank_k,
             "embedding_model": (
-                {
-                    "provider": emb.provider.value,
-                    "model_id": emb.model_id,
-                    "model_version": emb.model_version,
-                    "dim": emb.dim,
-                }
+                {"provider": model.get("provider"), "model_id": model.get("model_id"), "dim": model.get("dim")}
                 if mode.mode_used == "hybrid"
                 else None
             ),
@@ -255,6 +263,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             "latency_ms": {
                 "sql": round(sql_ms, 1),
                 "rerank": round(rr_ms, 1),
+                **({"query_embedding": round(emb_ms, 1)} if qvec is not None else {}),
                 "total": round(total_ms, 1),
                 **({"rerank_batches_ms": reranker.last.batch_ms} if reranked else {}),
             },

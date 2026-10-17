@@ -34,7 +34,7 @@ from lgx_ui.tools_bridge import apply_overrides as _apply
 from unit.test_ui_fakes import ELI, SCHEMAS, FakeOpenAIServer, FakeSession, fake_specs, tool_call_message
 
 SYSTEM = "PROMPT"
-CFG = LlmConfig(base_url="http://llm:11434/v1", model="fake-model", api_key="sk-test", timeout_s=5)
+CFG = LlmConfig(base_url="http://llm-test:8080/v1", model="fake-model", api_key="sk-test", timeout_s=5)
 
 
 def llm_for(server: FakeOpenAIServer) -> OpenAICompatChat:

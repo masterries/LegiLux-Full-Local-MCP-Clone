@@ -76,31 +76,22 @@ CREATE TABLE lgx_meta.release (                 -- exactly one row per shipped d
 );
 
 -- Embedding stage metadata. ZERO rows when provider=none (the shipped default until the user enables it).
+-- One row when the release carries vectors (provider mistral; revised 2026-10-17: one provider, one startup probe
+-- instead of golden-vector probes). The runtime embeds probe_text through the on-prem endpoint: the reported model id
+-- must equal model_id, the vector length dim, and the cosine to probe_vector must be >= probe_min_cosine.
 CREATE TABLE lgx.embedding_model (
   embedding_set_id smallint PRIMARY KEY,
-  provider         text NOT NULL CHECK (provider IN ('mistral-api', 'mistral-local', 'openai-compatible', 'tei')),
-  model_id         text NOT NULL,               -- 'mistral-embed-2312' (pinned id, never the alias)
-  model_version    text NOT NULL,               -- 'v23.12'
-  model_aliases    text[] NOT NULL DEFAULT '{}',-- ids the runtime endpoint may report for the same model
-  dim              int  NOT NULL CHECK (dim > 0),
-  normalized       boolean NOT NULL,            -- Mistral: unit norm, so cosine = dot product
-  distance         text NOT NULL DEFAULT 'cosine' CHECK (distance IN ('cosine', 'inner_product', 'l2')),
-  vector_type      text NOT NULL DEFAULT 'halfvec' CHECK (vector_type IN ('halfvec', 'bit+halfvec')),
-  doc_prefix       text NOT NULL DEFAULT '',    -- none for Mistral
-  query_prefix     text NOT NULL DEFAULT '',    -- none for Mistral
-  parity_threshold real NOT NULL DEFAULT 0.999 CHECK (parity_threshold > 0 AND parity_threshold <= 1),
+  provider         text NOT NULL CHECK (provider IN ('mistral')),
+  model_id         text NOT NULL,               -- the id the build-side API reported (e.g. 'mistral-embed')
+  model_requested  text NOT NULL,               -- config/embedding.yaml `model`
+  dim              int  NOT NULL CHECK (dim > 0 AND dim <= 4000),   -- halfvec HNSW limit
+  normalized       boolean NOT NULL DEFAULT true,   -- Mistral: unit norm, so cosine = dot product
+  probe_text       text NOT NULL,
+  probe_vector     real[] NOT NULL,             -- full precision, as the build-side API returned it
+  probe_min_cosine real NOT NULL DEFAULT 0.99 CHECK (probe_min_cosine > 0 AND probe_min_cosine <= 1),
   chunk_count      int  NOT NULL,
-  created_at       timestamptz NOT NULL DEFAULT now()
-);
--- Golden-vector probes: fixed texts + their full-precision (float4) document-side vectors.
--- At MCP start the runtime adapter embeds the same texts; every cosine must be >= parity_threshold.
-CREATE TABLE lgx.embedding_probe (
-  embedding_set_id smallint NOT NULL REFERENCES lgx.embedding_model ON DELETE CASCADE,
-  probe_no         smallint NOT NULL,
-  probe_text       text  NOT NULL,
-  text_sha256      bytea NOT NULL,
-  vector           real[] NOT NULL,
-  PRIMARY KEY (embedding_set_id, probe_no)
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  CHECK (cardinality(probe_vector) = dim)
 );
 
 -- ----------------------------------------------------------------------------------------------- B.5
@@ -436,7 +427,7 @@ CREATE FUNCTION lgx.or_query(q text) RETURNS tsquery
             FROM unnest(tsvector_to_array(to_tsvector('lgx.fr_legal'::regconfig, q))) AS l);
 
 -- Candidate generation + RRF fusion in one statement (PLAN.md §8.3). p_qvec NULL => lexical-only
--- (the default mode until vectors exist and the parity check passes). The reranker runs afterwards in
+-- (the default mode until vectors exist and the startup probe passes). The reranker runs afterwards in
 -- the MCP server on the returned candidates. Tool filters map 1:1 (Appendix D, D.2.1) and apply to EVERY branch:
 --   filters.doc_types -> p_doc_types; filters.act_eli -> p_act_ids (resolved by the server);
 --   filters.in_force_only = false -> p_include_future = true (also stored future versions and not-yet-in-force
@@ -502,21 +493,12 @@ CREATE FUNCTION lgx.search_candidates(
 ANALYZE;
 
 -- Conditional HNSW: only when the optional embedding stage produced vectors (default: no vectors).
--- halfvec HNSW supports up to 4,000 dims (Mistral Embed 1024 fits). For a >4,000-dim model (option B,
--- e5-mistral-7b-instruct, 4096-d) index binary_quantize(embedding)::bit(4096) with bit_hamming_ops and
--- re-rank the candidates with the full halfvec (pgvector README pattern).
+-- halfvec HNSW supports up to 4,000 dims; lgx.embedding_model.dim is checked against it (Mistral Embed: 1024).
 DO $$
-DECLARE v_dim int;
 BEGIN
   IF EXISTS (SELECT 1 FROM lgx.chunk WHERE embedding IS NOT NULL) THEN
-    SELECT dim INTO v_dim FROM lgx.embedding_model ORDER BY embedding_set_id DESC LIMIT 1;
-    IF v_dim <= 4000 THEN
-      EXECUTE 'CREATE INDEX chunk_hnsw ON lgx.chunk USING hnsw (embedding halfvec_cosine_ops) '
-           || 'WITH (m = 16, ef_construction = 128) WHERE searchable AND embedding IS NOT NULL';
-    ELSE
-      EXECUTE format('CREATE INDEX chunk_hnsw_bq ON lgx.chunk USING hnsw '
-           || '((binary_quantize(embedding)::bit(%s)) bit_hamming_ops) WHERE searchable AND embedding IS NOT NULL', v_dim);
-    END IF;
+    EXECUTE 'CREATE INDEX chunk_hnsw ON lgx.chunk USING hnsw (embedding halfvec_cosine_ops) '
+         || 'WITH (m = 16, ef_construction = 128) WHERE searchable AND embedding IS NOT NULL';
   END IF;
 END $$;
 
@@ -541,8 +523,8 @@ CREATE VIEW lgx_meta.invariant_violations AS
   UNION ALL SELECT 'vector_without_embedding_model', count(*)
     FROM lgx.chunk c WHERE c.embedding IS NOT NULL
      AND NOT EXISTS (SELECT 1 FROM lgx.embedding_model m WHERE m.embedding_set_id = c.embedding_set_id)
-  UNION ALL SELECT 'embedding_model_without_probes', count(*)
-    FROM lgx.embedding_model m WHERE NOT EXISTS (SELECT 1 FROM lgx.embedding_probe p WHERE p.embedding_set_id = m.embedding_set_id)
+  UNION ALL SELECT 'embedding_model_dim_mismatch', count(*)
+    FROM lgx.chunk c JOIN lgx.embedding_model m USING (embedding_set_id) WHERE vector_dims(c.embedding) <> m.dim
   UNION ALL SELECT 'missing_legal_texts', 4 - count(DISTINCT code)
     FROM lgx.legal_text WHERE code IN ('attribution', 'disclaimer', 'cc_by_4_0', 'notice') AND lang = 'fr'
   UNION ALL SELECT 'release_row_missing', 1 - count(*) FROM lgx_meta.release;

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Airgap egress check of the runtime services (PLAN §11.6 / D15; method and results: docs/dev/e2e-2026-10-17.md).
 #
-# Starts db + db-load + mcp + ollama + lgx-streamlit as a separate compose project (legilux-egress) from
-# deploy/compose.dev.yml plus a generated override:
+# Starts db + db-load + mcp + llm-stub + lgx-streamlit as a separate compose project (legilux-egress) from
+# deploy/compose.dev.yml plus a generated override (no LLM runtime is bundled: the chat goes to llm-stub, a
+# deterministic OpenAI-compatible stub, scripts/openai_stub.py, running in the UI image on the internal network):
 #   - every service sits only on the `backend` network (no `edge`, no published port); --mode internal (default)
 #     keeps it `internal: true` (no gateway route in the containers); --mode routed makes it a plain bridge WITHOUT
 #     masquerading, so that any connection to a non-local address really leaves the container and is counted below;
@@ -10,7 +11,7 @@
 #   - iptables counters (inserted before the first container starts): DOCKER-USER DROP for packets from the bridge to
 #     any other interface, INPUT DROP for NEW connections from the bridge to the host itself.
 # Then a scripted session through headless Chromium (scripts/ui_browser.cjs, every page request recorded): startup,
-# one Chat answer (real LLM on CPU) and one Direct search. Afterwards positive controls prove that each probe sees an
+# one Chat answer (tool loop through llm-stub and MCP) and one Direct search. Afterwards positive controls prove that each probe sees an
 # attempt (a canary DNS lookup, a TCP connect to TEST-NET-1 and one to the bridge gateway, made from lgx-streamlit).
 # PASS = 0 sentinel queries, 0 packets on the counter rules and 0 non-local browser requests during the session.
 #
@@ -18,8 +19,8 @@
 #                                [--out DIR] [--subnet 172.31.250.0/24] [--dry-run]
 # (--dry-run writes the override + Corefile and prints the rendered compose config; nothing is started.)
 # Needs: root (iptables), docker compose, the images built by `make dev-up` (lgx.local/lgx-{db,mcp,streamlit}:dev),
-# the Ollama image + model volume (`make ollama-pull`), the pinned CoreDNS image (deploy/images.lock, pulled through
-# mirror.gcr.io), the sample bundle in data/bundles/, node with the `playwright` npm package and its Chromium.
+# the pinned CoreDNS image (deploy/images.lock, pulled through mirror.gcr.io), the sample bundle in data/bundles/,
+# node with the `playwright` npm package and its Chromium.
 # It never builds or pulls (compose --no-build --pull never). The dev stack (project legilux-dev) is left alone.
 set -euo pipefail
 
@@ -59,7 +60,7 @@ STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 OUT=${OUT:-$ROOT/data/reports/egress/$STAMP-$MODE}
 mkdir -p "$OUT"
 OUT=$(cd "$OUT" && pwd)
-COMPOSE=(docker compose -p "$PROJECT" -f "$ROOT/deploy/compose.dev.yml" -f "$OUT/compose.egress.yml" --profile cpu)
+COMPOSE=(docker compose -p "$PROJECT" -f "$ROOT/deploy/compose.dev.yml" -f "$OUT/compose.egress.yml")
 log() { printf '[egress] %s\n' "$*" >&2; }
 
 # ------------------------------------------------------------------------------------------------ prerequisites
@@ -71,8 +72,6 @@ node -e "require('playwright')" 2>/dev/null || { log "node + the playwright npm 
 for img in lgx.local/lgx-db:dev lgx.local/lgx-mcp:dev lgx.local/lgx-streamlit:dev "$COREDNS_IMAGE"; do
   docker image inspect "$img" >/dev/null 2>&1 || { log "image $img missing (make dev-up / docker pull)"; exit 2; }
 done
-docker volume inspect "${LGX_DEV_OLLAMA_VOLUME:-legilux-dev-ollama}" >/dev/null 2>&1 \
-  || { log "Ollama model volume missing: make ollama-pull"; exit 2; }
 
 # ------------------------------------------------------------------------------------------------ generated files
 cat > "$OUT/Corefile" <<'EOF'
@@ -99,7 +98,6 @@ networks:
     ipam: { config: [{ subnet: "$SUBNET", gateway: "$GATEWAY_IP" }] }
 volumes:
   pgdata: { name: legilux-egress-pgdata }
-  ollama-models: { name: "${LGX_DEV_OLLAMA_VOLUME:-legilux-dev-ollama}", external: true }
 services:
   egress-sentinel:
     image: "$COREDNS_IMAGE"
@@ -114,14 +112,25 @@ services:
   db: { $DNS, pull_policy: never, depends_on: { $DEP } }
   db-load: { $DNS, pull_policy: never, depends_on: { $DEP } }
   mcp: { $DNS, pull_policy: never, depends_on: { $DEP }, networks: !override [backend], ports: !reset [] }
-  ollama: { $DNS, pull_policy: never, depends_on: { $DEP } }
+  llm-stub:
+    image: lgx.local/lgx-streamlit:dev
+    pull_policy: never
+    $DNS
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["python", "/opt/stub/openai_stub.py", "--host", "0.0.0.0", "--port", "8089"]
+    volumes: ["$ROOT/scripts/openai_stub.py:/opt/stub/openai_stub.py:ro"]
+    depends_on: { $DEP }
+    networks: [backend]
   lgx-streamlit:
     $DNS
     pull_policy: never
-    depends_on: { $DEP }
+    depends_on: { $DEP, llm-stub: { condition: service_started } }
     networks: !override [backend]
     ports: !reset []
-    environment: { LGX_LLM_TIMEOUT_S: "600", LGX_TURN_BUDGET_S: "1200" }
+    environment: { OPENAI_BASE_URL: "http://llm-stub:8089/v1", LGX_LLM_MODEL: "lgx-stub", HTTPS_PROXY: "" }
 EOF
 
 if [ "$DRY" = 1 ]; then "${COMPOSE[@]}" config; exit 0; fi
@@ -164,7 +173,7 @@ STARTUP_DNS=$(docker logs "$PROJECT-egress-sentinel-1" 2>&1 | grep -c '"' || tru
 
 # ------------------------------------------------------------------------------------------------ 2. session
 BROWSER_ARGS=(--url "http://$UI_IP:8501" --direct "$DIRECT" --requests "$OUT/browser-requests.json")
-[ "$CHAT" = 1 ] && BROWSER_ARGS+=(--chat "$QUESTION" --chat-timeout-s 1200)
+[ "$CHAT" = 1 ] && BROWSER_ARGS+=(--chat "$QUESTION" --chat-timeout-s 300)
 log "browser session against http://$UI_IP:8501 (chat: $CHAT)"
 t1=$(date +%s)
 BROWSER_RC=0

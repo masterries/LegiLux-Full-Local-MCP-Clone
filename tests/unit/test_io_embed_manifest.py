@@ -7,7 +7,6 @@ import pytest
 
 from lgx_core.config import DEFAULT_CONFIG_DIR, EmbeddingConfig, ProjectConfig
 from lgx_core.eli import assert_fetchable
-from lgx_core.embed import EmbeddingDisabledError, get_embedder
 from lgx_core.io import append_jsonl, atomic_write_text, read_jsonl, write_jsonl
 from lgx_core.models import FetchLogEntry, ManifestEntry, TextBasis
 
@@ -56,10 +55,7 @@ def test_bootstrap_manifest_is_valid_and_in_sample() -> None:
             assert e.amending_acts, "amending-act list is mandatory"
 
 
-def test_embedding_provider_none_computes_nothing() -> None:
-    emb = get_embedder(EmbeddingConfig())
-    assert emb.vector_status() == "disabled:provider_none"
-    with pytest.raises(EmbeddingDisabledError):
-        emb.embed(["texte"], "doc")
-    with pytest.raises(NotImplementedError):
-        get_embedder(EmbeddingConfig(provider="mistral-api"))
+def test_embedding_provider_none_is_the_default() -> None:
+    cfg = ProjectConfig.load(DEFAULT_CONFIG_DIR).embedding
+    assert not cfg.enabled and cfg.provider.value == "none"
+    assert EmbeddingConfig().model == "mistral-embed" and EmbeddingConfig().dim == 1024

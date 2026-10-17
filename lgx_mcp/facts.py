@@ -493,6 +493,41 @@ class Facts:
         )
         return [_unit(r) for r in rows]
 
+    async def under_part(self, unit_ids: Iterable[int]) -> set[int]:
+        """Those of ``unit_ids`` with a ``part`` ancestor (in a code-recueil: a member act's part, named or not)."""
+        want = list(dict.fromkeys(int(x) for x in unit_ids))
+        if not want:
+            return set()
+        rows = await self.db.fetch(
+            "WITH RECURSIVE anc AS (SELECT u.unit_id AS start, u.parent_id AS pid FROM lgx.unit u"
+            " WHERE u.unit_id = ANY(%s) UNION ALL SELECT a.start, p.parent_id FROM anc a JOIN lgx.unit p"
+            " ON p.unit_id = a.pid) SELECT DISTINCT a.start FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid"
+            " WHERE p.unit_type = 'part'",
+            [want],
+        )
+        return {int(r["start"]) for r in rows}
+
+    async def member_part(self, unit_id: int) -> tuple[bool, str | None]:
+        """(has a ``part`` ancestor, its heading): a PDF code-recueil unit without ``member_act_id`` under a member
+        part whose act was not identified (``membre_N`` or an unresolved « Loi du … » heading)."""
+        rows = await self.db.fetch(
+            "WITH RECURSIVE anc AS (SELECT u.parent_id AS pid, 0 AS depth FROM lgx.unit u WHERE u.unit_id = %s"
+            " UNION ALL SELECT p.parent_id, a.depth + 1 FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid)"
+            " SELECT p.heading FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid WHERE p.unit_type = 'part'"
+            " ORDER BY a.depth DESC LIMIT 1",
+            [unit_id],
+        )
+        return (True, rows[0]["heading"]) if rows else (False, None)
+
+    async def recueil_part_heading(self, version_id: int, member_act_id: int) -> str | None:
+        """The part heading under which a code-recueil version holds a member act (``lgx.recueil_member``)."""
+        rows = await self.db.fetch(
+            "SELECT rm.part_heading FROM lgx.recueil_member rm WHERE rm.recueil_version_id = %s"
+            " AND rm.member_act_id = %s",
+            [version_id, member_act_id],
+        )
+        return rows[0]["part_heading"] if rows else None
+
     async def toc(self, version_id: int, limit: int = 300) -> tuple[list[Unit], int]:
         rows = await self.db.fetch(
             f"SELECT {UNIT_COLS}, count(*) OVER () AS total FROM lgx.unit u WHERE u.version_id = %s"

@@ -18,6 +18,7 @@ from lgx_ingest.fetch import (
     CircuitBreaker,
     Fetcher,
     FetchStopped,
+    NightlyWindow,
     RateLimiter,
     Status,
     Target,
@@ -334,3 +335,46 @@ def test_run_fetch_without_robots_policy_fails_closed(
 def test_run_fetch_missing_manifest(ctx: StageContext) -> None:
     res = run_fetch(ctx)
     assert not res.ok and "manifest not found" in res.messages[0]
+
+
+# ------------------------------------------------------------------------------- nightly window (PLAN §3.3)
+def test_nightly_window_parse_open_and_wrap() -> None:
+    from zoneinfo import ZoneInfo
+
+    lu = ZoneInfo("Europe/Luxembourg")
+    w = NightlyWindow.parse("01:00-05:00 Europe/Luxembourg")
+    assert w.hours == 4
+    assert w.is_open(dt.datetime(2026, 10, 17, 1, 30, tzinfo=lu))
+    assert not w.is_open(dt.datetime(2026, 10, 17, 5, 0, tzinfo=lu))
+    assert w.is_open(dt.datetime(2026, 10, 16, 23, 30, tzinfo=dt.UTC))  # 01:30 CEST
+    wrap = NightlyWindow.parse("22:00-02:00 Europe/Luxembourg")
+    assert wrap.hours == 4 and wrap.is_open(dt.datetime(2026, 10, 17, 23, 0, tzinfo=lu))
+    assert wrap.is_open(dt.datetime(2026, 10, 17, 1, 0, tzinfo=lu))
+    assert not wrap.is_open(dt.datetime(2026, 10, 17, 12, 0, tzinfo=lu))
+    with pytest.raises(ValueError, match="HH:MM"):
+        NightlyWindow.parse("nightly")
+
+
+def test_full_fetch_only_inside_the_nightly_window(
+    ctx: StageContext, tmp_path: Path, entries: list[ManifestEntry]
+) -> None:
+    """A full run outside 01:00–05:00 stops (resumable) before any request; --ignore-window and the sample don't."""
+    ctx = _stage(ctx, tmp_path, entries)
+    full = StageContext(**{**ctx.__dict__, "sample": False})
+    noon = dt.datetime(2026, 10, 17, 10, 0, tzinfo=dt.UTC)
+    night = dt.datetime(2026, 10, 16, 23, 30, tzinfo=dt.UTC)
+
+    def run(c: StageContext, at: dt.datetime, limit: int = 2):  # type: ignore[no-untyped-def]
+        return run_fetch(c, limit=limit, policy=Policy(), sleep=lambda s: None, now=lambda: at)
+
+    with respx.mock() as mock:
+        mock.get(url__regex=r"https://legilux\.public\.lu/filestore/eli/etat/leg/.*").mock(
+            side_effect=lambda req: httpx.Response(200, content=req.url.path.encode(), headers={"Last-Modified": LM})
+        )
+        stopped = run(full, noon)
+        assert not stopped.ok and "nightly window" in stopped.messages[0] and mock.calls.call_count == 0
+        assert run(full, night).counts["fetched"] == 2
+        forced = StageContext(**{**full.__dict__, "options": {"ignore_window": "1"}})
+        assert run(forced, noon, limit=1).counts["fetched"] == 1
+        assert run(ctx, noon, limit=1).counts["fetched"] == 1  # the sample is exempt (rate limits only)
+        assert mock.calls.call_count == 4

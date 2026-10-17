@@ -188,6 +188,9 @@ async def get_article(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> To
         )
     annot = Annotator(ctx, facts)
     await annot.prepare([(act, version, full)])
+    redirected = res.redirected_from if res is not None else None
+    if redirected is not None:  # a member act superseded by this code: its article as the code prints it
+        await annot.superseded_by_code(redirected, ref="C1", variant="redirected")
     a = await annot.citation("C1", act, version, full)
     text = full.text_plain or ""
     size = page_size(rt.settings.max_result_tokens)
@@ -259,5 +262,24 @@ async def get_article(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> To
             "reason": res.candidates[0].reason if res.candidates else None,
             "parsed": res.citation.parsed() if res.citation else None,
         }
+        if redirected is not None:
+            structured["resolution"]["redirected_from"] = {
+                "act_eli": redirected.eli_work,
+                "title": clip(redirected.title, 200),
+                "reason": "superseded_by_code",
+            }
+        elif act.superseded_by_act_id and full.num_norm:  # own (original) text shown: point to the code's article
+            resolver = rt.resolver(ctx.release, facts)
+            in_code = await resolver.code_articles(act, full.num_norm, ctx.as_of)
+            if len(in_code) == 1:
+                code_act = await facts.act(in_code[0].act_id)
+                code_version = await facts.version(in_code[0].version_id)
+                structured["resolution"]["code_article"] = {
+                    "act_eli": code_act.eli_work if code_act else None,
+                    "version_eli": code_version.eli_version if code_version else None,
+                    "article": in_code[0].num_raw,
+                    "page": in_code[0].page_from,
+                    "hint": "texte original affiché à titre d'information ; la version à jour est cet article du code",
+                }
     structured.update(ctx.envelope())
     return ToolOutput(structured, render_article(structured, rt.settings.max_result_tokens), hits=1)

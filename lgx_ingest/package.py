@@ -259,6 +259,11 @@ def release_manifest(dsn: str, db_name: str, dump: dict[str, Any], pg_version: i
         if row is None or cur.description is None:
             raise LoadError(f"{db_name} has no lgx_meta.release row: load it first")
         rel = dict(zip([c.name for c in cur.description], row, strict=True))
+        model = conn.execute(
+            "SELECT provider, model_id, dim FROM lgx.embedding_model ORDER BY embedding_set_id LIMIT 1"
+        ).fetchone()
+    # PLAN §10.4: a release with vectors needs the runtime endpoint to serve the same model (startup probe)
+    embedding = {"provider": model[0], "model_id": model[1], "dim": model[2]} if model else None
     gates = rel.get("gates") or {}
     return {
         "channel": "data",
@@ -275,7 +280,7 @@ def release_manifest(dsn: str, db_name: str, dump: dict[str, Any], pg_version: i
         "release_kind": (rel.get("config") or {}).get("release_kind"),
         "counts": rel["counts"],
         "gates": {"status": gates.get("status"), "summary": gates.get("summary")},
-        "requires": {"schema_version": SCHEMA_VERSION, "embedding": None, "postgres_major": pg_version},
+        "requires": {"schema_version": SCHEMA_VERSION, "embedding": embedding, "postgres_major": pg_version},
         "dump": {
             "file": Path(dump["file"]).name,
             "bytes": dump["bytes"],

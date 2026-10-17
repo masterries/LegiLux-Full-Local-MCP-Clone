@@ -73,6 +73,16 @@ def test_prepare_without_expansion_and_overlapping_spans() -> None:
     assert ex.prepare("le bail").expansion == "louage"
 
 
+def test_a_query_that_is_only_a_citation_keeps_its_words() -> None:
+    """G3 v2 (M2 PDF text): an article starting with its provenance « (Loi du 21 novembre 1997) « … » was searched
+    with an empty lexical query (the citation span covered everything) and found nothing."""
+    q = "(Loi du 21 novembre 1997) «(1) Les banques"
+    p = load_expander().prepare(q, strip_spans=[(1, len(q))])
+    assert "banques" in p.lexical and "1997" in p.lexical and p.removed == []
+    kept = load_expander().prepare("Code du travail licenciement", strip_spans=[(0, len("Code du travail"))])
+    assert "licenciement" in kept.lexical and "travail" not in kept.lexical  # a real remainder: spans still go
+
+
 def test_operator_override_file(tmp_path: Any) -> None:
     (tmp_path / "query_expansion.yaml").write_text(
         "noise: {fr: [quid]}\nexpansions: [{lang: fr, when: [zorglub], add: 'contrat'}]\n", encoding="utf-8"

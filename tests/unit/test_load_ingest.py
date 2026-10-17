@@ -66,3 +66,29 @@ def test_offline_without_snapshot_fails_with_hint(tmp_path: Path, no_network: No
 def test_full_crawl_needs_confirmation(tmp_path: Path) -> None:
     res = CliRunner().invoke(app, ["--t", "2026-10-16", "--data-dir", str(tmp_path), "ingest", "--full"])
     assert res.exit_code == 2
+
+
+def test_dry_run_prints_the_plan_without_any_request(tmp_path: Path, no_network: None) -> None:
+    """`lgx ingest [--full] --dry-run`: robots + snapshot reused, select, fetch plan, nothing fetched or parsed."""
+    works = {k: v for k, v in E2E_WORKS.items() if k.endswith(("n25", "1978/07/14/n1"))}
+    cfg, data = build_fixture_sample(tmp_path, works)
+    for sample in (True, False):
+        ctx = StageContext.create(sync_date=T, config_dir=cfg, data_dir=data, sample=sample, dry_run=True)
+        result = run_ingest(ctx, echo=lambda _m: None)
+        steps = {s["stage"]: s for s in result.details["steps"]}
+        assert result.ok, (result.messages, steps)
+        assert list(steps) == ["robots", "discover", "select", "fetch"]
+        plan = result.details["plan"]
+        assert plan["counts"]["targets"] >= 2 and plan["duration_estimate"]["spacing_s"] >= 1.0
+        assert plan["requests"]["files"] == plan["counts"]["missing"]
+        assert any("environnement_annexes" in n for n in plan["never_fetched"])
+        report = data / "reports" / T.isoformat() / f"fetch_plan_{'sample' if sample else 'full'}.json"
+        assert json.loads(report.read_text(encoding="utf-8"))["stage"] == "fetch"
+        if not sample:
+            assert plan["duration_estimate"]["nightly_window"] and plan["full_file_plan"] is not None
+    assert not (data / "parsed").exists() or not any((data / "parsed").iterdir())
+
+
+def test_full_dry_run_needs_no_confirmation(tmp_path: Path) -> None:
+    res = CliRunner().invoke(app, ["--t", "2026-10-16", "--data-dir", str(tmp_path), "ingest", "--full", "--dry-run"])
+    assert res.exit_code != 2  # no snapshot in tmp: fails later (exit 1), but not at the --confirm-full-crawl guard

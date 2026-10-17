@@ -9,7 +9,7 @@ import pytest
 from lgx_core.citeparse import Citation
 from lgx_core.models import ToolErrorCode, WarningCode
 from lgx_core.warnings import load_catalogue
-from lgx_mcp.annotate import Annotator, acts_phrase, article_short, clip, status_basis
+from lgx_mcp.annotate import Annotator, acts_phrase, article_short, clip, of_member, status_basis
 from lgx_mcp.context import Clock, ToolFailure, WarningBag, make_context
 from lgx_mcp.facts import Act, AmendingAct, Version, normalise_eli, short_title_of
 from lgx_mcp.release import ReleaseInfo
@@ -198,6 +198,24 @@ def test_citation_string_formats() -> None:
         "Art. 5", "Loi du 20 juin 2001 sur l'extradition", version(), loi, "original_possibly_outdated", None
     )
     assert "(texte original, Mém. A n° 82/2001 — non consolidé)" in o and o.endswith("/a686/jo")
+
+
+def test_citation_string_names_the_member_act_of_a_code_recueil() -> None:
+    """PLAN §2.6: « art. 2 de l'arrêté grand-ducal … (Code de la route, version consolidée …) »."""
+    route = version(kind="code_recueil", label="Version consolidée applicable au 12/06/2026",
+                    eli_version="http://data.legilux.public.lu/eli/etat/leg/code/route/20260612")  # fmt: skip
+    member = of_member("Arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation.")
+    assert member == "de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation"
+    s = Annotator.citation_string("Art. 2", "Code de la route", route, act(), "consolidated", None, member=member)
+    assert s == (
+        "Art. 2 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation (Code de la route,"
+        " version consolidée applicable au 12/06/2026) — http://data.legilux.public.lu/eli/etat/leg/code/route/20260612"
+    )
+    assert of_member("Loi du 14 février 1955 concernant la circulation") == (
+        "de la loi du 14 février 1955 concernant la circulation"
+    )
+    assert of_member("Règlement grand-ducal du 8 août 2000 …").startswith("du règlement grand-ducal")
+    assert of_member(None) is None and of_member("  ") is None
 
 
 def test_normalise_eli_forms() -> None:

@@ -96,6 +96,8 @@ class Resolution:
     message: str | None = None
     out_of_scope: str | None = None
     related: list[Act] = field(default_factory=list)
+    # the cited act is a member superseded by a code-recueil; its article is served from the code's text
+    redirected_from: Act | None = None
 
     @property
     def best(self) -> Candidate | None:
@@ -315,6 +317,9 @@ class Resolver:
         best.article = raw
         serving = await self.facts.serving_at(best.act.act_id, as_of)
         version_id = serving.text_version_id if serving else None
+        routable = version_id is None and key and best.act.superseded_by_act_id
+        if routable and await self._route_to_code(res, best, key, raw, as_of):
+            return
         if version_id is None:
             res.article_status = "no_text"
             reason = best.act.metadata_reason
@@ -341,6 +346,8 @@ class Resolver:
         main = [u for u in units if not u.in_annex] or units
         exact = [u for u in main if u.num_norm == key] or main
         if len(exact) > 1:
+            exact = await self._own_articles(best.act, exact)
+        if len(exact) > 1:
             res.article_status = "ambiguous"
             res.status = "ambiguous"
             res.message = f"plusieurs articles {raw} dans ce texte (parties ou actes membres différents)"
@@ -350,3 +357,49 @@ class Resolver:
             return
         best.unit = exact[0]
         res.article_status = "resolved"
+
+    async def _own_articles(self, act: Act, units: list[Unit]) -> list[Unit]:
+        """A base act whose consolidation is a code-recueil (``loi/1925/12/17/n1`` = Code de la sécurité sociale):
+        its own articles come before the members' (« art. 24 du Code de la sécurité sociale » is the code's art. 24,
+        not that of a law printed after it): own = no member act and no member part above it (unnamed members are
+        ``part`` units too). Unchanged for pure recueils (``…/code/route``, ``…/code/fonction_publique``: every
+        article belongs to a member, ambiguous stays ambiguous) and outside code-recueils."""
+        if "/code/" in act.eli_work or "/recueil/" in act.eli_work or not any(u.member_act_id for u in units):
+            return units
+        in_part = await self.facts.under_part(u.unit_id for u in units if u.member_act_id is None)
+        own = [u for u in units if u.member_act_id is None and u.unit_id not in in_part]
+        return own or units
+
+    async def code_articles(self, member: Act, key: str, as_of: dt.date) -> list[Unit]:
+        """The article units numbered ``key`` of ``member`` in the text of the code-recueil that supersedes it."""
+        if member.superseded_by_act_id is None or not key:
+            return []
+        serving = await self.facts.serving_at(member.superseded_by_act_id, as_of)
+        version_id = serving.text_version_id if serving else None
+        if version_id is None:
+            return []
+        units = [u for u in await self.facts.article_units(version_id, key) if u.member_act_id == member.act_id]
+        main = [u for u in units if not u.in_annex] or units
+        return [u for u in main if u.num_norm == key] or main
+
+    async def _route_to_code(self, res: Resolution, best: Candidate, key: str, raw: str, as_of: dt.date) -> bool:
+        """PLAN §2.6 (4), Appendix D.2.2: a member act superseded by a code-recueil and without a text of its own at
+        ``as_of`` is served from the code's text (« redirect to the code article »). An act with its own (original)
+        text keeps it, with W_SUPERSEDED_BY_CODE and a pointer to the code article (``get_article``). ``False`` when
+        the code has no text at ``as_of`` or no such article of that member."""
+        exact = await self.code_articles(best.act, key, as_of)
+        if not exact:
+            return False
+        res.redirected_from = best.act
+        if len(exact) > 1:
+            res.article_status = "ambiguous"
+            res.status = "ambiguous"
+            res.message = f"plusieurs articles {raw} de cet acte dans le code qui l'intègre"
+            res.candidates = [
+                Candidate(best.act, 0.5, best.reason, unit=u, article=u.num_raw, note=u.breadcrumb) for u in exact[:20]
+            ]
+            return True
+        best.unit = exact[0]
+        best.note = "acte intégré à un code : article servi depuis le texte du code (superseded_by_code)"
+        res.article_status = "resolved"
+        return True

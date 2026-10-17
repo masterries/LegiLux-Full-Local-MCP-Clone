@@ -144,34 +144,22 @@ def test_settings_from_environment(tmp_path: Path) -> None:
             "LGX_MCP_TOKEN": "plain-token",
             "OPENAI_API_KEY_FILE": str(key),
             "OPENAI_API_KEY": "sk-plain",
-            "OPENAI_BASE_URL": "http://llm:11434/v1",
-            "LGX_LLM_MODEL": "ministral-3:8b",
-            "LGX_LLM_PRESETS": "ollama,vllm,mistral-onprem,cloud",
+            "OPENAI_BASE_URL": "https://mistral.example.intra/v1",
+            "LGX_LLM_MODEL": "mistral-medium",
             "LGX_MAX_TOOL_ITERATIONS": "7",
             "LGX_MCP_TIMEOUT_S": "bogus",
         }
     )
     assert s.mcp_token == "file-token" and s.llm_api_key == "sk-plain"
     assert s.max_tool_iterations == 7 and s.mcp_timeout_s == 20.0
-    keys = [p.key for p in s.presets]
-    assert keys == ["ollama", "vllm", "mistral-onprem", "custom"], "cloud needs LGX_ALLOW_CLOUD_LLM=1"
-    assert s.presets[0].base_url == "http://llm:11434/v1" and s.presets[0].model == "ministral-3:8b"
-    assert s.llm_trust_env is False and not s.allow_cloud
-    assert "http://llm:8000/v1" in s.known_llm_urls()
-
-    cloud = load_settings(
-        {
-            "LGX_ALLOW_CLOUD_LLM": "1",
-            "LGX_LLM_PRESETS": "cloud",
-            "OPENAI_BASE_URL": "https://api.example.invalid/v1",
-            "LGX_LLM_MODEL": "m",
-        }
-    )
-    assert [p.key for p in cloud.presets] == ["cloud", "custom"] and cloud.presets[0].cloud
-    assert cloud.llm_trust_env is True and cloud.allow_cloud
+    assert (s.llm_base_url, s.llm_model) == ("https://mistral.example.intra/v1", "mistral-medium")
+    assert s.llm_trust_env is False and not s.llm_external  # *.intra counts as inside the organisation
+    assert load_settings({"LGX_LLM_TRUST_ENV": "1"}).llm_trust_env is True
 
     empty = load_settings({})
     assert empty.mcp_token is None and empty.llm_api_key == NO_KEY and empty.eval_dir is None
+    # default: the user's Mistral endpoint (same API as Mistral SaaS; the airgap sets its on-prem domain)
+    assert empty.llm_base_url == "https://api.mistral.ai/v1" and empty.llm_external
 
 
 def test_unreadable_secret_file_fails_loudly(tmp_path: Path) -> None:
@@ -183,13 +171,7 @@ def test_unreadable_secret_file_fails_loudly(tmp_path: Path) -> None:
         load_settings({"OPENAI_API_KEY_FILE": str(tmp_path)})  # a directory: read fails
 
 
-def test_free_typed_llm_endpoint_must_be_internal() -> None:
-    from lgx_ui.app_support import endpoint_allowed
-
-    cfg = load_settings({"OPENAI_BASE_URL": "http://llm:11434/v1", "LGX_LLM_MODEL": "m"})
-    assert endpoint_allowed(cfg, "http://llm:11434/v1")  # configured
-    assert endpoint_allowed(cfg, "http://vllm:8000/v1") and endpoint_allowed(cfg, "http://10.1.2.3:8000/v1")
-    assert endpoint_allowed(cfg, "http://host.docker.internal:11434/v1")
-    assert not endpoint_allowed(cfg, "https://api.example.com/v1")  # public: only with the cloudllm opt-in
-    cloud = load_settings({"LGX_ALLOW_CLOUD_LLM": "1", "OPENAI_BASE_URL": "https://api.example.com/v1"})
-    assert endpoint_allowed(cloud, "https://other.example.org/v1")
+def test_any_openai_compatible_url_but_the_key_only_for_the_configured_one() -> None:
+    cfg = load_settings({"OPENAI_BASE_URL": "https://mistral.example.intra/v1/", "LGX_LLM_MODEL": "m"})
+    assert cfg.key_allowed("https://mistral.example.intra/v1")  # configured (trailing slash ignored)
+    assert not cfg.key_allowed("http://10.1.2.3:8000/v1") and not cfg.key_allowed("https://api.example.com/v1")

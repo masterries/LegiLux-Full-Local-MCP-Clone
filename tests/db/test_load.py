@@ -140,6 +140,63 @@ def test_tiny_release_gates_pass_and_reload_is_idempotent(
         assert conn.execute("SELECT eli_work, act_id FROM lgx.act ORDER BY 1").fetchall() == ids
 
 
+def test_vectors_from_the_embedding_cache_are_attached_all_or_nothing(
+    pg_server: PgServer, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """provider mistral + a cache covering every searchable chunk → vectors, model row with probe, HNSW, gate."""
+    import math
+
+    from lgx_core.embed import PROBE_TEXT
+    from lgx_ingest.embed import EmbeddingCache, cache_path, searchable_texts
+
+    build_tiny_release(tmp_path)
+    monkeypatch.setenv("LGX_EMBED_PROVIDER", "mistral")
+    monkeypatch.delenv("LGX_EMBED_DIM", raising=False)
+    ctx = StageContext.create(sync_date=T, data_dir=tmp_path, sample=False)
+    cfg = ctx.config.embedding.with_env()
+    texts, n = searchable_texts(ctx)
+    assert n >= 2
+    shas = sorted(texts)
+
+    def fake(i: int) -> list[float]:
+        v = [math.sin(i * 7 + k) for k in range(cfg.dim)]
+        norm = math.sqrt(sum(x * x for x in v))
+        return [x / norm for x in v]
+
+    _track(pg_server, "lgx_test_load_vec")
+    with EmbeddingCache(cache_path(ctx.layout.emb_dir, cfg), cfg.dim) as cache:
+        cache.put_many(shas[:-1], [fake(i) for i in range(len(shas) - 1)], "mistral-embed")
+        cache.set_meta("probe", {"text": PROBE_TEXT, "vector": fake(99), "model": "mistral-embed"})
+    partial = run_load(ctx, dsn=pg_server.dsn("postgres"), db_name="lgx_test_load_vec")
+    assert partial.ok and any("no vector" in m for m in partial.messages)
+    with pg_server.connect("lgx_test_load_vec") as conn:  # one chunk without a vector: lexical release
+        assert _one(conn, "SELECT count(*) FROM lgx.chunk WHERE embedding IS NOT NULL") == 0
+        assert _one(conn, "SELECT config->>'vector_status' FROM lgx_meta.release") == "disabled:no_vectors_loaded"
+    gates = run_gates(ctx, dsn=pg_server.dsn("postgres"), db_name="lgx_test_load_vec")
+    assert gates.ok and {"embedding_vectors"} <= {g["gate"] for g in gates.details["gates"]}
+    with EmbeddingCache(cache_path(ctx.layout.emb_dir, cfg), cfg.dim) as cache:
+        cache.put_many(shas[-1:], [fake(len(shas))], "mistral-embed")
+    full = run_load(ctx, dsn=pg_server.dsn("postgres"), db_name="lgx_test_load_vec")
+    assert full.ok, full.messages
+    with pg_server.connect("lgx_test_load_vec") as conn:
+        assert _one(conn, "SELECT count(*) FROM lgx.chunk WHERE embedding IS NOT NULL") == n
+        assert _one(conn, "SELECT count(*) FROM lgx.chunk WHERE searchable AND embedding IS NULL") == 0
+        row = conn.execute(
+            "SELECT provider, model_id, model_requested, dim, probe_text, cardinality(probe_vector), chunk_count"
+            " FROM lgx.embedding_model"
+        ).fetchone()
+        assert row == ("mistral", "mistral-embed", "mistral-embed", cfg.dim, PROBE_TEXT, cfg.dim, n)
+        assert _one(conn, "SELECT count(*) FROM pg_indexes WHERE indexname = 'chunk_hnsw'") == 1
+        assert _one(conn, "SELECT config->>'vector_status' FROM lgx_meta.release") == "ok"
+        assert "vectorisation" in str(
+            _one(conn, "SELECT body FROM lgx.legal_text WHERE code = 'attribution' AND lang = 'fr'")
+        )
+        assert conn.execute("SELECT check_name, n FROM lgx_meta.invariant_violations WHERE n <> 0").fetchall() == []
+    gates = run_gates(ctx, dsn=pg_server.dsn("postgres"), db_name="lgx_test_load_vec")
+    emb_gate = next(g for g in gates.details["gates"] if g["gate"] == "embedding_vectors")
+    assert gates.ok and emb_gate["status"] == "pass", emb_gate
+
+
 def test_constraint_violation_names_table_constraint_and_record(pg_server: PgServer, tmp_path: Path) -> None:
     build_tiny_release(tmp_path)
     manifest = tmp_path / "manifest" / T.isoformat() / "manifest.jsonl"

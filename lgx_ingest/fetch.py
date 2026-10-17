@@ -15,6 +15,9 @@ Contract: docs/dev/INTERFACES.md §5 (PLAN §3.3, §6.1 S3).
 * Bytes go to ``raw/<sha[:2]>/<sha256><ext>``; every success appends a ``RawFile`` to ``raw/index.jsonl``
   (last line per URL wins) and every attempt a ``FetchLogEntry`` to ``logs/fetch_log.jsonl``.
 * Resumable: URLs completed for this ``T`` are listed in ``logs/fetch_progress_<T>.txt`` and skipped.
+* Full runs (not ``--sample``) request only inside ``scope.fetch.nightly_window`` (01:00–05:00 Europe/Luxembourg,
+  PLAN §3.3): outside it the run stops, resumable; ``--opt ignore_window=1`` (``lgx ingest --ignore-window``) is
+  the operator opt-in that keeps every rate limit.
 """
 
 from __future__ import annotations
@@ -232,6 +235,48 @@ def mark_done(layout: DataLayout, url: str) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8") as fh:
         fh.write(url + "\n")
+
+
+# ------------------------------------------------------------------------------------ nightly window
+@dataclass(frozen=True)
+class NightlyWindow:
+    """``"01:00-05:00 Europe/Luxembourg"`` (may wrap midnight, e.g. ``"22:00-05:00 …"``)."""
+
+    start: dt.time
+    end: dt.time
+    tz: Any
+
+    @classmethod
+    def parse(cls, spec: str) -> NightlyWindow:
+        from zoneinfo import ZoneInfo
+
+        hours, _, zone = spec.strip().partition(" ")
+        a, _, b = hours.partition("-")
+        try:
+            tz = ZoneInfo(zone.strip() or "Europe/Luxembourg")
+            return cls(dt.time.fromisoformat(a), dt.time.fromisoformat(b), tz)
+        except ValueError as exc:
+            raise ValueError(f"nightly_window {spec!r}: expected 'HH:MM-HH:MM <IANA zone>'") from exc
+
+    @property
+    def hours(self) -> float:
+        a = self.start.hour * 60 + self.start.minute
+        b = self.end.hour * 60 + self.end.minute
+        return ((b - a) % 1440 or 1440) / 60
+
+    def is_open(self, now: dt.datetime) -> bool:
+        t = now.astimezone(self.tz).time()
+        if self.start <= self.end:
+            return self.start <= t < self.end
+        return t >= self.start or t < self.end
+
+
+def fetch_window(ctx: StageContext) -> NightlyWindow | None:
+    """The window this run must respect: none for the sample, ``--ignore-window`` or an empty config value."""
+    spec = ctx.config.scope.fetch.nightly_window
+    if ctx.sample or not spec or ctx.opt("ignore_window") in ("1", "true", "yes"):
+        return None
+    return NightlyWindow.parse(spec)
 
 
 # ----------------------------------------------------------------------------------------- limiter
@@ -509,6 +554,7 @@ def run_fetch(
     policy: UrlPolicy | None = None,
     client: httpx.Client | None = None,
     sleep: Callable[[float], None] = time.sleep,
+    now: Callable[[], dt.datetime] | None = None,
 ) -> StageResult:
     """Fetch every manifest entry with a ``file`` (sample entries only when ``ctx.sample``).
 
@@ -545,6 +591,8 @@ def run_fetch(
     counts: collections.Counter[str] = collections.Counter()
     failures: list[dict[str, str | int | None]] = []
     spacing = max(ctx.settings.rate_limit_s, ctx.config.scope.fetch.min_spacing_s)
+    window = fetch_window(ctx)
+    clock = now or (lambda: dt.datetime.now(dt.UTC))
     with Fetcher(
         layout=ctx.layout,
         policy=policy,
@@ -564,6 +612,11 @@ def run_fetch(
                 if limit is not None and downloads >= limit:
                     result.messages.append(f"stopped after --limit {limit} downloads")
                     break
+                if window is not None and not window.is_open(clock()):
+                    raise FetchStopped(
+                        f"outside the nightly window {ctx.config.scope.fetch.nightly_window}; run again inside it"
+                        " (completed URLs are skipped) or pass --ignore-window"
+                    )
                 outcome = fetcher.fetch(t)
                 counts[outcome.status] += 1
                 if outcome.status in (Status.FETCHED, Status.NOT_MODIFIED):

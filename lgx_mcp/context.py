@@ -70,6 +70,7 @@ class WarningBag:
     def add(
         self,
         code: WarningCode,
+        /,
         *,
         ref: str | None = None,
         variant: str | None = None,

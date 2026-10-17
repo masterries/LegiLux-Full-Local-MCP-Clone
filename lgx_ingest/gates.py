@@ -13,7 +13,8 @@ Database gates (``--opt dsn=…``/``LGX_PG_DSN`` + ``--opt db_name=…``, defaul
 ``lgx_meta.invariant_violations`` empty, denylist absence, release row, counts vs selection report and the
 loader inputs, no chunk without a unit / of a non-text version / outside its version window, text_basis
 consistency (labels vs stored texts vs ``lgx.serving_at(T)``), core texts and article counts, licence,
-embedding off (0 vectors, 0 embedding_model rows), canned lexical query.
+embedding off (0 vectors, 0 embedding_model rows) or, with provider mistral, all-or-nothing vectors,
+canned lexical query.
 """
 
 from __future__ import annotations
@@ -522,12 +523,23 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
     )
     vectors = int(_scalar(conn, "SELECT count(*) FROM lgx.chunk WHERE embedding IS NOT NULL"))
     models = int(_scalar(conn, "SELECT count(*) FROM lgx.embedding_model"))
-    if not ctx.config.embedding.enabled:
+    vstatus = release_config.get("vector_status")
+    if not ctx.config.embedding.with_env().enabled:
         report.check(
             "embedding_off",
-            vectors == 0 and models == 0 and release_config.get("vector_status") == "disabled:provider_none",
-            {"vectors": vectors, "embedding_model": models, "vector_status": release_config.get("vector_status")},
+            vectors == 0 and models == 0 and vstatus == "disabled:provider_none",
+            {"vectors": vectors, "embedding_model": models, "vector_status": vstatus},
             "provider none: no vectors, no model row",
+        )
+    else:  # provider mistral: all searchable chunks embedded (+ 1 model row with its probe), or a lexical release
+        n_search = int(_scalar(conn, "SELECT count(*) FROM lgx.chunk WHERE searchable"))
+        with_vectors = models == 1 and vectors == n_search and vstatus == "ok"
+        lexical = models == 0 and vectors == 0 and vstatus == "disabled:no_vectors_loaded"
+        report.check(
+            "embedding_vectors",
+            with_vectors or lexical,
+            {"vectors": vectors, "searchable": n_search, "embedding_model": models, "vector_status": vstatus},
+            "every searchable chunk has a vector and 1 model row, or none at all (lexical release)",
         )
     query = ctx.opt("canned_query") or CANNED_QUERY
     sql = "SELECT count(*) FROM lgx.search_candidates(%s, NULL, %s, '{}', NULL, NULL, 10, NULL, false)"

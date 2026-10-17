@@ -1,0 +1,17 @@
+{
+ "set": "G3",
+ "size": 10,
+ "method": "G3 search items whose hits can change under reranking: no act filter (out-of-scope vocabulary, national-only), PDF code texts and superseded members routed to the code; act-filtered items expect act-level warnings only (identical for any order of that act's articles)",
+ "ids": [
+  "G3-008",
+  "G3-009",
+  "G3-010",
+  "G3-011",
+  "G3-023",
+  "G3-026",
+  "G3-032",
+  "G3-050",
+  "G3-056",
+  "G3-120"
+ ]
+}

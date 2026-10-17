@@ -86,6 +86,108 @@ async def test_eu_regulation_citation_is_out_of_scope(live: LiveServer) -> None:
     assert "W_OUT_OF_SCOPE" in [w["code"] for w in r.structured_content["warnings"]]
 
 
+# --------------------------------------------------------------- PDF codes + code-recueil routing (M2 ingest)
+AGD_1955 = E + "agd/1955/11/23/n1"  # superseded_by_code → code/route (PLAN §2.6 (4)), no version of its own
+LOI_1955 = E + "loi/1955/02/14/n3"
+
+
+async def _call(srv: LiveServer, tool: str, args: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
+    async with mcp_client(srv) as c:
+        r = await c.call_tool(tool, args)
+    return bool(r.is_error), dict(r.structured_content or {})
+
+
+async def _need_pdf_codes(srv: LiveServer) -> None:
+    err, sc = await _call(srv, "get_act", {"eli": E + "code/route"})
+    if err or sc.get("text_basis") != "consolidated":
+        pytest.skip("release without the M2 PDF codes (lgx ingest --sample --include-m2)")
+
+
+def _codes(sc: dict[str, Any]) -> list[str]:
+    return [w["code"] for w in sc.get("warnings", [])]
+
+
+async def test_superseded_member_article_is_served_from_the_code_route(live: LiveServer) -> None:
+    await _need_pdf_codes(live)
+    for args in (
+        {"act_eli": AGD_1955, "article": "12"},
+        {"citation": "art. 12 de l'arrêté grand-ducal modifié du 23 novembre 1955 portant règlement de la circulation"
+         " sur toutes les voies publiques"},
+    ):  # fmt: skip
+        err, sc = await _call(live, "get_article", args)
+        assert not err, sc.get("error")
+        cit = sc["citation"]
+        assert cit["act_eli"] == E + "code/route" and cit["member_act"] == AGD_1955
+        assert cit["version_eli"] == E + "code/route/20260612" and isinstance(cit["page"], int)
+        assert {"W_PDF_EXTRACTED", "W_SUPERSEDED_BY_CODE"} <= set(cit["warnings"])
+        assert cit["citation_string"].startswith("Art. 12 de l'arrêté grand-ducal du 23 novembre 1955")
+        assert "(Code de la route, version consolidée applicable au 12/06/2026)" in cit["citation_string"]
+        assert sc["resolution"]["redirected_from"]["act_eli"] == AGD_1955
+        assert "masse totale" in sc["text"]
+
+
+async def test_superseded_member_with_its_own_original_keeps_it_and_points_to_the_code(live: LiveServer) -> None:
+    """rgd/2000/07/24/n3 has a stored JO original: it is shown « à titre d'information » + a pointer to the code."""
+    await _need_pdf_codes(live)
+    err, sc = await _call(live, "get_article", {"act_eli": E + "rgd/2000/07/24/n3", "article": "5"})
+    assert not err, sc.get("error")
+    assert sc["citation"]["act_eli"] == E + "rgd/2000/07/24/n3" and "W_SUPERSEDED_BY_CODE" in sc["citation"]["warnings"]
+    ptr = sc["resolution"]["code_article"]
+    assert ptr["act_eli"] == E + "code/education_nationale" and isinstance(ptr["page"], int)
+    assert "redirected_from" not in sc["resolution"]
+
+
+async def test_code_article_shared_by_members_is_ambiguous_not_guessed(live: LiveServer) -> None:
+    await _need_pdf_codes(live)
+    err, sc = await _call(live, "get_article", {"act_eli": E + "code/route", "article": "12"})
+    assert err and sc["error"]["code"] == "AMBIGUOUS" and len(sc["error"]["candidates"]) > 2
+
+
+async def test_social_security_code_article_is_the_codes_own_with_its_pages(live: LiveServer) -> None:
+    """« art. 24 du Code de la sécurité sociale » = the code's art. 24 (p. 81), not that of a member printed later."""
+    await _need_pdf_codes(live)
+    err, sc = await _call(live, "get_article", {"citation": "art. 24 du Code de la sécurité sociale"})
+    assert not err, sc.get("error")
+    cit = sc["citation"]
+    assert cit["act_eli"] == E + "loi/1925/12/17/n1" and cit["member_act"] is None
+    assert cit["version_eli"] == E + "code/securite_sociale/20260101" and cit["page"] == 81
+    assert "W_PDF_EXTRACTED" in cit["warnings"] and "soins de santé" in sc["text"]
+    msg = next(w["message"] for w in sc["warnings"] if w["code"] == "W_PDF_EXTRACTED")
+    assert "p. 81" in msg
+
+
+async def test_member_act_card_points_to_the_code(live: LiveServer) -> None:
+    await _need_pdf_codes(live)
+    for eli in (AGD_1955, LOI_1955):
+        err, sc = await _call(live, "get_act", {"eli": eli})
+        assert not err, sc.get("error")
+        sup = sc["superseded_by_code"]
+        assert sup["code_eli"] == E + "code/route" and sup["version_eli"] == E + "code/route/20260612"
+        assert "1955" in sup["member_context"] and "W_SUPERSEDED_BY_CODE" in _codes(sc)
+
+
+async def test_search_filtered_to_a_superseded_member_runs_in_the_code_text(live: LiveServer) -> None:
+    """The original of rgd/2000/07/24/n3 is not searchable (PLAN §6.4): its articles come from the code."""
+    await _need_pdf_codes(live)
+    sc = await _search(live, {"query": "Pour la rédaction de leur travail de candidature",
+                              "filters": {"act_eli": E + "rgd/2000/07/24/n3"}, "top_k": 3})  # fmt: skip
+    assert sc["hits"], sc["warnings"]
+    for h in sc["hits"]:
+        cit = h["citation"]
+        assert cit["act_eli"] == E + "code/education_nationale" and cit["member_act"] == E + "rgd/2000/07/24/n3"
+        assert "W_SUPERSEDED_BY_CODE" in cit["warnings"]
+    assert sc["hits"][0]["citation"]["article"] == "Art. 5."
+
+
+async def test_search_hits_in_pdf_codes_carry_member_and_page(live: LiveServer) -> None:
+    await _need_pdf_codes(live)
+    sc = await _search(live, {"query": "masse totale d'un véhicule ou d'un ensemble de véhicules couplés",
+                              "filters": {"act_eli": E + "code/route"}, "top_k": 5})  # fmt: skip
+    top = sc["hits"][0]["citation"]
+    assert top["member_act"] == AGD_1955 and top["article"] == "Art. 12." and isinstance(top["page"], int)
+    assert "W_PDF_EXTRACTED" in top["warnings"] and top["citation_string"].startswith("Art. 12 de l'arrêté")
+
+
 # ------------------------------------------------------------------------------------- real TEI reranker
 @pytest.fixture(scope="module")
 def tei() -> str:

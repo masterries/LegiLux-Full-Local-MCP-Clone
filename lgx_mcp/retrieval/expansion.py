@@ -135,6 +135,8 @@ class QueryExpander:
         """``strip_spans``: character spans of ``query`` (resolved citations) left out of the lexical text."""
         lang = guess_lang(query)
         text, removed = _cut(query, strip_spans)
+        if removed and not re.search(r"\w", text):  # the whole query was a citation (« (Loi du …) « … »): keep it
+            text, removed = " ".join(query.split()), []
         lexical, noise = self.strip_noise(text, lang)
         found = self.expand(query, lang) if expand else []
         words = set(fold(lexical).split())

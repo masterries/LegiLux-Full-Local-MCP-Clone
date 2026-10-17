@@ -78,7 +78,7 @@ def ui_env(monkeypatch: pytest.MonkeyPatch) -> None:
             monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("LGX_MCP_URL", f"http://127.0.0.1:{closed_port()}/mcp")
     monkeypatch.setenv("LGX_MCP_TIMEOUT_S", "3")
-    monkeypatch.setenv("OPENAI_BASE_URL", "http://llm:11434/v1")
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://llm-test:8080/v1")
     monkeypatch.setenv("LGX_LLM_MODEL", "fake-model")
 
 
@@ -166,7 +166,7 @@ def test_sidebar_widgets_keep_their_values_across_pages(ui_env: None) -> None:
     assert [kw["key"] for _, _, kw in keyed if "value" in kw or "index" in kw] == []
     assert [kw["key"] for name, args, kw in keyed if name in ("slider", "number_input") and len(args) > 3] == []
     assert set(app_support.SIDEBAR_KEYS) <= set(fake_st.session_state)
-    assert fake_st.session_state["llm_base_url"] == "http://llm:11434/v1"
+    assert fake_st.session_state["llm_base_url"] == "http://llm-test:8080/v1"
     fake_st.session_state["llm_model"] = "kept-model"
     app_support.render_sidebar(fake_st)
     assert fake_st.session_state["llm_model"] == "kept-model"
@@ -258,15 +258,16 @@ def test_direct_search_eval_and_corpus_with_fakes(ui_env: None, loopback_only: l
     assert "vecteurs désactivés : provider=none" in texts(at), "the reason stays visible under the metrics"
 
 
-def test_cloud_banner_only_with_the_opt_in_flag(ui_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_external_llm_banner_and_any_free_typed_url(ui_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
     deps = fake_deps(FakeSession(), FakeOpenAIServer())
     at = new_app(deps).run()
-    assert not any("cloudllm" in e.value for e in at.error)
-    monkeypatch.setenv("LGX_ALLOW_CLOUD_LLM", "1")
-    monkeypatch.setenv("LGX_LLM_PRESETS", "cloud")
+    assert not any("LLM externe" in w.value for w in at.warning)  # ui_env: an internal endpoint
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://api.mistral.ai/v1")
     at = new_app(deps).run()
-    assert any("quittent cet hôte" in e.value for e in at.error)
-    assert at.sidebar.selectbox(key="llm_preset").value == "cloud"
+    assert any("LLM externe (api.mistral.ai)" in w.value for w in at.warning)
+    at.sidebar.text_input(key="llm_base_url").set_value("https://other.example.org/v1").run()
+    assert not at.exception and not at.sidebar.error  # any OpenAI-compatible URL may be used …
+    assert "la clé API configurée n'est pas envoyée" in " ".join(c.value for c in at.sidebar.caption)  # … keyless
 
 
 # ------------------------------------------------------------------------------------------ offline config

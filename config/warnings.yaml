@@ -171,9 +171,19 @@ warnings:
   W_SUPERSEDED_BY_CODE:
     severity: medium
     params: [code]
+    note: variant redirected when get_article serves the member's article from the code's text (Appendix D.2.2 redirect); variant no_text on an act card without any stored text of the act itself.
     fr: "Acte intégré au {code} ; la version à jour figure dans le code (texte original affiché à titre d'information)."
     de: "In {code} eingegliedert; die aktuelle Fassung steht im Kodex (Originalfassung nur zur Information)."
     en: "Incorporated in {code}; the current wording is in the code (original shown for information only)."
+    variants:
+      redirected:
+        fr: "Acte intégré au {code} ; texte affiché : l'article tel qu'il figure dans le code (version à jour), pas le texte original de l'acte."
+        de: "In {code} eingegliedert; angezeigt wird der Artikel in der Fassung des Kodex (aktuelle Fassung), nicht die Originalfassung des Akts."
+        en: "Incorporated in {code}; shown: the article as it stands in the code (current wording), not the act's original text."
+      no_text:
+        fr: "Acte intégré au {code} ; la version à jour figure dans le code (aucun texte propre de l'acte n'est stocké)."
+        de: "In {code} eingegliedert; die aktuelle Fassung steht im Kodex (kein eigener Text des Akts gespeichert)."
+        en: "Incorporated in {code}; the current wording is in the code (no text of the act itself is stored)."
 
   W_PARTIAL_REPEAL_UNKNOWN:
     severity: info

@@ -15,6 +15,7 @@ from lgx_core.config import (
     ProjectConfig,
     ScopeConfig,
     Settings,
+    load_embedding_config,
     load_yaml,
 )
 from lgx_core.models import EmbeddingProvider, TextBasis
@@ -63,11 +64,46 @@ def test_scope_rules_match_known_titles() -> None:
     )
 
 
-def test_embedding_yaml_retry_key_is_not_yaml_boolean() -> None:
-    # PLAN §6.5 writes `retry: {on: [...]}`; YAML 1.1 parses `on` as True. The config uses on_status.
+def test_embedding_yaml_and_env_overrides(tmp_path: Path) -> None:
+    # PLAN §6.5 once wrote `retry: {on: [...]}`; YAML 1.1 parses `on` as True. The config uses retry_on_status.
     assert list(yaml.safe_load("{on: [1]}")) == [True]
     cfg = EmbeddingConfig.model_validate(load_yaml(DEFAULT_CONFIG_DIR / "embedding.yaml"))
-    assert cfg.retry.on_status == [429, 500, 502, 503, 504]
+    assert cfg.retry_on_status == [429, 500, 502, 503, 504] and not cfg.enabled
+    assert (cfg.max_concurrency, cfg.cooldown_s, cfg.batch_size, cfg.model, cfg.dim) == (
+        5,
+        20.0,
+        64,
+        "mistral-embed",
+        1024,
+    )
+    assert cfg.endpoint == "https://api.mistral.ai/v1/embeddings"
+    env = {
+        "LGX_EMBED_PROVIDER": "mistral",
+        "LGX_EMBED_BASE_URL": "https://mistral.example.intra/v1/",
+        "LGX_EMBED_MAX_CONCURRENCY": "2",
+        "LGX_EMBED_COOLDOWN_S": "7.5",
+        "LGX_EMBED_API_KEY": "k-env",
+    }
+    eff = load_embedding_config(DEFAULT_CONFIG_DIR, env)
+    assert eff.enabled and eff.endpoint == "https://mistral.example.intra/v1/embeddings"
+    assert (eff.max_concurrency, eff.cooldown_s) == (2, 7.5) and eff.api_key(env) == "k-env"
+    key = tmp_path / "key"
+    key.write_text("k-file\n")
+    assert eff.model_copy(update={"api_key_file": str(key)}).api_key(env) == "k-file"  # the file wins
+    assert round(cfg.throughput_texts_per_s(2.0), 2) == 14.55  # 5 x 64 / (2 + 20)
+    with pytest.raises(ValidationError):
+        load_embedding_config(DEFAULT_CONFIG_DIR, {"LGX_EMBED_PROVIDER": "openai-compatible"})
+    with pytest.raises(ValidationError):
+        load_embedding_config(DEFAULT_CONFIG_DIR, {"LGX_EMBED_DIM": "4096"})  # beyond the halfvec HNSW limit
+    assert load_embedding_config(tmp_path, {}) == EmbeddingConfig()  # no embedding.yaml (runtime image): defaults
+
+
+def test_config_digest_ignores_operational_embedding_knobs() -> None:
+    cfg = ProjectConfig.load(DEFAULT_CONFIG_DIR)
+    slower = cfg.model_copy(update={"embedding": cfg.embedding.model_copy(update={"cooldown_s": 99.0})})
+    assert slower.digest() == cfg.digest()
+    other = cfg.model_copy(update={"embedding": cfg.embedding.model_copy(update={"dim": 512})})
+    assert other.digest() != cfg.digest()
 
 
 def test_settings_from_env(tmp_path: Path) -> None:

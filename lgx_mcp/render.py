@@ -206,7 +206,9 @@ def render_about(out: dict[str, Any], max_tokens: int) -> str:
         f"    Actes : {c['acts']} · versions : {c['versions']} · articles indexés : {c['chunks']}",
         "    Par base de texte : " + ", ".join(f"{k} {v}" for k, v in sorted(c["by_text_basis"].items())),
         "    Indicateurs : " + ", ".join(f"{k} {v}" for k, v in sorted(c["by_flag"].items())),
-        f"    Recherche vectorielle : {emb['vector_status']} (fournisseur {emb['provider']}) ; mode par défaut"
+        f"    Recherche vectorielle : {emb['vector_status']} (fournisseur {emb['provider']}"
+        + (f" ; {emb['reason']}" if emb.get("reason") else "")
+        + ") ; mode par défaut"
         f" {out['retrieval_defaults'].get('mode')}, reranking {out['retrieval_defaults'].get('rerank_status')}.",
     ]
     gaps = out["known_gaps"]

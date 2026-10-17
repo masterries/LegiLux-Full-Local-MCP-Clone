@@ -22,15 +22,15 @@
   "W_NOT_YET_IN_FORCE",
   "W_OUT_OF_SCOPE",
   "W_PARTIAL_REPEAL_UNKNOWN",
+  "W_PDF_EXTRACTED",
   "W_REPEALED",
   "W_SNAPSHOT",
   "W_STUB",
-  "W_SUNSET"
+  "W_SUNSET",
+  "W_SUPERSEDED_BY_CODE"
  ],
  "not_triggerable": {
   "W_TEMPORARY_ACT": "no stored text carries acte_temporaire (temporary RGDs are metadata-only, OD10)",
-  "W_PDF_EXTRACTED": "no PDF-extracted text in this release (PDF codes are an M2 ingest deliverable)",
-  "W_SUPERSEDED_BY_CODE": "no act carries superseded_by_code in this release (recueil routing, M2 ingest)",
   "W_TRANSLATION": "added by the answer policy / verifier for non-French answers, not by a tool"
  },
  "note": "Mandatory warnings and status statements (PLAN §11.1 G3, §8.5): expected codes from the §8.5 triggers over database facts (lgx.serving_at, flags, units, data_quality_issue); `absent` = codes that must not appear. Gate: 100 % of the expected pairs, 0 forbidden, ≥ 98 % status statements.",
@@ -420,12 +420,14 @@
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -441,13 +443,15 @@
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
-    "article": "4.5"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+    "article": "xviii"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -466,7 +470,153 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(4.5.01) Le revêtement du sol des zones piétonnes",
+    "query": "Dans le cas qu’il fût dévolu à un",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-024",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-025",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+    "article": "52-20"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-026",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "La réussite aux études de première année en",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-027",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-028",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
+    "article": "8.12"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-029",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "(8.12.01) Les compartiments et locaux techniques ne peuvent",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
     },
@@ -485,7 +635,81 @@
    }
   },
   {
-   "id": "G3-024",
+   "id": "G3-030",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-031",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+    "article": "74"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-032",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "(Règl. g.-d. du 13 janvier 2005) «1. Tout",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-033",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -506,12 +730,12 @@
    }
   },
   {
-   "id": "G3-025",
+   "id": "G3-034",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
-    "article": "25"
+    "article": "108"
    },
    "expect": {
     "warnings": [
@@ -531,11 +755,11 @@
    }
   },
   {
-   "id": "G3-026",
+   "id": "G3-035",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Toute personne a le droit, dans le respect",
+    "query": "Les audiences des juridictions sont publiques, à moins",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
     },
@@ -554,7 +778,7 @@
    }
   },
   {
-   "id": "G3-027",
+   "id": "G3-036",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -575,7 +799,7 @@
    }
   },
   {
-   "id": "G3-028",
+   "id": "G3-037",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
@@ -600,7 +824,7 @@
    }
   },
   {
-   "id": "G3-029",
+   "id": "G3-038",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
@@ -623,7 +847,7 @@
    }
   },
   {
-   "id": "G3-030",
+   "id": "G3-039",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -644,12 +868,12 @@
    }
   },
   {
-   "id": "G3-031",
+   "id": "G3-040",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
-    "article": "382-2"
+    "article": "120"
    },
    "expect": {
     "warnings": [
@@ -669,11 +893,11 @@
    }
   },
   {
-   "id": "G3-032",
+   "id": "G3-041",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) L’infraction prévue à l’article 382-1, paragraphe 1er,",
+    "query": "( Arr. g.-d. 14 juillet 1943 ) Quiconque,",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1"
     },
@@ -692,7 +916,7 @@
    }
   },
   {
-   "id": "G3-033",
+   "id": "G3-042",
    "trigger": "act:original_possibly_outdated",
    "tool": "get_act",
    "arguments": {
@@ -713,12 +937,12 @@
    }
   },
   {
-   "id": "G3-034",
+   "id": "G3-043",
    "trigger": "article:original_possibly_outdated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1",
-    "article": "56"
+    "article": "15"
    },
    "expect": {
     "warnings": [
@@ -738,11 +962,11 @@
    }
   },
   {
-   "id": "G3-035",
+   "id": "G3-044",
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Si la distraction demandée n'est que d'une partie",
+    "query": "La partie saisie ne peut, à compter du",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1"
     },
@@ -761,7 +985,7 @@
    }
   },
   {
-   "id": "G3-036",
+   "id": "G3-045",
    "trigger": "act:original_possibly_outdated",
    "tool": "get_act",
    "arguments": {
@@ -783,7 +1007,7 @@
    }
   },
   {
-   "id": "G3-037",
+   "id": "G3-046",
    "trigger": "article:original_possibly_outdated",
    "tool": "get_article",
    "arguments": {
@@ -809,7 +1033,7 @@
    }
   },
   {
-   "id": "G3-038",
+   "id": "G3-047",
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
@@ -833,7 +1057,81 @@
    }
   },
   {
-   "id": "G3-039",
+   "id": "G3-048",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-049",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "l327-2"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-050",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "Sont punis d’un emprisonnement de huit jours à",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-051",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -853,12 +1151,12 @@
    }
   },
   {
-   "id": "G3-040",
+   "id": "G3-052",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1",
-    "article": "6"
+    "article": "12"
    },
    "expect": {
     "warnings": [
@@ -877,11 +1175,11 @@
    }
   },
   {
-   "id": "G3-041",
+   "id": "G3-053",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les membres effectifs et suppléants du Conseil doivent",
+    "query": "Le Conseil élabore son règlement d'ordre intérieur, qui",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1"
     },
@@ -899,7 +1197,81 @@
    }
   },
   {
-   "id": "G3-042",
+   "id": "G3-054",
+   "trigger": "act:stub_fallback",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_STUB",
+     "W_FUTURE_VERSION",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-055",
+   "trigger": "article:stub_fallback",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1",
+    "article": "12-1"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_STUB",
+     "W_FUTURE_VERSION",
+     "W_PDF_EXTRACTED",
+     "W_DATA_QUALITY"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-056",
+   "trigger": "search:stub_fallback",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "(Loi du 21 novembre 1997) «(1) Les banques",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_STUB",
+     "W_FUTURE_VERSION",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-057",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -920,12 +1292,12 @@
    }
   },
   {
-   "id": "G3-043",
+   "id": "G3-058",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
-    "article": "36"
+    "article": "27"
    },
    "expect": {
     "warnings": [
@@ -945,11 +1317,11 @@
    }
   },
   {
-   "id": "G3-044",
+   "id": "G3-059",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "1. L'autorisation du titulaire des droits exclusifs n'est",
+    "query": "Sauf convention contraire, l'acquisition d'une œuvre plastique emporte",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2"
     },
@@ -968,7 +1340,7 @@
    }
   },
   {
-   "id": "G3-045",
+   "id": "G3-060",
    "trigger": "act:original_possibly_outdated",
    "tool": "get_act",
    "arguments": {
@@ -989,12 +1361,12 @@
    }
   },
   {
-   "id": "G3-046",
+   "id": "G3-061",
    "trigger": "article:original_possibly_outdated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
-    "article": "14"
+    "article": "25"
    },
    "expect": {
     "warnings": [
@@ -1014,11 +1386,11 @@
    }
   },
   {
-   "id": "G3-047",
+   "id": "G3-062",
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "L'extradition peut être refusée si le Luxembourg, tenant",
+    "query": "1) Le ministre de la Justice peut, après",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5"
     },
@@ -1037,7 +1409,7 @@
    }
   },
   {
-   "id": "G3-048",
+   "id": "G3-063",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1058,12 +1430,12 @@
    }
   },
   {
-   "id": "G3-049",
+   "id": "G3-064",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
-    "article": "l234-13"
+    "article": "l164-4"
    },
    "expect": {
     "warnings": [
@@ -1083,11 +1455,11 @@
    }
   },
   {
-   "id": "G3-050",
+   "id": "G3-065",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le congé culturel peut être fractionné, chaque fraction",
+    "query": "(1) La commission paritaire ne peut délibérer que",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2"
     },
@@ -1106,7 +1478,7 @@
    }
   },
   {
-   "id": "G3-051",
+   "id": "G3-066",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1127,12 +1499,12 @@
    }
   },
   {
-   "id": "G3-052",
+   "id": "G3-067",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1",
-    "article": "18"
+    "article": "15"
    },
    "expect": {
     "warnings": [
@@ -1152,11 +1524,11 @@
    }
   },
   {
-   "id": "G3-053",
+   "id": "G3-068",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Par dépassement des limites fixées dans la loi",
+    "query": "La Caisse nationale de santé est substituée de",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1"
     },
@@ -1175,7 +1547,7 @@
    }
   },
   {
-   "id": "G3-054",
+   "id": "G3-069",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1197,12 +1569,12 @@
    }
   },
   {
-   "id": "G3-055",
+   "id": "G3-070",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
-    "article": "46"
+    "article": "10-1"
    },
    "expect": {
     "warnings": [
@@ -1223,11 +1595,11 @@
    }
   },
   {
-   "id": "G3-056",
+   "id": "G3-071",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Les gestionnaires agréés établis au Luxembourg, dans",
+    "query": "(1) Les gestionnaires sont, après leur dissolution, réputés",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1"
     },
@@ -1247,7 +1619,7 @@
    }
   },
   {
-   "id": "G3-057",
+   "id": "G3-072",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1269,12 +1641,12 @@
    }
   },
   {
-   "id": "G3-058",
+   "id": "G3-073",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2014/07/04/n2",
-    "article": "1"
+    "article": "6"
    },
    "expect": {
     "warnings": [
@@ -1295,11 +1667,11 @@
    }
   },
   {
-   "id": "G3-059",
+   "id": "G3-074",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Aux fins de la présente loi, l’on entend",
+    "query": "L’OLAS organise les audits des bonnes pratiques de",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2014/07/04/n2"
     },
@@ -1319,7 +1691,7 @@
    }
   },
   {
-   "id": "G3-060",
+   "id": "G3-075",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1340,12 +1712,12 @@
    }
   },
   {
-   "id": "G3-061",
+   "id": "G3-076",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2015/07/30/n2",
-    "article": "115"
+    "article": "89"
    },
    "expect": {
     "warnings": [
@@ -1365,11 +1737,11 @@
    }
   },
   {
-   "id": "G3-062",
+   "id": "G3-077",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les dispositions de la loi modifiée du 21",
+    "query": "Une dispense de la fréquentation de tout ou",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2015/07/30/n2"
     },
@@ -1388,7 +1760,7 @@
    }
   },
   {
-   "id": "G3-063",
+   "id": "G3-078",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -1408,12 +1780,12 @@
    }
   },
   {
-   "id": "G3-064",
+   "id": "G3-079",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
-    "article": "1"
+    "article": "5"
    },
    "expect": {
     "warnings": [
@@ -1432,11 +1804,11 @@
    }
   },
   {
-   "id": "G3-065",
+   "id": "G3-080",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le Journal officiel du Grand-Duché de Luxembourg rassemble",
+    "query": "Le Journal officiel est publié sous forme électronique",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25"
     },
@@ -1454,7 +1826,7 @@
    }
   },
   {
-   "id": "G3-066",
+   "id": "G3-081",
    "trigger": "act:stub_fallback",
    "tool": "get_act",
    "arguments": {
@@ -1474,12 +1846,12 @@
    }
   },
   {
-   "id": "G3-067",
+   "id": "G3-082",
    "trigger": "article:stub_fallback",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446",
-    "article": "147"
+    "article": "65"
    },
    "expect": {
     "warnings": [
@@ -1498,11 +1870,11 @@
    }
   },
   {
-   "id": "G3-068",
+   "id": "G3-083",
    "trigger": "search:stub_fallback",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le marché réglementé « Bourse de Luxembourg »",
+    "query": "Les décisions de la CSSF prises en vertu",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446"
     },
@@ -1520,7 +1892,7 @@
    }
   },
   {
-   "id": "G3-069",
+   "id": "G3-084",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1541,12 +1913,12 @@
    }
   },
   {
-   "id": "G3-070",
+   "id": "G3-085",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
-    "article": "50"
+    "article": "2"
    },
    "expect": {
     "warnings": [
@@ -1566,11 +1938,11 @@
    }
   },
   {
-   "id": "G3-071",
+   "id": "G3-086",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le recouvrement des amendes ou astreintes est confié",
+    "query": "Les dispositions du titre II s’appliquent aux responsables",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
     },
@@ -1589,7 +1961,7 @@
    }
   },
   {
-   "id": "G3-072",
+   "id": "G3-087",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1610,12 +1982,12 @@
    }
   },
   {
-   "id": "G3-073",
+   "id": "G3-088",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/09/a882",
-    "article": "6"
+    "article": "4"
    },
    "expect": {
     "warnings": [
@@ -1635,11 +2007,11 @@
    }
   },
   {
-   "id": "G3-074",
+   "id": "G3-089",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Des aides à la participation aux foires",
+    "query": "(1) Des aides à l’investissement peuvent être accordées",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/09/a882"
     },
@@ -1658,7 +2030,7 @@
    }
   },
   {
-   "id": "G3-075",
+   "id": "G3-090",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -1678,7 +2050,7 @@
    }
   },
   {
-   "id": "G3-076",
+   "id": "G3-091",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
@@ -1702,7 +2074,7 @@
    }
   },
   {
-   "id": "G3-077",
+   "id": "G3-092",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
@@ -1724,7 +2096,7 @@
    }
   },
   {
-   "id": "G3-078",
+   "id": "G3-093",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -1744,12 +2116,12 @@
    }
   },
   {
-   "id": "G3-079",
+   "id": "G3-094",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/07/29/a504",
-    "article": "3"
+    "article": "2"
    },
    "expect": {
     "warnings": [
@@ -1768,11 +2140,11 @@
    }
   },
   {
-   "id": "G3-080",
+   "id": "G3-095",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les dépenses occasionnées par le financement des frais",
+    "query": "Les dépenses occasionnées par la présente loi ne",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/07/29/a504"
     },
@@ -1790,7 +2162,7 @@
    }
   },
   {
-   "id": "G3-081",
+   "id": "G3-096",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -1809,7 +2181,7 @@
    }
   },
   {
-   "id": "G3-082",
+   "id": "G3-097",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -1829,12 +2201,12 @@
    }
   },
   {
-   "id": "G3-083",
+   "id": "G3-098",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
-    "article": "7"
+    "article": "11"
    },
    "expect": {
     "warnings": [
@@ -1853,11 +2225,11 @@
    }
   },
   {
-   "id": "G3-084",
+   "id": "G3-099",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Les TVP UE se composent d’un formulaire",
+    "query": "Le ministre assure l’invalidation et la destruction des",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88"
     },
@@ -1875,7 +2247,7 @@
    }
   },
   {
-   "id": "G3-085",
+   "id": "G3-100",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1884,7 +2256,8 @@
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
+     "W_SNAPSHOT",
+     "W_DATA_QUALITY"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -1896,17 +2269,18 @@
    }
   },
   {
-   "id": "G3-086",
+   "id": "G3-101",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
-    "article": "ii"
+    "article": "27quinquies"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
+     "W_SNAPSHOT",
+     "W_DATA_QUALITY"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -1921,11 +2295,11 @@
    }
   },
   {
-   "id": "G3-087",
+   "id": "G3-102",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le règlement grand-ducal du 13 février 1991 portant",
+    "query": "(1) Les services de médias audiovisuels fournis par",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias"
     },
@@ -1944,7 +2318,7 @@
    }
   },
   {
-   "id": "G3-088",
+   "id": "G3-103",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -1968,12 +2342,12 @@
    }
   },
   {
-   "id": "G3-089",
+   "id": "G3-104",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1988/07/15/n3",
-    "article": "9"
+    "article": "18"
    },
    "expect": {
     "warnings": [
@@ -1996,11 +2370,11 @@
    }
   },
   {
-   "id": "G3-090",
+   "id": "G3-105",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "1. Lorsque la valeur limite pertinente de l’article",
+    "query": "Notre Ministre du travail et Notre Ministre de",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1988/07/15/n3"
     },
@@ -2021,7 +2395,7 @@
    }
   },
   {
-   "id": "G3-091",
+   "id": "G3-106",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -2041,7 +2415,7 @@
    }
   },
   {
-   "id": "G3-092",
+   "id": "G3-107",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
@@ -2065,7 +2439,7 @@
    }
   },
   {
-   "id": "G3-093",
+   "id": "G3-108",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
@@ -2087,7 +2461,7 @@
    }
   },
   {
-   "id": "G3-094",
+   "id": "G3-109",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -2108,369 +2482,12 @@
    }
   },
   {
-   "id": "G3-095",
-   "trigger": "article:consolidated",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2",
-    "article": "17"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE",
-     "W_DERIVED_ELI",
-     "W_ARTICLE_REPEALED"
-    ],
-    "status": "in-force",
-    "status_path": "citation.status_as_of.status"
-   }
-  },
-  {
-   "id": "G3-096",
-   "trigger": "search:consolidated",
-   "tool": "search_legislation",
-   "arguments": {
-    "query": "Les montants fixés au présent règlement sont à",
-    "filters": {
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2"
-    },
-    "top_k": 3
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-097",
-   "trigger": "act:original_possibly_outdated",
-   "tool": "get_act",
-   "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ],
-    "absent": [
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE"
-    ],
-    "status": "in-force"
-   }
-  },
-  {
-   "id": "G3-098",
-   "trigger": "article:original_possibly_outdated",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4",
-    "article": "13"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN",
-     "W_DERIVED_ELI"
-    ],
-    "absent": [
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE",
-     "W_ARTICLE_REPEALED"
-    ],
-    "status": "in-force",
-    "status_path": "citation.status_as_of.status"
-   }
-  },
-  {
-   "id": "G3-099",
-   "trigger": "search:original_possibly_outdated",
-   "tool": "search_legislation",
-   "arguments": {
-    "query": "Aux fins d'exécution des contrôles visés à l'article",
-    "filters": {
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4"
-    },
-    "top_k": 3
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ],
-    "absent": [
-     "W_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-100",
-   "trigger": "act:consolidated",
-   "tool": "get_act",
-   "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE"
-    ],
-    "status": "in-force"
-   }
-  },
-  {
-   "id": "G3-101",
-   "trigger": "article:consolidated",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
-    "article": "730"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE",
-     "W_DERIVED_ELI",
-     "W_ARTICLE_REPEALED"
-    ],
-    "status": "in-force",
-    "status_path": "citation.status_as_of.status"
-   }
-  },
-  {
-   "id": "G3-102",
-   "trigger": "search:consolidated",
-   "tool": "search_legislation",
-   "arguments": {
-    "query": "En cas de saisie d'animaux et ustensiles servant",
-    "filters": {
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4"
-    },
-    "top_k": 3
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-103",
-   "trigger": "act:original_possibly_outdated",
-   "tool": "get_act",
-   "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ],
-    "absent": [
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE"
-    ],
-    "status": "in-force"
-   }
-  },
-  {
-   "id": "G3-104",
-   "trigger": "article:original_possibly_outdated",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
-    "article": "4"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN",
-     "W_DERIVED_ELI"
-    ],
-    "absent": [
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE",
-     "W_ARTICLE_REPEALED"
-    ],
-    "status": "in-force",
-    "status_path": "citation.status_as_of.status"
-   }
-  },
-  {
-   "id": "G3-105",
-   "trigger": "search:original_possibly_outdated",
-   "tool": "search_legislation",
-   "arguments": {
-    "query": "La commission a pour mission: a. de constituer,",
-    "filters": {
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
-    },
-    "top_k": 3
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_NOT_CONSOLIDATED",
-     "W_BASE_LEGALE_ABROGEE",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ],
-    "absent": [
-     "W_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-106",
-   "trigger": "act:consolidated",
-   "tool": "get_act",
-   "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_CONSO_LAGGING",
-     "W_BASE_LEGALE_ABROGEE"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE"
-    ],
-    "status": "in-force"
-   }
-  },
-  {
-   "id": "G3-107",
-   "trigger": "article:consolidated",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1",
-    "article": "6"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_CONSO_LAGGING",
-     "W_BASE_LEGALE_ABROGEE"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE",
-     "W_DERIVED_ELI",
-     "W_ARTICLE_REPEALED"
-    ],
-    "status": "in-force",
-    "status_path": "citation.status_as_of.status"
-   }
-  },
-  {
-   "id": "G3-108",
-   "trigger": "search:consolidated",
-   "tool": "search_legislation",
-   "arguments": {
-    "query": "1. Sous réserve du paragraphe 2 ci-dessous, les",
-    "filters": {
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1"
-    },
-    "top_k": 3
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_CONSO_LAGGING",
-     "W_BASE_LEGALE_ABROGEE"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-109",
-   "trigger": "act:consolidated",
-   "tool": "get_act",
-   "arguments": {
-    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT"
-    ],
-    "absent": [
-     "W_NOT_CONSOLIDATED",
-     "W_STUB",
-     "W_REPEALED",
-     "W_NOT_YET_IN_FORCE"
-    ],
-    "status": "in-force"
-   }
-  },
-  {
    "id": "G3-110",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324",
-    "article": "7"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2",
+    "article": "13"
    },
    "expect": {
     "warnings": [
@@ -2494,7 +2511,366 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Notre Ministre de l’Intérieur est chargé de l’exécution",
+    "query": "Les frais de garde sont taxés pour chaque",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-112",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_NOT_CONSOLIDATED",
+     "W_BASE_LEGALE_ABROGEE",
+     "W_PARTIAL_REPEAL_UNKNOWN"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-113",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4",
+    "article": "20"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_NOT_CONSOLIDATED",
+     "W_BASE_LEGALE_ABROGEE",
+     "W_PARTIAL_REPEAL_UNKNOWN",
+     "W_DERIVED_ELI"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-114",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "Les infractions aux dispositions du présent règlement et",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_NOT_CONSOLIDATED",
+     "W_BASE_LEGALE_ABROGEE",
+     "W_PARTIAL_REPEAL_UNKNOWN"
+    ],
+    "absent": [
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-115",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-116",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+    "article": "1004"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-117",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "Le délai dans lequel doivent être publiés les",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-118",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_NOT_CONSOLIDATED",
+     "W_BASE_LEGALE_ABROGEE",
+     "W_SUPERSEDED_BY_CODE",
+     "W_PARTIAL_REPEAL_UNKNOWN"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-119",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+    "article": "5"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_NOT_CONSOLIDATED",
+     "W_BASE_LEGALE_ABROGEE",
+     "W_SUPERSEDED_BY_CODE",
+     "W_PARTIAL_REPEAL_UNKNOWN",
+     "W_DERIVED_ELI"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-120",
+   "trigger": "search:superseded_by_code",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "Pour la rédaction de leur travail de candidature,",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_SUPERSEDED_BY_CODE",
+     "W_PDF_EXTRACTED"
+    ],
+    "absent": [
+     "W_REPEALED",
+     "W_NOT_CONSOLIDATED"
+    ]
+   }
+  },
+  {
+   "id": "G3-121",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_CONSO_LAGGING",
+     "W_BASE_LEGALE_ABROGEE"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-122",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1",
+    "article": "7"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_CONSO_LAGGING",
+     "W_BASE_LEGALE_ABROGEE"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-123",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "1. Les fournisseurs qui produisent des matériels de",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1"
+    },
+    "top_k": 3
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_CONSO_LAGGING",
+     "W_BASE_LEGALE_ABROGEE"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-124",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE"
+    ],
+    "status": "in-force"
+   }
+  },
+  {
+   "id": "G3-125",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324",
+    "article": "2"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT"
+    ],
+    "absent": [
+     "W_NOT_CONSOLIDATED",
+     "W_STUB",
+     "W_REPEALED",
+     "W_NOT_YET_IN_FORCE",
+     "W_DERIVED_ELI",
+     "W_ARTICLE_REPEALED"
+    ],
+    "status": "in-force",
+    "status_path": "citation.status_as_of.status"
+   }
+  },
+  {
+   "id": "G3-126",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "Le rapport justificatif, qui accompagne les projets d’aménagement",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324"
     },
@@ -2513,7 +2889,7 @@
    }
   },
   {
-   "id": "G3-112",
+   "id": "G3-127",
    "trigger": "act:original_possibly_outdated",
    "tool": "get_act",
    "arguments": {
@@ -2535,7 +2911,7 @@
    }
   },
   {
-   "id": "G3-113",
+   "id": "G3-128",
    "trigger": "article:original_possibly_outdated",
    "tool": "get_article",
    "arguments": {
@@ -2561,7 +2937,7 @@
    }
   },
   {
-   "id": "G3-114",
+   "id": "G3-129",
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
@@ -2585,7 +2961,7 @@
    }
   },
   {
-   "id": "G3-115",
+   "id": "G3-130",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -2605,7 +2981,7 @@
    }
   },
   {
-   "id": "G3-116",
+   "id": "G3-131",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
@@ -2629,7 +3005,7 @@
    }
   },
   {
-   "id": "G3-117",
+   "id": "G3-132",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
@@ -2651,7 +3027,7 @@
    }
   },
   {
-   "id": "G3-118",
+   "id": "G3-133",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -2671,7 +3047,7 @@
    }
   },
   {
-   "id": "G3-119",
+   "id": "G3-134",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
@@ -2695,7 +3071,7 @@
    }
   },
   {
-   "id": "G3-120",
+   "id": "G3-135",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
@@ -2717,7 +3093,7 @@
    }
   },
   {
-   "id": "G3-121",
+   "id": "G3-136",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -2738,12 +3114,12 @@
    }
   },
   {
-   "id": "G3-122",
+   "id": "G3-137",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106",
-    "article": "2"
+    "article": "1"
    },
    "expect": {
     "warnings": [
@@ -2763,11 +3139,11 @@
    }
   },
   {
-   "id": "G3-123",
+   "id": "G3-138",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le règlement grand-ducal du 15 août 2023 déterminant",
+    "query": "Lors des élections législatives, communales et européennes, les",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106"
     },
@@ -2786,7 +3162,7 @@
    }
   },
   {
-   "id": "G3-124",
+   "id": "G3-139",
    "trigger": "act:original_possibly_outdated",
    "tool": "get_act",
    "arguments": {
@@ -2808,12 +3184,12 @@
    }
   },
   {
-   "id": "G3-125",
+   "id": "G3-140",
    "trigger": "article:original_possibly_outdated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
-    "article": "1"
+    "article": "5"
    },
    "expect": {
     "warnings": [
@@ -2834,11 +3210,11 @@
    }
   },
   {
-   "id": "G3-126",
+   "id": "G3-141",
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les zones géographiques nationales pour l’exploitation des aéronefs",
+    "query": "Le ministre ayant la Navigation et les transports",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629"
     },
@@ -2858,7 +3234,7 @@
    }
   },
   {
-   "id": "G3-127",
+   "id": "G3-142",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -2880,12 +3256,12 @@
    }
   },
   {
-   "id": "G3-128",
+   "id": "G3-143",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779",
-    "article": "30"
+    "article": "26"
    },
    "expect": {
     "warnings": [
@@ -2906,11 +3282,11 @@
    }
   },
   {
-   "id": "G3-129",
+   "id": "G3-144",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "La référence au présent code se fait sous",
+    "query": "(1) Le Gouvernement met en place un comité",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779"
     },
@@ -2929,7 +3305,7 @@
    }
   },
   {
-   "id": "G3-130",
+   "id": "G3-145",
    "trigger": "act:consolidated",
    "tool": "get_act",
    "arguments": {
@@ -2950,12 +3326,12 @@
    }
   },
   {
-   "id": "G3-131",
+   "id": "G3-146",
    "trigger": "article:consolidated",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rmin/1985/01/28/n1",
-    "article": "3"
+    "article": "12"
    },
    "expect": {
     "warnings": [
@@ -2975,11 +3351,11 @@
    }
   },
   {
-   "id": "G3-132",
+   "id": "G3-147",
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les chiens doivent être vaccinés contre la rage",
+    "query": "Le règlement ministériel du 5 novembre 1982 déterminant",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rmin/1985/01/28/n1"
     },
@@ -2998,7 +3374,7 @@
    }
   },
   {
-   "id": "G3-133",
+   "id": "G3-148",
    "trigger": "act:original_never_amended",
    "tool": "get_act",
    "arguments": {
@@ -3018,7 +3394,7 @@
    }
   },
   {
-   "id": "G3-134",
+   "id": "G3-149",
    "trigger": "article:original_never_amended",
    "tool": "get_article",
    "arguments": {
@@ -3042,7 +3418,7 @@
    }
   },
   {
-   "id": "G3-135",
+   "id": "G3-150",
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
@@ -3064,12 +3440,12 @@
    }
   },
   {
-   "id": "G3-136",
+   "id": "G3-151",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
-    "article": "316_et_317"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+    "article": "51quater"
    },
    "expect": {
     "warnings": [
@@ -3080,28 +3456,12 @@
    }
   },
   {
-   "id": "G3-137",
-   "trigger": "article:repealed_stub",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
-    "article": "934"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_ARTICLE_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-138",
+   "id": "G3-152",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
-    "article": "l542-18"
+    "article": "l211-28"
    },
    "expect": {
     "warnings": [
@@ -3112,23 +3472,7 @@
    }
   },
   {
-   "id": "G3-139",
-   "trigger": "article:repealed_stub",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
-    "article": "430_et_431"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_ARTICLE_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-140",
+   "id": "G3-153",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
@@ -3144,12 +3488,12 @@
    }
   },
   {
-   "id": "G3-141",
+   "id": "G3-154",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
-    "article": "2208"
+    "article": "934"
    },
    "expect": {
     "warnings": [
@@ -3160,11 +3504,43 @@
    }
   },
   {
-   "id": "G3-142",
+   "id": "G3-155",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+    "article": "45ter"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_ARTICLE_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-156",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "139"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_ARTICLE_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-157",
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/11/30/a1010/art_2"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4/art_20"
    },
    "expect": {
     "warnings": [
@@ -3176,11 +3552,29 @@
    }
   },
   {
-   "id": "G3-143",
+   "id": "G3-158",
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_6"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l281-1"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_DERIVED_ELI"
+    ],
+    "absent": [
+     "W_PARTIAL_REPEAL_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "G3-159",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "arguments": {
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936/art_7"
    },
    "expect": {
     "warnings": [
@@ -3192,11 +3586,11 @@
    }
   },
   {
-   "id": "G3-144",
+   "id": "G3-160",
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_1er"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4/art_6"
    },
    "expect": {
     "warnings": [
@@ -3208,23 +3602,7 @@
    }
   },
   {
-   "id": "G3-145",
-   "trigger": "article:derived_eli_citation",
-   "tool": "get_article",
-   "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1/art_56"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_DERIVED_ELI",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ]
-   }
-  },
-  {
-   "id": "G3-146",
+   "id": "G3-161",
    "trigger": "status:repealed",
    "tool": "get_act",
    "arguments": {
@@ -3244,7 +3622,7 @@
    }
   },
   {
-   "id": "G3-147",
+   "id": "G3-162",
    "trigger": "status:repealed",
    "tool": "get_act",
    "arguments": {
@@ -3264,7 +3642,7 @@
    }
   },
   {
-   "id": "G3-148",
+   "id": "G3-163",
    "trigger": "status:repealed",
    "tool": "get_act",
    "arguments": {
@@ -3284,7 +3662,7 @@
    }
   },
   {
-   "id": "G3-149",
+   "id": "G3-164",
    "trigger": "status:repealed",
    "tool": "get_act",
    "arguments": {
@@ -3304,7 +3682,7 @@
    }
   },
   {
-   "id": "G3-150",
+   "id": "G3-165",
    "trigger": "status:repealed",
    "tool": "get_act",
    "arguments": {
@@ -3324,7 +3702,7 @@
    }
   },
   {
-   "id": "G3-151",
+   "id": "G3-166",
    "trigger": "status:repealed_implicit",
    "tool": "get_act",
    "arguments": {
@@ -3345,7 +3723,7 @@
    }
   },
   {
-   "id": "G3-152",
+   "id": "G3-167",
    "trigger": "status:repealed_implicit",
    "tool": "get_act",
    "arguments": {
@@ -3366,7 +3744,7 @@
    }
   },
   {
-   "id": "G3-153",
+   "id": "G3-168",
    "trigger": "status:repealed_implicit",
    "tool": "get_act",
    "arguments": {
@@ -3387,7 +3765,7 @@
    }
   },
   {
-   "id": "G3-154",
+   "id": "G3-169",
    "trigger": "status:repealed_implicit",
    "tool": "get_act",
    "arguments": {
@@ -3408,7 +3786,7 @@
    }
   },
   {
-   "id": "G3-155",
+   "id": "G3-170",
    "trigger": "status:repealed_implicit",
    "tool": "get_act",
    "arguments": {
@@ -3429,7 +3807,7 @@
    }
   },
   {
-   "id": "G3-156",
+   "id": "G3-171",
    "trigger": "status:not_yet_in_force",
    "tool": "get_act",
    "arguments": {
@@ -3449,7 +3827,7 @@
    }
   },
   {
-   "id": "G3-157",
+   "id": "G3-172",
    "trigger": "time_travel:in_force_from_dei",
    "tool": "get_act",
    "arguments": {
@@ -3469,7 +3847,7 @@
    }
   },
   {
-   "id": "G3-158",
+   "id": "G3-173",
    "trigger": "status:not_yet_in_force",
    "tool": "get_act",
    "arguments": {
@@ -3489,7 +3867,7 @@
    }
   },
   {
-   "id": "G3-159",
+   "id": "G3-174",
    "trigger": "time_travel:in_force_from_dei",
    "tool": "get_act",
    "arguments": {
@@ -3509,7 +3887,7 @@
    }
   },
   {
-   "id": "G3-160",
+   "id": "G3-175",
    "trigger": "status:not_yet_in_force",
    "tool": "get_act",
    "arguments": {
@@ -3529,7 +3907,7 @@
    }
   },
   {
-   "id": "G3-161",
+   "id": "G3-176",
    "trigger": "time_travel:in_force_from_dei",
    "tool": "get_act",
    "arguments": {
@@ -3550,7 +3928,7 @@
    }
   },
   {
-   "id": "G3-162",
+   "id": "G3-177",
    "trigger": "status:not_yet_in_force",
    "tool": "get_act",
    "arguments": {
@@ -3570,7 +3948,7 @@
    }
   },
   {
-   "id": "G3-163",
+   "id": "G3-178",
    "trigger": "time_travel:in_force_from_dei",
    "tool": "get_act",
    "arguments": {
@@ -3590,7 +3968,7 @@
    }
   },
   {
-   "id": "G3-164",
+   "id": "G3-179",
    "trigger": "status:not_yet_in_force",
    "tool": "get_act",
    "arguments": {
@@ -3610,7 +3988,7 @@
    }
   },
   {
-   "id": "G3-165",
+   "id": "G3-180",
    "trigger": "time_travel:in_force_from_dei",
    "tool": "get_act",
    "arguments": {
@@ -3630,7 +4008,7 @@
    }
   },
   {
-   "id": "G3-166",
+   "id": "G3-181",
    "trigger": "status:sunset",
    "tool": "get_act",
    "arguments": {
@@ -3651,7 +4029,7 @@
    }
   },
   {
-   "id": "G3-167",
+   "id": "G3-182",
    "trigger": "status:sunset",
    "tool": "get_act",
    "arguments": {
@@ -3672,7 +4050,7 @@
    }
   },
   {
-   "id": "G3-168",
+   "id": "G3-183",
    "trigger": "status:sunset",
    "tool": "get_act",
    "arguments": {
@@ -3693,7 +4071,7 @@
    }
   },
   {
-   "id": "G3-169",
+   "id": "G3-184",
    "trigger": "status:sunset",
    "tool": "get_act",
    "arguments": {
@@ -3714,7 +4092,7 @@
    }
   },
   {
-   "id": "G3-170",
+   "id": "G3-185",
    "trigger": "status:sunset",
    "tool": "get_act",
    "arguments": {
@@ -3735,7 +4113,7 @@
    }
   },
   {
-   "id": "G3-171",
+   "id": "G3-186",
    "trigger": "data_quality:act",
    "tool": "get_act",
    "arguments": {
@@ -3756,7 +4134,7 @@
    }
   },
   {
-   "id": "G3-172",
+   "id": "G3-187",
    "trigger": "data_quality:act",
    "tool": "get_act",
    "arguments": {
@@ -3777,7 +4155,7 @@
    }
   },
   {
-   "id": "G3-173",
+   "id": "G3-188",
    "trigger": "data_quality:act",
    "tool": "get_act",
    "arguments": {
@@ -3798,7 +4176,7 @@
    }
   },
   {
-   "id": "G3-174",
+   "id": "G3-189",
    "trigger": "data_quality:act",
    "tool": "get_act",
    "arguments": {
@@ -3819,7 +4197,7 @@
    }
   },
   {
-   "id": "G3-175",
+   "id": "G3-190",
    "trigger": "data_quality:act",
    "tool": "get_act",
    "arguments": {
@@ -3840,7 +4218,7 @@
    }
   },
   {
-   "id": "G3-176",
+   "id": "G3-191",
    "trigger": "future:stored_next_version",
    "tool": "search_legislation",
    "arguments": {
@@ -3860,7 +4238,7 @@
    }
   },
   {
-   "id": "G3-177",
+   "id": "G3-192",
    "trigger": "future:before_switch",
    "tool": "get_act",
    "arguments": {
@@ -3876,7 +4254,7 @@
    }
   },
   {
-   "id": "G3-178",
+   "id": "G3-193",
    "trigger": "future:stored_next_version",
    "tool": "search_legislation",
    "arguments": {
@@ -3896,7 +4274,7 @@
    }
   },
   {
-   "id": "G3-179",
+   "id": "G3-194",
    "trigger": "future:before_switch",
    "tool": "get_act",
    "arguments": {
@@ -3912,7 +4290,7 @@
    }
   },
   {
-   "id": "G3-180",
+   "id": "G3-195",
    "trigger": "future:stored_next_version",
    "tool": "search_legislation",
    "arguments": {
@@ -3932,7 +4310,7 @@
    }
   },
   {
-   "id": "G3-181",
+   "id": "G3-196",
    "trigger": "future:before_switch",
    "tool": "get_act",
    "arguments": {
@@ -3948,7 +4326,7 @@
    }
   },
   {
-   "id": "G3-182",
+   "id": "G3-197",
    "trigger": "cite:resolved_warns_only_for_itself",
    "tool": "resolve_citation",
    "arguments": {
@@ -3967,7 +4345,7 @@
    }
   },
   {
-   "id": "G3-183",
+   "id": "G3-198",
    "trigger": "cite:repealed_candidate",
    "tool": "resolve_citation",
    "arguments": {
@@ -3984,7 +4362,7 @@
    }
   },
   {
-   "id": "G3-184",
+   "id": "G3-199",
    "trigger": "cite:repealed_candidate",
    "tool": "resolve_citation",
    "arguments": {

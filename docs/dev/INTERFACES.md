@@ -8,7 +8,9 @@ change and say so in your report.
 - PLAN references: §2 (selection), §3.3 (politeness), §6 (pipeline), §7 + Appendix B (DB), §8 + Appendix D (MCP).
 - Development uses the **sample** only (`config/sample.yaml`). Never run a full crawl. Full SPARQL metadata
   pulls are part of the sample path (PLAN §6.2); file GETs are not.
-- Embeddings are **off** (`provider: none`). No stage computes vectors before M3.
+- Embeddings are **off** (`provider: none`; user decision). The only provider is `mistral` (Mistral embeddings API,
+  identical on the build side and in the airgap; only the base URL differs). Development never computes a real
+  embedding: tests use fake endpoints (2026-10-17).
 
 ## 0. Ownership
 
@@ -57,7 +59,7 @@ A stage that raises `NotImplementedError` makes the CLI exit with code **3** ("n
 | `lgx gates` / `lgx report` | `lgx_ingest.gates:run_gates` / `lgx_ingest.report:run_report` | `(ctx) -> StageResult` (gates also take `*, dsn=, db_name=`; CLI: `--opt dsn=… --opt db_name=…`) |
 | `lgx ingest [--sample/--full] [--refresh] [--offline] [--revalidate] [--load/--no-load] [--dsn] [--db-name] [--package [--container C] [--restore-to DB]] [--include-m2]` | `lgx_ingest.cli_ingest:run_ingest` | robots → discover → select → fetch → parse → chunk → load → gates → report [→ package] (§6) |
 | `lgx package [--dsn] [--db-name] [--out-dir] [--container C] [--restore-to DB]` | `lgx_ingest.package:run_package` | `(ctx, *, dsn=None, db_name=None, out_dir=None, container=None, restore_to=None) -> StageResult` |
-| `lgx embed` | built in: provider `none` → no-op | — |
+| `lgx embed [--dry-run] [--latency-s S]` | `lgx_ingest.embed:run_embed` | `(ctx, *, latency_s=2.0, env=None, transport=None) -> StageResult`: dry run = the plan (chunks, requests, tokens, duration under the throttle), never a request; provider `none` → nothing; `mistral` → throttled, resumable cache `data/emb/<model>-<dim>.sqlite` (§6) |
 | `lgx config-check`, `lgx paths`, `lgx version` | built in | — |
 
 Global options: `--t/--sync-date YYYY-MM-DD|auto`, `--config-dir`, `--data-dir`, `-o/--opt KEY=VALUE`.
@@ -96,8 +98,9 @@ messages, details}`; the CLI prints it as JSON and exits 1 when `ok` is false.
 | `parsed/<sha256>.<parser_version>.json` | `ParseResult` (cache keyed by file hash + parser version) | parse → structure |
 | `units/<T>/<eli_slug(version)>.jsonl` | `Unit`, one line per unit, document order | parse/structure → chunk, load |
 | `units/<T>/<eli_slug(version)>.relations.jsonl` | `Relation` from AKN (`akn-ref`, `akn-textualmod`, `akn-note`) | parse → load |
-| `chunks/<T>/<eli_slug(version)>.jsonl` | `Chunk` | chunk → load |
-| `reports/<T>/{load,gates,sizing}.json` | loader result, gate results, sizing report | load/gates/report |
+| `chunks/<T>/<eli_slug(version)>.jsonl` | `Chunk` | chunk → embed, load |
+| `emb/<model>-<dim>.sqlite` | embedding cache: `content_sha256 → float16 vector` + reported model id + startup probe (shared by all T) | embed → load |
+| `reports/<T>/{load,gates,sizing,embed}.json` | loader result, gate results, sizing report, embed run | load/gates/report/embed |
 | `bundles/data-<T>[-sample].{dump,release.json,sha256}` | `pg_dump -Fc` of the release + manifest + checksums | package → restore |
 
 `eli_slug("http://data.legilux.public.lu/eli/etat/leg/code/travail/20260726") == "eli-etat-leg-code-travail-20260726"`.
@@ -329,9 +332,14 @@ conflicting key value violates exclusion constraint "one_text_per_act_and_date"`
 - `data_quality_issue`: selection issues + parse issues of loaded versions, deduplicated on (entity, code),
   details joined. `legal_text`: `{T}` filled (fr 16/10/2026, de 16.10.2026, en 2026-10-16);
   `attribution_vectors` replaces `attribution` only with vectors; `LICENSES/CC-BY-4.0.txt` is appended to the fr and en `cc_by_4_0` notices (gate `cc_by_legalcode`).
-- Embeddings off: **zero** `lgx.embedding_model` rows (its CHECK has no `none` provider), all `chunk.embedding`
-  NULL; `lgx_meta.release.config` = `{release_kind, loader_version, config_digest, snapshot_digest, scope,
-  embedding, vector_status: "disabled:provider_none", sample_works, …}`; `counts` = per table / text_basis / flag /
+- Embeddings off: **zero** `lgx.embedding_model` rows (its CHECK allows only `mistral`), all `chunk.embedding`
+  NULL. With provider `mistral` (`config/embedding.yaml` / `LGX_EMBED_PROVIDER`) and an embedding cache that covers
+  every searchable chunk (`lgx_ingest.embed.release_vectors`), the loader inserts one `lgx.embedding_model` row
+  (reported `model_id`, `model_requested`, `dim`, `probe_text`, `probe_vector`, `probe_min_cosine`, `chunk_count`)
+  and sets `chunk.embedding` after the COPY (temp table + UPDATE), before the post-load builds HNSW; otherwise the
+  release is lexical-only (`vector_status: "disabled:no_vectors_loaded"`). `lgx_meta.release.config` =
+  `{release_kind, loader_version, config_digest, snapshot_digest, scope, embedding, vector_status:
+  "disabled:provider_none" | "ok" | "disabled:no_vectors_loaded", sample_works, …}`; `counts` = per table / text_basis / flag /
   role / unit type, relations, texts missing, selection counts. `inputs_digest` = sha256(snapshot digest,
   config digest, robots sha256s, loaded file sha256s, parser + rules versions).
 
@@ -347,7 +355,8 @@ chunk_unit_consistency (chunk ↔ unit ↔ version, chunks inside the version's 
 repealed/modifying unit, text versions have units), text_basis_consistent (labels vs stored texts vs
 `lgx.serving_at(T)`; windows starting after T excepted), core_texts_present (sample: the m1 `core` /
 `code_recueil` works; full: every CODE/Constitution with text), sample_texts_loaded (every m1 XML/HTML sample
-file), core_article_counts (≤ 2 % vs previous gates report), licence_cc_by_only, embedding_off,
+file), core_article_counts (≤ 2 % vs previous gates report), licence_cc_by_only, embedding_off (provider none) or
+embedding_vectors (provider mistral: every searchable chunk has a vector + 1 model row, or none at all),
 canned_lexical_query.
 
 **Ingest** (`lgx_ingest.cli_ingest.run_ingest`): robots reused when `robots/<T>/` exists (fetched again with
@@ -360,7 +369,7 @@ Luxembourg date, which is already 2026-10-17 at 22:00 UTC.
 
 **Package** (`lgx_ingest.package`): `pg_dump -Fc -Z zstd:9 --exclude-schema=build --no-owner --no-privileges` →
 `data/bundles/data-<T>[-sample].dump` + `.release.json` (release row, `requires {schema_version: 1, embedding:
-null, postgres_major}`, dump size/sha256) + `.sha256`. `--restore-to NAME`: fresh `NAME_next`, `pg_restore -j 4
+null | {provider, model_id, dim}, postgres_major}`, dump size/sha256) + `.sha256`. `--restore-to NAME`: fresh `NAME_next`, `pg_restore -j 4
 --exit-on-error --no-owner --no-privileges`, `95_roles.sql` (GRANTs), `ANALYZE`, `ALTER DATABASE … SET
 default_transaction_read_only = on`, row counts == source, smoke (invariants, canned query, `lgx_ro` SELECT only),
 then rename-swap to `NAME` (`NAME_prev` kept unless `--opt keep_prev=0`). Local `pg_dump`/`pg_restore` must be ≥ the
@@ -383,12 +392,19 @@ extrapolation (sample means × stored-text counts per kind; codes as measured) a
 | Read-only role (MCP) | `lgx_ro` / `lgx-ro-dev-only` → `postgresql://lgx_ro:lgx-ro-dev-only@127.0.0.1:55432/legilux` (compose names: `LGX_DB_HOST=127.0.0.1`, `LGX_DB_PORT=55432`, `LGX_DB_NAME=legilux`, `LGX_DB_USER=lgx_ro`, `LGX_DB_PASSWORD_FILE`) |
 | Build database | `legilux_build_20261016_sample` (writable as `postgres`; `lgx gates` updates its release row) |
 
-Re-create everything (offline, ≈ 90 s): `LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres
-uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --package --container lgx-dev-db
---restore-to legilux`. The container must not be removed by `make db-down` (that target removes the throwaway
+Re-create everything (offline, ≈ 2 min with warm caches): `LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres
+uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --include-m2 --package --container lgx-dev-db
+--restore-to legilux` (= `make ingest-sample`). The container must not be removed by `make db-down` (that target removes the throwaway
 `lgx-db-dev` container, which also wants port 55432: do not run `make db-up` while `lgx-dev-db` runs).
 
-Sample release at T = 2026-10-16: 58,390 acts, 29,133 versions (44 with text), 13,052 units, 10,220 chunks
+**Since the M2 integration (2026-10-17, with the m2 PDF codes):** 58,390 acts, 29,133 versions (49 with text: 38 XML,
+6 HTML, 5 PDF), 25,813 units (12,866 from PDF), 20,543 chunks (20,529 searchable), 174,339 relations, 551 article
+aliases, 30 act aliases, 741 recueil_member rows, 727 data-quality rows; labels: consolidated 27, stub_fallback 2,
+original_never_amended 11, original_possibly_outdated 7, metadata_only 58,343 (25,511 `not_loaded`); 355 acts
+`superseded_by_code`; search API 2. Database 339 MB (build) / 321 MB (restored); dump 15.0 MB; ingest ≈ 2 min with warm
+caches; pg_restore 13.8 s (`-j 4`); the dev stack's `db-load` (restore + GRANTs + ANALYZE + rename) 26 s.
+
+M1 sample release (for reference): 58,390 acts, 29,133 versions (44 with text), 13,052 units, 10,220 chunks
 (all searchable, no vectors), 174,396 relations (168,655 SPARQL + 5,741 AKN after de-duplication), 300 article
 aliases, 30 act aliases, 3,785 vocab concepts, 623 data-quality rows; labels: consolidated 23, stub_fallback 1,
 original_never_amended 11, original_possibly_outdated 7, metadata_only 58,348 (25,516 of them `not_loaded`).
@@ -399,15 +415,18 @@ ANALYZE/GRANTs.
 
 - The MCP server reads the database only as `lgx_ro`, computes status with `lgx.serving_at` (twin in
   `lgx_core.rules.serving`) and warnings with `lgx_core.warnings.Catalogue` over `lgx.warning_def`;
-  embeddings come from `lgx_core.embed.get_embedder(config.embedding)` → `NoneEmbedder` →
-  `vector_status = disabled:provider_none`, `mode_used = lexical`. Tool names and schemas: Appendix D.
+  query embeddings come from `lgx_mcp.vectors.QueryVectors` (provider `none` → `vector_status =
+  disabled:provider_none`, `mode_used = lexical`; provider `mistral` → one startup probe against the release's
+  `lgx.embedding_model` row, hybrid only when it passed). Tool names and schemas: Appendix D.
 - Dual-era contract tests need `mcp==1.27.2` as a client: run them in an isolated env
   (`uv run --isolated --with mcp==1.27.2 …`), never add it to the main lock (it conflicts with 2.3.0).
 - The UI lives in `ui/` with the importable package `ui/lgx_ui` (already in the wheel config).
 
 ## 8. Plan deviations fixed in M0 (details in the M0 report)
 
-- `config/embedding.yaml`: `retry.on` → `retry.on_status` (YAML 1.1 reads `on` as boolean true).
+- `config/embedding.yaml`: `retry.on` → `retry_on_status` (YAML 1.1 reads `on` as boolean true).
+- 2026-10-17 (user decision): one embedding provider (`mistral`), one throughput limiter (`max_concurrency`,
+  `cooldown_s`), one startup probe instead of the golden-vector table `lgx.embedding_probe` (removed).
 - `lgx.warning_def.variants jsonb` added; Appendix D's optional fragments are explicit variants in
   `config/warnings.yaml`.
 - `lgx.search_candidates`: the exact-identifier branch honours `p_doc_types` and ranks by `ts_rank_cd`.
@@ -453,18 +472,63 @@ ANALYZE/GRANTs.
 - **G0** moved to `eval/gold/G0/smoke.json` (union of the contract-test and Eval-tab sets, `lgx_ui.evalg0` format);
   `tests/contract` reads it there. The UI keeps its packaged copy; `LGX_EVAL_DIR=eval/gold` points the Eval tab at
   the canonical file.
-- **`lgx eval run --set G1 --mode lexical|rerank`** is `python -m eval.harness run …` today; the `lgx` command needs
-  `app.add_typer(eval.harness.cli.app, name="eval")` in `lgx_ingest/cli.py` (CLI owner).
+- **`lgx eval run --set G1 --mode lexical|rerank`** = `python -m eval.harness run …` (registered in `lgx_ingest/cli.py`
+  in the M2 integration; skipped when `eval/` is not importable, e.g. from the wheel).
 - Resolver gaps found by G1 (owners: `config/aliases.yaml`, `lgx_core/citeparse`): « règlement général sur la
   protection des données » / « GDPR » are not out-of-scope aliases; the backward form « Loi du 5 mars 1922 …, art.
   unique » is not parsed as an article (« article unique de la loi du … » is).
 - Reranker: model files only through `scripts/fetch_models.sh` (pinned revision, sha256 in `deploy/models.lock`,
   one shared directory `data/models/hf`); compose service `rerank` (profile `rerank` in both compose files; the
   airgap installer must set `COMPOSE_PROFILES` + `LGX_RERANK_URL=http://rerank:8080`, M5).
-- The dev runtime database `legilux` still carries search API 1 (built before M2); the next build of the sample
-  release applies the new `40_search.sql`. Until then the M2 numbers come from the scratch copy `legilux_eval_m2`
-  (sample dump + M2 functions, `eval/README.md`); drop it once `legilux` is rebuilt
+- ~~The dev runtime database `legilux` still carries search API 1~~ — rebuilt in the M2 integration (§ 11): `legilux`
+  serves search API 2 with the PDF codes. The scratch copy `legilux_eval_m2` (and the Task-A build database
+  `legilux_build_20261016_m2`) are obsolete; drop them when convenient
   (`docker exec lgx-dev-db psql -U postgres -c "DROP DATABASE legilux_eval_m2"`).
 - After the M2 ingest rebuild (PDF text, recueil routing): regenerate G3 (`python -m eval.harness gen-g3`, so that
   W_PDF_EXTRACTED / W_SUPERSEDED_BY_CODE / W_TEMPORARY_ACT get items), re-run `freeze-g2` (texts whose
   `text_sha256` changed need re-validation) and the baseline commands of `eval/reports/m2-baseline.md`.
+
+## 11. M2 integration (2026-10-17): serving the PDF codes and the recueil routing
+
+Found while serving the M2 sample release through the MCP tools; all in `lgx_mcp/` unless named.
+
+- **Crash fixed:** `W_SUPERSEDED_BY_CODE` has a `{code}` placeholder, which collided with the `code` argument of
+  `WarningBag.add` / `Catalogue.render` / `Catalogue.warning` (`get_act` of every routed member returned
+  `BACKEND_UNAVAILABLE`). `code` is positional-only now (`lgx_core/warnings/catalogue.py`, `context.py`).
+- **Routing (PLAN §2.6 (4), Appendix D.2.2).** A member act superseded by a code-recueil **without a text of its own**
+  at `as_of` (e.g. `agd/1955/11/23/n1`, `loi/1955/02/14/n3` → `code/route`) is served from the code's text:
+  `get_article` / `resolve_citation` resolve the member's article among the code units with that `member_act_id`
+  (`Resolver.code_articles`); `resolution.redirected_from` names the member, `W_SUPERSEDED_BY_CODE` variant
+  `redirected`. A member **with** its own (original) text keeps it (« texte original affiché à titre d'information »)
+  and gets `resolution.code_article` (code ELI, version, article, page). `get_act` of a member without any version:
+  variant `no_text`; `superseded_by_code.member_context` = the `recueil_member.part_heading`. New variants in
+  `config/warnings.yaml` (releases built before them fall back to the base text: the runtime catalogue is the
+  release's `lgx.warning_def`).
+- **Search.** `filters.act_eli` of a superseded member searches the code's text too, keeps only that member's
+  articles and marks them `W_SUPERSEDED_BY_CODE` (`redirected`): its original is not searchable (PLAN §6.4). A query
+  that is entirely a citation (an article starting with « (Loi du 21 novembre 1997) « … ») keeps its words as the
+  lexical query (`retrieval/expansion.py`).
+- **Code-recueil article choice.** For a base act whose consolidation is a code-recueil (`loi/1925/12/17/n1` = Code de
+  la sécurité sociale) « art. 24 » is the code's own article (no member, no member part above it), not that of a
+  member printed later in the PDF; pure recueils (`…/code/route`, `…/code/fonction_publique`) stay `AMBIGUOUS`.
+- **Citation string (PLAN §2.6 (3)).** Member articles name their act: « Art. 2 de l'arrêté grand-ducal du 23 novembre
+  1955 … (Code de la route, version consolidée applicable au 12/06/2026) — <ELI> »; articles under an unidentified PDF
+  member part (`membre_N`): « Art. 24 d'un acte membre non identifié (Code de la sécurité sociale, …) » — never the
+  code's own « Art. 24 ».
+- **Full ingest (`lgx_ingest/cli_ingest.py`, `fetch.py`).** `ingest --dry-run` (no request: robots + snapshot reused,
+  select, fetch plan → `reports/<T>/fetch_plan_<sample|full>.json`); a real `--full` run on a snapshot whose Q-MANIF
+  covered the sample only pulls Q-MANIF for every served version first (the manifest has files only where Q-MANIF ran);
+  full fetches run only inside `scope.fetch.nightly_window` (`--ignore-window` = operator opt-in). `make
+  ingest-sample` includes the m2 PDFs (`INGEST_FLAGS=--offline --include-m2`).
+- **Eval harness.** `run --subset FILE|ids`, `subset --set G2 --size 40` (fixed stratified subset, ids in
+  `eval/gold/subsets/`), `compare --subset` (score full-run reports on the same ids). G1 v2 / G3 v2 regenerated on the
+  M2 release; G2: two targets re-validated (drift: `rgd/2000/07/24/n3` became `superseded_by_code`). `gen_g3`: derived-ELI
+  items expect `W_PARTIAL_REPEAL_UNKNOWN` only for originals; search items of superseded members expect the routed hits.
+- **Data issues for the ingest owner** (not fixed here): 58 anonymous PDF member parts (`membre_N`, mostly without a
+  heading: their articles cannot be cited by act); the CSS title heading of art. 24 (p. 81) swallowed a provenance
+  note (breadcrumb « Titre IX – nouveau; 2. l'article 631-2 du Code du Travail (Mém. A 41 …) »); every PDF code article
+  carries `W_DATA_QUALITY` because of version-level parse issues — on `code/route/20260612` the
+  `pdf_member_without_articles` row lists `loi_1955-02-14` and `agd_1955-11-23` although both members have their
+  articles (probably a second heading of the same member, e.g. in an annex or the TOC; to triage); the recueil dedup made one G1 v1 item stale (« article 106 du
+  Code de la fonction publique » is no longer ambiguous).
+

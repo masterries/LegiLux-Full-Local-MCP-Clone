@@ -1,4 +1,4 @@
-"""Process-wide state of the server: settings, database pool, release cache, reranker, embedder, health.
+"""Process-wide state of the server: settings, database pool, release cache, reranker, query vectors, health.
 
 Created once per process (``create_runtime``) and shared by the MCP handlers and the health routes.
 Optional components (reranker, vectors) are probed in the background and never block startup or ``/readyz``.
@@ -13,9 +13,6 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from lgx_core.config import EmbeddingConfig
-from lgx_core.embed import Embedder, get_embedder
-from lgx_core.models import EmbeddingProvider
 from lgx_mcp.context import Clock
 from lgx_mcp.db import BackendUnavailableError, Database
 from lgx_mcp.facts import Facts
@@ -23,34 +20,13 @@ from lgx_mcp.release import ReleaseCache, ReleaseInfo
 from lgx_mcp.resolve import OutOfScopeAlias, Resolver, load_out_of_scope_aliases
 from lgx_mcp.retrieval.rerank import Reranker
 from lgx_mcp.settings import SUPPORTED_SCHEMA_VERSIONS, McpSettings
+from lgx_mcp.vectors import QueryVectors
 
 log = logging.getLogger("lgx_mcp.runtime")
 RATE_KEYS_MAX = 1024
 
 CANNED_QUERY = "contrat de travail"
 HEALTH_TTL_S = 30.0
-
-
-class _UnavailableEmbedder:
-    """A configured provider that this build cannot use (M3): lexical with a reason, never an error."""
-
-    def __init__(self, provider: EmbeddingProvider, reason: str) -> None:
-        self._provider = provider
-        self._reason = reason
-
-    @property
-    def info(self) -> Any:
-        from lgx_core.embed import EmbeddingInfo
-
-        return EmbeddingInfo(provider=self._provider)
-
-    def vector_status(self) -> str:
-        return self._reason
-
-    def embed(self, texts: Any, kind: Any) -> list[list[float]]:
-        from lgx_core.embed import EmbeddingDisabledError
-
-        raise EmbeddingDisabledError(self._reason)
 
 
 @dataclass
@@ -69,7 +45,7 @@ class Runtime:
     db: Database
     releases: ReleaseCache
     reranker: Reranker
-    embedder: Embedder
+    vectors: QueryVectors
     clock: Clock
     oos_aliases: dict[str, OutOfScopeAlias]
     health: Health = field(default_factory=Health)
@@ -93,6 +69,7 @@ class Runtime:
             with contextlib.suppress(asyncio.CancelledError, Exception):
                 await t
         self._tasks.clear()
+        await self.vectors.aclose()
         await self.db.close()
         self._started = False
 
@@ -101,6 +78,8 @@ class Runtime:
             try:
                 await self.check_db()
                 await self.reranker.probe()
+                if self.vectors.enabled and self.health.schema_ok:  # startup check 2: the embedding probe
+                    await self.vectors.probe(await self.releases.get())
             except asyncio.CancelledError:
                 raise
             except Exception as exc:  # health probing must never crash the server
@@ -121,10 +100,8 @@ class Runtime:
         return Resolver(facts, release.aliases, self.oos_aliases)
 
     def vector_status(self, release: ReleaseInfo | None) -> str:
-        status = self.embedder.vector_status()
-        if status == "ok" and release is not None and not release.vectors_present:
-            return "disabled:model_mismatch"
-        return status
+        """``ok`` only for a release with vectors whose startup probe passed; else ``disabled:<reason>``."""
+        return self.vectors.status(release)
 
     def rate_limited(self, client: str) -> float | None:
         """Seconds to wait when ``client`` (or the whole server) exceeded its per-minute budget."""
@@ -200,6 +177,7 @@ class Runtime:
             "schema_ok": h.schema_ok,
             "release_id": h.release_id,
             "vector_status": self.vector_status(rel),
+            "vector_reason": self.vectors.reason(rel),
             "reranker_ok": rr.status == "ok" if self.reranker.enabled else None,
             "rerank_status": rr.status,
             "rerank_reason": rr.reason,
@@ -218,13 +196,6 @@ def create_runtime(settings: McpSettings) -> Runtime:
         statement_timeout_ms=settings.statement_timeout_ms,
         timeout_s=settings.db_timeout_s,
     )
-    if settings.embed_provider is EmbeddingProvider.NONE:
-        embedder: Embedder = get_embedder(EmbeddingConfig(provider=EmbeddingProvider.NONE))
-    else:
-        try:
-            embedder = get_embedder(EmbeddingConfig(provider=settings.embed_provider))
-        except NotImplementedError:
-            embedder = _UnavailableEmbedder(settings.embed_provider, "disabled:endpoint_unreachable")
     return Runtime(
         settings=settings,
         db=db,
@@ -236,7 +207,7 @@ def create_runtime(settings: McpSettings) -> Runtime:
             timeout_s=settings.rerank_timeout_s,
             body_chars=settings.rerank_body_chars,
         ),
-        embedder=embedder,
+        vectors=QueryVectors(settings.embedding, settings.embed_api_key),
         clock=Clock(settings.tz, settings.clock_override),
         oos_aliases=load_out_of_scope_aliases(settings.config_dir),
     )

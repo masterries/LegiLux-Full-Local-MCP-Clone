@@ -1,22 +1,30 @@
-# Embedding stage (PLAN §6.5) — pluggable and OFF by default (user decision).
-# provider: none means: no vectors are computed or stored, vector_status = disabled:provider_none,
-# retrieval runs lexical. Secrets (API keys) never live in this file.
-provider: none                   # none | mistral-api | mistral-local | openai-compatible | tei
+# Embedding stage (PLAN §6.5) — OFF by default (user decision): provider none computes and stores no vectors,
+# vector_status = disabled:provider_none, retrieval runs lexical (+ reranker). Every key can be overridden by an
+# LGX_EMBED_* variable (LGX_EMBED_PROVIDER, LGX_EMBED_BASE_URL, LGX_EMBED_MODEL, LGX_EMBED_MAX_CONCURRENCY,
+# LGX_EMBED_COOLDOWN_S, LGX_EMBED_BATCH_SIZE, LGX_EMBED_TIMEOUT_S, LGX_EMBED_RETRIES, …; lgx_core.config.EMBED_ENV).
+# The API key is never in this file: LGX_EMBED_API_KEY_FILE (a 0600 file / Docker secret) or LGX_EMBED_API_KEY (dev).
+provider: none                   # none | mistral
 
-# Default design once enabled (option A, M3): Mistral Embed via the API on the build side and the
-# user's on-prem Mistral endpoint (LGX_EMBED_URL + LGX_EMBED_MODEL) in the airgap, guarded by the
-# golden-vector parity check. Values below are only read when provider != none.
-model_id: mistral-embed-2312     # pinned id, never the alias
-model_version: v23.12
-model_aliases: [mistral-embed]   # ids an endpoint may report for the same model
-dim: 1024                        # becomes halfvec(1024) for the release (psql -v embed_dim)
-normalized: true
-batch_size: 64                   # [U] verify in M3
-max_tokens_per_request: 16000    # [U] verify in M3
-max_input_tokens: 8000
-rate_limit_rps: 1
-retry: {on_status: [429, 500, 502, 503, 504], backoff_s: [2, 4, 8, 16, 32], honour_retry_after: true}   # PLAN §6.5 writes `on:`, which YAML 1.1 reads as boolean true
-parity_threshold: 0.999
-cost_budget_usd: 25              # the run aborts before exceeding it
-# base_url: https://api.mistral.ai           # [U] verify in M3 (mistral-api)
-# api_key_file: /run/secrets/mistral_api_key # build side only; never in bundles, logs or release.json
+# --- provider mistral: the Mistral embeddings API, POST {base_url}/v1/embeddings, Bearer key -------------------
+# Same API on both sides; only the base URL differs: Mistral SaaS on the connected build side (documents, `lgx embed`)
+# and the user's on-prem domain in the airgap (queries, lgx-mcp: LGX_EMBED_BASE_URL in deploy/.env).
+base_url: https://api.mistral.ai
+model: mistral-embed             # requested id; the id the API reports is recorded in lgx.embedding_model
+dim: 1024                        # halfvec(1024) for the release (psql -v embed_dim)
+
+# --- throughput limiter, shared by `lgx embed` (bulk) and the MCP server's query embedding ---------------------
+# At most max_concurrency requests in flight; each request slot waits cooldown_s after its request completed
+# before it is reused. Throughput <= max_concurrency x batch_size / (latency + cooldown_s) texts/s
+# (5 x 64 / (2 s + 20 s) ≈ 14.5 texts/s; docs/dev/DEVELOPMENT.md § Embeddings).
+max_concurrency: 5
+cooldown_s: 20
+batch_size: 64                   # texts per request
+max_tokens_per_request: 16000    # [U] estimated tokens (chars / 3.5); a batch is split below it
+timeout_s: 60                    # per request (lgx-mcp uses LGX_EMBED_TIMEOUT_S, 5 s in compose)
+retries: 5                       # on 429 / 5xx / network errors, honouring Retry-After
+backoff_s: [2, 4, 8, 16, 32]
+retry_on_status: [429, 500, 502, 503, 504]
+
+# --- startup probe of lgx-mcp: reported model id + dim must equal the release's lgx.embedding_model row; the
+# probe text's vector must have cosine >= probe_min_cosine with the one recorded at build time.
+probe_min_cosine: 0.99

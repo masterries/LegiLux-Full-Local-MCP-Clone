@@ -47,7 +47,7 @@ SEARCH_INPUT: dict[str, Any] = {
         "retrieval_mode": {
             "enum": ["auto", "lexical", "hybrid"],
             "default": "auto",
-            "description": "auto = hybrid when vectors are available and parity-checked, else lexical.",
+            "description": "auto = hybrid when the release has vectors and the embedding probe passed, else lexical.",
         },
     },
 }
@@ -388,7 +388,7 @@ ABOUT_OUTPUT = _out(
         "embedding": {
             "type": "object",
             "required": ["provider", "vector_status"],
-            "properties": {"provider": _S, "vector_status": _S, "parity": {"type": ["object", "null"]}},
+            "properties": {"provider": _S, "vector_status": _S, "reason": _SN, "probe": {"type": ["object", "null"]}},
         },
         "retrieval_defaults": {"type": "object"},
         "licences": {"type": "object"},

@@ -2788,14 +2788,17 @@
    "query": "Combien de temps dure la période de candidature des futurs professeurs ?",
    "targets": [
     {
-     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_7",
+     "act": "code/education_nationale",
+     "num": "7",
+     "member": "rgd/2000/07/24/n3",
      "grade": 2,
-     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_7",
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "key": "legilux://eli/etat/leg/code/education_nationale/art/7|http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
      "article": "Art. 7.",
-     "text_sha256": "f59b48b84e319db20b1238cb9b46d41f1fd4c7be9116903bbdeebc624342d808"
+     "text_sha256": "4739353973d825ae8753c1e4475d585a2b2abf929901fa81a250636ffd5bd111"
     }
-   ]
+   ],
+   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 7 in the code text (art. 7 there is the amended wording)"
   },
   {
    "id": "G2-182",
@@ -2803,14 +2806,17 @@
    "query": "En quelle langue le travail de candidature des enseignants peut-il être rédigé ?",
    "targets": [
     {
-     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_5",
+     "act": "code/education_nationale",
+     "num": "5",
+     "member": "rgd/2000/07/24/n3",
      "grade": 2,
-     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_5",
-     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "key": "legilux://eli/etat/leg/code/education_nationale/art/5|http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
      "article": "Art. 5.",
      "text_sha256": "e53f181073dffec28483c66672be8fe61e369f4dad9609437170e572e9998655"
     }
-   ]
+   ],
+   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 5 in the code text (art. 7 there is the amended wording)"
   },
   {
    "id": "G2-183",
