@@ -17,48 +17,11 @@ from jsonschema import Draft202012Validator
 from contract.conftest import LiveServer, mcp_client
 from lgx_mcp.schemas import TOOL_NAMES, TOOLS_BY_NAME
 
-G0 = json.loads((Path(__file__).parent / "g0_smoke.json").read_text(encoding="utf-8"))
+# G0 lives in eval/gold/G0 since M2 (merged with the Streamlit Eval tab's dev set; lgx_ui.evalg0 check format)
+G0_FILE = Path(__file__).resolve().parents[2] / "eval" / "gold" / "G0" / "smoke.json"
+G0 = json.loads(G0_FILE.read_text(encoding="utf-8"))
 A686 = "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
 MODES = ["auto", "legacy"]
-
-
-def resolve_path(data: Any, path: str) -> Any:
-    cur: list[Any] = [data]
-    flat = False
-    for part in path.split("."):
-        name, _, idx = part.partition("[")
-        nxt: list[Any] = []
-        for c in cur:
-            v = c.get(name) if isinstance(c, dict) else None
-            if idx:
-                if v is None:
-                    continue
-                if idx == "*]":
-                    nxt.extend(v)
-                    flat = True
-                    continue
-                i = int(idx[:-1])
-                v = v[i] if isinstance(v, list) and len(v) > i else None
-            nxt.append(v)
-        cur = nxt
-    return cur if flat else (cur[0] if cur else None)
-
-
-def check(op: str, actual: Any, value: Any) -> bool:
-    seq = actual if isinstance(actual, list) else [actual]
-    if op == "equals":
-        return actual == value
-    if op == "contains":
-        return value in seq
-    if op == "any_contains":
-        return any(isinstance(a, str) and value in a for a in seq)
-    if op == "all_equals":
-        return bool(seq) and all(a == value for a in seq)
-    if op == "nonempty":
-        return bool(actual)
-    if op == "len_ge":
-        return isinstance(actual, list) and len(actual) >= value
-    raise ValueError(op)
 
 
 def assert_result_shape(name: str, result: Any) -> dict[str, Any]:
@@ -140,13 +103,17 @@ async def test_m1_acceptance_get_article_code_du_travail(live: LiveServer) -> No
 
 @pytest.mark.parametrize("item", G0["items"], ids=[i["id"] for i in G0["items"]])
 async def test_g0_smoke(live: LiveServer, item: dict[str, Any]) -> None:
+    from lgx_ui.evalg0 import evaluate
+    from lgx_ui.evalg0 import resolve_path as ui_path
+
     async with mcp_client(live) as c:
         r = await c.call_tool(item["tool"], item["arguments"])
     assert bool(r.is_error) == bool(item.get("expect_error")), r.content[0].text[:500]
     sc = assert_result_shape(item["tool"], r)
-    for path, op, value in item["checks"]:
-        actual = resolve_path(sc, path)
-        assert check(op, actual, value), f"{item['id']}: {path} {op} {value!r} — got {actual!r}"
+    for chk in item["checks"]:
+        path, op, value = chk["path"], chk.get("op", "equals"), chk.get("value")
+        actual = ui_path(sc, path)
+        assert evaluate(op, actual, value), f"{item['id']}: {path} {op} {value!r} — got {actual!r}"
 
 
 # ------------------------------------------------------------------------------- search filters

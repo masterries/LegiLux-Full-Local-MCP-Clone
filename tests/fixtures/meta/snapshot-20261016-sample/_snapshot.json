@@ -2,7 +2,7 @@
   "format": 1,
   "sync_date": "2026-10-16",
   "source": "subset of snapshot-20261016",
-  "note": "Subset of tests/golden/snapshot-20261016 for the config/sample.yaml works plus selection edge cases (lgx_ingest.sparql.subset_snapshot). Offline rule tests run on it.",
+  "note": "Subset of tests/golden/snapshot-20261016 for the config/sample.yaml works plus selection edge cases (lgx_ingest.sparql.subset_snapshot). Offline rule tests run on it. M2: + code/communal and code/education_nationale (PDF code-recueils); their 2 Q-MANIF rows come from the Q-MANIF pull of 2026-10-17 for T = 2026-10-16 (the frozen research pulls have none).",
   "act_formats_coverage": null,
   "works": [
     "http://data.legilux.public.lu/eli/etat/leg/a/1892/12/29/n1",
@@ -11,7 +11,9 @@
     "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2",
     "http://data.legilux.public.lu/eli/etat/leg/agd/1995/05/18/n1",
     "http://data.legilux.public.lu/eli/etat/leg/amin/2022/07/15/a355",
+    "http://data.legilux.public.lu/eli/etat/leg/code/communal",
     "http://data.legilux.public.lu/eli/etat/leg/code/cooperation_judiciaire",
+    "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
     "http://data.legilux.public.lu/eli/etat/leg/code/environnement_annexes",
     "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
     "http://data.legilux.public.lu/eli/etat/leg/code/route",
@@ -77,13 +79,13 @@
     },
     "consolidations": {
       "file": "consolidations.parquet",
-      "file_sha256": "1cb8fed9b6bcea608d9cc686db807110f2fe03e08adb37fb1307991048ccf077",
-      "rows": 519
+      "file_sha256": "6ac67fdeb5f03409b386ffdf4148ac09bdd2dbaaec6f7dd0d32d2e51bb2762bd",
+      "rows": 700
     },
     "conso_formats": {
       "file": "conso_formats.parquet",
-      "file_sha256": "0ec04adc37db6e45e3b6d02f1b975e9ed41fa21b79116b90cb8dd8bf5e7c15d8",
-      "rows": 1229
+      "file_sha256": "b78c6827d63d5ef62720d45a9c29eb069c4822c7679b97282c1066d1eef053cb",
+      "rows": 1410
     },
     "conso_base_acts": {
       "file": "conso_base_acts.parquet",
@@ -122,9 +124,9 @@
     },
     "manifestations": {
       "file": "manifestations.parquet",
-      "file_sha256": "633dbe773414175198b3e065884b7eea5c92c50cda723e57647357b87687d064",
-      "rows": 183
+      "file_sha256": "cb31c2d321cea00d6a242ec1e520da421e1e4def73e5dd2245bbb12ba8231bdf",
+      "rows": 185
     }
   },
-  "snapshot_digest": "sha256:a6ad9cf74e862e600b4131c30516ac1c2e757b8d69d42e9d842e2a604f0a485c"
+  "snapshot_digest": "sha256:0e57e4b92f9389af32ef3307c6776b4dabdd755a0a33ccac7feabd662e9ad6f3"
 }

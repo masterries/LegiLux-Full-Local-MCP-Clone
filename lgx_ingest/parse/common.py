@@ -308,6 +308,8 @@ class Draft:
     member_act_eli: str | None = None
     from_recueil_wid: str | None = None
     refs: list[str] = field(default_factory=list)
+    page_from: int | None = None  # PDF-derived units: 1-based page range
+    page_to: int | None = None
     ordinal: int = 0
 
     @property
@@ -409,6 +411,8 @@ class UnitBuilder:
                     contains_quoted_amendment=d.contains_quoted_amendment,
                     amended_by=d.amended_by,
                     index_terms=d.index_terms,
+                    page_from=d.page_from,
+                    page_to=d.page_to,
                     from_recueil_wid=d.from_recueil_wid,
                     doc_type=e.doc_type,
                     source_format=e.file.source_format,

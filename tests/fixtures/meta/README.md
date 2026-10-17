@@ -2,7 +2,7 @@
 
 `snapshot-20261016-sample/` — commit-sized subset (≈ 100 KB) of the frozen golden snapshot
 `tests/golden/snapshot-20261016/`, in the exact `data/meta/<T>/` format (zstd parquet + `_snapshot.json`).
-It holds every row about the 51 `config/sample.yaml` works plus 12 selection edge cases (listed in
+It holds every row about the 53 `config/sample.yaml` works plus 12 selection edge cases (listed in
 `_snapshot.json` → `works`): flag/date conflicts (`loi/2010/05/27/n2`, `rgd/1978/02/28/n2`,
 `acc/2026/02/27/a120`, an `-implicit` act), a code-recueil without window version
 (`code/cooperation_judiciaire`), a future-only work (`loi/2026/04/15/a211`), `code/environnement_annexes`,

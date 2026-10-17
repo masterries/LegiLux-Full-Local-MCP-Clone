@@ -30,7 +30,7 @@ from psycopg.types.json import Jsonb
 
 from lgx_core.config import DataLayout, ProjectConfig
 from lgx_core.io import atomic_write_text, read_jsonl
-from lgx_core.models import CC_BY_4_0, DataQualityIssue, FetchLogEntry, ManifestEntry, SourceFormat, TextBasis
+from lgx_core.models import CC_BY_4_0, DataQualityIssue, FetchLogEntry, ManifestEntry, TextBasis
 from lgx_ingest.context import StageContext, StageResult
 from lgx_ingest.load import (
     LoadError,
@@ -45,6 +45,7 @@ from lgx_ingest.load import (
 
 Status = Literal["pass", "fail", "warn", "skip"]
 CORE_TYPES = frozenset({"CODE", "CODE_RECUEIL", "Constitution"})
+PDF_ARTICLE_TOLERANCE = 0.01  # PLAN §11.4: « Art. » line starts mapped within ±1 %
 CANNED_QUERY = "travail"
 
 
@@ -233,6 +234,9 @@ def file_gates(ctx: StageContext, report: GateReport) -> dict[str, Any]:
             examples=[f["eli_version"] for f in failures],
         )
 
+    if parse is not None:
+        pdf_and_recueil_gates(report, parse.get("details", {}).get("stats", {}))
+
     sample = sel.get("sample", {})
     mismatches = sample.get("mismatches", [])
     frozen = cfg.sample.snapshot_date == ctx.sync_date
@@ -260,11 +264,72 @@ def _rows(conn: psycopg.Connection[Any], sql: str, params: Any = None) -> list[t
     return conn.execute(sql, params).fetchall()
 
 
-def expected_core_works(cfg: ProjectConfig, sample: bool) -> list[str]:
-    """Sample works whose text must be present: CODE/Constitution/code-recueil groups of stage m1."""
+def pdf_and_recueil_gates(report: GateReport, stats: dict[str, dict[str, int]]) -> None:
+    """PLAN §11.4/§6.8: PDF article counts within ±1 % of the « Art. » heading candidates; recueil
+    structure pass drops only duplicates whose canonical member consolidation is stored (nothing silently)."""
+    pdf_bad, pdf_seen = [], {}
+    for version, st in sorted(stats.items()):
+        if "article_candidates" not in st:
+            continue
+        cand, arts = st["article_candidates"], st.get("articles", 0)
+        pdf_seen[version.rsplit("/eli/", 1)[-1]] = f"{arts}/{cand}"
+        if (cand and abs(arts - cand) / cand > PDF_ARTICLE_TOLERANCE) or (not cand and arts):
+            pdf_bad.append(f"{version}: {arts} articles vs {cand} candidates")
+    if pdf_seen:
+        report.check(
+            "pdf_article_counts",
+            not pdf_bad,
+            pdf_seen,
+            f"articles within ±{PDF_ARTICLE_TOLERANCE:.0%} of the Art. heading candidates",
+            examples=pdf_bad,
+        )
+    else:
+        report.add("pdf_article_counts", "skip", 0, "articles within ±1 % of candidates", "no PDF parsed")
+    rec_bad, rec_seen = [], {}
+    for version, st in sorted(stats.items()):
+        if "units_before_structure" not in st:
+            continue
+        dropped = st.get("dedup_dropped_duplicate", 0)
+        rec_seen[version.rsplit("/eli/", 1)[-1]] = {"dropped": dropped, "units": st.get("units")}
+        if st["units_before_structure"] - dropped != st.get("units"):
+            rec_bad.append(version)
+    if rec_seen:
+        report.check(
+            "recueil_dedup",
+            not rec_bad,
+            rec_seen,
+            "units after = units before − dropped duplicates (every other article kept)",
+            examples=rec_bad,
+        )
+
+
+def expected_core_works(cfg: ProjectConfig, sample: bool, fetched_m2: set[str] | None = None) -> list[str]:
+    """Sample works whose text must be present: CODE/Constitution/code-recueil groups of stage m1, plus the
+    m2 ones (PDF code-recueils) whose file was fetched in this build."""
     if not sample:
         return []
-    return [w.eli_work for w in cfg.sample.works if w.group in ("core", "code_recueil") and w.stage == "m1"]
+    return [
+        w.eli_work
+        for w in cfg.sample.works
+        if w.group in ("core", "code_recueil") and (w.stage == "m1" or w.eli_work in (fetched_m2 or set()))
+    ]
+
+
+def _fetched_m2(ctx: StageContext) -> tuple[set[str], set[str]]:
+    """(works, versions) of m2 sample entries whose file is in the raw index."""
+    from lgx_ingest.fetch import RawIndex, fetch_url
+
+    if not ctx.layout.manifest_path.exists():
+        return set(), set()
+    index = RawIndex(ctx.layout)
+    works, versions = set(), set()
+    for e in read_jsonl(ctx.layout.manifest_path, ManifestEntry):
+        if not (e.in_sample and e.sample_stage == "m2" and e.file is not None and e.eli_version):
+            continue
+        if index.get(fetch_url(e)) is not None:
+            works.add(e.eli_work)
+            versions.add(e.eli_version)
+    return works, versions
 
 
 def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateReport, sel: dict[str, Any]) -> None:
@@ -380,7 +445,8 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
     )
 
     # core texts: CODE / Constitution / code-recueils present (sample: the m1 core works)
-    expected = expected_core_works(ctx.config, ctx.sample)
+    m2_works, m2_versions = _fetched_m2(ctx) if ctx.sample else (set(), set())
+    expected = expected_core_works(ctx.config, ctx.sample, m2_works)
     core_rows = {
         r[0]: (r[1], int(r[2]))
         for r in _rows(
@@ -398,7 +464,7 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
         "core_texts_present",
         not missing,
         {w.rsplit("/eli/", 1)[-1]: v for w, v in core_rows.items()},
-        "every CODE/Constitution of the sample (m1) has text and articles",
+        "every CODE/Constitution/code-recueil of the sample (m1, fetched m2) has text and articles",
         examples=missing,
     )
     if ctx.sample and ctx.layout.manifest_path.exists():
@@ -406,10 +472,9 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
             e.eli_version
             for e in read_jsonl(ctx.layout.manifest_path, ManifestEntry)
             if e.in_sample
-            and e.sample_stage == "m1"
             and e.file is not None
             and e.eli_version
-            and e.file.source_format is not SourceFormat.PDF
+            and (e.sample_stage == "m1" or e.eli_version in m2_versions)
         ]
         have = {
             r[0]
@@ -422,7 +487,7 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
             "sample_texts_loaded",
             not absent,
             f"{len(have)}/{len(wanted)}",
-            "every m1 sample file (XML/HTML) has text in the release",
+            "every m1 sample file and every fetched m2 (PDF) file has text in the release",
             examples=absent,
         )
     prev_counts = _previous_article_counts(ctx)

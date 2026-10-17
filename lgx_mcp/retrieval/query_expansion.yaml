@@ -1,0 +1,182 @@
+# Server-side query preparation for the lexical branch of search_legislation (PLAN §8.3, R9; M2).
+#
+# status: draft_unvalidated — curated by the developer from general legal vocabulary (not from the gold
+# questions); lawyer review pending, like config/aliases.yaml. Offline: read from the image, never fetched.
+# An operator copy at $LGX_CONFIG_DIR/query_expansion.yaml replaces this file.
+#
+# noise      words removed from the lexical query before stemming (interrogatives and framing words that the
+#            French snowball stemmer keeps and that would get a high IDF: « quel » occurs in 121 of 10,220 sample
+#            chunks). Matched per token after folding (lower case, no accents, ’ -> ').
+# expansions when a trigger occurs in the folded query (whole words), its French terms are added to the lexical
+#            query with a lower weight (lgx.search_candidates p_expansion, opts.expansion_weight). `lang` says which
+#            question language the trigger belongs to: fr = French synonym or official wording, de / en = glossary for
+#            German / English questions the LLM did not reformulate (the tool description asks it to).
+version: 1
+status: draft_unvalidated
+noise:
+  fr: [quel, quelle, quels, quelles, comment, combien, pourquoi, selon, prevoit, prevoient, dit, existe, existe-t-il,
+       faut-il, peut-on, puis-je, dois-je, doit-on, ai-je, a-t-on, y-a-t-il, est-ce, "qu'est-ce", quoi, explique,
+       expliquer, "s'applique-t-il", "s'applique-t-elle", sont-ils, sont-elles, est-il, est-elle]
+  de: [was, wie, welche, welcher, welches, wann, wer, wo, warum, gibt, es, regelt, sagt, laut, nach, gem, gemass, des,
+       der, die, das, dem, den, ein, eine, einer, ist, sind, im, in, an, am, auf, bei, fur, mit, von, zu, und, oder,
+       muss, kann, darf, luxemburg, luxemburger, luxemburgischen, luxemburgischem, recht, gesetz]
+  en: [what, which, how, when, who, where, why, does, do, is, are, the, a, an, of, in, "on", at, by, for, to, under,
+       according, and, or, can, may, must, my, luxembourg, luxembourgish, law, rules, say, says]
+expansions:
+  # ------------------------------------------------------------------------------------------- French synonyms
+  - {lang: fr, when: ["liberte d'expression"], add: "liberté de manifester ses opinions liberté de la presse"}
+  - {lang: fr, when: ["licenciement"], add: "résiliation du contrat de travail"}
+  - {lang: fr, when: ["demission", "demissionner"], add: "résiliation à l'initiative du salarié préavis"}
+  - {lang: fr, when: ["preavis"], add: "délai de préavis résiliation"}
+  - {lang: fr, when: ["conges payes", "vacances"], add: "congé annuel de récréation"}
+  - {lang: fr, when: ["salaire minimum", "smic"], add: "salaire social minimum"}
+  - {lang: fr, when: ["donnees personnelles"], add: "données à caractère personnel traitement"}
+  - {lang: fr, when: ["heritage", "heritier", "heritiers"], add: "succession successions"}
+  - {lang: fr, when: ["divorce"], add: "dissolution du mariage époux"}
+  - {lang: fr, when: ["pension alimentaire"], add: "aliments obligation alimentaire"}
+  - {lang: fr, when: ["location", "locataire", "loyer"], add: "bail preneur bailleur louage"}
+  - {lang: fr, when: ["proprietaire"], add: "propriété"}
+  - {lang: fr, when: ["prison", "incarceration"], add: "emprisonnement réclusion peine"}
+  - {lang: fr, when: ["amende", "amendes"], add: "peine d'amende"}
+  - {lang: fr, when: ["delai de prescription", "prescrit", "prescrite"], add: "prescription"}
+  - {lang: fr, when: ["periode d'essai"], add: "clause d'essai essai"}
+  - {lang: fr, when: ["heures sup", "heures supplementaires"], add: "heures supplémentaires durée du travail"}
+  - {lang: fr, when: ["arret maladie", "malade"], add: "incapacité de travail maladie"}
+  - {lang: fr, when: ["harcelement"], add: "harcèlement moral sexuel"}
+  - {lang: fr, when: ["drone", "drones"], add: "aéronef sans équipage à bord"}
+  - {lang: fr, when: ["fonctionnaire", "fonctionnaires"], add: "fonctionnaire de l'État agent"}
+  - {lang: fr, when: ["sanction disciplinaire", "sanctions disciplinaires"], add: "discipline peines disciplinaires"}
+  - {lang: fr, when: ["vie privee"], add: "vie privée intimité"}
+  - {lang: fr, when: ["dommages et interets", "indemnisation"], add: "dommages-intérêts réparation du dommage"}
+  - {lang: fr, when: ["journaliste", "journalistes"], add: "journaliste professionnel presse"}
+  - {lang: fr, when: ["droit d'auteur", "droits d'auteur"], add: "œuvre auteur droits voisins"}
+  - {lang: fr, when: ["adn", "test genetique"], add: "empreintes génétiques"}
+  - {lang: fr, when: ["avortement"], add: "interruption volontaire de grossesse"}
+  - {lang: fr, when: ["mineur", "mineurs", "enfant mineur"], add: "mineur âgé de moins de dix-huit ans"}
+  # ------------------------------------------------------------------------------- German glossary (de -> fr)
+  - {lang: de, when: ["kundigungsfrist", "kundigungsfristen"], add: "délai de préavis licenciement résiliation"}
+  - {lang: de, when: ["kundigung", "gekundigt", "entlassung"], add: "licenciement résiliation du contrat"}
+  - {lang: de, when: ["fristlose kundigung"], add: "licenciement avec effet immédiat faute grave"}
+  - {lang: de, when: ["arbeitsvertrag", "arbeitsvertrags"], add: "contrat de travail"}
+  - {lang: de, when: ["arbeitnehmer", "arbeitnehmers", "angestellter"], add: "salarié"}
+  - {lang: de, when: ["arbeitgeber", "arbeitgebers"], add: "employeur"}
+  - {lang: de, when: ["urlaub", "jahresurlaub", "erholungsurlaub"], add: "congé annuel de récréation"}
+  - {lang: de, when: ["mutterschaftsurlaub", "mutterschutz"], add: "congé de maternité femme enceinte"}
+  - {lang: de, when: ["elternurlaub", "elternzeit"], add: "congé parental"}
+  - {lang: de, when: ["probezeit"], add: "période d'essai clause d'essai"}
+  - {lang: de, when: ["uberstunden"], add: "heures supplémentaires"}
+  - {lang: de, when: ["arbeitszeit"], add: "durée du travail"}
+  - {lang: de, when: ["mindestlohn"], add: "salaire social minimum"}
+  - {lang: de, when: ["lohn", "gehalt"], add: "salaire rémunération"}
+  - {lang: de, when: ["krankheit", "krank", "arbeitsunfahigkeit"], add: "maladie incapacité de travail"}
+  - {lang: de, when: ["datenschutz"], add: "protection des données à caractère personnel"}
+  - {lang: de, when: ["personenbezogene daten", "personenbezogener daten"], add: "données à caractère personnel"}
+  - {lang: de, when: ["verantwortlicher", "verantwortlichen"], add: "responsable du traitement"}
+  - {lang: de, when: ["datenschutzbehorde", "datenschutzkommission"], add: "Commission nationale pour la protection des données"}
+  - {lang: de, when: ["meinungsfreiheit", "meinungsausserung"], add: "liberté de manifester ses opinions liberté d'expression"}
+  - {lang: de, when: ["pressefreiheit"], add: "liberté de la presse"}
+  - {lang: de, when: ["verfassung"], add: "Constitution"}
+  - {lang: de, when: ["grundrechte", "grundrecht"], add: "droits et libertés"}
+  - {lang: de, when: ["eigentum"], add: "propriété"}
+  - {lang: de, when: ["erbe", "erbschaft", "erben"], add: "succession héritier"}
+  - {lang: de, when: ["testament"], add: "testament"}
+  - {lang: de, when: ["ehe", "heirat", "eheschliessung"], add: "mariage"}
+  - {lang: de, when: ["scheidung"], add: "divorce"}
+  - {lang: de, when: ["unterhalt"], add: "aliments obligation alimentaire"}
+  - {lang: de, when: ["haftung", "schadenersatz", "schaden"], add: "responsabilité dommage réparation"}
+  - {lang: de, when: ["vertrag", "vertrage"], add: "contrat convention"}
+  - {lang: de, when: ["kaufvertrag", "kauf"], add: "vente"}
+  - {lang: de, when: ["miete", "mietvertrag", "mieter", "vermieter"], add: "bail preneur bailleur"}
+  - {lang: de, when: ["verjahrung", "verjahrt"], add: "prescription"}
+  - {lang: de, when: ["strafe", "strafen", "bestrafung"], add: "peine"}
+  - {lang: de, when: ["freiheitsstrafe", "gefangnis"], add: "emprisonnement"}
+  - {lang: de, when: ["geldstrafe", "geldbusse"], add: "amende"}
+  - {lang: de, when: ["diebstahl"], add: "vol"}
+  - {lang: de, when: ["betrug"], add: "escroquerie"}
+  - {lang: de, when: ["korperverletzung"], add: "coups et blessures"}
+  - {lang: de, when: ["mord", "totschlag"], add: "meurtre assassinat homicide"}
+  - {lang: de, when: ["gericht", "gerichte"], add: "tribunal juridiction"}
+  - {lang: de, when: ["berufung"], add: "appel"}
+  - {lang: de, when: ["klage"], add: "action en justice demande"}
+  - {lang: de, when: ["urheberrecht", "urheber"], add: "droit d'auteur auteur"}
+  - {lang: de, when: ["auslieferung"], add: "extradition"}
+  - {lang: de, when: ["zwangsversteigerung", "pfandung"], add: "saisie immobilière"}
+  - {lang: de, when: ["wahl", "wahlen", "wahlbezirk", "wahllokal"], add: "élections électeurs vote"}
+  - {lang: de, when: ["beamter", "beamte", "staatsbeamte"], add: "fonctionnaire de l'État"}
+  - {lang: de, when: ["disziplinarverfahren", "disziplinarstrafe"], add: "procédure disciplinaire discipline"}
+  - {lang: de, when: ["investmentfonds", "fondsverwalter"], add: "fonds d'investissement alternatifs gestionnaires"}
+  - {lang: de, when: ["bankgeheimnis"], add: "secret bancaire secret professionnel"}
+  - {lang: de, when: ["drohne", "drohnen"], add: "aéronef sans équipage à bord"}
+  - {lang: de, when: ["leiche", "leichen", "leichentransport"], add: "transport des cadavres"}
+  - {lang: de, when: ["reisedokument", "reisepass"], add: "titre de voyage"}
+  - {lang: de, when: ["volkszahlung"], add: "recensement"}
+  - {lang: de, when: ["regierung"], add: "Gouvernement"}
+  - {lang: de, when: ["abgeordnete", "abgeordneter", "parlament"], add: "député Chambre des Députés"}
+  - {lang: de, when: ["grossherzog"], add: "Grand-Duc"}
+  - {lang: de, when: ["journalist", "journalisten"], add: "journaliste professionnel"}
+  - {lang: de, when: ["quellenschutz"], add: "protection des sources journaliste"}
+  - {lang: de, when: ["gegendarstellung"], add: "droit de réponse"}
+  - {lang: de, when: ["minderjahrige", "minderjahriger", "kinder"], add: "mineur"}
+  # ------------------------------------------------------------------------------- English glossary (en -> fr)
+  - {lang: en, when: ["notice period", "period of notice"], add: "délai de préavis"}
+  - {lang: en, when: ["dismissal", "dismissed", "termination of employment", "fired"], add: "licenciement résiliation du contrat de travail"}
+  - {lang: en, when: ["resignation", "resign"], add: "démission résiliation à l'initiative du salarié"}
+  - {lang: en, when: ["employment contract", "contract of employment"], add: "contrat de travail"}
+  - {lang: en, when: ["employee", "employees", "worker", "workers"], add: "salarié"}
+  - {lang: en, when: ["employer", "employers"], add: "employeur"}
+  - {lang: en, when: ["annual leave", "holiday", "holidays", "paid leave"], add: "congé annuel de récréation"}
+  - {lang: en, when: ["maternity leave", "maternity"], add: "congé de maternité"}
+  - {lang: en, when: ["parental leave"], add: "congé parental"}
+  - {lang: en, when: ["probation", "trial period", "probationary period"], add: "période d'essai clause d'essai"}
+  - {lang: en, when: ["overtime"], add: "heures supplémentaires"}
+  - {lang: en, when: ["working time", "working hours"], add: "durée du travail"}
+  - {lang: en, when: ["minimum wage"], add: "salaire social minimum"}
+  - {lang: en, when: ["wage", "wages", "salary", "pay"], add: "salaire rémunération"}
+  - {lang: en, when: ["sick leave", "sickness", "illness"], add: "maladie incapacité de travail"}
+  - {lang: en, when: ["data protection"], add: "protection des données"}
+  - {lang: en, when: ["personal data"], add: "données à caractère personnel"}
+  - {lang: en, when: ["controller", "data controller"], add: "responsable du traitement"}
+  - {lang: en, when: ["data protection authority", "supervisory authority"], add: "Commission nationale pour la protection des données"}
+  - {lang: en, when: ["freedom of expression", "free speech", "freedom of speech"], add: "liberté de manifester ses opinions liberté d'expression"}
+  - {lang: en, when: ["freedom of the press", "press freedom"], add: "liberté de la presse"}
+  - {lang: en, when: ["constitution", "constitutional"], add: "Constitution"}
+  - {lang: en, when: ["fundamental rights"], add: "droits et libertés"}
+  - {lang: en, when: ["property", "ownership"], add: "propriété"}
+  - {lang: en, when: ["inheritance", "heir", "heirs", "estate"], add: "succession héritier"}
+  - {lang: en, when: ["marriage", "married"], add: "mariage"}
+  - {lang: en, when: ["divorce"], add: "divorce"}
+  - {lang: en, when: ["maintenance", "alimony", "child support"], add: "aliments obligation alimentaire"}
+  - {lang: en, when: ["liability", "liable", "damages", "compensation"], add: "responsabilité dommage réparation dommages-intérêts"}
+  - {lang: en, when: ["contract", "contracts", "agreement"], add: "contrat convention"}
+  - {lang: en, when: ["sale", "purchase"], add: "vente"}
+  - {lang: en, when: ["lease", "tenancy", "tenant", "landlord", "rent"], add: "bail preneur bailleur"}
+  - {lang: en, when: ["limitation period", "statute of limitations", "time-barred"], add: "prescription"}
+  - {lang: en, when: ["penalty", "penalties", "punishment", "sentence"], add: "peine"}
+  - {lang: en, when: ["prison", "imprisonment", "jail"], add: "emprisonnement"}
+  - {lang: en, when: ["fine", "fines"], add: "amende"}
+  - {lang: en, when: ["theft", "stealing"], add: "vol"}
+  - {lang: en, when: ["fraud"], add: "escroquerie"}
+  - {lang: en, when: ["assault", "bodily harm"], add: "coups et blessures"}
+  - {lang: en, when: ["murder", "manslaughter", "homicide"], add: "meurtre assassinat homicide"}
+  - {lang: en, when: ["court", "courts"], add: "tribunal juridiction"}
+  - {lang: en, when: ["appeal"], add: "appel"}
+  - {lang: en, when: ["lawsuit", "legal action", "claim"], add: "action en justice demande"}
+  - {lang: en, when: ["copyright", "author", "authors"], add: "droit d'auteur auteur"}
+  - {lang: en, when: ["extradition", "extradited"], add: "extradition"}
+  - {lang: en, when: ["foreclosure", "seizure of real estate", "real estate seizure"], add: "saisie immobilière"}
+  - {lang: en, when: ["election", "elections", "polling", "voting"], add: "élections électeurs vote"}
+  - {lang: en, when: ["civil servant", "civil servants", "public servant", "public official"], add: "fonctionnaire de l'État"}
+  - {lang: en, when: ["disciplinary"], add: "procédure disciplinaire discipline"}
+  - {lang: en, when: ["investment fund", "investment funds", "fund manager", "fund managers", "aifm"], add: "fonds d'investissement alternatifs gestionnaires"}
+  - {lang: en, when: ["banking secrecy", "bank secrecy"], add: "secret bancaire secret professionnel"}
+  - {lang: en, when: ["drone", "drones", "unmanned aircraft"], add: "aéronef sans équipage à bord"}
+  - {lang: en, when: ["corpse", "corpses", "dead body", "dead bodies", "human remains"], add: "transport des cadavres"}
+  - {lang: en, when: ["travel document", "passport"], add: "titre de voyage"}
+  - {lang: en, when: ["census"], add: "recensement"}
+  - {lang: en, when: ["government", "cabinet"], add: "Gouvernement"}
+  - {lang: en, when: ["member of parliament", "members of parliament", "parliament", "mp"], add: "député Chambre des Députés"}
+  - {lang: en, when: ["grand duke"], add: "Grand-Duc"}
+  - {lang: en, when: ["journalist", "journalists"], add: "journaliste professionnel"}
+  - {lang: en, when: ["protection of sources", "journalistic sources"], add: "protection des sources journaliste"}
+  - {lang: en, when: ["right of reply"], add: "droit de réponse"}
+  - {lang: en, when: ["minor", "minors", "child", "children"], add: "mineur enfant"}

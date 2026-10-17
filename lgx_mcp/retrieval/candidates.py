@@ -6,11 +6,22 @@ chunk's ``rank_prior``. Every filter (``doc_types``, ``act_eli`` → act ids, ``
 applies to every branch inside the SQL function.
 
 Embeddings are OFF by default (provider ``none``): ``auto`` and ``hybrid`` then run lexical and say why.
+
+Two SQL generations (``ReleaseInfo.search_api``; releases are rebuilt, never migrated, so the server speaks both):
+
+* **2** (M2, ``db/schema/40_search.sql``): IDF-weighted lexical ranking in SQL (``ranker = bm25``: per query
+  term ``idf × saturated tf``, header matches weighted up, proximity of adjacent query terms, a soft length
+  normalisation, a boost for acts the query names), the server-side expansion terms with a lower weight, and the
+  M1 ``ts_rank_cd`` ordering as ``ranker = rank_cd`` for comparisons (eval, ADR 0001). The SQL returns the
+  distinct-term coverage itself.
+* **1** (M1 releases): ``ts_rank_cd`` over the OR query; coverage is computed here and :func:`coverage_order`
+  re-orders the candidates (native FTS has no IDF).
 """
 
 from __future__ import annotations
 
 import datetime as dt
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -65,6 +76,46 @@ class ChunkHit:
     exact_hit: bool
     cited_hit: bool
     coverage: int = 0  # distinct query lexemes present in the chunk
+    lex_score: float | None = None  # search API 2: the lexical ranker's own score
+    phrase_hits: int = 0  # search API 2: adjacent query-term pairs found within 3 positions
+    act_boosted: bool = False  # search API 2: the chunk belongs to an act the query names
+
+
+SQL_V1 = """
+        WITH ex AS (
+          SELECT (SELECT string_agg('(' || q::text || ')', ' | ')
+                    FROM (SELECT phraseto_tsquery('lgx.simple_ua', t) AS q FROM unnest(%(toks)s::text[]) AS t) z
+                   WHERE q::text <> '')::tsquery AS q
+        )
+        SELECT s.chunk_id, s.score, s.lex_rank, s.dense_rank, s.exact_hit, s.cited_hit,
+               c.unit_id, c.act_id, c.version_id, c.part_no, c.part_count, c.header, c.body, c.doc_type,
+               c.valid_from, c.valid_to,
+               (SELECT count(*) FROM unnest(tsvector_to_array(to_tsvector('lgx.fr_legal'::regconfig, %(q)s))) AS l(lex)
+                 WHERE c.tsv @@ quote_literal(l.lex)::tsquery) AS coverage,
+               NULL::float8 AS lex_score, 0 AS phrase_hits, false AS act_boosted
+          FROM ex,
+               lgx.search_candidates(%(q)s, %(qvec)s::halfvec, %(as_of)s, %(cited)s::bigint[], ex.q,
+                                     %(doc_types)s::text[], %(limit)s, %(act_ids)s::bigint[], %(ifo)s) s
+          JOIN lgx.chunk c ON c.chunk_id = s.chunk_id
+         ORDER BY s.score DESC, s.chunk_id
+        """
+
+SQL_V2 = """
+        WITH ex AS (
+          SELECT (SELECT string_agg('(' || q::text || ')', ' | ')
+                    FROM (SELECT phraseto_tsquery('lgx.simple_ua', t) AS q FROM unnest(%(toks)s::text[]) AS t) z
+                   WHERE q::text <> '')::tsquery AS q
+        )
+        SELECT s.chunk_id, s.score, s.lex_rank, s.dense_rank, s.exact_hit, s.cited_hit,
+               c.unit_id, c.act_id, c.version_id, c.part_no, c.part_count, c.header, c.body, c.doc_type,
+               c.valid_from, c.valid_to, s.coverage, s.lex_score, s.phrase_hits, s.act_boosted
+          FROM ex,
+               lgx.search_candidates(%(q)s, %(qvec)s::halfvec, %(as_of)s, %(cited)s::bigint[], ex.q,
+                                     %(doc_types)s::text[], %(limit)s, %(act_ids)s::bigint[], %(ifo)s,
+                                     %(expansion)s, %(boost)s::bigint[], %(opts)s::jsonb) s
+          JOIN lgx.chunk c ON c.chunk_id = s.chunk_id
+         ORDER BY s.score DESC, s.chunk_id
+        """
 
 
 async def search_candidates(
@@ -79,38 +130,32 @@ async def search_candidates(
     in_force_only: bool = True,
     limit: int = 40,
     qvec: Sequence[float] | None = None,
+    api: int = 1,
+    expansion: str | None = None,
+    boost_act_ids: Sequence[int] | None = None,
+    opts: dict[str, Any] | None = None,
 ) -> list[ChunkHit]:
+    """One ``lgx.search_candidates`` call. ``api`` = the release's search API (``expansion``, ``boost_act_ids``
+    and ``opts`` need 2 and are ignored by 1)."""
     vec = "[" + ",".join(f"{x:.6f}" for x in qvec) + "]" if qvec else None
-    rows = await db.fetch(
-        """
-        WITH ex AS (
-          SELECT (SELECT string_agg('(' || q::text || ')', ' | ')
-                    FROM (SELECT phraseto_tsquery('lgx.simple_ua', t) AS q FROM unnest(%(toks)s::text[]) AS t) z
-                   WHERE q::text <> '')::tsquery AS q
+    params: dict[str, Any] = {
+        "toks": list(exact_tokens),
+        "q": query,
+        "qvec": vec,
+        "as_of": as_of,
+        "cited": list(cited_units),
+        "doc_types": list(doc_types) if doc_types else None,
+        "limit": int(limit),
+        "act_ids": list(act_ids) if act_ids else None,
+        "ifo": in_force_only,
+    }
+    if api >= 2:
+        params.update(
+            expansion=expansion or None,
+            boost=list(boost_act_ids) if boost_act_ids else None,
+            opts=json.dumps(opts or {}),
         )
-        SELECT s.chunk_id, s.score, s.lex_rank, s.dense_rank, s.exact_hit, s.cited_hit,
-               c.unit_id, c.act_id, c.version_id, c.part_no, c.part_count, c.header, c.body, c.doc_type,
-               c.valid_from, c.valid_to,
-               (SELECT count(*) FROM unnest(tsvector_to_array(to_tsvector('lgx.fr_legal'::regconfig, %(q)s))) AS l(lex)
-                 WHERE c.tsv @@ quote_literal(l.lex)::tsquery) AS coverage
-          FROM ex,
-               lgx.search_candidates(%(q)s, %(qvec)s::halfvec, %(as_of)s, %(cited)s::bigint[], ex.q,
-                                     %(doc_types)s::text[], %(limit)s, %(act_ids)s::bigint[], %(ifo)s) s
-          JOIN lgx.chunk c ON c.chunk_id = s.chunk_id
-         ORDER BY s.score DESC, s.chunk_id
-        """,
-        {
-            "toks": list(exact_tokens),
-            "q": query,
-            "qvec": vec,
-            "as_of": as_of,
-            "cited": list(cited_units),
-            "doc_types": list(doc_types) if doc_types else None,
-            "limit": int(limit),
-            "act_ids": list(act_ids) if act_ids else None,
-            "ifo": in_force_only,
-        },
-    )
+    rows = await db.fetch(SQL_V2 if api >= 2 else SQL_V1, params)
     return [
         ChunkHit(
             chunk_id=int(r["chunk_id"]),
@@ -130,6 +175,9 @@ async def search_candidates(
             exact_hit=bool(r["exact_hit"]),
             cited_hit=bool(r["cited_hit"]),
             coverage=int(r["coverage"] or 0),
+            lex_score=float(r["lex_score"]) if r["lex_score"] is not None else None,
+            phrase_hits=int(r["phrase_hits"] or 0),
+            act_boosted=bool(r["act_boosted"]),
         )
         for r in rows
     ]

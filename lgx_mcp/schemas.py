@@ -412,9 +412,13 @@ TOOLS: list[dict[str, Any]] = [
         "description": (
             "Recherche dans la législation luxembourgeoise **applicable** (Mémorial A ; versions consolidées quand"
             " elles existent, sinon texte original signalé comme non consolidé). Écrivez la requête en **français"
-            " juridique**. Si la question est en allemand ou en anglais, traduisez-la d'abord en mots-clés français."
-            " Renvoie des articles avec citation, ELI, version, base du texte (`text_basis`) et avertissements"
-            " obligatoires. Ne déduisez jamais le statut d'un texte : utilisez `status_as_of`."
+            " juridique**, avec les mots des textes. Si la question est en allemand ou en anglais, traduisez-la"
+            " d'abord en mots-clés français (« Kündigungsfrist », « notice period » → « délai de préavis"
+            " licenciement » ; « Datenschutz » → « protection des données à caractère personnel » ;"
+            " « Meinungsfreiheit » → « liberté de manifester ses opinions »). Nommer l'acte (« Code du travail »,"
+            " « Constitution ») favorise ses articles. Renvoie des articles avec citation, ELI, version, base du texte"
+            " (`text_basis`) et avertissements obligatoires. Ne déduisez jamais le statut d'un texte : utilisez"
+            " `status_as_of`."
         ),
         "inputSchema": SEARCH_INPUT,
         "outputSchema": SEARCH_OUTPUT,

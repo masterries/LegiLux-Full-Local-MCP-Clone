@@ -230,7 +230,11 @@ def create_runtime(settings: McpSettings) -> Runtime:
         db=db,
         releases=ReleaseCache(db),
         reranker=Reranker(
-            settings.rerank_url, settings.rerank, batch=settings.rerank_batch, timeout_s=settings.rerank_timeout_s
+            settings.rerank_url,
+            settings.rerank,
+            batch=settings.rerank_batch,
+            timeout_s=settings.rerank_timeout_s,
+            body_chars=settings.rerank_body_chars,
         ),
         embedder=embedder,
         clock=Clock(settings.tz, settings.clock_override),

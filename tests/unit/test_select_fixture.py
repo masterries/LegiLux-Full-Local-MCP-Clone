@@ -34,7 +34,7 @@ def sel() -> Selection:
 
 def test_sample_expectations_match_on_the_frozen_snapshot(sel: Selection) -> None:
     sample = sel.report["sample"]
-    assert sample["works"] == 51
+    assert sample["works"] == 53  # M2: + code/communal, code/education_nationale (PDF, stage m2)
     assert sample["mismatches"] == []
 
 
@@ -116,7 +116,7 @@ def test_secteur_financier_stub_fallback(sel: Selection) -> None:
 def test_run_select_writes_the_contract_outputs(tmp_path: Path) -> None:
     ctx = StageContext.create(sync_date=T, data_dir=tmp_path, options={"snapshot": str(FIXTURE)})
     result = run_select(ctx)
-    assert result.ok and result.counts["sample_matched"] == 51
+    assert result.ok and result.counts["sample_matched"] == 53
     assert any("no robots denylist" in m for m in result.messages)
     layout = ctx.layout
     acts = list(read_jsonl(layout.acts_path, Act))

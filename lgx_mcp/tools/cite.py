@@ -17,6 +17,15 @@ async def resolve_citation(rt: Runtime, ctx: CallContext, args: dict[str, Any]) 
     facts = rt.facts()
     resolver = rt.resolver(ctx.release, facts)
     res = await resolver.resolve_text(text, ctx.as_of)
+    if res.status == "not_found" and res.citation is None:
+        # « règlement (UE) 2016/679 », « directive 2019/1152/UE », jurisprudence, Mémorial B: not a national act
+        # the parser could cite, but recognisably outside the corpus — say so instead of « not found » (G1, M2)
+        oos = resolver.parser.out_of_scope(text)
+        if oos:
+            from lgx_mcp.tools.search import OOS_FR
+
+            res.status = "out_of_scope"
+            res.out_of_scope = ", ".join(dict.fromkeys(OOS_FR.get(o.kind, o.kind) for o in oos))
     if res.status == "out_of_scope":
         ctx.bag.add(WarningCode.W_OUT_OF_SCOPE, what=res.out_of_scope or "référence externe")
         raise ToolFailure(

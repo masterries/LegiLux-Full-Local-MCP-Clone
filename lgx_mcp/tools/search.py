@@ -1,4 +1,10 @@
-"""``search_legislation`` (Appendix D.2.1): citation-aware lexical retrieval with optional reranking."""
+"""``search_legislation`` (Appendix D.2.1): citation-aware lexical retrieval with optional reranking.
+
+Pipeline (PLAN §8.3): citations in the query → cited units (weight 10) and act boosts; the rest of the question,
+without interrogative noise and with curated French expansions (:mod:`lgx_mcp.retrieval.expansion`), goes to the
+lexical ranker of ``lgx.search_candidates`` (IDF-weighted on M2 releases); the TEI cross-encoder, when configured,
+re-orders the first ``LGX_RERANK_K`` articles.
+"""
 
 from __future__ import annotations
 
@@ -16,13 +22,14 @@ from lgx_mcp.retrieval import (
     best_per_unit,
     coverage_order,
     decide_mode,
-    rerank_text,
     search_candidates,
 )
+from lgx_mcp.retrieval.expansion import load_expander
 from lgx_mcp.runtime import Runtime
 from lgx_mcp.tools.base import ToolOutput
 
 MAX_CITED = 5
+MAX_BOOST_ACTS = 50  # an ambiguous dated mention boosts every candidate act of that date, up to this many
 OOS_FR = {
     "eu_law": "droit de l'UE",
     "case_law": "jurisprudence",
@@ -64,8 +71,11 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
         what = ", ".join(dict.fromkeys(OOS_FR.get(o.kind, o.kind) for o in analysis.out_of_scope))
         ctx.bag.add(WarningCode.W_OUT_OF_SCOPE, what=what)
 
-    # --- explicit citations in the query become cited units (weight 10 in the RRF)
+    # --- explicit citations in the query become cited units (weight 10 in the RRF); the acts they name are boosted
+    #     and their words leave the lexical query (« Code du travail » would otherwise match every code header)
     cited: list[int] = []
+    boost_acts: list[int] = []
+    strip_spans: list[tuple[int, int]] = []
     detected = []
     for cit in analysis.citations[:MAX_CITED]:
         entry: dict[str, Any] = {"text": cit.text, "status": "not_found", "act_eli": None, "unit_eli": None}
@@ -75,12 +85,17 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             if res.status == "resolved" and res.candidates:
                 best = res.candidates[0]
                 entry["act_eli"] = best.act.eli_work
+                boost_acts.append(best.act.act_id)
+                strip_spans.append(cit.span)
                 if best.unit is not None:
                     entry["unit_eli"] = best.unit.eli_unit
                     cited.append(best.unit.unit_id)
             elif res.status == "ambiguous":
                 entry["candidates"] = [c.act.eli_work for c in res.candidates[:5]]
+                boost_acts.extend(c.act.act_id for c in res.candidates[:MAX_BOOST_ACTS])
+                strip_spans.append(cit.span)
         detected.append(entry)
+    boost_acts = list(dict.fromkeys(boost_acts))[:MAX_BOOST_ACTS]
 
     # --- filters
     act_ids = None
@@ -112,13 +127,23 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             mode = decide_mode("lexical", vector_status)
             mode = type(mode)(requested, "lexical", vector_status, f"query embedding failed: {exc}")
 
+    # --- lexical query (search API 2): citation spans and noise out, curated expansions in
+    api = ctx.release.search_api
+    ranker = rt.settings.lexical_ranker if api >= 2 else "rank_cd"
+    prepared = None
+    lexical_query = query
+    if api >= 2 and ranker == "bm25":
+        prepared = load_expander(rt.settings.config_dir).prepare(
+            query, strip_spans=strip_spans, expand=rt.settings.query_expansion
+        )
+        lexical_query = prepared.lexical
     reranker = rt.reranker
     rerank_k = rt.settings.rerank_k
     limit = max(top_k * 3, rerank_k if reranker.enabled else 0, 24)
     t_sql = time.perf_counter()
     hits = await search_candidates(
         rt.db,
-        query,
+        lexical_query,
         as_of=ctx.as_of,
         cited_units=cited,
         exact_tokens=analysis.exact_tokens,
@@ -127,10 +152,19 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
         in_force_only=in_force_only,
         limit=min(limit, 100),
         qvec=qvec,
+        api=api,
+        expansion=prepared.expansion if prepared else None,
+        boost_act_ids=boost_acts if ranker == "bm25" else None,
+        opts={**rt.settings.lexical_opts, "ranker": ranker},
     )
     sql_ms = (time.perf_counter() - t_sql) * 1000
+    lexical_order = None
     if mode.mode_used == "lexical":
-        hits = coverage_order(hits)
+        if api >= 2 and ranker == "bm25":
+            lexical_order = "bm25"  # IDF-weighted in SQL; the fused order already puts cited units first
+        else:
+            hits = coverage_order(hits)
+            lexical_order = "coverage"
     units = best_per_unit(hits)
 
     # --- rerank
@@ -143,9 +177,10 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
         pool = units[:rerank_k]
         t_rr = time.perf_counter()
         try:
-            values = await reranker.rerank(query, [rerank_text(h.header, h.body) for h in pool])
+            values = await reranker.rerank(query, [reranker.text(h.header, h.body) for h in pool])
             scores = {h.chunk_id: s for h, s in zip(pool, values, strict=True)}
-            order = sorted(pool, key=lambda h: (-scores[h.chunk_id], h.chunk_id))
+            # an article the question cites explicitly stays first (PLAN §8.3: cited units weigh 10)
+            order = sorted(pool, key=lambda h: (not h.cited_hit, -scores[h.chunk_id], h.chunk_id))
             units = order + units[rerank_k:]
             reranked = True
             rerank_status, rerank_reason = "ok", None
@@ -181,9 +216,13 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
                 "breadcrumb": unit.breadcrumb if unit else None,
                 "match": {
                     "lex_rank": h.lex_rank,
+                    "lex_score": round(h.lex_score, 4) if h.lex_score is not None else None,
                     "exact_hit": h.exact_hit,
                     "cited_hit": h.cited_hit,
                     "coverage": h.coverage,
+                    "phrase_hits": h.phrase_hits,
+                    "act_boosted": h.act_boosted,
+                    "rerank_score": round(scores[h.chunk_id], 6) if h.chunk_id in scores else None,
                     "part": f"{h.part_no}/{h.part_count}",
                 },
             }
@@ -210,13 +249,22 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
                 else None
             ),
             "candidates": len(units),
-            "lexical_order": "coverage" if mode.mode_used == "lexical" else None,
-            "latency_ms": {"sql": round(sql_ms, 1), "rerank": round(rr_ms, 1), "total": round(total_ms, 1)},
+            "lexical_order": lexical_order,
+            "lexical_ranker": ranker,
+            "search_api": api,
+            "latency_ms": {
+                "sql": round(sql_ms, 1),
+                "rerank": round(rr_ms, 1),
+                "total": round(total_ms, 1),
+                **({"rerank_batches_ms": reranker.last.batch_ms} if reranked else {}),
+            },
         },
         "query_interpretation": {
             "citations_detected": detected,
             "exact_tokens": analysis.exact_tokens,
             "out_of_scope": oos_out,
+            "lexical": prepared.as_dict() if prepared else None,
+            "boosted_acts": len(boost_acts) if ranker == "bm25" and api >= 2 else 0,
             "filters": {
                 "doc_types": doc_types,
                 "act_eli": filters.get("act_eli"),

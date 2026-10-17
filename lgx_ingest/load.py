@@ -296,6 +296,8 @@ class TextVersion:
     chunks: list[Chunk]
     parser_version: str
     issues: list[DataQualityIssue] = field(default_factory=list)
+    stats: dict[str, int] = field(default_factory=dict)  # parser stats (PDF: articles, candidates, pages …)
+    dedup: dict[str, Any] | None = None  # recueil deduplication report summary (XML recueils)
 
     @property
     def eli_version(self) -> str:
@@ -326,6 +328,21 @@ def _require(path: Path, hint: str) -> Path:
     if not path.exists():
         raise LoadError(f"missing input {path} ({hint})")
     return path
+
+
+_PDF_STAT_KEYS = (
+    "pages",
+    "pages_without_text",
+    "articles",
+    "article_candidates",
+    "page_units",
+    "members",
+    "anonymous_members",
+    "member_parts_resolved",
+    "member_parts_unresolved",
+    "jurisprudence_paragraphs",
+    "tables",
+)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -372,12 +389,12 @@ def read_inputs(ctx: StageContext) -> ReleaseInputs:
         item = {"eli_version": e.eli_version, "eli_work": e.eli_work, "format": e.file.source_format.value}
         raw = index.get(fetch_url(e))
         if raw is None:
-            reason = "pdf_m2" if e.file.source_format is SourceFormat.PDF else "not_fetched"
+            reason = "not_fetched_m2" if e.sample_stage == "m2" else "not_fetched"
             missing.append(item | {"reason": reason, "sample_stage": e.sample_stage or ""})
             continue
         units_path = layout.units_path(e.eli_version)
         if not units_path.exists():
-            reason = "pdf_m2" if e.file.source_format is SourceFormat.PDF else "not_parsed"
+            reason = "not_parsed_m2" if e.sample_stage == "m2" else "not_parsed"
             missing.append(item | {"reason": reason, "sample_stage": e.sample_stage or ""})
             continue
         units = list(read_jsonl(units_path, Unit))
@@ -402,14 +419,24 @@ def read_inputs(ctx: StageContext) -> ReleaseInputs:
         rel_path = layout.unit_relations_path(e.eli_version)
         unit_rels = list(read_jsonl(rel_path, Relation)) if rel_path.exists() else []
         fmt = e.file.source_format
-        pv = parser_version(fmt)
+        pv = parser_version(fmt, pdf_mode=ctx.config.scope.pdf_codes)
         parse_issues: list[DataQualityIssue] = []
+        parse_stats: dict[str, int] = {}
         parsed = layout.parsed_path(raw.sha256, pv)
         if parsed.exists():
             data = json.loads(parsed.read_text(encoding="utf-8"))
             pv = str(data.get("parser_version") or pv)
             parse_issues = [DataQualityIssue.model_validate(i) for i in data.get("issues", [])]
-        texts[e.eli_version] = TextVersion(e, raw, units, unit_rels, chunks, pv, parse_issues)
+            parse_stats = {k: v for k, v in (data.get("stats") or {}).items() if isinstance(v, int)}
+        structure_path = units_path.with_suffix(".structure.json")
+        structure = _read_json(structure_path) if structure_path.exists() else None
+        dedup = None
+        if structure is not None:  # recueil structure pass (PLAN §2.6): extra issues, dedup outcome
+            parse_issues += [DataQualityIssue.model_validate(i) for i in structure.get("issues", [])]
+            parse_stats.update({k: v for k, v in (structure.get("stats") or {}).items() if isinstance(v, int)})
+            if structure.get("dedup"):
+                dedup = {k: v for k, v in structure["dedup"].items() if k != "articles"}
+        texts[e.eli_version] = TextVersion(e, raw, units, unit_rels, chunks, pv, parse_issues, parse_stats, dedup)
     return ReleaseInputs(
         sync_date=ctx.sync_date,
         sample=ctx.sample,
@@ -911,6 +938,7 @@ def build_plan(
     anchors: dict[int, dict[str, int]] = {}  # version_id -> anchor key -> unit_id (first in document order)
     unit_by_eli: dict[str, list[tuple[int, int]]] = collections.defaultdict(list)  # eli_unit -> (version, unit)
     members: dict[int, collections.Counter[int]] = collections.defaultdict(collections.Counter)
+    member_heads: dict[tuple[int, int], str | None] = {}  # PDF member parts: (recueil version, member) -> heading
     units_by_type: collections.Counter[str] = collections.Counter()
     unresolved_members: collections.Counter[str] = collections.Counter()
     next_unit = 1
@@ -936,6 +964,8 @@ def build_plan(
                 unresolved_members[u.member_act_eli] += 1
             if member is not None and member != aid:
                 members[vid][member] += 1
+                if u.source_format is SourceFormat.PDF and u.unit_type is UnitType.PART and u.num_raw is None:
+                    member_heads.setdefault((vid, member), u.heading)
             for k in (u.anchor, u.akn_id):
                 if k:
                     keys.setdefault(anchor_key(k), uid)
@@ -1110,7 +1140,10 @@ def build_plan(
     member_rows: dict[tuple[int, int], tuple[Any, ...]] = {}
     for vid, counter in sorted(members.items()):
         for member in sorted(counter):
-            member_rows[(vid, member)] = (vid, member, None, None, "wid", None)
+            if (vid, member) in member_heads:  # PDF code-recueil: member heading (config/recueil_members.yaml)
+                member_rows[(vid, member)] = (vid, member, member_heads[(vid, member)], None, "heading", None)
+            else:
+                member_rows[(vid, member)] = (vid, member, None, None, "wid", None)
     for m in config.recueil_members.members:
         rec = expand(m.recueil)
         rec_vid = version_ids.get(rec)
@@ -1195,6 +1228,12 @@ def build_plan(
         "texts_missing": dict(sorted(missing_by_reason.items())),
         "not_loaded_by_planned_text_basis": dict(sorted(not_loaded.items())),
         "relations": dict(sorted(rel_counts.items())),
+        "pdf": {
+            v: {k: t.stats[k] for k in _PDF_STAT_KEYS if k in t.stats}
+            for v, t in sorted(inputs.texts.items())
+            if t.entry.file is not None and t.entry.file.source_format is SourceFormat.PDF
+        },
+        "recueil_dedup": {v: t.dedup for v, t in sorted(inputs.texts.items()) if t.dedup is not None},
         "selection": {
             "acts": selection_counts.get("acts"),
             "by_text_basis": selection_counts.get("by_text_basis", {}),

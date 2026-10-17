@@ -482,6 +482,101 @@
    "bytes": 3012461,
    "last_modified": null,
    "note": "HTML twin of code_civil"
+  },
+  "css_pdf": {
+   "path": "eli-etat-leg-code-securite_sociale-20260101-fr-pdf.pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/securite_sociale/20260101/fr/pdf/eli-etat-leg-code-securite_sociale-20260101-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/securite_sociale/20260101",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-01-01",
+    "upper": null
+   },
+   "source_format": "pdf",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "9a563419dafb07eeee368d125df22e95bb5c7740aa7c1c93e724fba722862c4d",
+   "bytes": 5059985,
+   "last_modified": "2026-03-27T05:56:21Z",
+   "note": "838 pages; margin notes (L. 27.7.92) -> provenance, left alinea numbers, footnotes, 145 member acts"
+  },
+  "route_pdf": {
+   "path": "eli-etat-leg-code-route-20260612-fr-pdf.pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/route/20260612/fr/pdf/eli-etat-leg-code-route-20260612-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/route/20260612",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-06-12",
+    "upper": null
+   },
+   "source_format": "pdf",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "db9935f47db11ed4cc45d4c93956ce5ffa6014df305530b3358711a58b67dfb3",
+   "bytes": 35507629,
+   "last_modified": "2026-06-12T07:05:37Z",
+   "note": "969 pages; member headings + Mémorial reference, inserted « Art. 1bis », jurisprudence sections skipped"
+  },
+  "communal_pdf": {
+   "path": "eli-etat-leg-code-communal-20260801-fr-pdf.pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/communal/20260801/fr/pdf/eli-etat-leg-code-communal-20260801-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/communal/20260801",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-08-01",
+    "upper": null
+   },
+   "source_format": "pdf",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "39b51f48279a27217f1436dc1f5ea700da38f758babea57a7dd4b07e1acc0a31",
+   "bytes": 5963766,
+   "last_modified": "2026-08-04T11:08:13Z",
+   "note": "749 pages; « Sommaire » boxes, roman article numbers (Concordat), excerpts « …, art. 8, 12 et 17 »"
+  },
+  "educ_pdf": {
+   "path": "eli-etat-leg-code-education_nationale-20260915-fr-pdf.pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/education_nationale/20260915/fr/pdf/eli-etat-leg-code-education_nationale-20260915-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale/20260915",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_basis": "consolidated",
+   "text_valid": {
+    "lower": "2026-09-15",
+    "upper": null
+   },
+   "source_format": "pdf",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "d4902723c1183074425116261672df02299c97f03422dccf3dceabb5e0cf4e23",
+   "bytes": 8511484,
+   "last_modified": "2026-09-22T05:42:38Z",
+   "note": "1,196 pages; repealed stubs « Art. 55. (abrogé …) », inserted sections"
+  },
+  "secfin_pdf": {
+   "path": "eli-etat-leg-memorial-2003-a164-fr-pdf.pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/memorial/2003/a164/fr/pdf/eli-etat-leg-memorial-2003-a164-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1/consolide/20031001",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_basis": "stub_fallback",
+   "text_valid": {
+    "lower": "2003-10-01",
+    "upper": null
+   },
+   "source_format": "pdf",
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "sha256": "6dd0263bf72f45db54b402df5549272045f6c8e9cf55e44441ed40d0ebcefe9c",
+   "bytes": 478608,
+   "last_modified": "2022-02-08T13:39:42Z",
+   "note": "Mémorial A n° 164 (2003): coordinated text of the secteur financier law (stub_fallback fixture); TOC pages, bold article headings"
   }
  }
 }

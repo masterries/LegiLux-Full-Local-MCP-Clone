@@ -66,6 +66,18 @@ works:
     stage: m2
     expect: {text_basis: consolidated, format: pdf, flags: [pdf_extracted]}
     why: Code de la route, PDF-only (969 pages, 35.5 MB), member-act context; no base act
+  - work: etat/leg/code/communal
+    version: etat/leg/code/communal/20260801
+    group: code_recueil
+    stage: m2
+    expect: {text_basis: consolidated, format: pdf, flags: [pdf_extracted]}
+    why: Code communal, PDF-only code-recueil without base act (M2 member-context segmentation)
+  - work: etat/leg/code/education_nationale
+    version: etat/leg/code/education_nationale/20260915
+    group: code_recueil
+    stage: m2
+    expect: {text_basis: consolidated, format: pdf, flags: [pdf_extracted]}
+    why: Code de l'éducation nationale, PDF-only code-recueil without base act (M2)
 
   # ------------------------------------------------------------------------- consolidations (fixtures)
   - work: etat/leg/loi/2018/08/01/a686

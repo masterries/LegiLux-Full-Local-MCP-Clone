@@ -430,3 +430,41 @@ ANALYZE/GRANTs.
   Existing 6/7-argument calls are unchanged.
 - `95_roles.sql`: the `REVOKE … ON SCHEMA build` is skipped when `build` does not exist (a restored dump has no
   `build` schema; the script failed on every restore).
+
+## 10. M2 serving side (Task B: retrieval, reranker, evaluation) — notes for the other stages
+
+- **`db/schema/40_search.sql` = search API 2** (ADR `docs/adr/0001-lexical-ranker.md`). New function
+  `lgx.query_terms(query, expansion, expansion_weight, df_cap)`; `lgx.search_candidates` gains three optional
+  trailing parameters (`p_expansion text`, `p_boost_act_ids bigint[]`, `p_opts jsonb`) and four output columns
+  (`lex_score`, `coverage`, `phrase_hits`, `act_boosted`). No table, column, index or extension changes; the loader
+  needs no change (it applies the file); every existing 6–9-argument call (gates `canned_lexical_query`, package
+  smoke, `/readyz` canned query, `tests/db`) keeps its result set (chunks matching any query term), only the
+  order changes. The MCP server detects the API per release (`pg_proc.pronargs` ≥ 12 → 2) and serves releases
+  built before M2 with the M1 ordering — rebuild, don't migrate.
+- If df counting (GIN, capped at `df_cap` = 5,000 rows per term) becomes the bottleneck at full scale, a
+  precomputed term-frequency relation refreshed in `90_postload.sql` (loader) would replace it; measure in M4
+  before adding it.
+- **Data issues seen while building the gold sets** (ingest / loader): `recueil/presse_medias` holds duplicated
+  member articles (Art. 24, 31, 36, 39 of loi/2004/06/08/n4 twice — the XML recueil dedup); six recueil article keys
+  (`num_norm`) swallowed their heading (> 40 characters, e.g. `2_decision_d_eligibilite_au_regime_instaure_par_la_loi`,
+  unreachable through `get_article`'s 40-character `article`); one malformed article ELI kept as is
+  (`…/code/travail/art_l_141-3is.` for « Art. L. 141-3 bis »); code-recueil articles have no `eli_unit`; the
+  presse_medias chunk headers start with the slug `etat/leg/recueil/presse_medias` (no titre court).
+- **G0** moved to `eval/gold/G0/smoke.json` (union of the contract-test and Eval-tab sets, `lgx_ui.evalg0` format);
+  `tests/contract` reads it there. The UI keeps its packaged copy; `LGX_EVAL_DIR=eval/gold` points the Eval tab at
+  the canonical file.
+- **`lgx eval run --set G1 --mode lexical|rerank`** is `python -m eval.harness run …` today; the `lgx` command needs
+  `app.add_typer(eval.harness.cli.app, name="eval")` in `lgx_ingest/cli.py` (CLI owner).
+- Resolver gaps found by G1 (owners: `config/aliases.yaml`, `lgx_core/citeparse`): « règlement général sur la
+  protection des données » / « GDPR » are not out-of-scope aliases; the backward form « Loi du 5 mars 1922 …, art.
+  unique » is not parsed as an article (« article unique de la loi du … » is).
+- Reranker: model files only through `scripts/fetch_models.sh` (pinned revision, sha256 in `deploy/models.lock`,
+  one shared directory `data/models/hf`); compose service `rerank` (profile `rerank` in both compose files; the
+  airgap installer must set `COMPOSE_PROFILES` + `LGX_RERANK_URL=http://rerank:8080`, M5).
+- The dev runtime database `legilux` still carries search API 1 (built before M2); the next build of the sample
+  release applies the new `40_search.sql`. Until then the M2 numbers come from the scratch copy `legilux_eval_m2`
+  (sample dump + M2 functions, `eval/README.md`); drop it once `legilux` is rebuilt
+  (`docker exec lgx-dev-db psql -U postgres -c "DROP DATABASE legilux_eval_m2"`).
+- After the M2 ingest rebuild (PDF text, recueil routing): regenerate G3 (`python -m eval.harness gen-g3`, so that
+  W_PDF_EXTRACTED / W_SUPERSEDED_BY_CODE / W_TEMPORARY_ACT get items), re-run `freeze-g2` (texts whose
+  `text_sha256` changed need re-validation) and the baseline commands of `eval/reports/m2-baseline.md`.

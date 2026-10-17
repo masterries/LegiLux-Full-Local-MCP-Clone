@@ -49,9 +49,12 @@ class _Cfg(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+_YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)  # libyaml when available (≈ 10x faster)
+
+
 def load_yaml(path: Path) -> Any:
     with path.open(encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+        return yaml.load(fh, Loader=_YAML_LOADER)  # a SafeLoader variant
 
 
 def today_luxembourg() -> dt.date:
@@ -371,13 +374,45 @@ class RecueilMemberEntry(_Cfg):
     part_heading: str | None = None
     method: Literal["wid", "heading", "curated"] = "curated"
     reviewed_by: str | None = None
+    # M2 (additive): derivation details and routing; every derived entry starts unreviewed
+    reviewed: bool = False
+    route: bool = Field(default=True, description="flag superseded_by_code + route the JO original to the code")
+    member_key: str | None = Field(default=None, description="PDF member part anchor, e.g. 'agd_1955-11-23'")
+    recueil_version: str | None = None
+    member_title: str | None = None
+    own_consolidation: str | None = Field(default=None, description="served consolidation of the member, if any")
+    coverage: Literal["full", "partial", "unknown"] = "unknown"
+    articles: int | None = None
+    confidence: float | None = None
+    note: str | None = None
+
+
+class RecueilUnresolved(_Cfg):
+    """A member heading that could not be resolved to exactly one act (lawyer input needed)."""
+
+    recueil: str
+    part_heading: str
+    member_key: str | None = None
+    candidates: list[str] = Field(default_factory=list)
+    reason: str
+
+
+class RecueilPending(_Cfg):
+    """A code-recueil/recueil whose membership could not be derived in this build (no cached text)."""
+
+    recueil: str
+    version: str | None = None
+    reason: str
 
 
 class RecueilMembersConfig(_Cfg):
     """``config/recueil_members.yaml``: reviewed code-recueil membership/routing (PLAN §2.6)."""
 
     version: int = 1
+    generated: str | None = None
     members: list[RecueilMemberEntry] = Field(default_factory=list)
+    unresolved: list[RecueilUnresolved] = Field(default_factory=list)
+    pending: list[RecueilPending] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------------------- aggregate

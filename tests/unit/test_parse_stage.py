@@ -65,7 +65,7 @@ def test_parse_then_chunk_writes_units_relations_and_chunks(tmp_path: Path) -> N
     assert chunks[0].header.startswith("etat/leg/loi/2018/08/01/a686 — version consolidée applicable au 26/12/2025")
 
 
-def test_parse_reports_missing_raw_and_skips_pdf(tmp_path: Path) -> None:
+def test_parse_reports_missing_raw_and_broken_pdf(tmp_path: Path) -> None:
     ctx = StageContext.create(sync_date=T, data_dir=tmp_path / "data")
     _d, entry, _raw = fixture_input("a88_jo")
     url = entry.file.url.replace("-fr-xml.xml", "-fr-pdf.pdf").replace("/fr/xml/", "/fr/pdf/")  # type: ignore[union-attr]
@@ -81,7 +81,9 @@ def test_parse_reports_missing_raw_and_skips_pdf(tmp_path: Path) -> None:
         ctx.layout.raw_index_path,
         _raw.model_copy(update={"url": url, "sha256": "0" * 64, "path": f"00/{'0' * 64}.pdf"}),
     )
-    assert run_parse(ctx).counts["skipped_pdf"] == 1  # PDF-only codes are M2
+    broken = run_parse(ctx)  # M2: PDFs are parsed; a broken file is a gated parse failure, never skipped
+    assert not broken.ok and broken.counts["failed"] == 1 and "skipped_pdf" not in broken.counts
+    assert broken.details["failures"][0]["eli_version"] == entry.eli_version
 
 
 def test_cli_content_parse_summary() -> None:

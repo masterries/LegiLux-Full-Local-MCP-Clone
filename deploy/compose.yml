@@ -2,7 +2,7 @@
 # deploy/compose.yml — AIRGAPPED RUNTIME (PLAN §10.2; Appendix C document 1).
 #
 # M1b scope: the services the dev stack exercises today — db, mcp, llm-cpu (profile cpu) and lgx-streamlit
-# (profile testui). Still to come from Appendix C: rerank (TEI, M2), llm-gpu / llm-vllm (gpu24 / gpu48),
+# (profile testui); M2 adds rerank (TEI, profile rerank). Still to come from Appendix C: llm-gpu / llm-vllm (gpu24 / gpu48),
 # proxy (Caddy basic auth on :8443 in front of lgx-streamlit), webui, egress-sentinel, lgx-ctl, prometheus,
 # db-bm25, oxigraph, embed-local. Until the proxy exists, lgx-streamlit here has no published port (by design:
 # Streamlit has no authentication and must only be reached through Caddy in the airgap).
@@ -109,10 +109,12 @@ services:
       LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
       LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000"
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
-      LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 once the TEI service is added (M2)
-      LGX_RERANK: "${LGX_RERANK:-auto}"
-      LGX_RERANK_K: "${LGX_RERANK_K:-40}"
-      LGX_RERANK_BATCH: "32"
+      LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 with the rerank profile (deploy/.env, lgx install)
+      LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto: unavailable -> unreranked + reason | on: BACKEND_UNAVAILABLE | off
+      LGX_RERANK_K: "${LGX_RERANK_K:-40}"               # cpu profile: 16 (written to .env by lgx install)
+      LGX_RERANK_BATCH: "32"                            # client-side split, <= TEI --max-client-batch-size (defence in depth)
+      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-1800}"  # body cut per candidate (PLAN §8.3: ~512 tokens)
+      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-30}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
       LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"
       LGX_EMBED_URL: "${LGX_EMBED_URL:-}"
@@ -126,11 +128,37 @@ services:
       LGX_TRUSTED_PROXIES: "${LGX_TRUSTED_PROXIES:-}"   # IP/CIDR of Open WebUI: its user headers key rate limit + audit
     secrets: [pg_ro_pw, mcp_token]
     volumes: ["audit:/var/log/lgx"]
-    depends_on: { db: { condition: service_healthy } }
+    depends_on:
+      db: { condition: service_healthy }
+      rerank: { condition: service_started, required: false }   # only when the rerank profile is active
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/readyz', timeout=3)"]
       interval: 15s
       retries: 20
+    networks: [backend]
+
+  rerank:                                               # TEI cross-encoder (PLAN §8.3 step 3; Appendix C). Profile rerank:
+    <<: *base                                           # opt-in until the cpu/gpu installers write COMPOSE_PROFILES (M5)
+    profiles: [rerank]
+    image: lgx.local/tei:cpu-1.9.4                      # text-embeddings-inference:cpu-1.9.4@sha256:2538ea1c… (images.lock)
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp", "/data"]
+    environment:
+      <<: *offline
+      RAYON_NUM_THREADS: "${LGX_RERANK_THREADS:-8}"     # image default 8; set to the cores reserved for reranking
+    # Model directory from the models bundle (deploy/models.lock, scripts/fetch_models.sh --verify-only).
+    # --max-client-batch-size 64 >= LGX_RERANK_BATCH and >= LGX_RERANK_K (TEI's default 32 rejects 40 candidates [V]);
+    # --max-batch-tokens 4096: one pair <= 4,096 tokens (auto-truncate), CPU warm-up 1.7 min instead of 9 min.
+    command: ["--model-id", "/models/hf/bge-reranker-v2-m3@953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e", "--port", "8080",
+              "--max-client-batch-size", "64", "--max-batch-tokens", "4096", "--auto-truncate", "true"]
+    volumes: ["${LGX_HOME:-/opt/legilux}/models/hf:/models/hf:ro"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/health"]   # curl ships in the image [V]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 300s
     networks: [backend]
 
   llm-cpu:                                              # TEST FIRST: gemma4:26b-a4b; dev fallback ministral-3:8b

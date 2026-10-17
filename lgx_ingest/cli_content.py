@@ -169,3 +169,52 @@ def content_parse(
         unit = next((u for u in result.units if u.anchor == a), None)
         summary.setdefault("units", {})[a] = unit.model_dump(mode="json") if unit else None
     typer.echo(json.dumps(summary, indent=2, ensure_ascii=False))
+
+
+@content.command("recueil-members")
+def content_recueil_members(
+    ctx: typer.Context,
+    write: Annotated[
+        Path | None, typer.Option("--write", help="Write the derived YAML (e.g. config/recueil_members.yaml)")
+    ] = None,
+) -> None:
+    """Derive code-recueil membership + routing from the cached recueil units and the snapshot (PLAN §2.6)."""
+    _run("lgx_ingest.recueil_members:run_recueil_members", _context(ctx), write=write)
+
+
+@content.command("pdf-check")
+def content_pdf_check(
+    ctx: typer.Context,
+    eli_version: Annotated[
+        str, typer.Option("--eli-version", help="Version ELI of a parsed PDF (relative or absolute)")
+    ],
+    n: Annotated[int, typer.Option(help="Articles to sample")] = 50,
+    seed: Annotated[int, typer.Option(help="Random seed")] = 0,
+) -> None:
+    """Spot-check N random articles of a parsed PDF against `pdftotext -layout` (target >= 98 %)."""
+    from lgx_core.eli import expand
+    from lgx_core.io import read_jsonl
+    from lgx_core.models import Unit
+    from lgx_ingest.fetch import RawIndex
+    from lgx_ingest.parse.pdf_check import spot_check
+
+    stage_ctx = _context(ctx)
+    version = expand(eli_version)
+    units_path = stage_ctx.layout.units_path(version)
+    if not units_path.exists():
+        err.print(f"[red]no units for {version}[/red] ({units_path}): run `lgx parse --opt include_m2=1`")
+        raise typer.Exit(2)
+    units = list(read_jsonl(units_path, Unit))
+    index = RawIndex(stage_ctx.layout)
+    raw = index.get(units[0].source_url) if units else None
+    if raw is None:
+        err.print(f"[red]raw file of {version} not in the raw index[/red]")
+        raise typer.Exit(2)
+    report = spot_check(index.path_of(raw), units, n=n, seed=seed)
+    out = stage_ctx.layout.reports_dir / f"pdf_check-{units_path.stem}.json"
+    from lgx_core.io import atomic_write_text
+
+    atomic_write_text(out, json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+    typer.echo(json.dumps({k: v for k, v in report.items() if k != "worst"}, ensure_ascii=False))
+    if report.get("ok") is False:
+        raise typer.Exit(1)

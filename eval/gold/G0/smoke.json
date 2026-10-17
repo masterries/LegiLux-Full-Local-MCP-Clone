@@ -1,0 +1,564 @@
+{
+ "set": "G0",
+ "release": "data-20261016-sample",
+ "status": "draft_unvalidated",
+ "note": "Deterministic MCP smoke cases (no LLM) for the 2026-10-16 sample release (PLAN §11.1 G0, §13 M1). Merged in M2 from tests/contract/g0_smoke.json (contract tests) and ui/lgx_ui/gold/g0_dev_sample.json (Streamlit Eval tab): the union of their checks, in the lgx_ui.evalg0 format so the Eval tab reads this file through LGX_EVAL_DIR=eval/gold. Paths address structuredContent; ops: equals, contains, any_contains, all_equals, any_startswith, exists, nonempty, in, gte, lte.",
+ "items": [
+  {
+   "id": "G0-01",
+   "tool": "about_corpus",
+   "arguments": {},
+   "description": "Corpus card: sync date and vector status (embeddings off)",
+   "checks": [
+    {
+     "path": "snapshot.sync_date",
+     "op": "equals",
+     "value": "2026-10-16"
+    },
+    {
+     "path": "snapshot.release_id",
+     "op": "equals",
+     "value": "data-20261016-sample"
+    },
+    {
+     "path": "embedding.vector_status",
+     "op": "equals",
+     "value": "disabled:provider_none"
+    },
+    {
+     "path": "embedding.vectors",
+     "op": "equals",
+     "value": 0
+    },
+    {
+     "path": "licences.data",
+     "op": "equals",
+     "value": "CC BY 4.0"
+    },
+    {
+     "path": "attribution",
+     "op": "nonempty"
+    },
+    {
+     "path": "disclaimer",
+     "op": "nonempty"
+    }
+   ]
+  },
+  {
+   "id": "G0-02",
+   "tool": "get_article",
+   "arguments": {
+    "citation": "art. L. 121-1 C. trav."
+   },
+   "description": "M1 acceptance: Code du travail art. L. 121-1 in code/travail/20260726",
+   "checks": [
+    {
+     "path": "citation.article_eli",
+     "op": "equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-1"
+    },
+    {
+     "path": "citation.version_eli",
+     "op": "equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/code/travail/20260726"
+    },
+    {
+     "path": "citation.text_basis",
+     "op": "equals",
+     "value": "consolidated"
+    },
+    {
+     "path": "citation.status_as_of.status",
+     "op": "equals",
+     "value": "in-force"
+    },
+    {
+     "path": "citation.licence",
+     "op": "equals",
+     "value": "http://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+     "path": "citation.article_wording_since",
+     "op": "equals",
+     "value": "2020-11-01"
+    },
+    {
+     "path": "text",
+     "op": "nonempty"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_NOT_OFFICIAL"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_SNAPSHOT"
+    }
+   ]
+  },
+  {
+   "id": "G0-03",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+    "article": "56"
+   },
+   "description": "a686 Art. 56 is a repealed stub (style=del)",
+   "checks": [
+    {
+     "path": "is_repealed",
+     "op": "equals",
+     "value": true
+    },
+    {
+     "path": "citation.warnings",
+     "op": "contains",
+     "value": "W_ARTICLE_REPEALED"
+    },
+    {
+     "path": "text",
+     "op": "equals",
+     "value": ""
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_ARTICLE_REPEALED"
+    }
+   ]
+  },
+  {
+   "id": "G0-04",
+   "tool": "get_article",
+   "arguments": {
+    "citation": "art. 1384 du Code civil"
+   },
+   "description": "Code civil art. 1384",
+   "checks": [
+    {
+     "path": "citation.article_eli",
+     "op": "equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384"
+    },
+    {
+     "path": "citation.version_eli",
+     "op": "any_contains",
+     "value": "/code/civil/"
+    }
+   ]
+  },
+  {
+   "id": "G0-05",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "licenciement avec préavis",
+    "filters": {
+     "doc_types": [
+      "CODE"
+     ]
+    },
+    "top_k": 5
+   },
+   "description": "Lexical search finds the Code du travail; envelope warnings present",
+   "checks": [
+    {
+     "path": "hits[*].citation.version_eli",
+     "op": "any_contains",
+     "value": "/code/travail/"
+    },
+    {
+     "path": "hits[*].citation.doc_type",
+     "op": "all_equals",
+     "value": "CODE"
+    },
+    {
+     "path": "retrieval.mode_used",
+     "op": "equals",
+     "value": "lexical"
+    },
+    {
+     "path": "retrieval.vector_status",
+     "op": "equals",
+     "value": "disabled:provider_none"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_NOT_OFFICIAL"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_SNAPSHOT"
+    }
+   ]
+  },
+  {
+   "id": "G0-06",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "protection des données traitement",
+    "top_k": 5
+   },
+   "description": "CNPD law (loi/2018/08/01/a686)",
+   "checks": [
+    {
+     "path": "hits[*].citation.act_eli",
+     "op": "contains",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
+    },
+    {
+     "path": "hits[*].citation.act_eli",
+     "op": "any_contains",
+     "value": "loi/2018/08/01/a686"
+    }
+   ]
+  },
+  {
+   "id": "G0-07",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "responsabilité civile dommage",
+    "top_k": 5
+   },
+   "description": "Code civil articles on liability",
+   "checks": [
+    {
+     "path": "hits[*].citation.version_eli",
+     "op": "any_contains",
+     "value": "/code/civil/"
+    }
+   ]
+  },
+  {
+   "id": "G0-08",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "contrat de travail",
+    "retrieval_mode": "hybrid",
+    "top_k": 3
+   },
+   "description": "hybrid falls back to lexical with a reason while vectors are disabled",
+   "checks": [
+    {
+     "path": "retrieval.mode_requested",
+     "op": "equals",
+     "value": "hybrid"
+    },
+    {
+     "path": "retrieval.mode_used",
+     "op": "equals",
+     "value": "lexical"
+    },
+    {
+     "path": "retrieval.reason",
+     "op": "equals",
+     "value": "vectors disabled: provider_none"
+    },
+    {
+     "path": "retrieval.reason",
+     "op": "nonempty"
+    }
+   ]
+  },
+  {
+   "id": "G0-09",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "liberté de manifester ses opinions",
+    "filters": {
+     "doc_types": [
+      "Constitution"
+     ]
+    },
+    "top_k": 5
+   },
+   "description": "doc_types filter applies to every hit",
+   "checks": [
+    {
+     "path": "hits",
+     "op": "nonempty"
+    },
+    {
+     "path": "hits[*].citation.doc_type",
+     "op": "all_equals",
+     "value": "Constitution"
+    }
+   ]
+  },
+  {
+   "id": "G0-10",
+   "tool": "search_legislation",
+   "arguments": {
+    "query": "commission nationale",
+    "filters": {
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
+    },
+    "top_k": 5
+   },
+   "description": "act_eli filter applies to every hit",
+   "checks": [
+    {
+     "path": "hits",
+     "op": "nonempty"
+    },
+    {
+     "path": "hits[*].citation.act_eli",
+     "op": "all_equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
+    }
+   ]
+  },
+  {
+   "id": "G0-11",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446",
+    "include": [
+     "versions",
+     "amendments"
+    ]
+   },
+   "description": "stub_fallback act with W_STUB",
+   "checks": [
+    {
+     "path": "text_basis",
+     "op": "equals",
+     "value": "stub_fallback"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_STUB"
+    },
+    {
+     "path": "versions",
+     "op": "nonempty"
+    },
+    {
+     "path": "fallback_version.has_text",
+     "op": "equals",
+     "value": true
+    },
+    {
+     "path": "current_version.is_stub",
+     "op": "equals",
+     "value": true
+    }
+   ]
+  },
+  {
+   "id": "G0-12",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1922/03/05/n1"
+   },
+   "description": "original_possibly_outdated: W_NOT_CONSOLIDATED + mandatory amending list (>= 2 acts)",
+   "checks": [
+    {
+     "path": "text_basis",
+     "op": "equals",
+     "value": "original_possibly_outdated"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_NOT_CONSOLIDATED"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_PARTIAL_REPEAL_UNKNOWN"
+    },
+    {
+     "path": "amending_acts_since_text_date[1].eli",
+     "op": "nonempty"
+    }
+   ]
+  },
+  {
+   "id": "G0-13",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1999/05/31/n8",
+    "as_of": "2026-10-16"
+   },
+   "description": "repealed act (dnl 2026-08-01)",
+   "checks": [
+    {
+     "path": "status_as_of.status",
+     "op": "equals",
+     "value": "no-longer-in-force"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_REPEALED"
+    },
+    {
+     "path": "text_basis",
+     "op": "equals",
+     "value": "metadata_only"
+    }
+   ]
+  },
+  {
+   "id": "G0-14",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510",
+    "as_of": "2026-10-16"
+   },
+   "description": "published, not yet in force at T (dei 2026-10-20)",
+   "checks": [
+    {
+     "path": "status_as_of.status",
+     "op": "equals",
+     "value": "not-yet-in-force"
+    },
+    {
+     "path": "warnings[*].code",
+     "op": "contains",
+     "value": "W_NOT_YET_IN_FORCE"
+    }
+   ]
+  },
+  {
+   "id": "G0-15",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2025/11/20/a510",
+    "as_of": "2026-10-20"
+   },
+   "description": "time travel: in force from 2026-10-20",
+   "checks": [
+    {
+     "path": "status_as_of.status",
+     "op": "equals",
+     "value": "in-force"
+    },
+    {
+     "path": "text_basis",
+     "op": "equals",
+     "value": "original_never_amended"
+    }
+   ]
+  },
+  {
+   "id": "G0-16",
+   "tool": "resolve_citation",
+   "arguments": {
+    "text": "loi du 1er août 2018, art. 5"
+   },
+   "description": "20 laws share the date: never guess",
+   "checks": [
+    {
+     "path": "status",
+     "op": "equals",
+     "value": "ambiguous"
+    },
+    {
+     "path": "candidates[*].act_eli",
+     "op": "contains",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
+    },
+    {
+     "path": "candidates[*].act_eli",
+     "op": "contains",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a689"
+    }
+   ]
+  },
+  {
+   "id": "G0-17",
+   "tool": "resolve_citation",
+   "arguments": {
+    "text": "art. L. 121-1 C. trav."
+   },
+   "description": "code abbreviation resolves to the article",
+   "checks": [
+    {
+     "path": "status",
+     "op": "equals",
+     "value": "resolved"
+    },
+    {
+     "path": "candidates[0].unit_eli",
+     "op": "equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-1"
+    },
+    {
+     "path": "candidates[0].reason",
+     "op": "equals",
+     "value": "alias"
+    },
+    {
+     "path": "candidates[*].unit_eli",
+     "op": "any_contains",
+     "value": "/code/travail/art_l_121-1"
+    }
+   ]
+  },
+  {
+   "id": "G0-18",
+   "tool": "resolve_citation",
+   "arguments": {
+    "text": "Mém. A n° 686 de 2018"
+   },
+   "description": "a Mémorial A reference resolves to its act",
+   "checks": [
+    {
+     "path": "status",
+     "op": "equals",
+     "value": "resolved"
+    },
+    {
+     "path": "candidates[0].act_eli",
+     "op": "equals",
+     "value": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
+    },
+    {
+     "path": "candidates[0].reason",
+     "op": "equals",
+     "value": "memorial"
+    }
+   ]
+  },
+  {
+   "id": "G0-19",
+   "tool": "get_article",
+   "arguments": {
+    "article": "5"
+   },
+   "description": "neither citation nor act_eli: BAD_INPUT",
+   "expect_error": true,
+   "checks": [
+    {
+     "path": "error.code",
+     "op": "equals",
+     "value": "BAD_INPUT"
+    }
+   ]
+  },
+  {
+   "id": "G0-20",
+   "tool": "get_act",
+   "arguments": {
+    "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+    "as_of": "2028-01-01"
+   },
+   "description": "as_of beyond the horizon H = T + 365",
+   "expect_error": true,
+   "checks": [
+    {
+     "path": "error.code",
+     "op": "equals",
+     "value": "AS_OF_OUT_OF_RANGE"
+    }
+   ]
+  }
+ ]
+}

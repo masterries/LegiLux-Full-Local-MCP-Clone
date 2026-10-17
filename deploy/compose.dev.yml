@@ -46,6 +46,8 @@ x-offline-env: &offline
   NO_PROXY: "*"
 
 x-ollama-image: &ollama_image "${LGX_OLLAMA_IMAGE:-mirror.gcr.io/ollama/ollama:0.40.5@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241}"
+# TEI cpu-1.9.4 (images.lock tei-cpu): index digest 2538ea1c…, linux/amd64 manifest 8419f533…, created 2026-09-15
+x-tei-image: &tei_image "${LGX_TEI_IMAGE:-ghcr.io/huggingface/text-embeddings-inference:cpu-1.9.4@sha256:2538ea1c9640d3763b15af668039d24172d063b42337b0c27796fc2be180c78d}"
 
 networks:
   backend:
@@ -170,9 +172,12 @@ services:
       LGX_MCP_TOKEN: *mcp_token                         # dev only (airgap: LGX_MCP_TOKEN_FILE secret)
       LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000,127.0.0.1:8000,localhost:${LGX_DEV_MCP_PORT:-8000},127.0.0.1:${LGX_DEV_MCP_PORT:-8000}"
       LGX_ALLOWED_ORIGINS: "http://localhost:${LGX_DEV_UI_PORT:-8501},http://127.0.0.1:${LGX_DEV_UI_PORT:-8501}"
-      LGX_RERANK: "${LGX_RERANK:-off}"                  # the TEI reranker joins in M2 (Appendix C service rerank)
-      LGX_RERANK_URL: "${LGX_RERANK_URL:-}"
-      LGX_RERANK_K: "${LGX_RERANK_K:-16}"
+      LGX_RERANK: "${LGX_RERANK:-off}"                  # auto with the `rerank` profile (service rerank below)
+      LGX_RERANK_URL: "${LGX_RERANK_URL:-http://rerank:8080}"
+      LGX_RERANK_K: "${LGX_RERANK_K:-16}"               # PLAN §8.3 cpu: 16 candidates
+      LGX_RERANK_BATCH: "16"                            # client-side split, <= the TEI --max-client-batch-size below
+      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 4 vCPU fp32: 16 x 600 chars ~ 19 s (1,800: 60 s)
+      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-60}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
       LGX_EMBED_PROVIDER: none                          # user decision: embeddings off (lexical-only)
       LGX_TZ: Europe/Luxembourg
@@ -187,6 +192,34 @@ services:
       timeout: 5s
       retries: 30
     ports: ["127.0.0.1:${LGX_DEV_MCP_PORT:-8000}:8000"]
+    networks: [backend, edge]
+
+  # -------------------------------------------------------------------------------------------- reranker (optional)
+  rerank:                                               # profile rerank: TEI cross-encoder (PLAN §8.3 step 3, Appendix C)
+    <<: *base                                           # LGX_RERANK=auto docker compose -f deploy/compose.dev.yml --profile rerank up -d
+    profiles: [rerank]
+    image: *tei_image
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp", "/data"]                            # /data = HUGGINGFACE_HUB_CACHE of the image (never used offline)
+    environment:
+      <<: *offline
+      RAYON_NUM_THREADS: "${LGX_RERANK_THREADS:-4}"     # the image default is 8; the dev host has 4 vCPU
+    # Model: scripts/fetch_models.sh (sha256-pinned in deploy/models.lock) -> data/models/hf, mounted read-only.
+    # --max-client-batch-size 64 >= LGX_RERANK_BATCH (client split) and >= LGX_RERANK_K (one call holds every
+    # candidate); --max-batch-tokens 4096 caps one pair at 4,096 tokens (auto-truncate) and cuts the CPU warm-up from
+    # 9 min (default 16,384: one 8k-token sequence) to 1.7 min on 4 vCPU without changing throughput.
+    command: ["--model-id", "/models/hf/bge-reranker-v2-m3@953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e", "--port", "8080",
+              "--max-client-batch-size", "64", "--max-batch-tokens", "4096", "--auto-truncate", "true"]
+    volumes: ["${LGX_DEV_MODELS_DIR:-../data/models/hf}:/models/hf:ro"]
+    healthcheck:                                        # /health answers once the model is loaded and warmed up
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 300s
+      start_interval: 5s
+    ports: ["127.0.0.1:${LGX_DEV_RERANK_PORT:-8090}:8080"]   # host-side eval / contract tests (LGX_TEST_RERANK_URL)
     networks: [backend, edge]
 
   # -------------------------------------------------------------------------------------------- LLM (optional)

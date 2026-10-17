@@ -293,7 +293,11 @@ class _Selector:
         self._deny_tree = tuple(p + "/" for p in self.deny)
         self.natural = re.compile(self.scope.exclusions.naturalisation.title_regex)
         self.temporary = re.compile(self.scope.temporary_traffic.title_regex)
-        self.members = {_abs(m.member): _abs(m.recueil) for m in config.recueil_members.members}
+        self.members = {
+            _abs(m.member): _abs(m.recueil)
+            for m in sorted(config.recueil_members.members, key=lambda m: (m.member, m.recueil), reverse=True)
+            if m.route
+        }  # only routed members (route: false = excerpt, own consolidation, or recueil without text)
         self.excluded: Counter[str] = Counter()
         self.privacy_excluded: set[str] = set()  # work ELIs whose relations must also disappear
         self.anomalies: dict[str, list[str]] = defaultdict(list)
@@ -435,7 +439,26 @@ class _Selector:
         else:
             self.original(out, versions, forced=None)
         self.close_windows(out, versions)
+        self.route_member(out)
         return out
+
+    def route_member(self, out: Outcome) -> None:
+        """Code-recueil members without a usable consolidation of their own are routed to the code text
+        (PLAN §2.6 item 4): served JO originals in step 3, and members without stored text (PDF-only,
+        licence, type) too — e.g. ``agd/1955/11/23/n1``, whose only consolidated text is the Code de la route.
+        Repealed members and members with their own consolidation are never routed."""
+        member_of = self.members.get(out.eli_work)
+        if not member_of or out.superseded_by or out.text_basis in (TextBasis.CONSOLIDATED, TextBasis.STUB_FALLBACK):
+            return
+        if out.text_basis is TextBasis.METADATA_ONLY and out.metadata_reason in (
+            MetadataReason.REPEALED,
+            MetadataReason.REPEALED_BASE,
+            MetadataReason.TEMPORARY,
+            MetadataReason.EXCLUDED_BY_CONFIG,
+        ):
+            return
+        out.flags.add(ActFlag.SUPERSEDED_BY_CODE)
+        out.superseded_by = member_of
 
     def consolidated_work(self, out: Outcome, versions: list[VersionRec]) -> None:
         T, act = self.T, out.act

@@ -36,6 +36,7 @@ class ReleaseInfo:
     aliases: dict[str, list[int]]  # alias_norm -> act ids
     alias_kinds: dict[str, str] = field(default_factory=dict)
     embedding_models: list[dict[str, Any]] = field(default_factory=list)
+    search_api: int = 1  # 1: lgx.search_candidates of M1 (9 arguments); 2: + expansion, act boosts, options (M2)
 
     def legal(self, code: str, lang: str = "fr") -> str:
         texts = self.legal_texts.get(code, {})
@@ -79,6 +80,10 @@ async def load_release(db: Database) -> ReleaseInfo:
         "SELECT embedding_set_id, provider, model_id, model_version, model_aliases, dim, parity_threshold"
         " FROM lgx.embedding_model ORDER BY embedding_set_id"
     )
+    api = await db.fetchone(
+        "SELECT max(p.pronargs) AS n FROM pg_proc p WHERE p.proname = 'search_candidates'"
+        " AND p.pronamespace = 'lgx'::regnamespace"
+    )
     return ReleaseInfo(
         release_id=row["release_id"],
         sync_date=row["sync_date"],
@@ -96,6 +101,7 @@ async def load_release(db: Database) -> ReleaseInfo:
         aliases=aliases,
         alias_kinds=kinds,
         embedding_models=models,
+        search_api=2 if api and (api["n"] or 0) >= 12 else 1,
     )
 
 

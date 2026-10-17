@@ -125,6 +125,9 @@ async def about_corpus(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> T
             "rerank_reason": rr.state.reason,
             "rerank_k": rt.settings.rerank_k,
             "top_k": 8,
+            "search_api": ctx.release.search_api,
+            "lexical_ranker": rt.settings.lexical_ranker if ctx.release.search_api >= 2 else "rank_cd",
+            "query_expansion": rt.settings.query_expansion and ctx.release.search_api >= 2,
         },
         "licences": {
             "data": "CC BY 4.0",

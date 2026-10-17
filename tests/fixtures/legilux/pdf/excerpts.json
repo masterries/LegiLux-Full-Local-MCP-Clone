@@ -1,0 +1,92 @@
+{
+ "version": 1,
+ "snapshot": "2026-10-16",
+ "licence_note": "Page excerpts of CC BY 4.0 Legilux PDF manifestations (jolux:license), © Service central de législation, Grand-Duché de Luxembourg; source legilux.public.lu. Change: only the listed pages were kept (pypdfium2 page import, no other modification).",
+ "excerpts": {
+  "css": {
+   "path": "pdf/eli-etat-leg-code-securite_sociale-20260101-fr-pdf.p67-70_307-309_591-592.pdf",
+   "pages": "67-70,307-309,591-592",
+   "sha256": "7464792a45fcd991d5f8aebfc5c79583df5d7bfda926fa817d0c513a0b06b73a",
+   "bytes": 63506,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "css_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/securite_sociale/20260101/fr/pdf/eli-etat-leg-code-securite_sociale-20260101-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/securite_sociale/20260101",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-01-01",
+    "upper": null
+   }
+  },
+  "route": {
+   "path": "pdf/eli-etat-leg-code-route-20260612-fr-pdf.p10-13_49-50_58-59.pdf",
+   "pages": "10-13,49-50,58-59",
+   "sha256": "6cdb9a9d35de344cdbaffe9ad108773c38d7c71e9d5d05382b9ec5e3ece9fd02",
+   "bytes": 77809,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "route_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/route/20260612/fr/pdf/eli-etat-leg-code-route-20260612-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/route/20260612",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-06-12",
+    "upper": null
+   }
+  },
+  "communal": {
+   "path": "pdf/eli-etat-leg-code-communal-20260801-fr-pdf.p40-41.pdf",
+   "pages": "40-41",
+   "sha256": "fecf71f53ebd857991d0e5bfc6a9df79a036ec8ac2ea216f9f74f082112e1cfd",
+   "bytes": 35002,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "communal_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/communal/20260801/fr/pdf/eli-etat-leg-code-communal-20260801-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/communal/20260801",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-08-01",
+    "upper": null
+   }
+  },
+  "educ": {
+   "path": "pdf/eli-etat-leg-code-education_nationale-20260915-fr-pdf.p59-60.pdf",
+   "pages": "59-60",
+   "sha256": "31576a555e1b6003445beccd1765d263b892e3fa1ac0d9180292aef1fe7319e3",
+   "bytes": 45531,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "educ_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/education_nationale/20260915/fr/pdf/eli-etat-leg-code-education_nationale-20260915-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale/20260915",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-09-15",
+    "upper": null
+   }
+  },
+  "secfin": {
+   "path": "pdf/eli-etat-leg-memorial-2003-a164-fr-pdf.p3_10-11.pdf",
+   "pages": "3,10-11",
+   "sha256": "2ebf01cba70cf88075f4e5e20516784fd93e5f0c3f07a9fe77a02b61924151a2",
+   "bytes": 47789,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "secfin_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/memorial/2003/a164/fr/pdf/eli-etat-leg-memorial-2003-a164-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1/consolide/20031001",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1",
+   "doc_type": "LOI",
+   "kind": "consolidated",
+   "text_valid": {
+    "lower": "2003-10-01",
+    "upper": null
+   }
+  }
+ }
+}

@@ -55,6 +55,8 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 | `LGX_ALLOWED_HOSTS` | `127.0.0.1:*,localhost:*,[::1]:*,mcp:*` | Host allowlist for `/mcp` (`host:port`, `host:*`, `*`) → 421 |
 | `LGX_ALLOWED_ORIGINS` | none | Origin allowlist (absent Origin is fine) → 403 |
 | `LGX_RERANK_URL` / `LGX_RERANK` / `LGX_RERANK_K` / `LGX_RERANK_BATCH` | unset / auto / 40 / 32 | TEI `/rerank`; `auto` degrades with a reason, `on` → `BACKEND_UNAVAILABLE`, batches ≤ 32 |
+| `LGX_RERANK_BODY_CHARS` / `LGX_RERANK_TIMEOUT_S` | 1800 / 10 | body cut per candidate (the header is compacted, version label dropped); per-call timeout. Dev host (4 vCPU): 600 / 60 |
+| `LGX_LEXICAL_RANKER` / `LGX_QUERY_EXPANSION` / `LGX_LEXICAL_OPTS` | bm25 / on / `{}` | M2 releases: IDF-weighted lexical ranking in SQL (`rank_cd` = the M1 ordering); curated FR synonyms + DE/EN glossary (`retrieval/query_expansion.yaml`, override `$LGX_CONFIG_DIR/query_expansion.yaml`); ranker knobs as JSON (`40_search.sql` `p_opts`, eval/tuning only) |
 | `LGX_RETRIEVAL_MODE_DEFAULT` | auto | auto \| lexical \| hybrid |
 | `LGX_EMBED_PROVIDER` | none | embeddings OFF: `vector_status = disabled:provider_none`, `mode_used = lexical` |
 | `LGX_TZ` / `LGX_STALENESS_WARN_DAYS` / `LGX_STALENESS_CRITICAL_DAYS` | Europe/Luxembourg / 30 / 90 | default `as_of` and `W_DATA_STALE` |
@@ -69,12 +71,29 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 
 1. `lgx_core.citeparse` finds citations in the query; resolved articles become `p_cited_units` (weight 10);
    identifier tokens (`2016/679`, `L. 121-1`, `124-10`, `12bis`) feed the exact branch; EU/case-law/communal/
-   Mémorial B/bill vocabulary adds `W_OUT_OF_SCOPE` (the search still runs).
-2. One `lgx.search_candidates(...)` call with every filter on every branch (`doc_types`, `act_eli` → act ids,
-   `in_force_only`, `as_of`); dense only when `vector_status = ok`.
-3. Lexical mode re-orders the fused candidates by cited unit → distinct query terms matched → RRF score
-   (native FTS has no IDF). The optional TEI reranker decides after that.
-4. One hit per article; citation objects and warnings from `lgx.serving_at` (status and label at `as_of`).
+   Mémorial B/bill vocabulary adds `W_OUT_OF_SCOPE` (the search still runs). The acts the query names (« Code du
+   travail », « Constitution », every candidate of an ambiguous « loi du 1er août 2018 ») are boosted, and the
+   citation spans leave the lexical text (« Code du travail » would otherwise match every code header).
+2. Query preparation (`retrieval/expansion.py`, M2 releases): interrogative / framing words out (« quel »,
+   « selon »; German and English function words only for a question in that language), curated expansions in
+   with a lower weight (« liberté d'expression » → « liberté de manifester ses opinions »; DE/EN glossary
+   « Kündigungsfrist », « notice period » → « délai de préavis licenciement ») — shown in
+   `query_interpretation.lexical`.
+3. One `lgx.search_candidates(...)` call with every filter on every branch (`doc_types`, `act_eli` → act ids,
+   `in_force_only`, `as_of`); dense only when `vector_status = ok`. **Search API 2** (M2 `40_search.sql`): the
+   lexical branch is BM25-like (idf × saturated tf, header matches weighted, proximity of adjacent query terms,
+   soft length normalisation, act boost; formula and knobs in the SQL header, decision in
+   `docs/adr/0001-lexical-ranker.md`). **Search API 1** (releases built before M2): `ts_rank_cd` + the M1
+   re-ordering by cited unit → distinct query terms matched → RRF score. `retrieval.search_api`,
+   `lexical_ranker` and `lexical_order` say which ran.
+4. The optional TEI reranker (`retrieval/rerank.py`) re-orders the first `LGX_RERANK_K` articles on « compact
+   header + body[:LGX_RERANK_BODY_CHARS] »; an article the question cites explicitly stays first (`hits[].score`
+   is then the reranker score, not monotonic for that hit); batches ≤ `LGX_RERANK_BATCH`; per-batch latency in
+   `retrieval.latency_ms.rerank_batches_ms`; after a failure it is not called again until the next probe (60 s),
+   so searches degrade at once (`reranked = false`, `rerank_reason`). Measured on 4 idle vCPU (fp32): 16 ×
+   (header + 600 characters) ≈ 19 s, 16 × 1,800 characters ≈ 60 s; G2 p50 17.7 s / p95 34 s on a busy host
+   (`eval/reports/m2-baseline.md`).
+5. One hit per article; citation objects and warnings from `lgx.serving_at` (status and label at `as_of`).
 
 The resolver (`lgx_mcp/resolve.py`) never guesses: two candidates within 0.05 → `ambiguous` (`AMBIGUOUS` in
 `get_article` / `get_act`, `status: ambiguous` in `resolve_citation`). The only act of a (type, date) is taken only
@@ -89,7 +108,8 @@ answers.
 
 ## Tests
 
-`tests/unit/test_mcp*.py`, `tests/unit/test_citeparse.py` (offline); `tests/contract/` (server in a thread
+`tests/unit/test_mcp*.py`, `tests/unit/test_citeparse.py` (offline); `tests/contract/test_mcp_m2.py` (M2 ranking on a
+search-API-2 release, the real TEI container at `LGX_TEST_RERANK_URL`); `tests/contract/` (server in a thread
 against the dev DB, official 2.3.0 client in both eras, G0 smoke set, health/auth/degraded states, stdio, and the
 real `mcp==1.27.2` client via `uv run --isolated`). They skip when the dev DB is not reachable
 (`LGX_TEST_REQUIRE_DB=1` turns that into a failure). Tests marked `any_release` need no sample content; CI runs them

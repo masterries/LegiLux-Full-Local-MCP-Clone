@@ -1,0 +1,3801 @@
+{
+ "set": "G3",
+ "started_at": "20261017T064759Z",
+ "items_total": 184,
+ "gold_status": "draft_unvalidated",
+ "gold_files": [
+  "warnings.json"
+ ],
+ "config": {
+  "backend": "in-process",
+  "mode": "lexical",
+  "ranker": "bm25",
+  "expansion": true,
+  "lexical_opts": {},
+  "rerank_k": null,
+  "rerank_body_chars": null,
+  "rerank_url": null,
+  "release_id": "data-20261016-sample",
+  "sync_date": "2026-10-16",
+  "search_api": 2,
+  "clock": "2026-10-16T12:00:00+02:00"
+ },
+ "summary": {
+  "n": 184,
+  "items_ok": 184,
+  "mandatory_warning_coverage": 1.0,
+  "expected_pairs": 563,
+  "missing_pairs": 0,
+  "forbidden_seen": 0,
+  "status_correct": 1.0,
+  "per_code": {
+   "W_ARTICLE_REPEALED": {
+    "expected": 6,
+    "present": 6
+   },
+   "W_BASE_LEGALE_ABROGEE": {
+    "expected": 12,
+    "present": 12
+   },
+   "W_CLOCK_SUSPECT": {
+    "expected": 2,
+    "present": 2
+   },
+   "W_CONSO_DISCONTINUED": {
+    "expected": 6,
+    "present": 6
+   },
+   "W_CONSO_LAGGING": {
+    "expected": 3,
+    "present": 3
+   },
+   "W_DATA_QUALITY": {
+    "expected": 14,
+    "present": 14
+   },
+   "W_DATA_STALE": {
+    "expected": 2,
+    "present": 2
+   },
+   "W_DERIVED_ELI": {
+    "expected": 21,
+    "present": 21
+   },
+   "W_FUTURE_VERSION": {
+    "expected": 15,
+    "present": 15
+   },
+   "W_NOT_CONSOLIDATED": {
+    "expected": 21,
+    "present": 21
+   },
+   "W_NOT_OFFICIAL": {
+    "expected": 184,
+    "present": 184
+   },
+   "W_NOT_YET_IN_FORCE": {
+    "expected": 6,
+    "present": 6
+   },
+   "W_OUT_OF_SCOPE": {
+    "expected": 3,
+    "present": 3
+   },
+   "W_PARTIAL_REPEAL_UNKNOWN": {
+    "expected": 56,
+    "present": 56
+   },
+   "W_REPEALED": {
+    "expected": 17,
+    "present": 17
+   },
+   "W_SNAPSHOT": {
+    "expected": 184,
+    "present": 184
+   },
+   "W_STUB": {
+    "expected": 6,
+    "present": 6
+   },
+   "W_SUNSET": {
+    "expected": 5,
+    "present": 5
+   }
+  },
+  "skipped": 0,
+  "gates": {
+   "mandatory_warnings==100%": true,
+   "status_statements>=98%": true
+  }
+ },
+ "items": [
+  {
+   "id": "G3-001",
+   "trigger": "envelope:always",
+   "tool": "about_corpus",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-002",
+   "trigger": "envelope:stale_level1",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_STALE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_DATA_STALE",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-003",
+   "trigger": "envelope:stale_level2",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_STALE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_DATA_STALE",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-004",
+   "trigger": "envelope:fresh",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-005",
+   "trigger": "envelope:clock_before_T",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CLOCK_SUSPECT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_CLOCK_SUSPECT",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-006",
+   "trigger": "envelope:clock_after_H",
+   "tool": "about_corpus",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CLOCK_SUSPECT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_DATA_STALE",
+    "W_CLOCK_SUSPECT",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-007",
+   "trigger": "envelope:clock_no_as_of",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_CLOCK_SUSPECT",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_error": "AS_OF_OUT_OF_RANGE",
+   "status_ok": true
+  },
+  {
+   "id": "G3-008",
+   "trigger": "search:out_of_scope_vocabulary",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-009",
+   "trigger": "search:out_of_scope_vocabulary",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-010",
+   "trigger": "search:out_of_scope_vocabulary",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_OUT_OF_SCOPE"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-011",
+   "trigger": "search:national_only",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-012",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-013",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-014",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-015",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-016",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-017",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-018",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-019",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-020",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-021",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-022",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-023",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-024",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-025",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-026",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-027",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-028",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-029",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-030",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-031",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-032",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-033",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-034",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-035",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-036",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-037",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-038",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-039",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-040",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-041",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-042",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-043",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-044",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-045",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-046",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-047",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-048",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-049",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-050",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-051",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-052",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-053",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-054",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-055",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-056",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-057",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-058",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-059",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-060",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-061",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-062",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-063",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-064",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-065",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-066",
+   "trigger": "act:stub_fallback",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-067",
+   "trigger": "article:stub_fallback",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-068",
+   "trigger": "search:stub_fallback",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_STUB"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-069",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-070",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-071",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-072",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-073",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-074",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-075",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-076",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-077",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-078",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-079",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-080",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-081",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-082",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-083",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-084",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-085",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-086",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-087",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-088",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_FUTURE_VERSION",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-089",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_FUTURE_VERSION",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-090",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_FUTURE_VERSION",
+    "W_DATA_QUALITY"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-091",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-092",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-093",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-094",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-095",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-096",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-097",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-098",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-099",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-100",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-101",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-102",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-103",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-104",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-105",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-106",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-107",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-108",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_CONSO_LAGGING",
+    "W_BASE_LEGALE_ABROGEE"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-109",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-110",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-111",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-112",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-113",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-114",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-115",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-116",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-117",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-118",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-119",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-120",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-121",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-122",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-123",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-124",
+   "trigger": "act:original_possibly_outdated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-125",
+   "trigger": "article:original_possibly_outdated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-126",
+   "trigger": "search:original_possibly_outdated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_STUB",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-127",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-128",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-129",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DATA_QUALITY"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-130",
+   "trigger": "act:consolidated",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-131",
+   "trigger": "article:consolidated",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-132",
+   "trigger": "search:consolidated",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-133",
+   "trigger": "act:original_never_amended",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-134",
+   "trigger": "article:original_never_amended",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-135",
+   "trigger": "search:original_never_amended",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-136",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-137",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-138",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-139",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-140",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-141",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_ARTICLE_REPEALED"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-142",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DERIVED_ELI",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_CONSO_DISCONTINUED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-143",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DERIVED_ELI",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-144",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DERIVED_ELI",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-145",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_DERIVED_ELI",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_CONSOLIDATED",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-146",
+   "trigger": "status:repealed",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-147",
+   "trigger": "status:repealed",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-148",
+   "trigger": "status:repealed",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-149",
+   "trigger": "status:repealed",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-150",
+   "trigger": "status:repealed",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-151",
+   "trigger": "status:repealed_implicit",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-152",
+   "trigger": "status:repealed_implicit",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-153",
+   "trigger": "status:repealed_implicit",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-154",
+   "trigger": "status:repealed_implicit",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-155",
+   "trigger": "status:repealed_implicit",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-156",
+   "trigger": "status:not_yet_in_force",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-157",
+   "trigger": "time_travel:in_force_from_dei",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-158",
+   "trigger": "status:not_yet_in_force",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-159",
+   "trigger": "time_travel:in_force_from_dei",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_DATA_STALE",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-160",
+   "trigger": "status:not_yet_in_force",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-161",
+   "trigger": "time_travel:in_force_from_dei",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-162",
+   "trigger": "status:not_yet_in_force",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-163",
+   "trigger": "time_travel:in_force_from_dei",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_DATA_STALE",
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-164",
+   "trigger": "status:not_yet_in_force",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "not-yet-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-165",
+   "trigger": "time_travel:in_force_from_dei",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-166",
+   "trigger": "status:sunset",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-167",
+   "trigger": "status:sunset",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-168",
+   "trigger": "status:sunset",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-169",
+   "trigger": "status:sunset",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-170",
+   "trigger": "status:sunset",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_SUNSET",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "got_status": "in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-171",
+   "trigger": "data_quality:act",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-172",
+   "trigger": "data_quality:act",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-173",
+   "trigger": "data_quality:act",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-174",
+   "trigger": "data_quality:act",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-175",
+   "trigger": "data_quality:act",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED",
+    "W_DATA_QUALITY"
+   ],
+   "got_status": "no-longer-in-force",
+   "status_ok": true
+  },
+  {
+   "id": "G3-176",
+   "trigger": "future:stored_next_version",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_FUTURE_VERSION"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-177",
+   "trigger": "future:before_switch",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-178",
+   "trigger": "future:stored_next_version",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN",
+    "W_DERIVED_ELI"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-179",
+   "trigger": "future:before_switch",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_NOT_YET_IN_FORCE",
+    "W_PARTIAL_REPEAL_UNKNOWN"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-180",
+   "trigger": "future:stored_next_version",
+   "tool": "search_legislation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_FUTURE_VERSION",
+    "W_DATA_QUALITY"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-181",
+   "trigger": "future:before_switch",
+   "tool": "get_act",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_FUTURE_VERSION"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_BASE_LEGALE_ABROGEE",
+    "W_FUTURE_VERSION",
+    "W_DATA_QUALITY"
+   ],
+   "status_ok": null
+  },
+  {
+   "id": "G3-182",
+   "trigger": "cite:resolved_warns_only_for_itself",
+   "tool": "resolve_citation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT"
+   ],
+   "got_status": "resolved",
+   "status_ok": true
+  },
+  {
+   "id": "G3-183",
+   "trigger": "cite:repealed_candidate",
+   "tool": "resolve_citation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "resolved",
+   "status_ok": true
+  },
+  {
+   "id": "G3-184",
+   "trigger": "cite:repealed_candidate",
+   "tool": "resolve_citation",
+   "expected": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "missing": [],
+   "forbidden_seen": [],
+   "ok": true,
+   "got": [
+    "W_NOT_OFFICIAL",
+    "W_SNAPSHOT",
+    "W_REPEALED"
+   ],
+   "got_status": "resolved",
+   "status_ok": true
+  }
+ ]
+}

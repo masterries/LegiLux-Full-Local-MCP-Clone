@@ -1,0 +1,3161 @@
+{
+ "set": "G2",
+ "release": "data-20261016-sample",
+ "status": "draft_unvalidated",
+ "note": "Retrieval v1 (PLAN §11.1 G2, M2): natural-language questions written by the developer from the article texts of the 2026-10-16 sample (no copied article wording; some keyword-style queries), each with 1-3 target articles (grade 2 = answers the question, 1 = related). DE/EN items ask the same legal points without French keywords (worst case: the LLM did not reformulate). Not lawyer-validated; the curated query expansion (lgx_mcp/retrieval/query_expansion.yaml) was written before these questions from general legal vocabulary, but by the same author: report ablations. Targets frozen by `python -m eval.harness freeze-g2` (key, act, article, text_sha256).",
+ "items": [
+  {
+   "id": "G2-001",
+   "lang": "fr",
+   "query": "Quel est le délai de préavis en cas de licenciement selon le Code du travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-3.",
+     "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
+    }
+   ]
+  },
+  {
+   "id": "G2-002",
+   "lang": "fr",
+   "query": "préavis licenciement ancienneté de services continus",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-3.",
+     "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
+    }
+   ]
+  },
+  {
+   "id": "G2-003",
+   "lang": "fr",
+   "query": "Combien de temps de préavis un salarié doit-il respecter s'il démissionne de son CDI ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-4.",
+     "text_sha256": "c2287dc3c9a147f4f15120402c693381f4741ff85537e14c75c249d9fca1961f"
+    }
+   ]
+  },
+  {
+   "id": "G2-004",
+   "lang": "fr",
+   "query": "L'employeur peut-il renvoyer un salarié sans préavis en cas de faute grave ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-10",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-10",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-10.",
+     "text_sha256": "3713265282bac7dfd85c423dd7a19a6e7a6f70cc7e1dc82c42699413ebba0bd0"
+    }
+   ]
+  },
+  {
+   "id": "G2-005",
+   "lang": "fr",
+   "query": "Dans quelles entreprises le salarié doit-il être convoqué à un entretien avant son licenciement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-2.",
+     "text_sha256": "c76585a43347c3f1d467f939eb991aae029ed3339ac712787edb70c2feb55ac0"
+    }
+   ]
+  },
+  {
+   "id": "G2-006",
+   "lang": "fr",
+   "query": "Montant de l'indemnité de départ due au salarié licencié selon son ancienneté",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-7",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-7",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-7.",
+     "text_sha256": "10d84b4a352e9d323e15078a1bd4d56c39d423647138358a2e4712e61e1bd130"
+    }
+   ]
+  },
+  {
+   "id": "G2-007",
+   "lang": "fr",
+   "query": "Que doit verser la partie qui rompt un contrat à durée indéterminée sans respecter le délai de préavis ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-6.",
+     "text_sha256": "838f1a3b7659e816aff07cb496ea8406c1ea49238181c82d91e2147b661d4ce4"
+    }
+   ]
+  },
+  {
+   "id": "G2-008",
+   "lang": "fr",
+   "query": "Le salarié licencié peut-il exiger que l'employeur lui communique les motifs du licenciement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-5.",
+     "text_sha256": "e720db4b7ab1b5992c0a3b067e6c2e8ae1191de2ba90c7b64ad61af78b7202db"
+    }
+   ]
+  },
+  {
+   "id": "G2-009",
+   "lang": "fr",
+   "query": "Peut-on prévoir une clause d'essai dans un contrat à durée indéterminée et sous quelle forme ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 121-5.",
+     "text_sha256": "8a3544097f6b3fba36079f7bd3fe9117d7f59a5cc671a6d3aa89756253218fc4"
+    }
+   ]
+  },
+  {
+   "id": "G2-010",
+   "lang": "fr",
+   "query": "Le contrat de travail doit-il être établi par écrit et remis au salarié dès l'entrée en service ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 121-4.",
+     "text_sha256": "3843515006e6cbad13f62497e26b6240db5d8c5f226e41004398787cc847139c"
+    }
+   ]
+  },
+  {
+   "id": "G2-011",
+   "lang": "fr",
+   "query": "Que doit faire un salarié malade pour avertir son employeur et quand remettre le certificat médical ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_121-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 121-6.",
+     "text_sha256": "60180eb57f686d3fccb1c44ac166882cc0b8c161894abca7c71be77887aaf98c"
+    }
+   ]
+  },
+  {
+   "id": "G2-012",
+   "lang": "fr",
+   "query": "Dans quels cas peut-on recourir à un contrat de travail à durée déterminée ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 122-1.",
+     "text_sha256": "d5c13d52489523d31606b995cf4b1ea8977e3eb144a032763b2bb16a099d2945"
+    }
+   ]
+  },
+  {
+   "id": "G2-013",
+   "lang": "fr",
+   "query": "Quelles mentions obligatoires doit comporter un contrat à durée déterminée ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 122-2.",
+     "text_sha256": "d02a35901a48224e72a7aace668533f2235146b17ff5dfa921016c248f687ee4"
+    }
+   ]
+  },
+  {
+   "id": "G2-014",
+   "lang": "fr",
+   "query": "Un contrat à durée déterminée peut-il être rompu avant son échéance ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-13",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_122-13",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 122-13.",
+     "text_sha256": "e81fb12dcd792e3a856f6bfbd2d60f5078094b606fc16e109dd021528ebbf669"
+    }
+   ]
+  },
+  {
+   "id": "G2-015",
+   "lang": "fr",
+   "query": "Comment la loi définit-elle le harcèlement sexuel sur le lieu de travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 245-2.",
+     "text_sha256": "44e5eb9217300cbd096dddfcc5224964dae7913f54f973131124f2af31df7af4"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-4",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 245-4.",
+     "text_sha256": "2ed8c9f02c87f276752b5ea0e400b5ded2f6b950f9a22d916e48413e4269daa0"
+    }
+   ]
+  },
+  {
+   "id": "G2-016",
+   "lang": "fr",
+   "query": "Quelles obligations pèsent sur l'employeur lorsqu'il apprend qu'un salarié subit un harcèlement moral ?",
+   "targets": [
+    {
+     "act": "loi/2006/07/31/n2",
+     "num": "l246-3",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/2006/07/31/n2/art/l246-3|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 246-3.",
+     "text_sha256": "ab00a2e19a2b1c931d1c9e363dec2cb2c0937940538018b0d82cab7c304acc1a"
+    }
+   ]
+  },
+  {
+   "id": "G2-017",
+   "lang": "fr",
+   "query": "Définition du harcèlement moral dans les relations de travail",
+   "targets": [
+    {
+     "act": "loi/2006/07/31/n2",
+     "num": "l246-2",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/2006/07/31/n2/art/l246-2|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 246-2.",
+     "text_sha256": "4c7b5d0b56c5c529f38834b8a12c65d650a325a3d6350d68f9d0e21ba49e949f"
+    }
+   ]
+  },
+  {
+   "id": "G2-018",
+   "lang": "fr",
+   "query": "Un employeur peut-il licencier une salariée enceinte ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_337-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_337-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 337-1.",
+     "text_sha256": "c342b91b6cc8b7a3e3cda1e5092578eb412f85b1039acf47dae858a92d3335c0"
+    }
+   ]
+  },
+  {
+   "id": "G2-019",
+   "lang": "fr",
+   "query": "Comment une salariée enceinte demande-t-elle à être dispensée du travail de nuit ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_333-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_333-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 333-2.",
+     "text_sha256": "33f0ed2cd25a84cf494be3bd6ad2e21317df922caaa00895317c97d352836efc"
+    }
+   ]
+  },
+  {
+   "id": "G2-020",
+   "lang": "fr",
+   "query": "Le congé parental doit-il suivre immédiatement le congé de maternité ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-45",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-45",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-45",
+     "text_sha256": "9abb281fbd03124f645c55d579142a51ba186b76f58afd21ff1b19161e32d50b"
+    }
+   ]
+  },
+  {
+   "id": "G2-021",
+   "lang": "fr",
+   "query": "Un parent qui ne prend pas son congé parental peut-il le céder à l'autre parent ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-47",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-47",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-47.",
+     "text_sha256": "e337daeedc49eabf8e0b1eb029ecf0d03e9330e1c10dcc806a2328e657408352"
+    }
+   ]
+  },
+  {
+   "id": "G2-022",
+   "lang": "fr",
+   "query": "Qu'est-ce que le congé linguistique pour apprendre le luxembourgeois et qui y a droit ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-72",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-72",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-72.",
+     "text_sha256": "21c41d7ce5de74856f27346de6926381fc8b5c170180ff2632bd609897ce8c36"
+    }
+   ]
+  },
+  {
+   "id": "G2-023",
+   "lang": "fr",
+   "query": "Nombre maximal d'heures de congé linguistique sur une carrière",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-74",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-74",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-74.",
+     "text_sha256": "8575d3384ed8d1af3ed79ea2f560c44bc7c102ee277233fd2ab3b087b37ac375"
+    }
+   ]
+  },
+  {
+   "id": "G2-024",
+   "lang": "fr",
+   "query": "Combien de jours de congé-formation peut-on obtenir au total ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-61",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-61",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-61.",
+     "text_sha256": "d93b8e973ad7661701d1e3774936f157d7b952ddb77cf93f0595003ce80c2445"
+    }
+   ]
+  },
+  {
+   "id": "G2-025",
+   "lang": "fr",
+   "query": "Le congé culturel peut-il être fractionné en plusieurs parties ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-13",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_234-13",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 234-13.",
+     "text_sha256": "38e985d5638cff252d972d9ef2da720cde34bcb66b49cc2ce68ff7c43f98192f"
+    }
+   ]
+  },
+  {
+   "id": "G2-026",
+   "lang": "fr",
+   "query": "Qu'est-ce qui est considéré comme du travail supplémentaire ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_211-22",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_211-22",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 211-22.",
+     "text_sha256": "21cea950cb0a7ea87f60bc55c98b0c95bc0d9b4393b79269af490cc04bbd2c8a"
+    }
+   ]
+  },
+  {
+   "id": "G2-027",
+   "lang": "fr",
+   "query": "Un salarié qui a plusieurs emplois doit-il les déclarer à l'Inspection du travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_213-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_213-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 213-1.",
+     "text_sha256": "b5591d2cba4711e54912101f00c7a458e7845859e8e2b3b09d294da5528aab21"
+    }
+   ]
+  },
+  {
+   "id": "G2-028",
+   "lang": "fr",
+   "query": "À quel repos compensatoire a droit le salarié qui a travaillé un dimanche ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_231-7",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_231-7",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 231-7.",
+     "text_sha256": "88f322a73f88e018d9d4e10b39b1aef426e1df7d43d2c9d79b1652145e4bc4d0"
+    }
+   ]
+  },
+  {
+   "id": "G2-029",
+   "lang": "fr",
+   "query": "Le médecin du travail peut-il vérifier si un congé de maladie est justifié ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_325-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_325-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 325-2.",
+     "text_sha256": "244c2c0e3a210437c44368279ee20a678692a2f97825054162c67491b7adbcf9"
+    }
+   ]
+  },
+  {
+   "id": "G2-030",
+   "lang": "fr",
+   "query": "Sanctions pénales contre l'employeur qui n'organise pas les examens médicaux du médecin du travail",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_327-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_327-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 327-2.",
+     "text_sha256": "5ec012a2daa0585f8eceea703ef6d0a37db573a2a5a76e35d0afa659c34c38cd"
+    }
+   ]
+  },
+  {
+   "id": "G2-031",
+   "lang": "fr",
+   "query": "Qui est responsable de la sécurité et de la santé d'un travailleur intérimaire pendant sa mission ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-12",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-12",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 131-12.",
+     "text_sha256": "d4982e7a186ccaeffe303abfdff41e41b9f90cbaab614c271c2d5e099e2681b3"
+    }
+   ]
+  },
+  {
+   "id": "G2-032",
+   "lang": "fr",
+   "query": "Quel tribunal est compétent pour un litige sur le contrat de mission d'un intérimaire ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-18",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_131-18",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 131-18.",
+     "text_sha256": "2ad8f272fea9aa7aaedab8c32be655e95bd9b956836856b88509dea04bf7ed5d"
+    }
+   ]
+  },
+  {
+   "id": "G2-033",
+   "lang": "fr",
+   "query": "À quel moment un licenciement collectif prend-il effet ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_166-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 166-6.",
+     "text_sha256": "c689c712411545b2bfd298d013beed2c674706aa9d366efddfb2aa6ca70b942b"
+    }
+   ]
+  },
+  {
+   "id": "G2-034",
+   "lang": "fr",
+   "query": "Quelles conditions météorologiques ouvrent droit à l'indemnisation du chômage dû aux intempéries ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_531-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_531-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 531-2.",
+     "text_sha256": "759a69e8ea707e4f33be5b2645421f380771711245481697841edd50a577749a"
+    }
+   ]
+  },
+  {
+   "id": "G2-035",
+   "lang": "fr",
+   "query": "Dans quels cas l'indemnité de préretraite prend-elle fin ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_585-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_585-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 585-6.",
+     "text_sha256": "f83db8c030094eb3bad64e0505605e17b76ad7320ef6d2d2d4122b1d4efa24e9"
+    }
+   ]
+  },
+  {
+   "id": "G2-036",
+   "lang": "fr",
+   "query": "Un salarié qui démissionne doit-il rembourser les frais de formation continue payés par l'employeur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_542-15",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_542-15",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 542-15.",
+     "text_sha256": "c24b2651da1c61bde9f6180c986a092b567d5af72ab9240bdd618fe5761d370a"
+    }
+   ]
+  },
+  {
+   "id": "G2-037",
+   "lang": "fr",
+   "query": "Les délégués du personnel sont-ils payés pour leur mandat et qui prend en charge leurs frais ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_416-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_416-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 416-6.",
+     "text_sha256": "7f8c5adfa07accb24d6d323b8808dd7991ec694337ff9a685ba703b50e54910d"
+    }
+   ]
+  },
+  {
+   "id": "G2-038",
+   "lang": "fr",
+   "query": "Quel salaire minimum pour un étudiant qui travaille pendant les vacances scolaires ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_151-5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_151-5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 151-5.",
+     "text_sha256": "e14e26f16b576b5c3b27f255285fae9fc4afbf60ed4552c26243c4352ef9f38e"
+    }
+   ]
+  },
+  {
+   "id": "G2-039",
+   "lang": "fr",
+   "query": "Un stage d'étudiant de plus de quatre semaines doit-il être rémunéré ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_152-4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_152-4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 152-4.",
+     "text_sha256": "11fbbe382eaca1c7946b1848553f6fe118bfbb8efa91a0c020d76b7a1e30d825"
+    }
+   ]
+  },
+  {
+   "id": "G2-040",
+   "lang": "fr",
+   "query": "Que faut-il entendre par transfert d'entreprise pour le maintien des droits des salariés ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_127-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 127-2.",
+     "text_sha256": "a0758a0f963e0c0804e648b69dfcee968f5764fb0741af67834dee4e4e264e65"
+    }
+   ]
+  },
+  {
+   "id": "G2-041",
+   "lang": "fr",
+   "query": "Qui garantit le paiement des salaires en cas de faillite de l'employeur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_126-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_126-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 126-1.",
+     "text_sha256": "c6174f6c94644cef5bc5f05973f2c3aa6f91140184928bbde0af1aff05ce6529"
+    }
+   ]
+  },
+  {
+   "id": "G2-042",
+   "lang": "fr",
+   "query": "L'apprenti reçoit-il une indemnité pendant son apprentissage ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_111-11",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_111-11",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 111-11.",
+     "text_sha256": "7e78c31ec6cdf3796ba8157b239610affd61fbce3afc8aba46c13b0b97d08e23"
+    }
+   ]
+  },
+  {
+   "id": "G2-043",
+   "lang": "fr",
+   "query": "Un salarié à temps partiel est-il prioritaire pour un poste à temps plein qui se libère ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_123-3",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_123-3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 123-3.",
+     "text_sha256": "6bc76ad4d3307858126af0d2e8f88ac3102e9ae083188e2dafc331abe31054c0"
+    }
+   ]
+  },
+  {
+   "id": "G2-044",
+   "lang": "fr",
+   "query": "Quelle amende pour une annonce d'emploi contraire à l'égalité entre hommes et femmes ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_241-11",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_241-11",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 241-11.",
+     "text_sha256": "3f33cf499c969731ee0c4206e7f0796cbf4f5fd0a965faa3c5eb57061413cefd"
+    }
+   ]
+  },
+  {
+   "id": "G2-045",
+   "lang": "fr",
+   "query": "La discrimination fondée sur le sexe ou le changement de sexe est-elle interdite au travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_241-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_241-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 241-1.",
+     "text_sha256": "e1ff7f875beba30207c6f6b4104969e9c2886e5cfd318927ca776912e5e6ba6b"
+    }
+   ]
+  },
+  {
+   "id": "G2-046",
+   "lang": "fr",
+   "query": "Un salarié peut-il être sanctionné pour avoir porté plainte afin de faire respecter ses droits ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_010-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_010-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 010-2.",
+     "text_sha256": "0f5961b9e5e749c70edf4cb0972ccda45a7916c43e0e24ab52edea2c0b5ea95f"
+    }
+   ]
+  },
+  {
+   "id": "G2-047",
+   "lang": "fr",
+   "query": "Celui qui cause un dommage à autrui par sa faute doit-il le réparer ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1382",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1382",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1382.",
+     "text_sha256": "35ac2cc9097242f9b2599b14096f806bab9b7bbb4df35572316f4de81c919f89"
+    }
+   ]
+  },
+  {
+   "id": "G2-048",
+   "lang": "fr",
+   "query": "responsabilité des parents pour les dommages causés par leurs enfants mineurs",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1384.",
+     "text_sha256": "cdf9448d1e89b18d46086ccb93fb7bad2ab4d3f754585686065a49cba1fcc9d7"
+    }
+   ]
+  },
+  {
+   "id": "G2-049",
+   "lang": "fr",
+   "query": "Quels devoirs les époux ont-ils l'un envers l'autre ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_212",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_212",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 212.",
+     "text_sha256": "2410cd8606df9ba71a1aea40e8dd06c28c7ab988a7e2fb70f29e06798a163482"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_213",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_213",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 213.",
+     "text_sha256": "74b6e46c1bc6bc2017fe1ac7b487b4daa1aa497a5c18cb2dda3d272196a5f04d"
+    }
+   ]
+  },
+  {
+   "id": "G2-050",
+   "lang": "fr",
+   "query": "Un époux a-t-il besoin de l'accord de son conjoint pour exercer une profession ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_223",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_223",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 223.",
+     "text_sha256": "3d64cdf07054c8eb6bb7196836bd97b522f4dc8aebb6ab74453c43d15cb87898"
+    }
+   ]
+  },
+  {
+   "id": "G2-051",
+   "lang": "fr",
+   "query": "Quel est l'âge minimum pour se marier ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 144.",
+     "text_sha256": "f7a52ffb44a268865c095e1df471f9c696d4a9e82fc9ba8553ebf4b82b643273"
+    }
+   ]
+  },
+  {
+   "id": "G2-052",
+   "lang": "fr",
+   "query": "Un mineur peut-il se marier et qui doit donner son consentement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_148",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_148",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 148.",
+     "text_sha256": "36f38dcac0e4654438ee8fa94820aa2466dd0c2b89727081ec29cc72993c8d39"
+    }
+   ]
+  },
+  {
+   "id": "G2-053",
+   "lang": "fr",
+   "query": "Pour quelles causes le divorce peut-il être prononcé ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_229",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_229",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 229.",
+     "text_sha256": "826f1cdcb6bbffc3fc2878cdc425174bf1a9150a0032389a4528e6cef6718aeb"
+    }
+   ]
+  },
+  {
+   "id": "G2-054",
+   "lang": "fr",
+   "query": "Comment se passe un divorce par consentement mutuel et quelle convention faut-il soumettre au tribunal ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_230",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_230",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 230.",
+     "text_sha256": "928812e9983fde5bd265d394346d17f1fb8e43eae28cd53c2544f6d350863364"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_231",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_231",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 231.",
+     "text_sha256": "9b349f3a9dbb32d792190f76ff7330b7c4b518635b3d6117518f55b3bafcef1e"
+    }
+   ]
+  },
+  {
+   "id": "G2-055",
+   "lang": "fr",
+   "query": "Qui peut demander le divorce pour rupture irrémédiable des relations conjugales ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_232",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_232",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 232.",
+     "text_sha256": "d7f411eed95c3ab25ef7c442183dc62116e5f83885d24e78bb89898efde6e855"
+    }
+   ]
+  },
+  {
+   "id": "G2-056",
+   "lang": "fr",
+   "query": "De quelles manières le mariage est-il dissous ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_227",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_227",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 227.",
+     "text_sha256": "c339b538ae8cfdcbeb6ebdc30ba09e7c62561fd35e44bd37e427cacf9c239377"
+    }
+   ]
+  },
+  {
+   "id": "G2-057",
+   "lang": "fr",
+   "query": "Après le divorce, le parent qui garde les enfants peut-il obtenir le logement familial ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_253",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_253",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 253.",
+     "text_sha256": "a00bb9f17d6f0d115ffdbccb5bb79d97902a5bc2b92f98aa63f825e0e6aafa87"
+    }
+   ]
+  },
+  {
+   "id": "G2-058",
+   "lang": "fr",
+   "query": "Comment le Code civil définit-il le droit de propriété ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_544",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_544",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 544.",
+     "text_sha256": "625a33db388b38e7d18f7c637f9a53ba020874f223cd7ef52913cc348406580f"
+    }
+   ]
+  },
+  {
+   "id": "G2-059",
+   "lang": "fr",
+   "query": "Un contrat valablement conclu a-t-il force de loi entre les parties ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1134",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1134",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1134.",
+     "text_sha256": "ff3aca9c89451c93dfa8599fe69ca863f1516aaa3cef9e9ac25648ed38973e20"
+    }
+   ]
+  },
+  {
+   "id": "G2-060",
+   "lang": "fr",
+   "query": "Le vendeur répond-il des vices cachés de la chose vendue même s'il les ignorait ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1643",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1643",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1643.",
+     "text_sha256": "11ab9504b0de1899c6e58f3f746cd0065e319254f49337d3f0b1b27c6f9e99df"
+    }
+   ]
+  },
+  {
+   "id": "G2-061",
+   "lang": "fr",
+   "query": "Quelles sont les obligations principales du locataire ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1728",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1728",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1728.",
+     "text_sha256": "8702bf44ef9cc2253e3f6b5504f9010907eff1da1c5bda7dbaf5ac0b785c0bf8"
+    }
+   ]
+  },
+  {
+   "id": "G2-062",
+   "lang": "fr",
+   "query": "Quelles sont les obligations principales du vendeur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1603",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1603",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1603.",
+     "text_sha256": "28b623d8ad42054b173ca78086474eeb17d2a6bcd8efd40a2900d339c6877371"
+    }
+   ]
+  },
+  {
+   "id": "G2-063",
+   "lang": "fr",
+   "query": "À partir de quand l'acheteur devient-il propriétaire de la chose vendue ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1583",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1583",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1583.",
+     "text_sha256": "d6b64298b58bd9c925814952e504218c7a90054f04b551e29357d95d2ad40d83"
+    }
+   ]
+  },
+  {
+   "id": "G2-064",
+   "lang": "fr",
+   "query": "Quelles conditions doit remplir un testament écrit à la main pour être valable ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_970",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_970",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 970.",
+     "text_sha256": "9d705f2c63733597c298a554d7a2bab0a391e94f05cfd7989d2b8bc7ac7b36a0"
+    }
+   ]
+  },
+  {
+   "id": "G2-065",
+   "lang": "fr",
+   "query": "Que faut-il faire d'un testament olographe avant son exécution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1007",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1007",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1007.",
+     "text_sha256": "716cd96d5af54c59f9a1256d6fa5ef4eced850580a26abb3616a65c80f910044"
+    }
+   ]
+  },
+  {
+   "id": "G2-066",
+   "lang": "fr",
+   "query": "En fait de meubles, la possession vaut-elle titre et que peut faire la victime d'un vol ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2279",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2279",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 2279.",
+     "text_sha256": "e9e2ebae3925c052b3466d5ff354f399bc637d8b653591c636e1b82d4eb165e6"
+    }
+   ]
+  },
+  {
+   "id": "G2-067",
+   "lang": "fr",
+   "query": "Selon quelles règles les successions sont-elles dévolues aux héritiers ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_723",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_723",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 723.",
+     "text_sha256": "f8437938a0965a57db10c616bf853dcde7e2510fe1476e96403e734d7c584371"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_745",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_745",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 745.",
+     "text_sha256": "73a50a67df0959b6b00df6d5c6707a31b128c1027b3f403b497dacedc8488bd4"
+    }
+   ]
+  },
+  {
+   "id": "G2-068",
+   "lang": "fr",
+   "query": "Les enfants héritent-ils à parts égales de leurs parents ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_745",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_745",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 745.",
+     "text_sha256": "73a50a67df0959b6b00df6d5c6707a31b128c1027b3f403b497dacedc8488bd4"
+    }
+   ]
+  },
+  {
+   "id": "G2-069",
+   "lang": "fr",
+   "query": "Les frères et sœurs du défunt héritent-ils si ses parents sont déjà décédés ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_750",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_750",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 750.",
+     "text_sha256": "192862219565c529de96eb02a8723744f7fa28c60d343620fc62c5bbbfa1f313"
+    }
+   ]
+  },
+  {
+   "id": "G2-070",
+   "lang": "fr",
+   "query": "Où un enfant mineur est-il domicilié lorsque ses parents ont des domiciles différents ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_108",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_108",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 108.",
+     "text_sha256": "e7185f506c849e5d7793ab0a5fafa07d31b4ee5657d468c1e3ccdaa6f93cfbdf"
+    }
+   ]
+  },
+  {
+   "id": "G2-071",
+   "lang": "fr",
+   "query": "Le mari est-il présumé être le père de l'enfant conçu pendant le mariage ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_312",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_312",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 312.",
+     "text_sha256": "bee7e77ceef04976300d7f56b58cdd7d5f930f788562a402a2899498d0ee314d"
+    }
+   ]
+  },
+  {
+   "id": "G2-072",
+   "lang": "fr",
+   "query": "Faut-il le consentement des deux parents pour l'adoption d'un enfant mineur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_351",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_351",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 351.",
+     "text_sha256": "a00c3a43af95687bc23bd8545ca21a06fec77f6e431c0e7d780fd9ca10e90f5c"
+    }
+   ]
+  },
+  {
+   "id": "G2-073",
+   "lang": "fr",
+   "query": "Quelle protection pour un adulte dont les facultés mentales sont altérées par la maladie ou l'âge ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_490",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_490",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 490.",
+     "text_sha256": "54aec632d589f40cf6501d2ebc1e4f2cfddf73ed778aad8057ede16d0f1e7efe"
+    }
+   ]
+  },
+  {
+   "id": "G2-074",
+   "lang": "fr",
+   "query": "Les donations faites entre époux pendant le mariage peuvent-elles être révoquées ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1096",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1096",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1096.",
+     "text_sha256": "edae58820b5619b54197dba9510f14147f8b0c2f57210c53c8b4cd0f7bfd6645"
+    }
+   ]
+  },
+  {
+   "id": "G2-075",
+   "lang": "fr",
+   "query": "L'usufruitier peut-il donner le bien à bail ou céder son droit ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_595",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_595",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 595.",
+     "text_sha256": "2f0905c701adcc9ebec60773f81850536e5cea179e7c81bf01ef55f078afe80e"
+    }
+   ]
+  },
+  {
+   "id": "G2-076",
+   "lang": "fr",
+   "query": "Qui supporte les frais d'inscription d'une hypothèque ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2155",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_2155",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 2155.",
+     "text_sha256": "73f948bdfaa8e012134826c510e21a2ca97eade6e90904bf5fb0a17010608716"
+    }
+   ]
+  },
+  {
+   "id": "G2-077",
+   "lang": "fr",
+   "query": "Le transporteur est-il responsable des accidents des voyageurs et de la perte des marchandises ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1784",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1784",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1784.",
+     "text_sha256": "cf08e76460f1b4680cb9ab0da95d991c2ea8d0077525ffa17ed44cb6b0b05db9"
+    }
+   ]
+  },
+  {
+   "id": "G2-078",
+   "lang": "fr",
+   "query": "Les époux peuvent-ils organiser librement leur régime matrimonial par contrat ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1387",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1387",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1387.",
+     "text_sha256": "f11f49a5e40200360bd496d0185c30ab071c8c51387731301628546d59f8c2da"
+    }
+   ]
+  },
+  {
+   "id": "G2-079",
+   "lang": "fr",
+   "query": "Un associé doit-il réparer le dommage qu'il a causé à la société par sa faute ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1850",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1850",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1850.",
+     "text_sha256": "19a83d53ccb615739b7beca245d8a12e778e162eef590ac714019da68f15db4e"
+    }
+   ]
+  },
+  {
+   "id": "G2-080",
+   "lang": "fr",
+   "query": "Le personnel d'une maison de retraite peut-il acheter un bien appartenant à un résident ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1125-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1125-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1125-1.",
+     "text_sha256": "91420e9b22713d767aab6e051658431ea0fc4fd1f42e85e585d55389929b704e"
+    }
+   ]
+  },
+  {
+   "id": "G2-081",
+   "lang": "fr",
+   "query": "Le locataire troublé par une action concernant la propriété du fonds a-t-il droit à une diminution du loyer ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1726",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1726",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1726.",
+     "text_sha256": "ba3c408d044a2ca1525e8fa65789de605df8f950cc74beba91ab0b508464a860"
+    }
+   ]
+  },
+  {
+   "id": "G2-082",
+   "lang": "fr",
+   "query": "Comment le vol est-il défini dans le Code pénal ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 461.",
+     "text_sha256": "7ee372cccd7e79c8d5cf6a9c32a06e6dd86355fb442127c5694f34c662b496c3"
+    }
+   ]
+  },
+  {
+   "id": "G2-083",
+   "lang": "fr",
+   "query": "Quelle peine encourt l'auteur d'un meurtre ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_393",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_393",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 393.",
+     "text_sha256": "b8669b8b8b428bbd42d88be93bf81dba541a8a4a92eec72a9cf74e8ba871d154"
+    }
+   ]
+  },
+  {
+   "id": "G2-084",
+   "lang": "fr",
+   "query": "Quelle est la différence entre meurtre et assassinat ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_394",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_394",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 394.",
+     "text_sha256": "315537acc4d51a8f90a5c26c7e3d5ad71d2c16e268bb733303c4c58d3dd623a5"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_393",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_393",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 393.",
+     "text_sha256": "b8669b8b8b428bbd42d88be93bf81dba541a8a4a92eec72a9cf74e8ba871d154"
+    }
+   ]
+  },
+  {
+   "id": "G2-085",
+   "lang": "fr",
+   "query": "Peine pour des coups et blessures volontaires ayant causé une incapacité de travail",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_399",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_399",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 399.",
+     "text_sha256": "42e4030e0ca9592b5d3815f1045562544a52de7ae45282b660774d9ed0cc16f4"
+    }
+   ]
+  },
+  {
+   "id": "G2-086",
+   "lang": "fr",
+   "query": "Est-on punissable lorsqu'on blesse quelqu'un pour se défendre ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 416.",
+     "text_sha256": "7f26bc6dc82eb384abe76b92468e0425a60ac9f7a973a098e7cc422771f735f3"
+    }
+   ]
+  },
+  {
+   "id": "G2-087",
+   "lang": "fr",
+   "query": "Quelle sanction pour avoir causé involontairement la mort d'une personne ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_419",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_419",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 419.",
+     "text_sha256": "35b7d844c95a2763e5d8140b5d1a15a352785edf3038cea5e9bdca36838a1518"
+    }
+   ]
+  },
+  {
+   "id": "G2-088",
+   "lang": "fr",
+   "query": "Harceler quelqu'un de façon répétée est-il une infraction ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_442-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_442-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 442-2.",
+     "text_sha256": "009883eb303dde28403da80987d3897cbe1c50d7e280ba1af6646f56dea02d23"
+    }
+   ]
+  },
+  {
+   "id": "G2-089",
+   "lang": "fr",
+   "query": "Qu'est-ce que la calomnie et la diffamation en droit pénal ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_443",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_443",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 443.",
+     "text_sha256": "36b2d87d5ea4c76eeb1b196167975d2ab6f1ad2aa34d29d8bbdbb080641cd09b"
+    }
+   ]
+  },
+  {
+   "id": "G2-090",
+   "lang": "fr",
+   "query": "La violation du secret professionnel par un médecin est-elle punie ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_458",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_458",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 458.",
+     "text_sha256": "c6a19ba0e3d3308ceb85c3e3e525c48b8b20b889bb263420e1fc8e2a9b69ce41"
+    }
+   ]
+  },
+  {
+   "id": "G2-091",
+   "lang": "fr",
+   "query": "Quelle peine pour l'accès frauduleux à un système informatique ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_509-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_509-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 509-1.",
+     "text_sha256": "e42ba891b2f45d1bdcaacface04cbe3e3f07e4b15af883826d1047e5af1a5190"
+    }
+   ]
+  },
+  {
+   "id": "G2-092",
+   "lang": "fr",
+   "query": "Quelles peines sont prévues pour le blanchiment ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_506-5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_506-5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 506-5.",
+     "text_sha256": "4cf1ddbed3fad6c79cfdbfc898821bae82a78fe386eea1e82229c52957d805bc"
+    }
+   ]
+  },
+  {
+   "id": "G2-093",
+   "lang": "fr",
+   "query": "Un adulte qui fait des propositions sexuelles à un enfant de moins de seize ans sur internet risque quelle peine ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_385-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_385-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 385-2.",
+     "text_sha256": "a79534176ebcb8bf1687316986dbfff0ac38b319a8ac23f1490497aa5b788cdc"
+    }
+   ]
+  },
+  {
+   "id": "G2-094",
+   "lang": "fr",
+   "query": "La profanation de tombes et l'atteinte à l'intégrité d'un cadavre sont-elles punies ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_453",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_453",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 453.",
+     "text_sha256": "c10f290832c76e8401da51b7aae1a9f01c8ba49d1c6b37ee0dfd91b03a7d4733"
+    }
+   ]
+  },
+  {
+   "id": "G2-095",
+   "lang": "fr",
+   "query": "Quelle peine pour celui qui met le feu à un immeuble habité ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_510",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_510",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 510.",
+     "text_sha256": "5810b79c1bddfa491a81c7125a27cc7e7e11542f9a79d7f9ce49c035ebe6be09"
+    }
+   ]
+  },
+  {
+   "id": "G2-096",
+   "lang": "fr",
+   "query": "Le tribunal peut-il prononcer un travail d'intérêt général à la place de l'emprisonnement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_22",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_22",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 22.",
+     "text_sha256": "075316a0b1d5d79e7dcd7559141f40f959c4c90b28c90e266d558270aa5f03cd"
+    }
+   ]
+  },
+  {
+   "id": "G2-097",
+   "lang": "fr",
+   "query": "Peines alternatives à l'emprisonnement pour un délit, comme l'interdiction de conduire ou la confiscation du véhicule",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_21",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_21",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 21.",
+     "text_sha256": "eb228a1f1837d42e65c0807b93466e1990f14d95ed0ede4d6bc834e02d76572b"
+    }
+   ]
+  },
+  {
+   "id": "G2-098",
+   "lang": "fr",
+   "query": "Comment est calculée la contrainte par corps lorsque l'amende n'est pas payée ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_30",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_30",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 30.",
+     "text_sha256": "47a1921151181682257c7df0d47caf93a3f71250bd91f299b40bd189fafb6ffe"
+    }
+   ]
+  },
+  {
+   "id": "G2-099",
+   "lang": "fr",
+   "query": "Ne pas porter secours à une personne en danger est-il punissable ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_410-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_410-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 410-2.",
+     "text_sha256": "4290fb5adb43be143feb633c79a1d3ab379f8132be189fe05ecabffc6eaa3df8"
+    }
+   ]
+  },
+  {
+   "id": "G2-100",
+   "lang": "fr",
+   "query": "Tuer sans nécessité l'animal domestique d'autrui constitue-t-il une infraction ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_541",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_541",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 541.",
+     "text_sha256": "63d8f5229760b9a98bb692a839007ac582cbb107e1871ad9480dfbc37cf16425"
+    }
+   ]
+  },
+  {
+   "id": "G2-101",
+   "lang": "fr",
+   "query": "Organiser une loterie non autorisée est-il puni par la loi ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_302",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_302",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 302.",
+     "text_sha256": "546339ee35e80258ef6de955e0f810f42783f9d24c13fa24377da1b40ddb60a0"
+    }
+   ]
+  },
+  {
+   "id": "G2-102",
+   "lang": "fr",
+   "query": "Les bruits et tapages nocturnes sont-ils sanctionnés par une amende ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_561",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_561",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 561.",
+     "text_sha256": "b6cffe968bf5e7313ec8f0ada147d91542959732558a3828ab776a2854d56d65"
+    }
+   ]
+  },
+  {
+   "id": "G2-103",
+   "lang": "fr",
+   "query": "Quelle peine pour celui qui brise volontairement des scellés ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_284",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_284",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 284.",
+     "text_sha256": "8f176f733a96b4e66d445ff94950852b5bd8b793bd6393c09547cf12c9b21308"
+    }
+   ]
+  },
+  {
+   "id": "G2-104",
+   "lang": "fr",
+   "query": "Peine du fonctionnaire qui commet un faux dans un acte public",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_194",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_194",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 194.",
+     "text_sha256": "59df8059517b824f0073ceb5c3bdbde1cade24787a93275bcf0a24685938c851"
+    }
+   ]
+  },
+  {
+   "id": "G2-105",
+   "lang": "fr",
+   "query": "Quels actes constituent un crime de génocide ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_136bis",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_136bis",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 136bis.",
+     "text_sha256": "b69a0874d8ca7aced42ed3746f3db967438982c7b72f7a903d7a07548c882b1b"
+    }
+   ]
+  },
+  {
+   "id": "G2-106",
+   "lang": "fr",
+   "query": "Constitution liberté d'expression",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 23.",
+     "text_sha256": "e1af1468125ad926256c7cf90a9d4c8a60f6b2a95f05e4cd61d0cfd3549fb7fb"
+    }
+   ]
+  },
+  {
+   "id": "G2-107",
+   "lang": "fr",
+   "query": "La Constitution garantit-elle la liberté de la presse et interdit-elle la censure ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 23.",
+     "text_sha256": "e1af1468125ad926256c7cf90a9d4c8a60f6b2a95f05e4cd61d0cfd3549fb7fb"
+    }
+   ]
+  },
+  {
+   "id": "G2-108",
+   "lang": "fr",
+   "query": "Les Luxembourgeois sont-ils égaux devant la loi selon la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_15",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_15",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 15.",
+     "text_sha256": "0852457f7858e6a89f8202ce69d2c012315502acbe7b8ea1669085e5b873595f"
+    }
+   ]
+  },
+  {
+   "id": "G2-109",
+   "lang": "fr",
+   "query": "La police peut-elle entrer dans un domicile sans base légale ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_21",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_21",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 21.",
+     "text_sha256": "9299060e4b7cc448965cc562d5ca190d565f2753be590d92208d2080973174b4"
+    }
+   ]
+  },
+  {
+   "id": "G2-110",
+   "lang": "fr",
+   "query": "La liberté de religion et de conviction est-elle garantie par la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_24",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_24",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 24.",
+     "text_sha256": "ca464e6a9930701a955a1ea963064c50e3bbb5a22b0ab9d7955c515fa8c87669"
+    }
+   ]
+  },
+  {
+   "id": "G2-111",
+   "lang": "fr",
+   "query": "Le droit d'association est-il protégé par la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_26",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_26",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 26.",
+     "text_sha256": "30aef15998851a072d0f851fad26ff0429543cda6f16ec458801ef5d64459fec"
+    }
+   ]
+  },
+  {
+   "id": "G2-112",
+   "lang": "fr",
+   "query": "La Constitution reconnaît-elle un droit au travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_38",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_38",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 38.",
+     "text_sha256": "1bc56eb7d54ed593389d1021beb5256380556023ac59ec017618408f92c03b71"
+    }
+   ]
+  },
+  {
+   "id": "G2-113",
+   "lang": "fr",
+   "query": "Le droit à l'éducation est-il garanti par la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_33",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_33",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 33.",
+     "text_sha256": "cd32b943d406472689e3723610356c7cd064292f12233a3bd05159856cf22036"
+    }
+   ]
+  },
+  {
+   "id": "G2-114",
+   "lang": "fr",
+   "query": "Quelle est la langue du Grand-Duché de Luxembourg selon la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 4.",
+     "text_sha256": "67c18164bd3a8b552a7f3b32138e74605e2d99ab89ee0eabd781b481a94dd0f8"
+    }
+   ]
+  },
+  {
+   "id": "G2-115",
+   "lang": "fr",
+   "query": "Qui est le chef de l'État du Luxembourg ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_44",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_44",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 44.",
+     "text_sha256": "a8c2054be41c66ad2748c0266a97108b7069c9cf24b22ca2eec8f7356a86c231"
+    }
+   ]
+  },
+  {
+   "id": "G2-116",
+   "lang": "fr",
+   "query": "Combien de députés compte la Chambre et pour quelle durée sont-ils élus ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_63",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_63",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 63.",
+     "text_sha256": "6403ba0761bdce4e3b77985e827e9dfa69c8e1e297b4f7f51855afff9feeccd4"
+    }
+   ]
+  },
+  {
+   "id": "G2-117",
+   "lang": "fr",
+   "query": "Quelle procédure faut-il suivre pour réviser la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_131",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_131",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 131.",
+     "text_sha256": "d436195505fc926e0078d8a9abb56dcb6920cb5e8154605f2dcb6768494f0ee9"
+    }
+   ]
+  },
+  {
+   "id": "G2-118",
+   "lang": "fr",
+   "query": "Un député peut-il être arrêté ou poursuivi pénalement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_85",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_85",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 85.",
+     "text_sha256": "7629a2faf4197ccf74568dd67896c41608ea4ba10091fd27f2141a6752d471fa"
+    }
+   ]
+  },
+  {
+   "id": "G2-119",
+   "lang": "fr",
+   "query": "Peut-on être à la fois député et ministre ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_65",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_65",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 65.",
+     "text_sha256": "7b8edf637de3c32b160aacd5fbf0ae6496864913e47cbb6573fff063e86e2110"
+    }
+   ]
+  },
+  {
+   "id": "G2-120",
+   "lang": "fr",
+   "query": "Le respect de la vie privée est-il un droit constitutionnel ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_20",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_20",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 20.",
+     "text_sha256": "71edb2246a62aa387faf6aaf8eb9ab42b740dcd0fab6231b59d6ba8e6588e098"
+    }
+   ]
+  },
+  {
+   "id": "G2-121",
+   "lang": "fr",
+   "query": "La torture et les traitements inhumains sont-ils interdits par la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_13",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_13",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 13.",
+     "text_sha256": "549e14b9c6bf65781c71e9b697006f622804ef8c8a3619fc83a5c89571da4539"
+    }
+   ]
+  },
+  {
+   "id": "G2-122",
+   "lang": "fr",
+   "query": "Dans quels cas une personne peut-elle être arrêtée sans décision de justice ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_17",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_17",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 17.",
+     "text_sha256": "ab5041da998f99f444d8b367b839f1c89e2730cee504a9f548b8b109ddfd5443"
+    }
+   ]
+  },
+  {
+   "id": "G2-123",
+   "lang": "fr",
+   "query": "Les audiences des tribunaux sont-elles publiques ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_108",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_108",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 108.",
+     "text_sha256": "3d4473bd190fdd36373034c3450ba161ae1b8c6d1f58ac7d4e9b990dd5be8038"
+    }
+   ]
+  },
+  {
+   "id": "G2-124",
+   "lang": "fr",
+   "query": "Qui contrôle la conformité des lois à la Constitution ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_112",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_112",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 112.",
+     "text_sha256": "e738425aafcc62c9fcea53642fe950e03a44df7c995eb317a8323f166a237f61"
+    }
+   ]
+  },
+  {
+   "id": "G2-125",
+   "lang": "fr",
+   "query": "Les citoyens ont-ils le droit d'adresser des requêtes aux autorités publiques ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_29",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_29",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 29.",
+     "text_sha256": "5379dff9b2fa57e6651083ceba3385801748cdac5aa70ca717fb4e74db12b7fa"
+    }
+   ]
+  },
+  {
+   "id": "G2-126",
+   "lang": "fr",
+   "query": "L'État a-t-il l'obligation de protéger l'environnement, le climat et le bien-être animal ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_41",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_41",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 41.",
+     "text_sha256": "e5228db8df8364fd41258e5660e8b642a46af31962fc715fa04a6bbe60b340fe"
+    }
+   ]
+  },
+  {
+   "id": "G2-127",
+   "lang": "fr",
+   "query": "Le Luxembourg peut-il transférer l'exercice de pouvoirs de l'État à l'Union européenne ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 5.",
+     "text_sha256": "47be8557333bc0f72906dc82f077f91565d6a73fc2d2eeccd14d5dd2dd9b1443"
+    }
+   ]
+  },
+  {
+   "id": "G2-128",
+   "lang": "fr",
+   "query": "La Chambre des Députés peut-elle instituer une commission d'enquête ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_81",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_81",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 81.",
+     "text_sha256": "c4d4a59d216a2bc0f7804cdb2d5b75f8354e85a4ac105ad96606329381f61109"
+    }
+   ]
+  },
+  {
+   "id": "G2-129",
+   "lang": "fr",
+   "query": "Que se passe-t-il lorsque la Chambre refuse la confiance au Gouvernement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_93",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_93",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 93.",
+     "text_sha256": "2cca35af8e0149f386b4185074cc022cbd53446e35accf0032edaac4cf95f4a7"
+    }
+   ]
+  },
+  {
+   "id": "G2-130",
+   "lang": "fr",
+   "query": "Comment la fonction de chef de l'État se transmet-elle au sein de la dynastie ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_56",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_56",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 56.",
+     "text_sha256": "ec83cbefa1b020680d152938f7feff4819ab3d920d7f1d731f7e6123aaa743b0"
+    }
+   ]
+  },
+  {
+   "id": "G2-131",
+   "lang": "fr",
+   "query": "Le juge civil peut-il ordonner d'office une mesure d'instruction ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_348",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_348",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 348.",
+     "text_sha256": "18ea35183cee1e94af1fb09bd048d9b06bcb39717120948e04af59ebddb47f3f"
+    }
+   ]
+  },
+  {
+   "id": "G2-132",
+   "lang": "fr",
+   "query": "Qui doit consigner la provision sur la rémunération de l'expert judiciaire ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_467",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_467",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 467.",
+     "text_sha256": "1a74260b21aa681282b3cea33b4f1be47aae1328ff32fd67e71db5646d3b1da7"
+    }
+   ]
+  },
+  {
+   "id": "G2-133",
+   "lang": "fr",
+   "query": "Lors d'une enquête, le juge peut-il entendre toute personne utile à la manifestation de la vérité ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_418",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_418",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 418.",
+     "text_sha256": "f71aef84999757df4ac26acbefe3664848c090c3fdbeae721d89d61a0dd72c1f"
+    }
+   ]
+  },
+  {
+   "id": "G2-134",
+   "lang": "fr",
+   "query": "Dans quels cas peut-on introduire un recours en révision contre une sentence arbitrale ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1243",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1243",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 1243.",
+     "text_sha256": "a2140b4b441cf4c1960395da03fa50f472e671a8b46c03d3141e3e72de8b0a96"
+    }
+   ]
+  },
+  {
+   "id": "G2-135",
+   "lang": "fr",
+   "query": "La péremption d'instance court-elle aussi contre l'État et les mineurs ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_541",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_541",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 541.",
+     "text_sha256": "149371abd288effd1b8cd5bdcd8cd1c829aa1976d5863981fdbad7883587fd96"
+    }
+   ]
+  },
+  {
+   "id": "G2-136",
+   "lang": "fr",
+   "query": "Comment le tiers saisi fait-il sa déclaration dans une saisie-arrêt ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_707",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_707",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 707.",
+     "text_sha256": "74e72f468750ee44c65f5a9b2cf853f8d1f2cd61a1e53012fc30aac0c34dc0e4"
+    }
+   ]
+  },
+  {
+   "id": "G2-137",
+   "lang": "fr",
+   "query": "Une injonction de payer européenne est-elle exécutée au Luxembourg sans exequatur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_685-6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_685-6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 685-6.",
+     "text_sha256": "f18a78534efdc9e5f0950aed9ce6ba7502a9ee32bbe80f6abebb4a2d68100dac"
+    }
+   ]
+  },
+  {
+   "id": "G2-138",
+   "lang": "fr",
+   "query": "Dans quel délai le tribunal statue-t-il sur une demande de déclaration d'abandon d'un enfant ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1032",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/procedure_civile/art_1032",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
+     "article": "Art. 1032.",
+     "text_sha256": "2899573d367eb2c031eff9d0c7d11a6b96353e87a486aa9f490875ae61c94dca"
+    }
+   ]
+  },
+  {
+   "id": "G2-139",
+   "lang": "fr",
+   "query": "Combien de membres composent la Commission nationale pour la protection des données ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 16.",
+     "text_sha256": "14ae506d58c19808fe5dd7d12667b00a749180d8153db7e362f4bfd09eecdd5a"
+    }
+   ]
+  },
+  {
+   "id": "G2-140",
+   "lang": "fr",
+   "query": "Qui nomme les commissaires de la CNPD ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_17",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_17",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 17.",
+     "text_sha256": "c928bbbe7aa1d0c4be6715eb890118232df4359839ae78851ccddd671788a8c6"
+    }
+   ]
+  },
+  {
+   "id": "G2-141",
+   "lang": "fr",
+   "query": "La CNPD peut-elle infliger des astreintes à un responsable du traitement ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_49",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_49",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 49.",
+     "text_sha256": "c961a8ba3f49e6a4111213c0c6f8265a3a95e71c9cbbaa65e941a448149fe4ff"
+    }
+   ]
+  },
+  {
+   "id": "G2-142",
+   "lang": "fr",
+   "query": "Contre qui la CNPD peut-elle prononcer des amendes administratives ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_48",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_48",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 48.",
+     "text_sha256": "389ee2738aba2034a321248a0870128fa91cb252aeb45dd218e46e37b7c43a8e"
+    }
+   ]
+  },
+  {
+   "id": "G2-143",
+   "lang": "fr",
+   "query": "Quels pouvoirs d'investigation la CNPD possède-t-elle ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_14",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_14",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 14.",
+     "text_sha256": "eb7f737ca8c6490a8b4b888e8faa604d7032cd58d58a5c57c3b2508a8089592b"
+    }
+   ]
+  },
+  {
+   "id": "G2-144",
+   "lang": "fr",
+   "query": "Le traitement de données personnelles à des fins de journalisme échappe-t-il à certaines règles ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_62",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_62",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 62.",
+     "text_sha256": "475d7cfb3e6398f1e9f984cad91bdd3ee25d047d6c54ccbfe9f51ae7b121490a"
+    }
+   ]
+  },
+  {
+   "id": "G2-145",
+   "lang": "fr",
+   "query": "Comment déposer une réclamation auprès de la CNPD ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_9",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_9",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 9.",
+     "text_sha256": "98d7b314f94371d49b3e88d7d64f5ec358a04ad23f91344cc990a266a2428c31"
+    }
+   ]
+  },
+  {
+   "id": "G2-146",
+   "lang": "fr",
+   "query": "Empêcher la CNPD d'accomplir ses missions est-il une infraction ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_51",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_51",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 51.",
+     "text_sha256": "51bc110f5b0bd0f4bef44fab080c50a76fb0578a7602ba975282f38bf7cb7c77"
+    }
+   ]
+  },
+  {
+   "id": "G2-147",
+   "lang": "fr",
+   "query": "Quelles garanties pour les données traitées à des fins de recherche scientifique ou de statistique ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_63",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_63",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 63.",
+     "text_sha256": "c8615f7666890d1a7878afecaf8e0c0147eeadeab4480df5de357df8012ec7a4"
+    }
+   ]
+  },
+  {
+   "id": "G2-148",
+   "lang": "fr",
+   "query": "Pendant combien de temps les droits d'auteur durent-ils après la mort de l'auteur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 9.",
+     "text_sha256": "4ab11442ab64e93fb9aa820def5bff19585d0ae67a242771808fb313a87c625a"
+    }
+   ]
+  },
+  {
+   "id": "G2-149",
+   "lang": "fr",
+   "query": "Les logiciels sont-ils protégés par le droit d'auteur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_31",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_31",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 31.",
+     "text_sha256": "6b95f7544deb740497379b5cf3c81b4d10fbed386cdef18805b63308100ff478"
+    }
+   ]
+  },
+  {
+   "id": "G2-150",
+   "lang": "fr",
+   "query": "Peut-on faire une copie de sauvegarde d'un programme d'ordinateur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_35",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_35",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 35.",
+     "text_sha256": "e4e39d1d2d94cd78cda40f3d48a70fcb164f5cc89a809f8c084f52e4fb614848"
+    }
+   ]
+  },
+  {
+   "id": "G2-151",
+   "lang": "fr",
+   "query": "L'auteur conserve-t-il un droit moral sur son œuvre après avoir cédé ses droits patrimoniaux ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 2.",
+     "text_sha256": "327f91fb17da5fc88d328ed38189346b75980f8a40a83140c07e702ea869db12"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_11",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_11",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 11.",
+     "text_sha256": "c482ec6b23e7bbdab314a0b0b93b01807c4aa37f53b8ad07114d1fe7b3b9bc7d"
+    }
+   ]
+  },
+  {
+   "id": "G2-152",
+   "lang": "fr",
+   "query": "Peut-on citer de courts extraits d'une œuvre sans l'autorisation de l'auteur ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_10",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_10",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 10.",
+     "text_sha256": "b0bca39adb2421f984ed8919410fda4bbfbd7632c322499b6ca88855a1c1b4a3"
+    }
+   ]
+  },
+  {
+   "id": "G2-153",
+   "lang": "fr",
+   "query": "Combien de temps sont protégés les droits des artistes interprètes ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_45",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_45",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 45.",
+     "text_sha256": "e12472bf3481d8c050b786f030845afefc071aa61b6705ec60791c3f6ab1b779"
+    }
+   ]
+  },
+  {
+   "id": "G2-154",
+   "lang": "fr",
+   "query": "Que doit obligatoirement mentionner un contrat d'édition ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_15",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_15",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 15.",
+     "text_sha256": "d53583c5fc52654e039d75bbefbd578ba2664d49bf4e03fad776e5674b9494e3"
+    }
+   ]
+  },
+  {
+   "id": "G2-155",
+   "lang": "fr",
+   "query": "Un journaliste entendu comme témoin peut-il refuser de dévoiler ses sources ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "7",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/7|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 7.",
+     "text_sha256": "ddec5962eb5d22b9153d4dc1894921547a57723f838df3f4b1b7ec9683dbee93"
+    }
+   ]
+  },
+  {
+   "id": "G2-156",
+   "lang": "fr",
+   "query": "Les médias doivent-ils respecter la présomption d'innocence ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "12",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/12|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 12.",
+     "text_sha256": "39ea3b7d1ed407f68233066a87d89f91c1e774d229498e3e403bb274c96ba8f3"
+    }
+   ]
+  },
+  {
+   "id": "G2-157",
+   "lang": "fr",
+   "query": "Un média peut-il publier l'identité d'un mineur qui a fugué ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "18",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/18|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 18.",
+     "text_sha256": "86df6e4c9dd990991a3305aa53438249e7a2c8734db5dac2baf3ccbfa92c2477"
+    }
+   ]
+  },
+  {
+   "id": "G2-158",
+   "lang": "fr",
+   "query": "Que comprend la liberté d'expression dans les médias ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "6",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/6|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 6.",
+     "text_sha256": "2dab0945eab02b5d8254924ee3eafe4c1e99f7b796d1fc15130b92937ab34707"
+    }
+   ]
+  },
+  {
+   "id": "G2-159",
+   "lang": "fr",
+   "query": "Un journaliste peut-il refuser que son article paraisse sous sa signature s'il a été modifié ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "4",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/4|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 4.",
+     "text_sha256": "cfbcaea47758215388384fc8b79cbcd8f6517721dbdd49a97571528bc9a1cd50"
+    }
+   ]
+  },
+  {
+   "id": "G2-160",
+   "lang": "fr",
+   "query": "Le journaliste a-t-il un devoir de vérifier l'exactitude des faits ?",
+   "targets": [
+    {
+     "act": "recueil/presse_medias",
+     "num": "10",
+     "member": "loi/2004/06/08/n4",
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/recueil/presse_medias/art/10|http://data.legilux.public.lu/eli/etat/leg/loi/2004/06/08/n4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
+     "article": "Art. 10.",
+     "text_sha256": "32c8025c71e65b4d9d01e84a60772d4aad9f48b9144e1df7ccfaa4a2c090501d"
+    }
+   ]
+  },
+  {
+   "id": "G2-161",
+   "lang": "fr",
+   "query": "Qui délivre l'agrément aux gestionnaires de fonds d'investissement alternatifs au Luxembourg ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+     "article": "Art. 6.",
+     "text_sha256": "2a8dffe35d4483688a44a02d85544a026cd1e664a019efe04b8d1b050ed1d290"
+    }
+   ]
+  },
+  {
+   "id": "G2-162",
+   "lang": "fr",
+   "query": "Un fonds d'investissement alternatif peut-il avoir plusieurs gestionnaires ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+     "article": "Art. 4.",
+     "text_sha256": "2eeb7b78e4f92cb252368a56328f38cf7e1dd6b7d658b9f60eda9a246da58fb6"
+    }
+   ]
+  },
+  {
+   "id": "G2-163",
+   "lang": "fr",
+   "query": "Les gestionnaires de FIA doivent-ils avoir une politique de rémunération ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_12",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_12",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+     "article": "Art. 12.",
+     "text_sha256": "2c8707aa0308f3fed533e61ba1246e54f6b81bb9e524f432ab693ca94b7218da"
+    }
+   ]
+  },
+  {
+   "id": "G2-164",
+   "lang": "fr",
+   "query": "Comment un gestionnaire de FIA doit-il traiter les conflits d'intérêts ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_13",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1/art_13",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
+     "article": "Art. 13.",
+     "text_sha256": "b094b265e1ec535bb90f29aa0454afa890f0b386a45b60dc0e52e9cab8cc4a64"
+    }
+   ]
+  },
+  {
+   "id": "G2-165",
+   "lang": "fr",
+   "query": "Quand une loi publiée au Journal officiel devient-elle obligatoire ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+     "article": "Art. 4.",
+     "text_sha256": "79cdda482197c6ffba6d2b1558dbbfa768d0c94d20a0d1d8e1791ccd8b3aa8c2"
+    }
+   ]
+  },
+  {
+   "id": "G2-166",
+   "lang": "fr",
+   "query": "Quelle version du Journal officiel fait foi ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+     "article": "Art. 5.",
+     "text_sha256": "8da5689ee9f2fd9c46954654c58bfe38bf3cdc548757985eef8c8ffb15fd1370"
+    }
+   ]
+  },
+  {
+   "id": "G2-167",
+   "lang": "fr",
+   "query": "Quels actes sont publiés au Mémorial A ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+     "article": "Art. 2.",
+     "text_sha256": "f165b580e029af7e550910c28dbb4865db12e0c8811694bfe19746d42158cc4f"
+    }
+   ]
+  },
+  {
+   "id": "G2-168",
+   "lang": "fr",
+   "query": "Qui délivre un titre de voyage provisoire de l'Union européenne à un citoyen européen non représenté ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/art_2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
+     "article": "Art. 2.",
+     "text_sha256": "a2bd42c867634a04a8e6d3ee3eed702cec517bacece3ce141c9d61cdd7ef699e"
+    }
+   ]
+  },
+  {
+   "id": "G2-169",
+   "lang": "fr",
+   "query": "Combien de temps un titre de voyage provisoire de l'UE est-il valable ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/art_6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88/art_6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
+     "article": "Art. 6.",
+     "text_sha256": "332a2bc37fa245c28a01dbd909c908bf7bc886a988df09543f3937b32fd803b4"
+    }
+   ]
+  },
+  {
+   "id": "G2-170",
+   "lang": "fr",
+   "query": "Quel âge minimum pour piloter un drone en catégorie ouverte au Luxembourg ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
+     "article": "Art. 2.",
+     "text_sha256": "49fdbf060c46ee57acce4ef3810552795077bc46dcd17ceec211145136f9a2b2"
+    }
+   ]
+  },
+  {
+   "id": "G2-171",
+   "lang": "fr",
+   "query": "Quels documents le télépilote d'un drone doit-il pouvoir présenter lors d'un contrôle ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
+     "article": "Art. 4.",
+     "text_sha256": "cc633ff87ba8bb7c0a1dee537d4ff7ef93790290d1e7d203e252534d223f1d8d"
+    }
+   ]
+  },
+  {
+   "id": "G2-172",
+   "lang": "fr",
+   "query": "Faut-il une autorisation pour transporter le corps d'un défunt vers le cimetière d'une autre commune ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_1er",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_1er",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1",
+     "article": "Art. 1er.",
+     "text_sha256": "9b49776a0af479b6e7b21e1aa632d6857b3977e9cbf6cc72a0a489875cfd5e45"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_2",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1",
+     "article": "Art. 2.",
+     "text_sha256": "26f7c7960b443b4de70f422c9a44b48924bd408ed7cd0b2cadfc358cfb7b8f50"
+    }
+   ]
+  },
+  {
+   "id": "G2-173",
+   "lang": "fr",
+   "query": "Quelles pièces faut-il fournir pour obtenir un permis de transport d'un cadavre ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1",
+     "article": "Art. 5.",
+     "text_sha256": "a86f96992c9955d8762a240eeadcd3b3741eb9505fea37a8da6a4595f96689e6"
+    }
+   ]
+  },
+  {
+   "id": "G2-174",
+   "lang": "fr",
+   "query": "Qui autorise une exhumation demandée par la famille ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_11",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1/art_11",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1913/02/14/n1",
+     "article": "Art. 11.",
+     "text_sha256": "858dd1cfecaae97bc2d49e0e019890e65991a783c0986e5a6edebe9aa3b3514e"
+    }
+   ]
+  },
+  {
+   "id": "G2-175",
+   "lang": "fr",
+   "query": "Quelle indemnité était prévue pour les agents recenseurs du bétail en 1939 ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2/art_8",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2/art_8",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1939/09/25/n2",
+     "article": "Art. 8.",
+     "text_sha256": "abe56531baaa0c0951b8b0184189322fb1bb37c60d3d3ad3cf168ecbc1fb9dcf"
+    }
+   ]
+  },
+  {
+   "id": "G2-176",
+   "lang": "fr",
+   "query": "L'administration fiscale peut-elle exiger des banques des informations sur leurs clients ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_1er",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_1er",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1",
+     "article": "Art. 1er.",
+     "text_sha256": "0fdc851957dac90d5ed920da5160f7641435a42aee0f0789d13b20124bd37b88"
+    },
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_2",
+     "grade": 1,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1",
+     "article": "Art. 2.",
+     "text_sha256": "1d6859340c982cc0ab9091f56192b43a0ade27185e6e303090d55c3fb8b94b68"
+    }
+   ]
+  },
+  {
+   "id": "G2-177",
+   "lang": "fr",
+   "query": "Le Luxembourg extrade-t-il ses propres ressortissants ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+     "article": "Art. 7.",
+     "text_sha256": "d5675078e2e2229dce70be8328212594facd37b3164439eca6b0a4fe0849522c"
+    }
+   ]
+  },
+  {
+   "id": "G2-178",
+   "lang": "fr",
+   "query": "L'extradition peut-elle être accordée pour une infraction politique ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+     "article": "Art. 4.",
+     "text_sha256": "e0e6f9153ff9651b2eec540fcc050558f5177e6f63663eeaf6d47902df454d91"
+    }
+   ]
+  },
+  {
+   "id": "G2-179",
+   "lang": "fr",
+   "query": "Une personne peut-elle être extradée pour une infraction fiscale ou douanière ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_6",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_6",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+     "article": "Art. 6.",
+     "text_sha256": "8123e95ef600349378365f24cdc01cb5621cc440e80b4169ca021dd8ade41f3a"
+    }
+   ]
+  },
+  {
+   "id": "G2-180",
+   "lang": "fr",
+   "query": "Que se passe-t-il si l'infraction est punie de la peine de mort dans l'État qui demande l'extradition ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_12",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_12",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+     "article": "Art. 12.",
+     "text_sha256": "6505890f6e40327e7153dca3ddea9b0caef962db2371800247068df87b92f3e1"
+    }
+   ]
+  },
+  {
+   "id": "G2-181",
+   "lang": "fr",
+   "query": "Combien de temps dure la période de candidature des futurs professeurs ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_7",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_7",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "article": "Art. 7.",
+     "text_sha256": "f59b48b84e319db20b1238cb9b46d41f1fd4c7be9116903bbdeebc624342d808"
+    }
+   ]
+  },
+  {
+   "id": "G2-182",
+   "lang": "fr",
+   "query": "En quelle langue le travail de candidature des enseignants peut-il être rédigé ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_5",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3/art_5",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
+     "article": "Art. 5.",
+     "text_sha256": "e53f181073dffec28483c66672be8fe61e369f4dad9609437170e572e9998655"
+    }
+   ]
+  },
+  {
+   "id": "G2-183",
+   "lang": "fr",
+   "query": "Combien de membres compte le Conseil national de coordination de la politique des transports ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1",
+     "article": "Art. 4.",
+     "text_sha256": "d30db82aa4eb2bc3e6ffbb11880b8a070d8b4f6b86cac11c554af135308de7bf"
+    }
+   ]
+  },
+  {
+   "id": "G2-184",
+   "lang": "fr",
+   "query": "Où votent les électeurs domiciliés dans une localité qui n'est pas chef-lieu de commune ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/art_1er",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106/art_1er",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106",
+     "article": "Art. 1er.",
+     "text_sha256": "b77dccf1fbe97294973511794ad105f74a9e0fa537d73432732c5154a06f068c"
+    }
+   ]
+  },
+  {
+   "id": "G2-185",
+   "lang": "fr",
+   "query": "Par quel terme les mots ouvrier et employé privé ont-ils été remplacés dans le Code du travail ?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/art_8",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1/art_8",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1",
+     "article": "Art. 8.",
+     "text_sha256": "eca8012db8fecb6a3814246e73b3e78880228a5cfc7b93c98898abaca423009d"
+    }
+   ]
+  },
+  {
+   "id": "G2-186",
+   "lang": "de",
+   "query": "Welche Kündigungsfrist gilt, wenn der Arbeitgeber einem Arbeitnehmer kündigt?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-3.",
+     "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
+    }
+   ]
+  },
+  {
+   "id": "G2-187",
+   "lang": "de",
+   "query": "Darf einer schwangeren Arbeitnehmerin gekündigt werden?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_337-1",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_337-1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 337-1.",
+     "text_sha256": "c342b91b6cc8b7a3e3cda1e5092578eb412f85b1039acf47dae858a92d3335c0"
+    }
+   ]
+  },
+  {
+   "id": "G2-188",
+   "lang": "de",
+   "query": "Wie lange gilt das Urheberrecht nach dem Tod des Urhebers?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 9.",
+     "text_sha256": "4ab11442ab64e93fb9aa820def5bff19585d0ae67a242771808fb313a87c625a"
+    }
+   ]
+  },
+  {
+   "id": "G2-189",
+   "lang": "de",
+   "query": "Garantiert die Verfassung die Meinungsfreiheit und die Pressefreiheit?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_23",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 23.",
+     "text_sha256": "e1af1468125ad926256c7cf90a9d4c8a60f6b2a95f05e4cd61d0cfd3549fb7fb"
+    }
+   ]
+  },
+  {
+   "id": "G2-190",
+   "lang": "de",
+   "query": "Ab welchem Alter darf man in Luxemburg heiraten?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 144.",
+     "text_sha256": "f7a52ffb44a268865c095e1df471f9c696d4a9e82fc9ba8553ebf4b82b643273"
+    }
+   ]
+  },
+  {
+   "id": "G2-191",
+   "lang": "de",
+   "query": "Wie definiert das Strafgesetzbuch den Diebstahl?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_461",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 461.",
+     "text_sha256": "7ee372cccd7e79c8d5cf6a9c32a06e6dd86355fb442127c5694f34c662b496c3"
+    }
+   ]
+  },
+  {
+   "id": "G2-192",
+   "lang": "de",
+   "query": "Ab welchem Alter darf man eine Drohne in der offenen Kategorie fliegen?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629/art_2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
+     "article": "Art. 2.",
+     "text_sha256": "49fdbf060c46ee57acce4ef3810552795077bc46dcd17ceec211145136f9a2b2"
+    }
+   ]
+  },
+  {
+   "id": "G2-193",
+   "lang": "de",
+   "query": "Wie viele Mitglieder hat die nationale Datenschutzkommission?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_16",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 16.",
+     "text_sha256": "14ae506d58c19808fe5dd7d12667b00a749180d8153db7e362f4bfd09eecdd5a"
+    }
+   ]
+  },
+  {
+   "id": "G2-194",
+   "lang": "de",
+   "query": "Haften Eltern für Schäden, die ihre minderjährigen Kinder verursachen?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_1384",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 1384.",
+     "text_sha256": "cdf9448d1e89b18d46086ccb93fb7bad2ab4d3f754585686065a49cba1fcc9d7"
+    }
+   ]
+  },
+  {
+   "id": "G2-195",
+   "lang": "de",
+   "query": "Liefert Luxemburg eigene Staatsangehörige aus?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_7",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
+     "article": "Art. 7.",
+     "text_sha256": "d5675078e2e2229dce70be8328212594facd37b3164439eca6b0a4fe0849522c"
+    }
+   ]
+  },
+  {
+   "id": "G2-196",
+   "lang": "en",
+   "query": "What notice period must an employer give when dismissing an employee?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-3",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-3.",
+     "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
+    }
+   ]
+  },
+  {
+   "id": "G2-197",
+   "lang": "en",
+   "query": "Can an employer dismiss an employee immediately for serious misconduct?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-10",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_124-10",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 124-10.",
+     "text_sha256": "3713265282bac7dfd85c423dd7a19a6e7a6f70cc7e1dc82c42699413ebba0bd0"
+    }
+   ]
+  },
+  {
+   "id": "G2-198",
+   "lang": "en",
+   "query": "How long does copyright last after the death of the author?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2/art_9",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
+     "article": "Art. 9.",
+     "text_sha256": "4ab11442ab64e93fb9aa820def5bff19585d0ae67a242771808fb313a87c625a"
+    }
+   ]
+  },
+  {
+   "id": "G2-199",
+   "lang": "en",
+   "query": "Does the constitution protect the right to privacy?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_20",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1/art_20",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
+     "article": "Art. 20.",
+     "text_sha256": "71edb2246a62aa387faf6aaf8eb9ab42b740dcd0fab6231b59d6ba8e6588e098"
+    }
+   ]
+  },
+  {
+   "id": "G2-200",
+   "lang": "en",
+   "query": "On what grounds can a divorce be granted under the Civil Code?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_229",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_229",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 229.",
+     "text_sha256": "826f1cdcb6bbffc3fc2878cdc425174bf1a9150a0032389a4528e6cef6718aeb"
+    }
+   ]
+  },
+  {
+   "id": "G2-201",
+   "lang": "en",
+   "query": "How is sexual harassment at work defined?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-2",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_245-2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+     "article": "Art. L. 245-2.",
+     "text_sha256": "44e5eb9217300cbd096dddfcc5224964dae7913f54f973131124f2af31df7af4"
+    }
+   ]
+  },
+  {
+   "id": "G2-202",
+   "lang": "en",
+   "query": "What is the minimum age to get married?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/civil/art_144",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+     "article": "Art. 144.",
+     "text_sha256": "f7a52ffb44a268865c095e1df471f9c696d4a9e82fc9ba8553ebf4b82b643273"
+    }
+   ]
+  },
+  {
+   "id": "G2-203",
+   "lang": "en",
+   "query": "Can the data protection authority impose administrative fines?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_48",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686/art_48",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
+     "article": "Art. 48.",
+     "text_sha256": "389ee2738aba2034a321248a0870128fa91cb252aeb45dd218e46e37b7c43a8e"
+    }
+   ]
+  },
+  {
+   "id": "G2-204",
+   "lang": "en",
+   "query": "Is self-defence a justification for injuring an attacker?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/code/penal/art_416",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
+     "article": "Art. 416.",
+     "text_sha256": "7f26bc6dc82eb384abe76b92468e0425a60ac9f7a973a098e7cc422771f735f3"
+    }
+   ]
+  },
+  {
+   "id": "G2-205",
+   "lang": "en",
+   "query": "When does a law published in the Official Journal become binding?",
+   "targets": [
+    {
+     "eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4",
+     "grade": 2,
+     "key": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25/art_4",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2016/12/23/n25",
+     "article": "Art. 4.",
+     "text_sha256": "79cdda482197c6ffba6d2b1558dbbfa768d0c94d20a0d1d8e1791ccd8b3aa8c2"
+    }
+   ]
+  }
+ ]
+}
