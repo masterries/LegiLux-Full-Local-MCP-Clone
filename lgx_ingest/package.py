@@ -117,6 +117,11 @@ def bundle_name(sync_date: dt.date, sample: bool) -> str:
     return f"data-{sync_date.isoformat()}" + ("-sample" if sample else "")
 
 
+# bundle files are not secret and are read by other users and containers (dev compose db-load runs with no
+# capabilities, so a 0600 file of another uid is unreadable even for root there)
+BUNDLE_MODE = 0o644
+
+
 def dump_database(tools: PgTools, db_name: str, out: Path) -> dict[str, Any]:
     """``pg_dump -Fc -Z zstd:9`` of the shipped schemas into ``out`` (atomic: temp file + rename)."""
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -129,6 +134,7 @@ def dump_database(tools: PgTools, db_name: str, out: Path) -> dict[str, Any]:
     if proc.returncode != 0:
         tmp.unlink(missing_ok=True)
         raise LoadError(f"pg_dump failed ({proc.returncode}): {proc.stderr.decode(errors='replace').strip()[-500:]}")
+    tmp.chmod(BUNDLE_MODE)
     tmp.replace(out)
     return {"file": str(out), "bytes": out.stat().st_size, "sha256": sha256_file(out), "seconds": round(seconds, 2)}
 
@@ -305,9 +311,11 @@ def run_package(
         dump = dump_database(tools, source, out)
         manifest = release_manifest(resolved, source, dump, pg_version)
         rel_path = out.with_suffix(".release.json")
-        atomic_write_text(rel_path, json.dumps(manifest, indent=2, ensure_ascii=False, default=str) + "\n")
+        manifest_text = json.dumps(manifest, indent=2, ensure_ascii=False, default=str) + "\n"
+        atomic_write_text(rel_path, manifest_text, mode=BUNDLE_MODE)
         sums = out.with_suffix(".sha256")
-        atomic_write_text(sums, f"{dump['sha256']}  {out.name}\n{sha256_file(rel_path)}  {rel_path.name}\n")
+        sums_text = f"{dump['sha256']}  {out.name}\n{sha256_file(rel_path)}  {rel_path.name}\n"
+        atomic_write_text(sums, sums_text, mode=BUNDLE_MODE)
         result.outputs = [str(out), str(rel_path), str(sums)]
         result.counts = {"dump_bytes": dump["bytes"]}
         result.details = {"source_db": source, "dump": dump, "tools": "container" if tools.container else "local"}

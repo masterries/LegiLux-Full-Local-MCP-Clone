@@ -100,3 +100,46 @@ def test_runtime_base_is_offline_by_construction() -> None:
         assert cfg["networks"][net]["internal"] is True
     assert set(cfg["services"]["lgx-streamlit"]["networks"]) == {"backend", "front"}
     assert set(cfg["services"]["mcp"]["networks"]) == {"backend"}
+
+
+def test_dev_edge_network_has_no_outbound_nat() -> None:
+    """Review 2026-10-17: lgx-streamlit / mcp reached the internet through `edge` (default route, NAT)."""
+    cfg = rendered(DEV, ("cpu",))
+    opts = cfg["networks"]["edge"].get("driver_opts") or {}
+    assert opts.get("com.docker.network.bridge.enable_ip_masquerade") == "false"
+    assert "edge" not in cfg["services"]["ollama"]["networks"]
+
+
+def test_dev_down_stops_every_profile() -> None:
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    line = next(x for x in makefile.splitlines() if "down $(DEV_DOWN_FLAGS)" in x)
+    for profile in ("cpu", "ollama-pull", "cloudllm"):
+        assert f"--profile {profile}" in line, profile
+
+
+def test_runtime_secret_ownership_table_matches_the_services() -> None:
+    """Review 2026-10-17: bind-mounted secrets keep host owner/mode; uid-10001 services cannot read root 0600."""
+    import re
+
+    text = RUNTIME.read_text(encoding="utf-8")
+    table = {
+        m.group(1): (m.group(2), m.group(3))
+        for m in re.finditer(r"^#   (\w+)\s+(\S+:\S+)\s+(0[0-7]{3})\s+\S", text, re.MULTILINE)
+    }
+    cfg = rendered(RUNTIME, ("cpu", "testui"))
+    assert set(table) == set(cfg["secrets"])
+    for name, svc in cfg["services"].items():
+        for sec in svc.get("secrets", []):
+            secret = sec["source"] if isinstance(sec, dict) else sec
+            owner, mode = table[secret]
+            if svc.get("user") == "10001:10001":
+                uid, gid = owner.split(":")
+                readable = (uid == "10001" and mode[1] in "46") or (gid == "10001" and mode[2] in "46")
+                assert readable, f"{name}: secret {secret} ({owner} {mode}) is not readable by uid 10001"
+
+
+def test_runtime_cpu_ui_timeouts_fit_measured_cpu_latency() -> None:
+    env = rendered(RUNTIME, ("cpu", "testui"))["services"]["lgx-streamlit"]["environment"]
+    assert float(env["LGX_LLM_TIMEOUT_S"]) >= 600  # 237-359 s per call measured on CPU (e2e 2026-10-17)
+    assert float(env["LGX_TURN_BUDGET_S"]) >= 2 * float(env["LGX_LLM_TIMEOUT_S"])
+    assert int(env["LGX_TOOL_RESULT_TOKENS"]) <= 2500

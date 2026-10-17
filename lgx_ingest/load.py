@@ -717,7 +717,7 @@ def inputs_digest(inputs: ReleaseInputs, config_digest: str) -> str:
 
 def legal_text_rows(config: ProjectConfig, sync_date: dt.date, *, with_vectors: bool) -> list[tuple[str, str, str]]:
     """``lgx.legal_text`` rows: ``{T}`` filled; ``attribution_vectors`` replaces ``attribution`` only when the
-    release has vectors; the CC BY 4.0 legal code file replaces the short English notice when present."""
+    release has vectors; the CC BY 4.0 legal code file is appended to the licence notice in every language."""
     rows: dict[tuple[str, str], str] = {}
     texts = config.legal_texts.texts
     for code, by_lang in texts.items():
@@ -727,7 +727,10 @@ def legal_text_rows(config: ProjectConfig, sync_date: dt.date, *, with_vectors: 
         for lang, body in source.items():
             rows[(code, lang.value)] = fill_t(body, sync_date, lang)
     if CC_BY_LEGALCODE.exists():
-        rows[("cc_by_4_0", Lang.EN.value)] = CC_BY_LEGALCODE.read_text(encoding="utf-8")
+        legalcode = CC_BY_LEGALCODE.read_text(encoding="utf-8").strip()
+        for (code, lang), body in list(rows.items()):
+            if code == "cc_by_4_0":
+                rows[(code, lang)] = f"{body}\n\n{legalcode}\n"
     return [(code, lang, body) for (code, lang), body in sorted(rows.items())]
 
 

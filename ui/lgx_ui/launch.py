@@ -48,6 +48,12 @@ def default_app() -> Path:
 
 def main(argv: Sequence[str] | None = None) -> None:
     harden()
+    from lgx_ui.settings import UiSettingsError, load_settings
+
+    try:  # fail at start (container restart loop, unhealthy) rather than on every page with a silent 401
+        load_settings()
+    except UiSettingsError as exc:
+        raise SystemExit(f"lgx_ui.launch: {exc}") from exc
     from streamlit.web import cli
 
     args = list(sys.argv[1:] if argv is None else argv)

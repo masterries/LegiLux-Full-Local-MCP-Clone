@@ -13,12 +13,12 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
-from urllib.parse import urlsplit
 
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
 from lgx_core.config import DEFAULT_CONFIG_DIR
 from lgx_core.models import EmbeddingProvider
+from lgx_core.urls import is_internal_url
 
 RerankMode = Literal["auto", "on", "off"]
 RetrievalMode = Literal["auto", "lexical", "hybrid"]
@@ -50,21 +50,6 @@ def _list(v: str | None, default: tuple[str, ...]) -> tuple[str, ...]:
     if v is None or not v.strip():
         return default
     return tuple(x.strip() for x in v.split(",") if x.strip())
-
-
-def is_internal_url(url: str) -> bool:
-    """True for service names (no dot), localhost, private/loopback IPs and internal suffixes (PLAN §9.5)."""
-    host = urlsplit(url).hostname or ""
-    if not host:
-        return False
-    if host == "localhost" or "." not in host:
-        return True
-    try:
-        ip = ipaddress.ip_address(host)
-        return ip.is_private or ip.is_loopback or ip.is_link_local
-    except ValueError:
-        pass
-    return host.endswith((".internal", ".local", ".lan", ".intra", ".svc", ".cluster.local", ".home.arpa"))
 
 
 @dataclass(frozen=True)
@@ -101,6 +86,7 @@ class McpSettings:
     db_timeout_s: float = 3.0
     rate_per_client_min: int = 30
     rate_global_min: int = 300
+    trusted_proxies: tuple[str, ...] = ()  # peers (IP / CIDR) whose user headers key the rate limit and audit
     config_dir: Path = DEFAULT_CONFIG_DIR
     log_level: str = "INFO"
     allow_external_urls: bool = False
@@ -171,6 +157,7 @@ class McpSettings:
             "db_timeout_s": float(g("LGX_DB_TIMEOUT_S", "3")),
             "rate_per_client_min": int(g("LGX_RATE_PER_CLIENT_MIN", "30")),
             "rate_global_min": int(g("LGX_RATE_GLOBAL_MIN", "300")),
+            "trusted_proxies": _list(g("LGX_TRUSTED_PROXIES"), ()),
             "config_dir": Path(g("LGX_CONFIG_DIR") or DEFAULT_CONFIG_DIR),
             "log_level": (g("LGX_LOG_LEVEL") or "INFO").upper(),
             "allow_external_urls": _bool(g("LGX_ALLOW_EXTERNAL_URLS"), False),
@@ -199,6 +186,11 @@ class McpSettings:
             )
         if self.token is not None and len(self.token) < 16:
             raise SettingsError("the MCP bearer token must have at least 16 characters")
+        for net in self.trusted_proxies:
+            try:
+                ipaddress.ip_network(net, strict=False)
+            except ValueError as exc:
+                raise SettingsError(f"LGX_TRUSTED_PROXIES: {net!r} is not an IP address or CIDR") from exc
 
     def describe(self) -> dict[str, object]:
         """Non-secret view for logs and ``about_corpus``."""

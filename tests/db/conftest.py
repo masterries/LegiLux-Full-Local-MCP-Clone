@@ -100,6 +100,9 @@ def pg_server() -> Iterator[PgServer]:
             port=int(info.get("port", 5432)),
             user=str(info.get("user", "postgres")),
             password=str(info.get("password", "")),
+            # the server's container (CI: job.services.postgres.id): pg_dump / pg_restore run there, so the
+            # package -> restore -> rename-swap path is tested too
+            container=os.environ.get("LGX_TEST_PG_CONTAINER") or None,
         )
         _wait_tcp(server)
         yield server

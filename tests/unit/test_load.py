@@ -112,6 +112,11 @@ def test_legal_texts_fill_t_and_vector_variant() -> None:
     assert "vectorisation" not in rows[("attribution", "fr")]
     with_vec = {(c, lang): body for c, lang, body in legal_text_rows(cfg, T, with_vectors=True)}
     assert "vectorisation" in with_vec[("attribution", "fr")]
+    # review 2026-10-17: the licence resource pointed to a LICENSES/ file that did not exist
+    for lang in ("fr", "en"):
+        body = rows[("cc_by_4_0", lang)]
+        assert "Creative Commons Attribution 4.0 International Public License" in body and len(body) > 10_000
+        assert "Section 8 -- Interpretation." in body and "LICENSES/" not in body
 
 
 # ------------------------------------------------------------------------------------- inputs + plan

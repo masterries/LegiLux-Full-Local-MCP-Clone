@@ -13,20 +13,26 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
 from lgx_core.citeparse import ALIAS_EQUIVALENTS, ActMention, Citation, CitationParser
 from lgx_core.config import AliasesConfig, load_yaml
-from lgx_core.eli import ELI_BASE, expand
+from lgx_core.eli import ELI_BASE, LEG_PREFIX, expand
 from lgx_core.normalise import alias_norm
-from lgx_mcp.facts import ACT_COLS, Act, Facts, Unit, _act
+from lgx_mcp.facts import ACT_COLS, Act, Facts, Unit, _act, normalise_eli
 
 log = logging.getLogger("lgx_mcp.resolve")
 
 AMBIGUITY_MARGIN = 0.05
 WEAK_SCORE = 0.2
+# the only act of a (type, date) is taken only when the cited title fits it: « loi du 30 mai 2018 relative à la
+# protection des animaux » scores 0.31 against the MiFID law of that date, « … sur les marchés financiers » 0.48
+LONE_TITLE_SCORE = 0.4
+# a truncated dated ELI (…/etat/leg/loi/2018/08/01) names a date, not an act: the acts of that date are candidates
+_ELI_DATE = re.compile("^" + re.escape(LEG_PREFIX) + r"(?P<seg>[a-z_]+)/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})$")
 Status = Literal["resolved", "ambiguous", "not_found", "out_of_scope"]
 ArticleStatus = Literal["resolved", "ambiguous", "not_found", "no_text", "not_requested"]
 
@@ -118,9 +124,17 @@ class Resolver:
                 message="article sans acte identifiable : précisez la loi, le règlement ou le code",
             )
         res = await self.resolve_act(cit.act, cit)
-        if res.status == "resolved" and want_article and cit.article is not None:
+        # an article ELI (…/a686/art_5, …/code/travail/art_l_121-1) names its article even without « art. … »
+        named_unit = res.status == "resolved" and res.candidates[0].unit is not None
+        if res.status == "resolved" and want_article and (cit.article is not None or named_unit):
             await self.resolve_article(res, cit, as_of)
         return res
+
+    async def resolve_eli(self, eli: str) -> Resolution:
+        """An ELI given as such (get_act ``eli``, search ``filters.act_eli``): exact act, or that date's acts."""
+        eli = normalise_eli(eli)
+        m = ActMention(kind="eli", span=(0, len(eli)), surface=eli, eli=eli)
+        return await self._by_eli(m, Citation(span=(0, len(eli)), text=eli, act=m))
 
     # --------------------------------------------------------------------------------------------- act
     async def resolve_act(self, m: ActMention, cit: Citation) -> Resolution:
@@ -142,6 +156,15 @@ class Resolver:
         assert m.eli is not None
         act, unit, _ = await self.facts.find_act_by_eli(m.eli)
         if act is None:
+            dm = _ELI_DATE.match(normalise_eli(m.eli))
+            if dm:
+                try:
+                    d = dt.date(int(dm["y"]), int(dm["m"]), int(dm["d"]))
+                except ValueError:
+                    d = None
+                if d is not None:
+                    dated = ActMention(kind="dated", span=m.span, surface=m.surface, eli_segment=dm["seg"], date=d)
+                    return await self._by_type_date(dated, cit)
             return Resolution(status="not_found", citation=cit, message=f"ELI inconnu dans cette base : {m.eli}")
         return Resolution(status="resolved", citation=cit, candidates=[Candidate(act, 1.0, "eli", unit=unit)])
 
@@ -213,7 +236,16 @@ class Resolver:
                 score = 1.0 / len(rows)
             scored.append((act, score))
         if len(scored) == 1:
-            scored = [(scored[0][0], max(scored[0][1], 0.95))]
+            act, score = scored[0]
+            if not hint or act.act_id in inner or score >= LONE_TITLE_SCORE:
+                scored = [(act, max(score, 0.95))]
+            else:  # never guess: the cited title does not fit the only act of that date
+                return Resolution(
+                    status="ambiguous",
+                    citation=cit,
+                    candidates=[Candidate(act, score, "type_date_title")],
+                    message="l'intitulé cité ne correspond pas au seul acte de cette date dans cette base",
+                )
         return self._ranked(
             cit,
             scored,
@@ -257,10 +289,13 @@ class Resolver:
             return Resolution(status="not_found", citation=cit)
         scored.sort(key=lambda x: (-x[1], x[0].eli_work))
         cands = [Candidate(a, s, reason) for a, s in scored[:20]]
+        top = cands[0].confidence
+        if weak_is_ambiguous and top < WEAK_SCORE:
+            return Resolution(status="ambiguous", citation=cit, candidates=cands, message=tie_message)
         if len(cands) == 1:
             return Resolution(status="resolved", citation=cit, candidates=cands)
-        top, second = cands[0].confidence, cands[1].confidence
-        if top - second < AMBIGUITY_MARGIN or (weak_is_ambiguous and top < WEAK_SCORE):
+        second = cands[1].confidence
+        if top - second < AMBIGUITY_MARGIN:
             return Resolution(status="ambiguous", citation=cit, candidates=cands, message=tie_message)
         return Resolution(status="resolved", citation=cit, candidates=cands)
 
@@ -268,8 +303,16 @@ class Resolver:
     async def resolve_article(self, res: Resolution, cit: Citation, as_of: dt.date) -> None:
         best = res.candidates[0]
         art = cit.article
-        assert art is not None
-        best.article = art.raw
+        if art is None:  # the article an article ELI names
+            assert best.unit is not None
+            key, raw = best.unit.num_norm or "", best.unit.num_raw or best.unit.eli_unit or ""
+        else:
+            key, raw = art.key, art.raw
+            if best.unit is not None and not await self.facts.unit_has_key(best.unit, key):
+                # an article ELI used as act_eli with another `article`: the act is the ELI's, the article the
+                # one asked for (never the ELI's article under the requested number)
+                best.unit = None
+        best.article = raw
         serving = await self.facts.serving_at(best.act.act_id, as_of)
         version_id = serving.text_version_id if serving else None
         if version_id is None:
@@ -289,18 +332,18 @@ class Resolver:
                 best.unit = await self.facts.unit(int(rows[0]["unit_id"]))
                 res.article_status = "resolved"
                 return
-        units = await self.facts.article_units(version_id, art.key)
+        units = await self.facts.article_units(version_id, key) if key else []
         if not units:
             best.unit = None
             res.article_status = "not_found"
-            best.note = f"article {art.raw} introuvable dans la version applicable"
+            best.note = f"article {raw} introuvable dans la version applicable"
             return
         main = [u for u in units if not u.in_annex] or units
-        exact = [u for u in main if u.num_norm == art.key] or main
+        exact = [u for u in main if u.num_norm == key] or main
         if len(exact) > 1:
             res.article_status = "ambiguous"
             res.status = "ambiguous"
-            res.message = f"plusieurs articles {art.raw} dans ce texte (parties ou actes membres différents)"
+            res.message = f"plusieurs articles {raw} dans ce texte (parties ou actes membres différents)"
             res.candidates = [
                 Candidate(best.act, 0.5, best.reason, unit=u, article=u.num_raw, note=u.breadcrumb) for u in exact[:20]
             ]

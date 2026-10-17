@@ -18,7 +18,8 @@ from lgx_core.eli import ELI_BASE, LEG_PREFIX
 from lgx_mcp.db import Database
 
 _SUBRESOURCE = re.compile(r"^(?:art_.+|jo|consolide|\d{8}|fr|de|en|html|xml|pdf|.+\.(?:html|xml|pdf))$")
-_DATED_PATH = re.compile(r"/\d{4}/\d{2}/\d{2}/")
+# code / recueil families whose versions live under an undated path (…/code/travail/20260726)
+_FAMILY = re.compile("^" + re.escape(LEG_PREFIX) + r"(?:code|recueil)/[^/]+$")
 
 ACT_COLS = (
     "a.act_id, a.eli_work, a.eli_jo, a.doc_type, a.date_document, a.publication_date, a.dei_min, a.dnl,"
@@ -368,18 +369,36 @@ class Facts:
                 a = _act(row)
                 self.cache.acts[a.act_id] = a
                 return a, None, None
-        # code / recueil families without a dated work id: …/code/travail -> its versions …/code/travail/<date>
+            if parts[-1].startswith("art_"):  # …/art_l_121-1/<a date that is not stored> -> the article
+                urow = await self.db.fetchone(
+                    f"SELECT {UNIT_COLS} FROM lgx.unit u WHERE u.eli_unit = %s ORDER BY u.version_id DESC LIMIT 1",
+                    [prefix],
+                )
+                if urow:
+                    u = _unit(urow)
+                    return await self.act(u.act_id), u, None
+        # code / recueil families without a dated work id: …/code/travail -> its versions …/code/travail/<date>.
+        # Only a real family (…/etat/leg/code|recueil/<name>) whose versions all belong to ONE act: a truncated
+        # dated ELI (…/loi/2018/08/01, …/loi/2018, …/loi) is not an act (the resolver lists that date's acts).
         prefix = "/".join(parts)
-        if not _DATED_PATH.search(prefix):
-            vrow = await self.db.fetchone(
-                f"SELECT {VERSION_COLS} FROM lgx.act_version v WHERE v.eli_version LIKE %s"
-                " ORDER BY v.date_applicability DESC NULLS LAST LIMIT 1",
+        if _FAMILY.match(prefix):
+            rows = await self.db.fetch(
+                "SELECT DISTINCT v.act_id FROM lgx.act_version v WHERE v.eli_version LIKE %s LIMIT 2",
                 [prefix.replace("%", r"\%").replace("_", r"\_") + "/%"],
             )
-            if vrow:
-                v = _version(vrow)
-                return await self.act(v.act_id), None, None
+            if len(rows) == 1:
+                return await self.act(int(rows[0]["act_id"])), None, None
         return None, None, None
+
+    async def unit_has_key(self, unit: Unit, key: str) -> bool:
+        """``key`` (num_norm of a cited number) is this article's number or one of its extra alias keys."""
+        if unit.num_norm == key:
+            return True
+        row = await self.db.fetchone(
+            "SELECT 1 AS x FROM lgx.article_alias aa WHERE aa.unit_id = %s AND aa.num_norm = %s LIMIT 1",
+            [unit.unit_id, key],
+        )
+        return row is not None
 
     # -------------------------------------------------------------------------------------- versions
     async def versions(self, ids: Iterable[int]) -> dict[int, Version]:
@@ -396,6 +415,21 @@ class Facts:
         if version_id is None:
             return None
         return (await self.versions([version_id])).get(version_id)
+
+    async def next_version(self, act_id: int, date: dt.date | None) -> Version | None:
+        """The consolidation that applies from ``date`` (``serving.next_version_date``), with has_files/has_text."""
+        if date is None:
+            return None
+        row = await self.db.fetchone(
+            f"SELECT {VERSION_COLS} FROM lgx.act_version v WHERE v.act_id = %s AND v.kind <> 'original'"
+            " AND v.date_applicability = %s ORDER BY v.version_id LIMIT 1",
+            [act_id, date],
+        )
+        if row is None:
+            return None
+        v = _version(row)
+        self.cache.versions[v.version_id] = v
+        return v
 
     async def versions_of_act(self, act_id: int, limit: int = 200) -> list[Version]:
         rows = await self.db.fetch(

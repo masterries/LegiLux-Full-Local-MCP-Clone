@@ -65,6 +65,29 @@ aus Legilux. Sie läuft in einer **Airgap-Umgebung**, also ohne Internet. Ein lo
 | M4 | Evaluation, nächtliche Synchronisierung, Betrieb |
 | M5 | Härtung, signierte Pakete, Installation im Airgap |
 
+## Schnellstart (Entwicklung)
+
+Linux-Rechner mit Docker und [uv](https://docs.astral.sh/uv/); alle Dienste lauschen nur auf `127.0.0.1`.
+
+```sh
+uv sync --all-extras          # Python-3.13-Abhängigkeiten aus uv.lock (+ Entwicklungswerkzeuge)
+make ingest-sample            # Stichproben-DB + Paket data/bundles/data-2026-10-16-sample.dump (offline aus data/;
+                              #   frischer Checkout: make ingest-sample INGEST_FLAGS=  → höflicher Stichproben-Abruf, nie Vollabzug)
+make dev-up                   # DB + Wiederherstellung + MCP + Streamlit + Ollama (cpu), wartet bis alles gesund ist
+make ollama-pull              # einmalig: qwen3:4b-instruct-2507-q4_K_M (2,5 GB) ins Ollama-Volume; MODEL=<tag> für ein anderes
+open http://127.0.0.1:8501    # Test-UI (Chat, Recherche directe, Évaluation, Corpus); MCP: http://127.0.0.1:8000/mcp
+make e2e                      # optional: 5 Testfragen (FR/DE) über den Code-Pfad der UI, JSON in data/reports/e2e/
+make dev-down                 # stoppen (Volumes bleiben); make dev-logs SERVICE=mcp zeigt die Logs eines Dienstes
+```
+
+Anderer OpenAI-kompatibler Endpunkt (vLLM, Mistral On-Prem …): in der Seitenleiste « Autre endpoint (saisie libre) »
+wählen und Basis-URL und Modell eintragen (an eine eingetippte URL wird kein API-Schlüssel gesendet), oder den Stack
+mit dem Endpunkt als Voreinstellung starten, die auch den Schlüssel erhält:
+`LGX_MISTRAL_ONPREM_URL=https://mistral.example.internal/v1 LGX_MISTRAL_ONPREM_MODEL=<modell> LGX_DEV_LLM_API_KEY=<schlüssel> make dev-up`
+(Voreinstellung « Mistral on-prem »), oder als Standard: `LGX_LLM_BASE_URL=https://…/v1 MODEL=<modell> make dev-up`.
+Embeddings bleiben aus (`provider: none`, nur Volltextsuche). Auf 4 vCPUs dauert eine Antwort 4–10 Minuten; Ergebnisse,
+Zeiten und bekannte Probleme: [`dev/e2e-2026-10-17.md`](dev/e2e-2026-10-17.md). Airgap-Prüfung: `make egress-check`.
+
 ## Offene Entscheidungen (Vorgabe in Klammern)
 
 1. Historische Fassungen für Fragen zu einem früheren Stichtag (**keine**, später N = 1 für Codes möglich)

@@ -5,7 +5,9 @@
 # /opt/lgx/Modelfile.legilux-cpu, and stops. The runtime `ollama` service (internal network) never pulls.
 # In the airgap the models come from the signed models bundle instead (PLAN §9.2).
 set -eu
-: "${LGX_OLLAMA_PULL:?set LGX_OLLAMA_PULL (e.g. ministral-3:8b)}"
+: "${LGX_OLLAMA_PULL:?set LGX_OLLAMA_PULL (e.g. qwen3:4b-instruct-2507-q4_K_M)}"
+# Behind a TLS-intercepting proxy (connected dev host): LGX_DEV_CA_BUNDLE is mounted here; empty = system roots.
+if [ -s /run/lgx/ca-bundle.crt ]; then export SSL_CERT_FILE=/run/lgx/ca-bundle.crt; fi
 ollama serve >/tmp/ollama-serve.log 2>&1 &
 pid=$!
 trap 'kill "$pid" 2>/dev/null || true' EXIT INT TERM

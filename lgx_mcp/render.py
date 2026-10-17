@@ -26,9 +26,18 @@ def _footer(env: dict[str, Any]) -> list[str]:
     return [str(env.get("attribution", "")), str(env.get("disclaimer", ""))]
 
 
+def version_note(v: dict[str, Any]) -> str:
+    """« texte publié » | « publiée, non stockée dans cette base » | « annoncée sans texte » (has_text / has_files)."""
+    if v.get("has_text"):
+        return "texte publié"
+    return "publiée, non stockée dans cette base" if v.get("has_files") else "annoncée sans texte"
+
+
 def _status_line(c: dict[str, Any]) -> str:
     st = c.get("status_as_of") or {}
     status = STATUS_FR.get(st.get("status", ""), st.get("status", "?"))
+    if c.get("valid_from") and st.get("as_of") and c["valid_from"] > st["as_of"]:
+        status += f" — texte affiché pas encore applicable (à partir du {c['valid_from']})"
     basis = TEXT_BASIS_FR.get(c.get("text_basis", ""), c.get("text_basis", ""))
     since = ""
     if c.get("article_wording_since"):
@@ -92,14 +101,16 @@ def render_article(out: dict[str, Any], max_tokens: int) -> str:
         lines.append("    Modifié par : " + " ; ".join(names) + (" …" if len(out["amended_by"]) > 5 else ""))
     if out.get("future_version"):
         fv = out["future_version"]
-        lines.append(
-            f"    Nouvelle rédaction applicable à partir du {fv.get('applicable_from')}"
-            f" ({'publiée' if fv.get('has_text') else 'annoncée sans texte'})"
-        )
+        lines.append(f"    Nouvelle rédaction applicable à partir du {fv.get('applicable_from')} ({version_note(fv)})")
     pi = out.get("page_info") or {}
     lines.append(DATA_NOTE)
     lines.append(f"<<<TEXTE {c['key']} (page {pi.get('page', 1)}/{pi.get('pages', 1)})")
-    lines.append(out.get("text") or "(texte vide : article abrogé)")
+    if out.get("text"):
+        lines.append(out["text"])
+    elif out.get("is_repealed"):
+        lines.append("(texte vide : article abrogé)")
+    else:  # an empty <p/> in the source is not a repeal (structuredContent: is_repealed = false)
+        lines.append("(texte vide dans la source — contenu non reproduit)")
     lines.append(">>>")
     if out.get("next_cursor"):
         lines.append(f"Suite : rappeler get_article avec cursor = « {out['next_cursor']} ».")
@@ -130,10 +141,7 @@ def render_act(out: dict[str, Any], max_tokens: int) -> str:
             lines.append(f"    {label} : {v.get('label') or v['version_eli']} — {v['version_eli']}")
     if out.get("next_version"):
         nv = out["next_version"]
-        lines.append(
-            f"    Prochaine version : {nv.get('applicable_from')}"
-            f" ({'texte publié' if nv.get('has_text') else 'annoncée sans texte'})"
-        )
+        lines.append(f"    Prochaine version : {nv.get('applicable_from')} ({version_note(nv)})")
     if out.get("repealed_by"):
         rb = out["repealed_by"]
         lines.append(f"    Abrogé par : {clip(rb.get('title'), 150) or rb.get('eli')} ({rb.get('date')})")

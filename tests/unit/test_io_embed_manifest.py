@@ -8,7 +8,7 @@ import pytest
 from lgx_core.config import DEFAULT_CONFIG_DIR, EmbeddingConfig, ProjectConfig
 from lgx_core.eli import assert_fetchable
 from lgx_core.embed import EmbeddingDisabledError, get_embedder
-from lgx_core.io import append_jsonl, read_jsonl, write_jsonl
+from lgx_core.io import append_jsonl, atomic_write_text, read_jsonl, write_jsonl
 from lgx_core.models import FetchLogEntry, ManifestEntry, TextBasis
 
 FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "manifest" / "bootstrap_sample.jsonl"
@@ -23,6 +23,15 @@ def test_jsonl_roundtrip(tmp_path: Path) -> None:
     append_jsonl(log, FetchLogEntry(url="u", fetched_at=dt.datetime(2026, 10, 16, tzinfo=dt.UTC), http_status=304))
     append_jsonl(log, FetchLogEntry(url="v", fetched_at=dt.datetime(2026, 10, 16, tzinfo=dt.UTC), http_status=200))
     assert [e.url for e in read_jsonl(log, FetchLogEntry)] == ["u", "v"]
+
+
+def test_atomic_write_mode(tmp_path: Path) -> None:
+    """Review 2026-10-17: mkstemp's 0600 made the bundle sidecars unreadable for the capability-less db-load."""
+    atomic_write_text(tmp_path / "private.json", "{}")
+    atomic_write_text(tmp_path / "bundle.sha256", "x  y\n", mode=0o644)
+    assert (tmp_path / "private.json").stat().st_mode & 0o777 == 0o600
+    assert (tmp_path / "bundle.sha256").stat().st_mode & 0o777 == 0o644
+    assert (tmp_path / "bundle.sha256").read_text() == "x  y\n" and not list(tmp_path.glob(".*.tmp"))
 
 
 def test_read_jsonl_reports_line(tmp_path: Path) -> None:

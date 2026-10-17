@@ -53,6 +53,17 @@ sample (T=auto follows the Luxembourg date).
 applies the parts `00_extensions … 95_roles` in order. Without `--container` it uses the local `psql`
 and `PGHOST/PGPORT/PGUSER/PGPASSWORD`. Each release is a fresh database ("rebuild, don't migrate").
 
+## Dev stack (one command each)
+
+`make ingest-sample` (offline sample ingest + package into `lgx-dev-db`, which `make dev-db` creates if needed),
+`make dev-up` / `dev-down` / `dev-logs` / `dev-ps` (`deploy/compose.dev.yml`, profile `cpu`, waits until healthy),
+`make ollama-pull MODEL=<tag>`, `make e2e` (scripted questions through the UI container), `make egress-check`
+(airgap egress check), and host runs `make mcp` (:8001) / `make ui` (:8511). Behind a TLS-intercepting proxy pass
+`LGX_DEV_CA_BUNDLE=/path/ca-bundle.crt` to `dev-up` (image builds) and `ollama-pull`. `db-load` restores the bundle only while the stack's
+`legilux` database is missing: after a new `make ingest-sample` run `make dev-down`, `docker volume rm legilux-dev-pgdata`
+and `make dev-up` (the model volume stays). Results of the first CPU run
+and the egress check: `docs/dev/e2e-2026-10-17.md`.
+
 ## Tests and lint
 
 ```sh
@@ -68,7 +79,11 @@ make test-live    # tests marked live: a few polite requests to Legilux (opt-in)
   port, apply the schema to two fresh databases and check objects, vocabulary parity with
   `lgx_core.models`, status/serving functions, the EXCLUDE constraint, lexical search and the conditional
   HNSW index. Set `LGX_TEST_PG_DSN=postgresql://…` to use an existing server instead (CI does this with a
-  pgvector service container); they are skipped when neither is available.
+  pgvector service container) and `LGX_TEST_PG_CONTAINER=<its container>` so the package → pg_dump/pg_restore →
+  rename-swap path runs too; they are skipped when neither is available.
+- CI (`.github/workflows/ci.yml`) also restores the offline fixture release as `legilux`
+  (`scripts/ci_fixture_release.py`), runs the `any_release` MCP contract tests against it with
+  `LGX_TEST_REQUIRE_DB=1`, and builds both runtime images. The sample-content contract tests need the dev DB.
 
 ## Pipeline (sample)
 

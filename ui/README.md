@@ -23,17 +23,27 @@ token) and the configured LLM endpoint. Embeddings are off: the hybrid toggle st
 | `.streamlit/config.toml` | offline config (baked into the image; `STREAMLIT_*` variables override per host) |
 | `Dockerfile` | image `lgx.local/lgx-streamlit` (build from the repo root) |
 
+## Screenshots
+
+Dev stack on 4 vCPUs with `qwen3:4b-instruct-2507-q4_K_M` (details: `docs/dev/e2e-2026-10-17.md`).
+
+| Chat (answer, sources, warnings) | Recherche directe « art. L. 121-1 C. trav. » | Corpus |
+|---|---|---|
+| ![Chat](../docs/screenshots/chat.png) | ![Recherche directe](../docs/screenshots/direct-search.png) | ![Corpus](../docs/screenshots/corpus.png) |
+
+Retake them with `scripts/ui_browser.cjs` (Playwright, headless Chromium; commands in the e2e document), then
+reduce them to 128-colour PNGs (≤ 400 KB each).
+
 ## Run
 
 ```sh
-# Host (dev): needs a running lgx-mcp; run from ui/ so .streamlit/config.toml applies
-cd ui && LGX_MCP_URL=http://127.0.0.1:8000/mcp LGX_MCP_TOKEN=<token> \
-  OPENAI_BASE_URL=http://127.0.0.1:11434/v1 LGX_LLM_MODEL=ministral-3:8b \
-  uv run python -m lgx_ui.launch --server.address 127.0.0.1          # http://127.0.0.1:8501
+# Dev stack (db + sample restore + mcp + UI + Ollama, ports on 127.0.0.1 only), from the repo root
+make dev-up                     # = docker compose -f deploy/compose.dev.yml --profile cpu up -d --build --wait
+make ollama-pull                # once: qwen3:4b-instruct-2507-q4_K_M (deploy/ollama/README.md)
 
-# Dev stack (db + sample restore + mcp + UI, ports on 127.0.0.1 only), from the repo root
-docker compose -f deploy/compose.dev.yml up -d --build
-docker compose -f deploy/compose.dev.yml --profile cpu up -d          # + Ollama (see deploy/ollama/README.md)
+# Host (dev): needs a running lgx-mcp (make mcp → :8001) and an LLM endpoint the host can reach
+make ui HOST_LLM_BASE_URL=http://127.0.0.1:11434/v1 MODEL=<model>       # http://127.0.0.1:8511
+# = cd ui && LGX_MCP_URL=… LGX_MCP_TOKEN=… OPENAI_BASE_URL=… LGX_LLM_MODEL=… uv run python -m lgx_ui.launch
 
 # Image only
 docker build -f ui/Dockerfile -t lgx.local/lgx-streamlit:dev .       # --secret id=ca_bundle,src=… behind a TLS proxy
@@ -42,9 +52,16 @@ docker build -f ui/Dockerfile -t lgx.local/lgx-streamlit:dev .       # --secret 
 Environment (Appendix C names): `LGX_MCP_URL`, `LGX_MCP_TOKEN_FILE` (or `LGX_MCP_TOKEN` in dev),
 `OPENAI_BASE_URL`, `OPENAI_API_KEY_FILE` (or `OPENAI_API_KEY`), `LGX_LLM_MODEL`, `LGX_LLM_PRESETS`
 (`ollama,vllm,mistral-onprem`; `cloud` only with `LGX_ALLOW_CLOUD_LLM=1`), `LGX_MAX_TOOL_ITERATIONS` (5),
-`LGX_MCP_TIMEOUT_S` (20), `LGX_LLM_TIMEOUT_S` (120), `LGX_TOOL_RESULT_TOKENS` (4000), `LGX_TURN_BUDGET_S`
-(600), `LGX_EVAL_DIR`, `LGX_HOSTNAME`. The configured API key is only sent to the configured/preset base URLs,
-never to a URL typed into the sidebar.
+`LGX_MCP_TIMEOUT_S` (20), `LGX_LLM_TIMEOUT_S` (120; both compose files 600 for CPU), `LGX_TOOL_RESULT_TOKENS`
+(4000; compose 2500), `LGX_TURN_BUDGET_S` (600; compose 1200), `LGX_EVAL_DIR`, `LGX_HOSTNAME`. A `*_FILE` that cannot
+be read stops the UI at start (`UiSettingsError`; airgap secrets must be readable by uid 10001). The configured API
+key is only sent to the configured/preset base URLs, never to a URL typed into the sidebar, and a typed URL must be
+internal (service name, localhost, private IP, `*.internal` …) unless `LGX_ALLOW_CLOUD_LLM=1`. Without a sidebar
+`as_of`, an `as_of` chosen by the model is ignored (server date) unless the question names that date as a point in
+time (« au 1er janvier 2020 », not « loi du 1er août 2018 ») or « as_of choisi par le modèle si vide » is ticked; the
+model is told in the tool message when its date was replaced. Tool results are cut to `LGX_TOOL_RESULT_TOKENS` without
+ever dropping or shortening a warning (`compact_json`: text and snippets first, then machine-only fields, warning data
+lists beyond 5 entries, then trailing hits).
 
 ## Tests
 

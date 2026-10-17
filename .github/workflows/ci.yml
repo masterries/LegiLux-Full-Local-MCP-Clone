@@ -77,9 +77,36 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install (locked)
         run: uv sync --locked --all-extras
-      - name: Schema tests
+      - name: Schema + loader tests (package -> pg_dump / pg_restore -> rename-swap run in the service container)
         env:
           LGX_TEST_PG_DSN: postgresql://postgres:postgres@localhost:5432/postgres
+          LGX_TEST_PG_CONTAINER: ${{ job.services.postgres.id }}
         run: uv run pytest -q -m db
+      - name: Fixture release as the runtime database `legilux` (offline pipeline over the committed CC BY fixtures)
+        run: >-
+          uv run python scripts/ci_fixture_release.py
+          --dsn postgresql://postgres:postgres@localhost:5432/postgres
+          --container ${{ job.services.postgres.id }} --ro-password lgx-ro-ci
+      - name: MCP contract tests that need no sample content (auth 401/421/403, /readyz, protocol eras, degraded)
+        env:
+          LGX_TEST_MCP_PG_DSN: postgresql://lgx_ro:lgx-ro-ci@localhost:5432/legilux
+          LGX_TEST_REQUIRE_DB: "1"   # an unreachable database fails the job instead of skipping every test
+        run: uv run pytest -q -m any_release tests/contract
       - name: Build the lgx-db image
         run: docker build -t lgx.local/lgx-db:ci db
+
+  images:
+    name: runtime images (lgx-mcp, lgx-streamlit)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build lgx-mcp (docker/lgx-mcp.Dockerfile)
+        run: docker build -f docker/lgx-mcp.Dockerfile -t lgx.local/lgx-mcp:ci .
+      - name: Build lgx-streamlit (ui/Dockerfile)
+        run: docker build -f ui/Dockerfile -t lgx.local/lgx-streamlit:ci .
+      - name: Smoke the images (imports, non-root user, no network needed)
+        run: |
+          docker run --rm --network none --entrypoint python lgx.local/lgx-mcp:ci -c "import lgx_mcp.server"
+          docker run --rm --network none --entrypoint python lgx.local/lgx-streamlit:ci -c "import lgx_ui.app_support"
+          test "$(docker inspect -f '{{.Config.User}}' lgx.local/lgx-mcp:ci)" = "10001:10001"
+          test "$(docker inspect -f '{{.Config.User}}' lgx.local/lgx-streamlit:ci)" = "10001:10001"

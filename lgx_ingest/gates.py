@@ -443,6 +443,18 @@ def db_gates(ctx: StageContext, conn: psycopg.Connection[Any], report: GateRepor
     )
     if ctx.config.scope.licence_policy == "cc_by_only":
         report.check("licence_cc_by_only", unlicensed == 0, unlicensed, 0)
+    # the airgap's only copy of the licence the attribution cites (LICENSES/CC-BY-4.0.txt, PLAN Appendix D.5)
+    legalcode = _rows(
+        conn,
+        "SELECT lang, length(body) FROM lgx.legal_text WHERE code = 'cc_by_4_0' AND strpos(body, %s) > 0 ORDER BY lang",
+        ("Creative Commons Attribution 4.0 International Public License",),
+    )
+    report.check(
+        "cc_by_legalcode",
+        [r[0] for r in legalcode] == ["en", "fr"],
+        {r[0]: r[1] for r in legalcode},
+        "fr + en notices carry the full legal code (LICENSES/CC-BY-4.0.txt)",
+    )
     vectors = int(_scalar(conn, "SELECT count(*) FROM lgx.chunk WHERE embedding IS NOT NULL"))
     models = int(_scalar(conn, "SELECT count(*) FROM lgx.embedding_model"))
     if not ctx.config.embedding.enabled:

@@ -11,8 +11,18 @@
 # For the connected dev host use compose.dev.yml (standalone, dev defaults, 127.0.0.1 ports).
 #
 # Conventions (Appendix C): images lgx.local/<name>:<tag> loaded from the signed platform bundle and verified by
-# image ID (pins in images.lock); pull_policy never; secrets are 0600 files under ${LGX_HOME}/secrets written by
-# `lgx install`; networks backend/front are internal, edge is the only network with a gateway.
+# image ID (pins in images.lock); pull_policy never; networks backend/front are internal, edge is the only network
+# with a gateway.
+# Secrets are files under ${LGX_HOME}/secrets written by `lgx install` (M5). Outside Swarm a compose secret is a
+# plain bind mount that keeps the host owner and mode (long-syntax uid/gid/mode are ignored), and mcp /
+# lgx-streamlit run as 10001:10001 with cap_drop ALL, so ownership is part of the contract (tests/unit/
+# test_ui_compose.py checks this table against the services):
+#   pg_superuser_pw  root:root   0600   db (the postgres entrypoint reads it as root)
+#   pg_ro_pw         10001:10001 0400   mcp
+#   mcp_token        10001:10001 0400   mcp, lgx-streamlit
+#   llm_api_key      10001:10001 0400   lgx-streamlit
+# e.g. install -o 10001 -g 10001 -m 0400 /dev/stdin "${LGX_HOME}/secrets/mcp_token" <<< "$TOKEN". A secret that
+# uid 10001 cannot read stops mcp (SettingsError) and lgx-streamlit (UiSettingsError) at start.
 # =====================================================================================================
 name: legilux
 
@@ -113,6 +123,7 @@ services:
       LGX_STALENESS_CRITICAL_DAYS: "90"
       LGX_MAX_RESULT_TOKENS: "${LGX_MAX_RESULT_TOKENS:-4000}"
       LGX_AUDIT_QUERY_TEXT: "false"
+      LGX_TRUSTED_PROXIES: "${LGX_TRUSTED_PROXIES:-}"   # IP/CIDR of Open WebUI: its user headers key rate limit + audit
     secrets: [pg_ro_pw, mcp_token]
     volumes: ["audit:/var/log/lgx"]
     depends_on: { db: { condition: service_healthy } }
@@ -148,7 +159,11 @@ services:
       LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
       LGX_MCP_TIMEOUT_S: "20"
-      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
+      # sized for the cpu profile (docs/dev/e2e-2026-10-17.md: 237-359 s per call at 5-7k prompt tokens on CPU;
+      # 120 s timed out); gpu profiles may lower them in deploy/.env
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-600}"
+      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-1200}"
+      LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"   # PLAN §9.1 cpu: ≤ 2.5k retrieved tokens
       LGX_EVAL_DIR: /data/eval
       LGX_HOSTNAME: "${LGX_HOSTNAME:-legilux.intra}"
       STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"

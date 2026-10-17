@@ -18,12 +18,16 @@ from lgx_ui.tools_bridge import (
     COMBINATORS,
     LoopConfig,
     SidebarOverrides,
+    ToolTrace,
+    build_context,
     compact_json,
+    named_dates,
     openai_tools,
     probe_tool_calling,
     run_chat_turn,
     run_tool_loop,
     sanitize_parameters,
+    tool_message_content,
     validate_arguments,
 )
 from lgx_ui.tools_bridge import apply_overrides as _apply
@@ -157,6 +161,44 @@ def test_overrides_are_scoped_to_the_arguments_each_tool_accepts() -> None:
     assert about.arguments == {} and about.applied == []
 
 
+def test_model_as_of_is_dropped_without_a_sidebar_date() -> None:
+    """e2e 2026-10-17: a 4B model sent its training-time "today" (2024-04-05) as as_of on every call."""
+    res = apply("get_article", {"citation": "art. L. 121-1 C. trav.", "as_of": "2024-04-05"}, SidebarOverrides())
+    assert res.arguments == {"citation": "art. L. 121-1 C. trav."}
+    assert res.applied == ["as_of 2024-04-05 du modèle ignoré (date du serveur)"]
+    kept = apply("resolve_citation", {"text": "C. trav.", "as_of": "2024-04-05"}, SidebarOverrides(model_as_of=True))
+    assert kept.arguments == {"text": "C. trav.", "as_of": "2024-04-05"} and kept.applied == []
+    sidebar = apply("get_act", {"citation": "x", "as_of": "2024-04-05"}, SidebarOverrides(as_of="2026-10-16"))
+    assert sidebar.arguments["as_of"] == "2026-10-16" and sidebar.applied == ["as_of=2026-10-16"]
+    assert res.dropped_as_of == "2024-04-05" and sidebar.dropped_as_of is None
+    # review 2026-10-17: a date the user names is a real point-in-time question, the model's as_of stays
+    named = apply("get_article", {"citation": "x", "as_of": "2020-01-01"}, SidebarOverrides(user_dates=("2020-01-01",)))
+    assert named.arguments["as_of"] == "2020-01-01" and named.dropped_as_of is None
+
+
+def test_named_dates_are_points_in_time_not_act_dates() -> None:
+    assert named_dates("Quelle était la rédaction de l'art. L. 121-1 C. trav. au 1er janvier 2020 ?") == {"2020-01-01"}
+    assert named_dates("art. 5 de la loi modifiée du 1er août 2018 portant organisation de la CNPD") == set()
+    assert named_dates("règlement grand-ducal du 24 juillet 2000, version au 31/12/2024") == {"2024-12-31"}
+    assert named_dates("Fassung am 1. Januar 2021 (Gesetz vom 1. August 2018)") == {"2021-01-01"}
+    assert named_dates("as of March 5, 2024; 2025-03-01; 30 février 2020") == {"2024-03-05", "2025-03-01"}
+
+
+def test_dropped_model_as_of_is_announced_to_the_model() -> None:
+    """Review 2026-10-17: the « as_of … ignoré » note only reached the UI trace, never the model."""
+    sc = {"citation": {"key": "C1"}, "text": "…", "as_of": "2026-10-17", "warnings": []}
+    trace = ToolTrace(1, "c1", "get_article", {"citation": "x", "as_of": "2020-01-01"}, dropped_as_of="2020-01-01")
+    trace.outcome = ToolOutcome(name="get_article", arguments={}, structured=sc, text="t", is_error=False)
+    payload = json.loads(tool_message_content(trace, 2500))
+    assert (
+        payload["note"].startswith("as_of 2020-01-01 demandé par le modèle ignoré")
+        and "(2026-10-17)" in payload["note"]
+    )
+    assert payload["citation"] == {"key": "C1"}
+    trace.dropped_as_of = None
+    assert "note" not in json.loads(tool_message_content(trace, 2500))
+
+
 def test_top_k_cap_and_unset_overrides() -> None:
     # model omitted top_k: the schema default (8) is larger than the cap -> cap applied
     res = apply("search_legislation", {"query": "bail"}, SidebarOverrides(top_k_cap=3))
@@ -214,6 +256,50 @@ def test_compact_json_respects_the_token_budget() -> None:
     assert estimate_tokens(cut) <= 200 and cut.endswith("tokens]")
 
 
+def test_compact_json_never_drops_warnings() -> None:
+    """Review 2026-10-17: the largest list was often the envelope ``warnings`` (W_STUB, W_NOT_CONSOLIDATED with
+    data.amending_acts), so mandatory warnings were popped while hits and attribution stayed."""
+    amending = [{"eli": f"{ELI}/loi/2020/01/{i:02d}/a{i}", "title": "Loi " + "t" * 190} for i in range(1, 9)]
+    warnings = [
+        {"code": "W_NOT_OFFICIAL", "severity": "info", "message": "Non officielle " + "x" * 150, "refs": []},
+        {"code": "W_NOT_CONSOLIDATED", "severity": "high", "message": "Texte non consolidé " + "m" * 700,
+         "refs": ["C1"], "data": {"amending_acts": amending}},
+        {"code": "W_STUB", "severity": "high", "message": "Consolidation annoncée " + "s" * 120, "refs": ["C2"]},
+    ]  # fmt: skip
+    hits = [
+        {"rank": i, "snippet": "z" * 600, "citation": {"key": f"C{i}", "warnings": ["W_NOT_CONSOLIDATED", "W_STUB"],
+         "display_url": "u" * 80, "source_sha256": "f" * 64, "act_title": "a" * 190}}
+        for i in range(1, 9)
+    ]  # fmt: skip
+    sc = {"hits": hits, "warnings": warnings, "attribution": "Source : Legilux", "disclaimer": "Journal officiel"}
+    from lgx_core.textsize import estimate_tokens
+
+    for budget in (2500, 1500, 1000):
+        out = compact_json(sc, budget)
+        assert estimate_tokens(out) <= budget
+        data = json.loads(out)
+        assert [w["code"] for w in data["warnings"]] == ["W_NOT_OFFICIAL", "W_NOT_CONSOLIDATED", "W_STUB"]
+        assert [w["message"] for w in data["warnings"]] == [w["message"] for w in warnings]  # whole messages
+        assert all(h["citation"]["warnings"] == ["W_NOT_CONSOLIDATED", "W_STUB"] for h in data.get("hits", []))
+        w = data["warnings"][1]["data"]
+        assert len(w["amending_acts"]) + w.get("amending_acts_omitted", 0) == 8 and len(w["amending_acts"]) >= 5
+    assert len(json.loads(compact_json(sc, 2500))["hits"]) >= 2
+
+
+def test_retrieve_first_context_keeps_warning_messages() -> None:
+    sc = {
+        "hits": [{"snippet": "s" * 3000, "citation": {"key": f"C{i}", "act_title": "Loi"}} for i in range(1, 9)],
+        "warnings": [{"code": "W_STUB", "message": "Consolidation annoncée au 01/01/2027, texte non disponible."}],
+        "disclaimer": "Journal officiel",
+        "attribution": "Source : Legilux",
+    }
+    ctx = build_context(
+        ToolOutcome(name="search_legislation", arguments={}, structured=sc, text="", is_error=False), 1000
+    )
+    assert "[!] W_STUB : Consolidation annoncée au 01/01/2027, texte non disponible." in ctx
+    assert "Attribution : Source : Legilux" in ctx and "[C1]" in ctx and len(ctx) <= 3500
+
+
 # ------------------------------------------------------------------------------------- tool loop
 
 
@@ -261,6 +347,31 @@ async def test_multi_step_tool_loop_with_overrides() -> None:
     payload = json.loads(tool_msg["content"])
     assert payload["hits"][0]["citation"]["key"] == "C1" and payload["retrieval"]["mode_used"] == "lexical"
     assert result.mcp_latency_s >= 0 and result.total_s >= result.llm_latency_s
+
+
+@pytest.mark.parametrize(
+    ("question", "sent", "noted"),
+    [
+        ("Quelle était la rédaction de l'art. L. 121-1 C. trav. au 1er janvier 2020 ?", "2020-01-01", False),
+        ("Que dit l'art. L. 121-1 C. trav. ?", None, True),
+    ],
+)
+async def test_loop_keeps_a_user_named_as_of_and_announces_a_dropped_one(
+    question: str, sent: str | None, noted: bool
+) -> None:
+    server = FakeOpenAIServer(
+        [
+            tool_call_message(("c1", "get_article", {"citation": "art. L. 121-1 C. trav.", "as_of": "2020-01-01"})),
+            {"role": "assistant", "content": "ok"},
+        ]
+    )
+    session = FakeSession()
+    await turn(server, session, question=question)
+    assert session.calls[0][1].get("as_of") == sent
+    tool_msg = json.loads(server.requests[1]["messages"][-1]["content"])
+    assert ("note" in tool_msg) is noted
+    if noted:
+        assert "as_of 2020-01-01 demandé par le modèle ignoré" in tool_msg["note"]
 
 
 async def test_parallel_tool_calls_run_concurrently_and_keep_order() -> None:

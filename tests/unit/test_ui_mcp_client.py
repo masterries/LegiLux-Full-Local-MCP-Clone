@@ -21,7 +21,7 @@ from lgx_ui.mcp_client import (
     health_url,
     run_sync,
 )
-from lgx_ui.settings import NO_KEY, load_settings
+from lgx_ui.settings import NO_KEY, UiSettingsError, load_settings
 from unit.test_ui_fakes import FAKE_PROMPT, SCHEMAS, bearer_guard, build_fake_server
 
 URL = "http://localhost:8000/mcp"
@@ -172,3 +172,24 @@ def test_settings_from_environment(tmp_path: Path) -> None:
 
     empty = load_settings({})
     assert empty.mcp_token is None and empty.llm_api_key == NO_KEY and empty.eval_dir is None
+
+
+def test_unreadable_secret_file_fails_loudly(tmp_path: Path) -> None:
+    """Review 2026-10-17: a root-owned 0600 secret made the UI fall back to no token (401 on every call)."""
+    missing = tmp_path / "secrets" / "mcp_token"
+    with pytest.raises(UiSettingsError, match="LGX_MCP_TOKEN_FILE"):
+        load_settings({"LGX_MCP_TOKEN_FILE": str(missing), "LGX_MCP_TOKEN": "plain-token"})
+    with pytest.raises(UiSettingsError, match="OPENAI_API_KEY_FILE"):
+        load_settings({"OPENAI_API_KEY_FILE": str(tmp_path)})  # a directory: read fails
+
+
+def test_free_typed_llm_endpoint_must_be_internal() -> None:
+    from lgx_ui.app_support import endpoint_allowed
+
+    cfg = load_settings({"OPENAI_BASE_URL": "http://llm:11434/v1", "LGX_LLM_MODEL": "m"})
+    assert endpoint_allowed(cfg, "http://llm:11434/v1")  # configured
+    assert endpoint_allowed(cfg, "http://vllm:8000/v1") and endpoint_allowed(cfg, "http://10.1.2.3:8000/v1")
+    assert endpoint_allowed(cfg, "http://host.docker.internal:11434/v1")
+    assert not endpoint_allowed(cfg, "https://api.example.com/v1")  # public: only with the cloudllm opt-in
+    cloud = load_settings({"LGX_ALLOW_CLOUD_LLM": "1", "OPENAI_BASE_URL": "https://api.example.com/v1"})
+    assert endpoint_allowed(cloud, "https://other.example.org/v1")

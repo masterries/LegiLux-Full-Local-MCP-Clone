@@ -86,15 +86,27 @@ async def _resolve_target(rt: Runtime, ctx: CallContext, facts: Facts, args: dic
             'etat/leg/loi/2018/08/01/a686", "article": "5"}',
         )
     resolver = rt.resolver(ctx.release, facts)
+    no_article = ToolFailure(
+        ToolErrorCode.BAD_INPUT,
+        "la référence ne contient pas de numéro d'article",
+        hint="Utilisez get_act pour la fiche d'un acte, ou précisez l'article (« art. 5 … »).",
+    )
     if citation:
         cit = resolver.parser.parse_one(citation)
-        if cit is not None and cit.article is None and not (cit.act and cit.act.eli_article):
-            raise ToolFailure(
-                ToolErrorCode.BAD_INPUT,
-                "la référence ne contient pas de numéro d'article",
-                hint="Utilisez get_act pour la fiche d'un acte, ou précisez l'article (« art. 5 … »).",
-            )
+        # an article ELI (citation_string / article_eli of an earlier result) names its article by itself
+        eli_only = cit is not None and cit.article is None and cit.act is not None and cit.act.kind == "eli"
+        if cit is not None and cit.article is None and not eli_only:
+            raise no_article
         res = await resolver.resolve_text(citation, ctx.as_of)
+        if eli_only and res.status == "resolved" and res.article_status == "not_requested":
+            assert cit is not None and cit.act is not None
+            if "/art_" in (cit.act.eli or ""):
+                raise ToolFailure(
+                    ToolErrorCode.NOT_FOUND,
+                    f"article introuvable dans cette base : {cit.act.eli}",
+                    hint='Vérifiez le numéro ou consultez la table des matières via get_act include=["toc"].',
+                )
+            raise no_article
     else:
         eli = normalise_eli(act_eli)
         mention = ActMention(kind="eli", span=(0, len(eli)), surface=eli, eli=eli)
@@ -124,7 +136,11 @@ def _raise_for(res: Resolution, ctx: CallContext) -> None:
             candidates=_candidates_payload(res),
         )
     if res.status == "not_found" or not res.candidates:
-        raise ToolFailure(ToolErrorCode.NOT_FOUND, res.message or "référence introuvable dans cette base")
+        raise ToolFailure(
+            ToolErrorCode.NOT_FOUND,
+            res.message or "référence introuvable dans cette base",
+            candidates=_candidates_payload(res),
+        )
     best = res.candidates[0]
     if res.article_status == "no_text":
         reason = METADATA_REASON_FR.get(best.act.metadata_reason or "", "")
@@ -203,15 +219,12 @@ async def get_article(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> To
             repealed_by = {"eli": rep.eli, "title": clip(rep.title, 200), "date": iso(rep.date_entry_into_force)}
     future = None
     if a.serving.next_version_date:
-        nv = await facts.db.fetchone(
-            "SELECT eli_version, has_text FROM lgx.act_version WHERE act_id = %s AND kind <> 'original'"
-            " AND date_applicability = %s ORDER BY version_id LIMIT 1",
-            [act.act_id, a.serving.next_version_date],
-        )
+        nv = await facts.next_version(act.act_id, a.serving.next_version_date)
         future = {
             "applicable_from": iso(a.serving.next_version_date),
-            "version_eli": nv["eli_version"] if nv else None,
-            "has_text": bool(nv["has_text"]) if nv else bool(a.serving.next_version_has_text),
+            "version_eli": nv.eli_version if nv else None,
+            "has_text": nv.has_text if nv else bool(a.serving.next_version_has_text),
+            "has_files": nv.has_files if nv else False,
         }
     member = None
     if full.member_act_id:

@@ -30,7 +30,10 @@ async def resolve_citation(rt: Runtime, ctx: CallContext, args: dict[str, Any]) 
     status = res.status
     if status == "resolved" and res.article_status in ("not_found",):
         status = "not_found"
-    for c in res.candidates[:3]:
+    # Status warnings name the candidate they describe (refs = its act ELI). A resolved act only warns for itself, even
+    # when its article is missing: an unrelated low-confidence candidate's W_REPEALED was read as the resolved act's
+    # (e2e 2026-10-17). The resolver's own status decides, not the article-adjusted one.
+    for c in res.candidates[:1] if res.status == "resolved" else res.candidates[:3]:
         await _warn_status(rt, ctx, facts, c)
     structured: dict[str, Any] = {
         "status": status,
@@ -50,4 +53,4 @@ async def _warn_status(rt: Runtime, ctx: CallContext, facts: Any, cand: Candidat
 
     serving = await facts.serving_at(cand.act.act_id, ctx.as_of)
     if serving is not None:
-        await Annotator(ctx, facts).status_warnings(cand.act, serving, ref=None)
+        await Annotator(ctx, facts).status_warnings(cand.act, serving, ref=cand.act.eli_work)

@@ -30,6 +30,11 @@ RELEASE_PREFIX = "data-20261016"
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "legacy_client: needs the isolated mcp==1.27.2 client (uv run --isolated)")
+    config.addinivalue_line(
+        "markers",
+        "any_release: needs no sample content (auth, health, protocol eras, degraded states); CI runs these"
+        " against the offline fixture release (scripts/ci_fixture_release.py)",
+    )
 
 
 def free_port() -> int:
@@ -107,9 +112,10 @@ def mcp_dsn() -> str:
         with psycopg.connect(dsn, connect_timeout=3) as conn:
             row = conn.execute("SELECT release_id FROM lgx_meta.release").fetchone()
     except psycopg.Error as exc:
-        pytest.skip(
-            f"MCP contract tests need the dev database ({exc.__class__.__name__}); see docs/dev/INTERFACES.md §6.1"
-        )
+        msg = f"MCP contract tests need the dev database ({exc.__class__.__name__}); see docs/dev/INTERFACES.md §6.1"
+        if os.environ.get("LGX_TEST_REQUIRE_DB") == "1":  # CI: a skipped contract suite must not pass as green
+            pytest.fail(msg)
+        pytest.skip(msg)
     if not row or not str(row[0]).startswith(RELEASE_PREFIX):
         pytest.skip(f"contract expectations are written for the {RELEASE_PREFIX} sample release, found {row}")
     return dsn

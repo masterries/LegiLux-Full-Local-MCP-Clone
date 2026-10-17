@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # lgx-mcp — runtime MCP server of the LegiLux local clone (PLAN §8, §10.1; compose service `mcp`).
 #
 # Build from the repository root:

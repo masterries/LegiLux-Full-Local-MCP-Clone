@@ -25,6 +25,7 @@ from lgx_mcp.retrieval.rerank import Reranker
 from lgx_mcp.settings import SUPPORTED_SCHEMA_VERSIONS, McpSettings
 
 log = logging.getLogger("lgx_mcp.runtime")
+RATE_KEYS_MAX = 1024
 
 CANNED_QUERY = "contrat de travail"
 HEALTH_TTL_S = 30.0
@@ -128,6 +129,8 @@ class Runtime:
     def rate_limited(self, client: str) -> float | None:
         """Seconds to wait when ``client`` (or the whole server) exceeded its per-minute budget."""
         now = time.monotonic()
+        if len(self._rate) > RATE_KEYS_MAX:  # bounded memory: drop clients without a call in the last minute
+            self._rate = {k: w for k, w in self._rate.items() if w and now - w[-1] < 60.0}
         checks = (
             (client, self.settings.rate_per_client_min),
             ("*", self.settings.rate_global_min),

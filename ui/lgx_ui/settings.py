@@ -84,14 +84,24 @@ class UiSettings:
         return urls
 
 
+class UiSettingsError(RuntimeError):
+    """A configured secret file cannot be read: the UI refuses to start (as lgx-mcp does)."""
+
+
 def _read_secret(env: Mapping[str, str], name: str) -> str | None:
-    """``NAME_FILE`` (a 0600 file / Docker secret) wins over ``NAME``; blank values count as unset."""
+    """``NAME_FILE`` (a Docker secret, readable by uid 10001) wins over ``NAME``; blank values count as unset.
+
+    An unreadable ``NAME_FILE`` is an error, never a silent fallback to "no token" / "no key" (every MCP call
+    would then fail with 401 and the LLM would get ``sk-no-key``)."""
     path = env.get(f"{name}_FILE", "").strip()
     if path:
         try:
             value = Path(path).read_text(encoding="utf-8").strip()
-        except OSError:
-            value = ""
+        except OSError as exc:
+            raise UiSettingsError(
+                f"cannot read secret file {name}_FILE={path}: {exc} (Docker secrets of lgx-streamlit must be"
+                " readable by uid 10001: chown 10001:10001, chmod 0400)"
+            ) from exc
         if value:
             return value
     value = env.get(name, "").strip()

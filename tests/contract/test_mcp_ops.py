@@ -36,6 +36,7 @@ def _init(version: str) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------------------------ health + auth
+@pytest.mark.any_release
 def test_health_routes_need_no_token_and_accept_any_host(live: LiveServer) -> None:
     for path in ("/livez", "/healthz", "/readyz"):
         r = httpx.get(live.base + path, headers={"Host": "evil.example"}, timeout=10, trust_env=False)
@@ -48,6 +49,7 @@ def test_health_routes_need_no_token_and_accept_any_host(live: LiveServer) -> No
     assert body["reranker_ok"] is None and body["rerank_status"] == "off"
 
 
+@pytest.mark.any_release
 def test_mcp_requires_bearer_token(live: LiveServer) -> None:
     body = _init("2025-03-26")
     r = httpx.post(live.url, json=body, headers=MCP_HEADERS, timeout=10, trust_env=False)
@@ -58,12 +60,14 @@ def test_mcp_requires_bearer_token(live: LiveServer) -> None:
     assert r.status_code == 401
 
 
+@pytest.mark.any_release
 def test_host_and_origin_allowlists(live: LiveServer) -> None:
     assert _post(live, _init("2025-03-26"), Host="evil.example:8000").status_code == 421
     assert _post(live, _init("2025-03-26"), Origin="https://evil.example").status_code == 403
     assert _post(live, _init("2025-03-26"), Host=f"localhost:{live.base.rsplit(':', 1)[1]}").status_code == 200
 
 
+@pytest.mark.any_release
 async def test_wrong_token_fails_the_mcp_client(live: LiveServer) -> None:
     with pytest.raises(Exception):  # noqa: B017 - transport error type differs per era
         async with mcp_client(live, token="not-the-token-0123456789") as c:
@@ -71,6 +75,7 @@ async def test_wrong_token_fails_the_mcp_client(live: LiveServer) -> None:
 
 
 # ----------------------------------------------------------------- handshake era without a 1.x client
+@pytest.mark.any_release
 @pytest.mark.parametrize("version", ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"])
 def test_old_protocol_versions_initialise_and_call(live: LiveServer, version: str) -> None:
     r = _post(live, _init(version))
@@ -86,15 +91,16 @@ def test_old_protocol_versions_initialise_and_call(live: LiveServer, version: st
         "jsonrpc": "2.0",
         "id": 3,
         "method": "tools/call",
-        "params": {"name": "get_article", "arguments": {"citation": "art. L. 121-1 C. trav."}},
+        "params": {"name": "about_corpus", "arguments": {}},  # any release (an article call: test_mcp_legacy)
     }
     res = _post(live, call, **hdr).json()["result"]
     assert res["isError"] is False
-    assert res["structuredContent"]["citation"]["article_eli"].endswith("/code/travail/art_l_121-1")
+    assert res["structuredContent"]["snapshot"]["release_id"].startswith("data-20261016")
     assert res["content"][0]["type"] == "text"
 
 
 # ------------------------------------------------------------------------------- degraded states
+@pytest.mark.any_release
 def test_database_down_readyz_503_livez_200_and_backend_unavailable(mcp_dsn: str) -> None:
     dead = f"postgresql://lgx_ro:x@127.0.0.1:{free_port()}/legilux"
     srv = start_server(make_settings(mcp_dsn, pg_conninfo=dead, db_timeout_s=1.0))
@@ -171,10 +177,21 @@ async def test_clock_suspect_keeps_ready_and_warns(mcp_dsn: str) -> None:
         sc = r.structured_content
         assert "W_CLOCK_SUSPECT" in [w["code"] for w in sc["warnings"]]
         assert sc["as_of"] == "2026-10-16" and sc["snapshot"]["clock_ok"] is False
+        # review 2026-10-17: statuses were still asserted (at T) next to « aucun statut n'est affirmé »
+        eli = "http://data.legilux.public.lu/eli/etat/leg/loi/1999/05/31/n8"
+        async with mcp_client(srv) as c:
+            refused = await c.call_tool("get_act", {"eli": eli})
+            dated = await c.call_tool("get_act", {"eli": eli, "as_of": "2026-10-16"})
+        assert refused.is_error and refused.structured_content["error"]["code"] == "AS_OF_OUT_OF_RANGE"
+        assert "status_as_of" not in refused.structured_content
+        assert not dated.is_error and dated.structured_content["status_as_of"]["status"] == "no-longer-in-force"
+        clock = next(w for w in dated.structured_content["warnings"] if w["code"] == "W_CLOCK_SUSPECT")
+        assert "uniquement pour la date as_of demandée" in clock["message"]
     finally:
         srv.stop()
 
 
+@pytest.mark.any_release
 async def test_rate_limit_per_client(mcp_dsn: str) -> None:
     srv = start_server(make_settings(mcp_dsn, rate_per_client_min=2, rate_global_min=0))
     try:
@@ -208,6 +225,7 @@ async def test_stdio_entry_point(mcp_dsn: str) -> None:
     assert not r.is_error and r.structured_content["citation"]["article_eli"].endswith("/art_l_121-1")
 
 
+@pytest.mark.any_release
 def test_cli_check_prints_readyz(mcp_dsn: str) -> None:
     import subprocess
 

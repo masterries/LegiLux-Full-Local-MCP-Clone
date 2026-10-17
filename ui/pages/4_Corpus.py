@@ -27,7 +27,8 @@ else:
     cols[0].metric("Données au (T)", str(snap.get("sync_date", "?")))
     cols[1].metric("Âge (jours)", str(snap.get("age_days", "?")))
     cols[2].metric("Horloge", "ok" if snap.get("clock_ok") else "à vérifier" if "clock_ok" in snap else "?")
-    cols[3].metric("Vecteurs", str(emb.get("vector_status", "?")))
+    vstatus = str(emb.get("vector_status", "?"))  # "disabled:provider_none" is cut off in a metric; reason below
+    cols[3].metric("Vecteurs", "désactivés" if vstatus.startswith("disabled") else vstatus)
     st.caption(
         f"release {snap.get('release_id', '?')} · horizon {snap.get('horizon', '?')} · "
         f"niveau d'obsolescence {snap.get('staleness_level', '?')} · "

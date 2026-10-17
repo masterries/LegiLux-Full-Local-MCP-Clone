@@ -16,10 +16,10 @@ texts:
     de: "Nicht amtliche Information. Allein das veröffentlichte Amtsblatt (Journal officiel) ist maßgeblich und entfaltet Rechtswirkung (Gesetz vom 23. Dezember 2016 über das Journal officiel, Art. 5; Originalwortlaut: « Le Journal officiel publié fait seul foi et produit des effets juridiques »). Konsolidierte Fassungen und diese lokale Kopie dienen nur der Information. Keine Rechtsberatung."
     en: "Unofficial information. \"Le Journal officiel publié fait seul foi et produit des effets juridiques\" — only the published Journal officiel is authentic and has legal effect (Law of 23 December 2016 on the Journal officiel, Art. 5). Consolidated versions and this local copy are informative only. This is not legal advice."
   cc_by_4_0:
-    # The full CC BY 4.0 legal code ships as LICENSES/CC-BY-4.0.txt (added with the M1 bundle stage);
-    # the loader stores that file's text under this code. Until then this short notice is stored.
-    fr: "Creative Commons Attribution 4.0 International (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/legalcode.fr. Le texte intégral de la licence est fourni dans LICENSES/CC-BY-4.0.txt."
-    en: "Creative Commons Attribution 4.0 International (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/legalcode.en. The full licence text ships in LICENSES/CC-BY-4.0.txt."
+    # The loader appends the full CC BY 4.0 legal code (LICENSES/CC-BY-4.0.txt, English) to both notices, so
+    # legilux://legal/cc-by-4.0 carries the licence text in the airgap; gate cc_by_legalcode fails without it.
+    fr: "Creative Commons Attribution 4.0 International (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/legalcode.fr. Texte juridique intégral de la licence (version anglaise) ci-dessous."
+    en: "Creative Commons Attribution 4.0 International (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/legalcode.en. Full legal code of the licence below."
   notice:
     fr: "Copie locale non officielle, à usage interne de l'organisation qui la déploie. Les données proviennent de Legilux (SCL) sous licence CC BY 4.0 ; les textes sous « Licence de réutilisation SCL » ne sont pas inclus. Aucune restriction supplémentaire n'est ajoutée à la réutilisation des données."
     en: "Unofficial local copy for internal use by the deploying organisation. Data from Legilux (SCL) under CC BY 4.0; texts under the \"Licence de réutilisation SCL\" are not included. No additional restriction on reuse of the data is imposed."

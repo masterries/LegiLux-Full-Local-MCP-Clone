@@ -129,7 +129,7 @@ def test_guard_middleware() -> None:
 # --------------------------------------------------------------------------------------------- audit
 def test_audit_record_hashes_and_hmac(tmp_path: Path) -> None:
     path = tmp_path / "a" / "audit.jsonl"
-    log = AuditLog(str(path), b"k" * 32)
+    log = AuditLog(str(path), b"k" * 32, trusted_proxies=("10.0.0.0/24",))
     e = log.record(
         tool="search_legislation",
         arguments={"query": "ma question", "top_k": 3},
@@ -145,6 +145,17 @@ def test_audit_record_hashes_and_hmac(tmp_path: Path) -> None:
     assert line["args_sha256"] == canonical_sha256({"top_k": 3, "query": "ma question"})
     assert line["client"].startswith("u:") and line["chat"] and line["latency_ms"] == 12.3
     assert log.client_id(None, "10.0.0.5") == log.client_id({}, "10.0.0.5") != log.client_id(None, "10.0.0.6")
+    # user headers only key the client behind a trusted proxy (review 2026-10-17: rotating x-lgx-user escaped the
+    # per-client limit, spoofing it exhausted another user's budget)
+    assert log.client_id({"x-lgx-user": "u1"}, "10.0.0.5") != log.client_id({"x-lgx-user": "u2"}, "10.0.0.5")
+    untrusted = AuditLog(None, b"k" * 32)
+    assert untrusted.client_id({"x-lgx-user": "u1"}, "10.0.0.5") == untrusted.client_id(
+        {"x-lgx-user": "u2"}, "10.0.0.5"
+    )
+    assert untrusted.client_id({"x-lgx-user": "u1"}, "10.0.0.5").startswith("p:")
+    assert log.client_id({"x-lgx-user": "u1"}, "10.0.1.5").startswith("p:")  # outside the trusted CIDR
+    with pytest.raises(SettingsError, match="TRUSTED_PROXIES"):
+        McpSettings.from_env({"LGX_MCP_AUTH": "off", "LGX_TRUSTED_PROXIES": "openwebui"})
     with_text = AuditLog(None, b"k", query_text=True).record(
         tool="get_article", arguments={"citation": "art. 5"}, latency_ms=1, hits=1, error_code="NOT_FOUND",
         headers=None, peer=None, protocol_version=None,
@@ -235,3 +246,19 @@ def test_rate_limiter() -> None:
     assert rt.rate_limited("a") is not None  # third call of client a within a minute
     assert rt.rate_limited("b") is None
     assert rt.rate_limited("c") is not None  # global budget (3) exhausted
+
+
+def test_rate_limiter_keys_are_bounded(monkeypatch: pytest.MonkeyPatch) -> None:
+    import lgx_mcp.runtime as runtime_mod
+
+    s = McpSettings.from_env({"LGX_MCP_AUTH": "off", "LGX_RATE_PER_CLIENT_MIN": "30", "LGX_RATE_GLOBAL_MIN": "0"})
+    rt = runtime_mod.create_runtime(s)
+    monkeypatch.setattr(runtime_mod, "RATE_KEYS_MAX", 10)
+    clock = [1000.0]
+    monkeypatch.setattr(runtime_mod.time, "monotonic", lambda: clock[0])
+    for i in range(10):
+        rt.rate_limited(f"old{i}")
+    clock[0] += 61  # every old window is empty now
+    for i in range(5):
+        rt.rate_limited(f"new{i}")
+    assert len(rt._rate) <= 11 and not any(k.startswith("old") for k in rt._rate)

@@ -14,7 +14,7 @@ change and say so in your report.
 
 | Area | Files | Owner |
 |---|---|---|
-| Shared foundation (M0) | `lgx_core/{models,config,eli,io}.py`, `lgx_core/warnings/`, `lgx_core/embed/`, `lgx_ingest/{cli,context,sparql_templates}.py`, `config/*.yaml`, `sparql/`, `db/`, `scripts/`, `pyproject.toml`, `uv.lock`, `Makefile`, CI | orchestrator (M0) |
+| Shared foundation (M0) | `lgx_core/{models,config,eli,io,urls}.py`, `lgx_core/warnings/`, `lgx_core/embed/`, `lgx_ingest/{cli,context,sparql_templates}.py`, `config/*.yaml`, `sparql/`, `db/`, `scripts/`, `pyproject.toml`, `uv.lock`, `Makefile`, CI | orchestrator (M0) |
 | **Agent A** — metadata + selection | `lgx_ingest/{robots,sparql,select}.py`, `lgx_core/rules/*`, tests under `tests/unit/test_{robots,sparql,select,rules}*.py`, `tests/golden/` | agent A |
 | **Agent B** — fetch + parsers | `lgx_ingest/{fetch,structure,chunk}.py`, `lgx_ingest/parse/*`, `lgx_core/normalise/*`, tests under `tests/unit/test_{fetch,parse,akn,html,chunk,normalise}*.py`, small CC-BY fixtures in `tests/fixtures/legilux/` | agent B |
 | Loader + gates (after A and B) | `lgx_ingest/{load,gates,report,package,cli_ingest}.py`, `db/schema/*` (since M1), tests `tests/{unit,db}/test_load*.py`, `tests/unit/load_fixture.py` | loader stage |
@@ -328,7 +328,7 @@ conflicting key value violates exclusion constraint "one_text_per_act_and_date"`
   `config/recueil_members.yaml` override.
 - `data_quality_issue`: selection issues + parse issues of loaded versions, deduplicated on (entity, code),
   details joined. `legal_text`: `{T}` filled (fr 16/10/2026, de 16.10.2026, en 2026-10-16);
-  `attribution_vectors` replaces `attribution` only with vectors; `LICENSES/CC-BY-4.0.txt` (if present) is the en body.
+  `attribution_vectors` replaces `attribution` only with vectors; `LICENSES/CC-BY-4.0.txt` is appended to the fr and en `cc_by_4_0` notices (gate `cc_by_legalcode`).
 - Embeddings off: **zero** `lgx.embedding_model` rows (its CHECK has no `none` provider), all `chunk.embedding`
   NULL; `lgx_meta.release.config` = `{release_kind, loader_version, config_digest, snapshot_digest, scope,
   embedding, vector_status: "disabled:provider_none", sample_works, …}`; `counts` = per table / text_basis / flag /

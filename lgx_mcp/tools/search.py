@@ -70,7 +70,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
     for cit in analysis.citations[:MAX_CITED]:
         entry: dict[str, Any] = {"text": cit.text, "status": "not_found", "act_eli": None, "unit_eli": None}
         if cit.act is not None:
-            res = await resolver.resolve(cit, ctx.as_of, want_article=cit.article is not None)
+            res = await resolver.resolve(cit, ctx.as_of)
             entry["status"] = res.status
             if res.status == "resolved" and res.candidates:
                 best = res.candidates[0]
@@ -85,14 +85,21 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
     # --- filters
     act_ids = None
     if filters.get("act_eli"):
-        act, _, _ = await facts.find_act_by_eli(filters["act_eli"])
-        if act is None:
+        fres = await resolver.resolve_eli(filters["act_eli"])
+        if fres.status == "ambiguous":  # a truncated dated ELI: never narrow to one act of that date silently
+            raise ToolFailure(
+                ToolErrorCode.AMBIGUOUS,
+                f"filters.act_eli ne désigne pas un seul acte : {filters['act_eli']}",
+                hint="Choisissez l'ELI complet d'un des candidats (ou utilisez resolve_citation).",
+                candidates=[c.as_dict() for c in fres.candidates[:20]],
+            )
+        if fres.status != "resolved" or not fres.candidates:
             raise ToolFailure(
                 ToolErrorCode.NOT_FOUND,
                 f"filters.act_eli inconnu dans cette base : {filters['act_eli']}",
                 hint="Utilisez resolve_citation pour trouver l'ELI de l'acte.",
             )
-        act_ids = [act.act_id]
+        act_ids = [fres.candidates[0].act.act_id]
 
     # --- mode (vectors are behind the adapter; provider none -> lexical with the reason)
     vector_status = rt.vector_status(ctx.release)

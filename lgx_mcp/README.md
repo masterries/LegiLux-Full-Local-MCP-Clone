@@ -62,6 +62,7 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 | `LGX_AUDIT_FILE` / `LGX_AUDIT_QUERY_TEXT` / `LGX_AUDIT_HMAC_KEY_FILE` | stderr / false / token | JSONL audit; question text off by default |
 | `LGX_STATEMENT_TIMEOUT_MS` / `LGX_DB_POOL_MAX` / `LGX_DB_TIMEOUT_S` | 5000 / 8 / 3 | read-only pool (every session `default_transaction_read_only=on`) |
 | `LGX_RATE_PER_CLIENT_MIN` / `LGX_RATE_GLOBAL_MIN` | 30 / 300 | tool calls per minute (0 = off) |
+| `LGX_TRUSTED_PROXIES` | none | IPs / CIDRs (Open WebUI) whose `x-openwebui-user-*` / `x-lgx-user` headers key the rate limit and audit; every other caller is keyed by its peer address |
 | `LGX_CONFIG_DIR` | repo `config/` | only `aliases.yaml` (out-of-scope aliases such as RGPD) |
 
 ## Retrieval (PLAN §8.3)
@@ -76,10 +77,20 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 4. One hit per article; citation objects and warnings from `lgx.serving_at` (status and label at `as_of`).
 
 The resolver (`lgx_mcp/resolve.py`) never guesses: two candidates within 0.05 → `ambiguous` (`AMBIGUOUS` in
-`get_article` / `get_act`, `status: ambiguous` in `resolve_citation`).
+`get_article` / `get_act`, `status: ambiguous` in `resolve_citation`). The only act of a (type, date) is taken only
+when no title is cited or the cited title fits it (score ≥ 0.4, or an inner alias); a truncated dated ELI
+(`…/loi/2018/08/01`) lists that date's acts, a year or type prefix is `NOT_FOUND`, only real code / recueil families
+(`…/code/travail`) name an act. An article ELI is a citation by itself (`get_article {citation: <article_eli>}`); as
+`act_eli` with a different `article`, the requested article of that act is served.
+
+Host clock outside [T, H]: status tools refuse calls without an explicit `as_of` (`AS_OF_OUT_OF_RANGE`, PLAN §2.8);
+with `as_of` they answer for that date only (`W_CLOCK_SUSPECT` variant `explicit_as_of`). `about_corpus` always
+answers.
 
 ## Tests
 
 `tests/unit/test_mcp*.py`, `tests/unit/test_citeparse.py` (offline); `tests/contract/` (server in a thread
 against the dev DB, official 2.3.0 client in both eras, G0 smoke set, health/auth/degraded states, stdio, and the
-real `mcp==1.27.2` client via `uv run --isolated`). They skip when the dev DB is not reachable.
+real `mcp==1.27.2` client via `uv run --isolated`). They skip when the dev DB is not reachable
+(`LGX_TEST_REQUIRE_DB=1` turns that into a failure). Tests marked `any_release` need no sample content; CI runs them
+against the offline fixture release (`scripts/ci_fixture_release.py`).

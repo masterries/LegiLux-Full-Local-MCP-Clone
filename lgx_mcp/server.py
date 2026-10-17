@@ -110,6 +110,14 @@ async def run_tool(
         validate_arguments(name, arguments)
         release = await rt.release()
         cctx = make_context(release, rt.settings, rt.clock, arguments.get("as_of"))
+        if not cctx.clock_ok and not cctx.as_of_given and name != "about_corpus":
+            # PLAN §2.8: a host clock outside [T, H] never sets the date of a status assertion
+            raise ToolFailure(
+                ToolErrorCode.AS_OF_OUT_OF_RANGE,
+                f"horloge du serveur incohérente avec la date des données ({cctx.T.isoformat()}) : aucun statut"
+                " n'est affirmé sans date as_of explicite",
+                hint=f"Passez as_of=YYYY-MM-DD (≤ {cctx.H.isoformat()}) ; l'exploitant doit corriger l'horloge (NTP).",
+            )
         out = await HANDLERS[name](rt, cctx, arguments)
         hits = out.hits
         return types.CallToolResult(
@@ -191,7 +199,12 @@ async def read_resource(rt: Runtime, audit: AuditLog, uri: str, *, ctx: Any = No
 
 
 def build_server(rt: Runtime) -> Server[Any]:
-    audit = AuditLog(rt.settings.audit_file, rt.settings.audit_hmac_key, query_text=rt.settings.audit_query_text)
+    audit = AuditLog(
+        rt.settings.audit_file,
+        rt.settings.audit_hmac_key,
+        query_text=rt.settings.audit_query_text,
+        trusted_proxies=rt.settings.trusted_proxies,
+    )
 
     @asynccontextmanager
     async def lifespan(_: Server[Any]) -> AsyncIterator[dict[str, Any]]:

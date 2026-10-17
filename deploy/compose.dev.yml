@@ -5,6 +5,7 @@
 #   docker compose -f deploy/compose.dev.yml up -d --build          # db + db-load + mcp + lgx-streamlit
 #   docker compose -f deploy/compose.dev.yml --profile cpu up -d     # + Ollama (LLM on the internal network)
 #   docker compose -f deploy/compose.dev.yml --profile ollama-pull run --rm ollama-pull   # fetch the dev model once
+#   (Makefile wrappers: make dev-up | dev-down | dev-logs | ollama-pull MODEL=<tag> | e2e | egress-check)
 #   docker compose -f deploy/compose.dev.yml --profile cloudllm up -d lgx-streamlit-cloud # OPT-IN cloud LLM (:8502)
 # UI: http://127.0.0.1:8501 · MCP: http://127.0.0.1:8000/mcp (/livez, /readyz).
 #
@@ -17,14 +18,16 @@
 #   come from STREAMLIT_* variables, which take precedence over the file.
 # - `backend` is internal (db <-> mcp <-> ui <-> llm, no route out). Docker does not publish ports of containers
 #   that sit only on internal networks, so mcp and lgx-streamlit also join `edge`, published on 127.0.0.1 only.
-#   The egress gates therefore run on the offline VM, not here (PLAN §11.6).
+#   `edge` has IP masquerading off: published ports keep working, but nothing on it is NATed to the internet.
+#   The full egress gates still run on the offline VM (PLAN §11.6).
 # - The database is its own volume, filled once by `db-load` from the sample bundle built by
 #   `lgx ingest --sample --offline --package` (data/bundles/data-2026-10-16-sample.dump). It is independent of the
 #   host-side lgx-dev-db container. To reuse that container's volume instead, STOP lgx-dev-db first and set
 #   LGX_DEV_PGDATA_VOLUME=lgx-dev-pgdata: two servers must never share a data directory, and the db service then
 #   refuses to start while a postmaster.pid is present (LGX_DEV_DB_FORCE=1 overrides after a crash).
 # - A cloud LLM is possible ONLY through the explicit `cloudllm` profile (red banner in the UI); the default
-#   command never starts lgx-streamlit-cloud.
+#   command never starts lgx-streamlit-cloud. The default UI also refuses a free-typed non-internal LLM URL
+#   (lgx_ui.app_support.endpoint_allowed). `make dev-down` stops the cloudllm profile too.
 # =====================================================================================================
 name: legilux-dev
 
@@ -47,7 +50,8 @@ x-ollama-image: &ollama_image "${LGX_OLLAMA_IMAGE:-mirror.gcr.io/ollama/ollama:0
 networks:
   backend:
     internal: true                                      # no gateway, no route out
-  edge: {}                                              # gateway network, only for the 127.0.0.1-published ports
+  edge:                                                 # only for the 127.0.0.1-published ports: no outbound NAT
+    driver_opts: { com.docker.network.bridge.enable_ip_masquerade: "false" }
   dev-egress: {}                                        # internet-capable; only ollama-pull and lgx-streamlit-cloud
 
 volumes:
@@ -96,6 +100,8 @@ configs:
 secrets:
   cloud_llm_api_key:                                    # cloudllm profile only; repo-root secrets/ (gitignored, 0600)
     file: "${LGX_CLOUD_LLM_KEY_FILE:-../secrets/cloud_llm_api_key}"
+  build_ca_bundle:                                      # image builds: CA bundle of a TLS-intercepting proxy (empty default)
+    file: "${LGX_DEV_CA_BUNDLE:-/dev/null}"           # e.g. LGX_DEV_CA_BUNDLE=/root/.ccr/ca-bundle.crt
 
 services:
   # -------------------------------------------------------------------------------------------- data
@@ -128,7 +134,8 @@ services:
     <<: *base
     image: lgx.local/lgx-db:dev
     restart: "no"
-    user: "0:0"                                         # reads the 0600 bundle files on the host; no capabilities
+    user: "0:0"                                         # no capabilities: the bundle files must be world-readable
+                                                        # (lgx package writes them 0644; uid 0 without DAC_OVERRIDE)
     entrypoint: ["/bin/sh", "/run/lgx/db-load.sh"]
     environment:
       LGX_DEV_BUNDLE: "${LGX_DEV_BUNDLE:-data-2026-10-16-sample.dump}"
@@ -146,7 +153,10 @@ services:
   mcp:
     <<: *base
     image: lgx.local/lgx-mcp:dev
-    build: { context: .., dockerfile: docker/lgx-mcp.Dockerfile }   # created by the MCP stage
+    build:                                              # created by the MCP stage
+      context: ..
+      dockerfile: docker/lgx-mcp.Dockerfile
+      secrets: [{ source: build_ca_bundle, target: ca_bundle }]   # = --secret id=ca_bundle (never in a layer)
     user: "10001:10001"
     read_only: true
     tmpfs: ["/tmp"]
@@ -180,7 +190,7 @@ services:
     networks: [backend, edge]
 
   # -------------------------------------------------------------------------------------------- LLM (optional)
-  ollama:                                               # profile cpu: dev fallback model ministral-3:8b (6.0 GB)
+  ollama:                                               # profile cpu: dev model qwen3:4b-instruct-2507-q4_K_M (2.5 GB)
     <<: *base
     profiles: [cpu]
     image: *ollama_image
@@ -193,7 +203,8 @@ services:
       OLLAMA_HOST: "0.0.0.0:11434"
       OLLAMA_MODELS: /models/ollama
     volumes: ["ollama-models:/models/ollama"]
-    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, timeout: 10s, retries: 10 }
+    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, timeout: 10s, retries: 10, start_period: 60s,
+                   start_interval: 2s }
     networks: { backend: { aliases: [llm] } }
 
   ollama-pull:                                          # one-shot, connected dev host only: model into the volume
@@ -205,18 +216,22 @@ services:
     environment:
       OLLAMA_MODELS: /models/ollama
       OLLAMA_HOST: "127.0.0.1:11434"
-      LGX_OLLAMA_PULL: "${LGX_OLLAMA_PULL:-${LGX_LLM_MODEL:-ministral-3:8b}}"
+      LGX_OLLAMA_PULL: "${LGX_OLLAMA_PULL:-${LGX_LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}}"
       LGX_OLLAMA_ALIAS: "${LGX_OLLAMA_ALIAS:-}"
     volumes:
       - "ollama-models:/models/ollama"
       - "./ollama:/opt/lgx:ro"
+      - "${LGX_DEV_CA_BUNDLE:-/dev/null}:/run/lgx/ca-bundle.crt:ro"   # used only when non-empty (TLS proxy)
     networks: [dev-egress]
 
   # -------------------------------------------------------------------------------------------- UI
   lgx-streamlit:                                        # on by default in dev (PLAN §9.3)
     <<: *base
     image: lgx.local/lgx-streamlit:dev
-    build: { context: .., dockerfile: ui/Dockerfile }
+    build:
+      context: ..
+      dockerfile: ui/Dockerfile
+      secrets: [{ source: build_ca_bundle, target: ca_bundle }]
     user: "10001:10001"
     read_only: true
     tmpfs: ["/tmp"]
@@ -224,7 +239,7 @@ services:
       <<: *offline
       OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-http://llm:11434/v1}"   # Ollama /v1 | vLLM | on-prem Mistral
       OPENAI_API_KEY: *llm_api_key                      # dev only (airgap: OPENAI_API_KEY_FILE secret)
-      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-ministral-3:8b}"
+      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}"   # validated on cpu (docs/dev/e2e-2026-10-17.md)
       LGX_LLM_PRESETS: "ollama,vllm,mistral-onprem"      # 'cloud' only in lgx-streamlit-cloud
       LGX_MISTRAL_ONPREM_URL: "${LGX_MISTRAL_ONPREM_URL:-}"
       LGX_MISTRAL_ONPREM_MODEL: "${LGX_MISTRAL_ONPREM_MODEL:-}"
@@ -232,7 +247,8 @@ services:
       LGX_MCP_TOKEN: *mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
       LGX_MCP_TIMEOUT_S: "20"
-      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-600}"     # cpu: one call = 2-7k prompt tokens at ~25 tok/s + answer
+      LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-1200}"   # (docs/dev/e2e-2026-10-17.md: 120 s timed out on 4 vCPUs)
       LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"
       LGX_HOSTNAME: "${LGX_HOSTNAME:-localhost}"
       STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
@@ -249,6 +265,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 60s
+      start_interval: 2s
     ports: ["127.0.0.1:${LGX_DEV_UI_PORT:-8501}:8501"]
     networks: [backend, edge]
 

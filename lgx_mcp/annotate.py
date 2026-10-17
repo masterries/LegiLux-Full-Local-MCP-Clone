@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from lgx_core.eli import display_url, resource_uri
-from lgx_core.models import WarningCode
+from lgx_core.models import Severity, WarningCode
 from lgx_mcp.context import CallContext, fr_date, iso
 from lgx_mcp.facts import Act, AmendingAct, Facts, Serving, Unit, Version, short_title_of
 
@@ -37,7 +37,7 @@ METADATA_REASON_FR = {
     "temporary": "acte temporaire",
     "robots": "exclu (robots.txt)",
     "excluded_by_config": "exclu par configuration",
-    "not_yet_text": "texte pas encore publié",
+    "not_yet_text": "aucun texte applicable à ce jour (seulement une version future ou annoncée)",
 }
 CODE_KINDS = ("code", "code_recueil", "recueil")
 MAX_ACTS_IN_MESSAGE = 5
@@ -205,6 +205,7 @@ class Annotator:
             bag.add(
                 WarningCode.W_NOT_CONSOLIDATED,
                 ref=key,
+                variant=None if acts else "no_known_acts",  # never claim amendments that get_act cannot list
                 memorial=act.memorial or "Mémorial A",
                 acts=acts_phrase(acts),
                 data={"amending_acts": [a.as_dict() for a in acts]},
@@ -259,12 +260,20 @@ class Annotator:
         await self.status_warnings(act, serving, ref=key)
         # --- versions
         if version.valid_from and version.valid_from > as_of:
-            bag.add(WarningCode.W_FUTURE_VERSION, ref=key, d=fr_date(version.valid_from))
+            # the displayed text itself is the future wording: its own message (not merged with the current
+            # hit's « nouvelle rédaction … » by the bag) and high severity (PLAN §8.7 V6)
+            bag.add(
+                WarningCode.W_FUTURE_VERSION,
+                ref=key,
+                variant="shown",
+                d=fr_date(version.valid_from),
+                severity=Severity.HIGH,
+            )
         elif serving.next_version_date:
             bag.add(
                 WarningCode.W_FUTURE_VERSION,
                 ref=key,
-                variant=None if serving.next_version_has_text else "announced",
+                variant=await self.next_version_variant(act, serving),
                 d=fr_date(serving.next_version_date),
             )
         # --- unit
@@ -302,6 +311,13 @@ class Annotator:
         await self.data_quality_warnings(
             [act.eli_work, act.eli_jo, version.eli_version, unit.eli_unit if unit else None], ref=key
         )
+
+    async def next_version_variant(self, act: Act, serving: Serving) -> str | None:
+        """None = stored; not_stored = published on Legilux (has_files) but not in this base; announced = no files."""
+        if serving.next_version_has_text:
+            return None
+        nv = await self.facts.next_version(act.act_id, serving.next_version_date)
+        return "not_stored" if nv is not None and nv.has_files else "announced"
 
     async def status_warnings(self, act: Act, serving: Serving, *, ref: str | None) -> None:
         bag = self.ctx.bag

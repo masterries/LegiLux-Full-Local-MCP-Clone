@@ -209,6 +209,11 @@ def make_context(release: ReleaseInfo, settings: McpSettings, clock: Clock, as_o
     if level:
         n = settings.staleness_critical_days if level == 2 else settings.staleness_warn_days
         bag.add(WarningCode.W_DATA_STALE, n=n, T=fr_date(T), severity=Severity.HIGH if level == 2 else None)
-    if not clock_ok:
-        bag.add(WarningCode.W_CLOCK_SUSPECT, now=now.strftime("%d/%m/%Y %H:%M"), T=fr_date(T))
+    if not clock_ok:  # status tools refuse without as_of (server.run_tool); with as_of only that date is asserted
+        bag.add(
+            WarningCode.W_CLOCK_SUSPECT,
+            variant="explicit_as_of" if given is not None else None,
+            now=now.strftime("%d/%m/%Y %H:%M"),
+            T=fr_date(T),
+        )
     return ctx

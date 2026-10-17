@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # lgx-streamlit — tester UI of the LegiLux local clone (PLAN §9.3, §10.1; service lgx-streamlit, profile testui).
 #
 # Build from the repository root (the context needs pyproject.toml, uv.lock, lgx_core/ and ui/):

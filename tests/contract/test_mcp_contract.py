@@ -78,6 +78,7 @@ def assert_result_shape(name: str, result: Any) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------------------------- listing
+@pytest.mark.any_release
 @pytest.mark.parametrize("mode", MODES)
 async def test_list_tools_contract(live: LiveServer, mode: str) -> None:
     async with mcp_client(live, mode) as c:
@@ -268,6 +269,106 @@ async def test_ambiguous_article_lists_candidates(live: LiveServer) -> None:
     assert len(cands) == 20 and A686 in [x["act_eli"] for x in cands]
 
 
+async def test_resolved_citation_warns_only_for_the_chosen_act(live: LiveServer) -> None:
+    """e2e 2026-10-17: W_REPEALED of two other RGDs of the same date (low-confidence candidates) came without refs
+    and the model reported the resolved, in-force RGD as repealed."""
+    text = "règlement grand-ducal du 24 juillet 2000 concernant le travail de candidature"
+    async with mcp_client(live) as c:
+        sc = (await c.call_tool("resolve_citation", {"text": text})).structured_content
+    assert sc["status"] == "resolved"
+    assert sc["candidates"][0]["act_eli"] == "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
+    assert len(sc["candidates"]) > 1
+    assert [w for w in sc["warnings"] if w["code"] == "W_REPEALED"] == []
+    async with mcp_client(live) as c:
+        amb = (await c.call_tool("resolve_citation", {"text": "loi du 1er août 2018"})).structured_content
+    top = {x["act_eli"] for x in amb["candidates"][:3]}
+    for w in amb["warnings"]:
+        if w["code"] in ("W_REPEALED", "W_NOT_YET_IN_FORCE", "W_SUNSET"):
+            assert w["refs"] and set(w["refs"]) <= top, w
+
+
+ELI = "http://data.legilux.public.lu/eli/etat/leg/"
+
+
+@pytest.mark.parametrize(
+    ("act_eli", "article", "want"),
+    [
+        (ELI + "code/travail/art_l_121-1", "L. 124-3", ELI + "code/travail/art_l_124-3"),
+        (ELI + "loi/2018/08/01/a686/art_5", "49", ELI + "loi/2018/08/01/a686/art_49"),
+        (ELI + "loi/2018/08/01/a686/art_5", "5", ELI + "loi/2018/08/01/a686/art_5"),
+    ],
+)
+async def test_article_eli_as_act_eli_serves_the_requested_article(
+    live: LiveServer, act_eli: str, article: str, want: str
+) -> None:
+    """Review 2026-10-17: an article ELI reused as act_eli returned the ELI's article for any `article`."""
+    async with mcp_client(live) as c:
+        r = await c.call_tool("get_article", {"act_eli": act_eli, "article": article})
+    sc = assert_result_shape("get_article", r)
+    assert sc["citation"]["article_eli"] == want
+    assert sc["resolution"]["parsed"]["article"] == article
+
+
+@pytest.mark.parametrize(
+    ("citation", "want"),
+    [
+        (ELI + "code/travail/art_l_121-1", ELI + "code/travail/art_l_121-1"),
+        (ELI + "code/travail/art_l_121-1/20201101", ELI + "code/travail/art_l_121-1"),
+        (ELI + "loi/2018/08/01/a686/art_5", ELI + "loi/2018/08/01/a686/art_5"),
+        (ELI + "loi/2016/12/23/n25/art_5", ELI + "loi/2016/12/23/n25/art_5"),  # derived JO article ELI
+    ],
+)
+async def test_article_eli_is_a_citation(live: LiveServer, citation: str, want: str) -> None:
+    """The server's own citation_string / article_eli can be looked up again as `citation`."""
+    async with mcp_client(live) as c:
+        r = await c.call_tool("get_article", {"citation": citation})
+        assert not r.is_error, r.content[0].text
+        missing = await c.call_tool("get_article", {"citation": ELI + "loi/2018/08/01/a686/art_999"})
+        act_only = await c.call_tool("get_article", {"citation": A686})
+    assert assert_result_shape("get_article", r)["citation"]["article_eli"] == want
+    assert missing.structured_content["error"]["code"] == "NOT_FOUND"
+    assert act_only.structured_content["error"]["code"] == "BAD_INPUT"
+
+
+async def test_truncated_dated_eli_is_not_an_act(live: LiveServer) -> None:
+    """Review 2026-10-17: …/loi/2018/08/01, …/loi/2018 and …/loi were served as one (random) act, reason 'eli'."""
+    async with mcp_client(live) as c:
+        date_card = await c.call_tool("get_act", {"eli": ELI + "loi/2018/08/01"})
+        year_card = await c.call_tool("get_act", {"eli": ELI + "loi/2018"})
+        type_card = await c.call_tool("get_act", {"eli": ELI + "loi"})
+        art = await c.call_tool("get_article", {"act_eli": ELI + "rgd/1988/07/15", "article": "1"})
+        cite = (await c.call_tool("resolve_citation", {"text": ELI + "loi/2018/08/01 art. 5"})).structured_content
+        filt = await c.call_tool(
+            "search_legislation", {"query": "commission nationale", "filters": {"act_eli": ELI + "loi/2018/08/01"}}
+        )
+        family = (await c.call_tool("get_act", {"eli": ELI + "code/travail"})).structured_content
+    assert date_card.structured_content["error"]["code"] == "AMBIGUOUS"
+    assert A686 in [x["act_eli"] for x in date_card.structured_content["error"]["candidates"]]
+    assert year_card.structured_content["error"]["code"] == "NOT_FOUND"
+    assert type_card.structured_content["error"]["code"] == "NOT_FOUND"
+    assert art.structured_content["error"]["code"] == "AMBIGUOUS"
+    assert len(art.structured_content["error"]["candidates"]) == 5
+    assert cite["status"] == "ambiguous" and A686 in [x["act_eli"] for x in cite["candidates"]]
+    assert filt.structured_content["error"]["code"] == "AMBIGUOUS"
+    assert family["act_eli"] == ELI + "loi/2006/07/31/n2"  # a real code family still names its act
+
+
+async def test_lone_dated_candidate_needs_a_fitting_title(live: LiveServer) -> None:
+    """Review 2026-10-17: the only law of 30 May 2018 (MiFID) was served for « … protection des animaux »."""
+    wrong = "art. 3 de la loi du 30 mai 2018 relative à la protection des animaux de compagnie"
+    right = "art. 3 de la loi du 30 mai 2018 relative aux marchés d'instruments financiers"
+    async with mcp_client(live) as c:
+        cite = (await c.call_tool("resolve_citation", {"text": wrong})).structured_content
+        art = await c.call_tool("get_article", {"citation": wrong})
+        ok = (await c.call_tool("resolve_citation", {"text": right})).structured_content
+        bare = (await c.call_tool("resolve_citation", {"text": "loi du 30 mai 2018, art. 3"})).structured_content
+    assert cite["status"] == "ambiguous" and cite["candidates"][0]["confidence"] < 0.4
+    assert art.structured_content["error"]["code"] == "AMBIGUOUS"
+    assert art.structured_content["error"]["candidates"][0]["act_eli"] == ELI + "loi/2018/05/30/a446"
+    assert ok["status"] == "resolved" and ok["candidates"][0]["act_eli"] == ELI + "loi/2018/05/30/a446"
+    assert bare["status"] == "resolved"  # no title cited: the only act of that date
+
+
 async def test_metadata_only_act_has_card_but_no_article(live: LiveServer) -> None:
     eli = "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a689"
     async with mcp_client(live) as c:
@@ -288,6 +389,54 @@ async def test_not_consolidated_lists_amending_acts(live: LiveServer) -> None:
     assert "http://data.legilux.public.lu/eli/etat/leg/loi/1965/05/26/n1/jo" in elis
 
 
+async def test_not_consolidated_without_known_amending_acts(live: LiveServer) -> None:
+    """Review 2026-10-17: « modifié depuis par : actes modificatifs postérieurs (voir get_act) » with nothing listed."""
+    eli = ELI + "rgd/2025/12/22/a629"
+    async with mcp_client(live) as c:
+        art = (await c.call_tool("get_article", {"act_eli": eli, "article": "1"})).structured_content
+        card = (await c.call_tool("get_act", {"eli": eli})).structured_content
+    w = next(w for w in art["warnings"] if w["code"] == "W_NOT_CONSOLIDATED")
+    assert w["data"]["amending_acts"] == [] and card["amending_acts_since_text_date"] == []
+    assert "modifié depuis par" not in w["message"] and "aucun acte modificatif connu" in w["message"]
+
+
+async def test_future_version_published_but_not_stored(live: LiveServer) -> None:
+    """Review 2026-10-17: a consolidation with files on Legilux was called « annoncée sans texte » / « pas encore
+    publié » because it is not stored in the sample."""
+    async with mcp_client(live) as c:
+        r = await c.call_tool("get_act", {"eli": ELI + "loi/2026/04/15/a211"})
+    sc = r.structured_content
+    assert sc["next_version"]["has_files"] is True and sc["next_version"]["has_text"] is False
+    assert "pas encore publié" not in (sc["metadata_reason_label"] or "")
+    w = next(w for w in sc["warnings"] if w["code"] == "W_FUTURE_VERSION")
+    assert "non stockée dans cette base" in w["message"] and "annoncée sans texte" not in w["message"]
+    assert "publiée, non stockée dans cette base" in r.content[0].text
+
+
+async def test_future_text_hits_are_marked_not_yet_applicable(live: LiveServer) -> None:
+    """Review 2026-10-17 (PLAN §8.7 V6): with in_force_only=false the 20/10/2026 wording shared the current hit's
+    status line and its single deduplicated W_FUTURE_VERSION."""
+    args = {"query": "ILNAS machines règlement 2023/1230", "filters": {"in_force_only": False}, "as_of": "2026-10-17"}
+    async with mcp_client(live) as c:
+        r = await c.call_tool("search_legislation", args)
+    sc = assert_result_shape("search_legislation", r)
+    future = [h["citation"]["key"] for h in sc["hits"] if h["citation"]["valid_from"] > "2026-10-17"]
+    current = [h["citation"]["key"] for h in sc["hits"] if h["citation"]["valid_from"] <= "2026-10-17"]
+    assert future and current
+    shown = [w for w in sc["warnings"] if w["code"] == "W_FUTURE_VERSION" and "Texte affiché" in w["message"]]
+    assert len(shown) == 1 and set(shown[0]["refs"]) == set(future) and shown[0]["severity"] == "high"
+    assert "texte affiché pas encore applicable (à partir du 2026-10-20)" in r.content[0].text
+
+
+async def test_resolved_act_with_missing_article_warns_only_for_itself(live: LiveServer) -> None:
+    text = "art. 999 du règlement grand-ducal du 24 juillet 2000 concernant le travail de candidature"
+    async with mcp_client(live) as c:
+        sc = (await c.call_tool("resolve_citation", {"text": text})).structured_content
+    assert sc["status"] == "not_found" and sc["article_status"] == "not_found"
+    assert sc["candidates"][0]["act_eli"] == ELI + "rgd/2000/07/24/n3"
+    assert [w for w in sc["warnings"] if w["code"] == "W_REPEALED"] == []
+
+
 async def test_data_stale_and_future_as_of(live: LiveServer) -> None:
     async with mcp_client(live) as c:
         r = await c.call_tool("get_act", {"eli": A686, "as_of": "2027-03-01"})
@@ -296,6 +445,7 @@ async def test_data_stale_and_future_as_of(live: LiveServer) -> None:
     assert r.structured_content["snapshot"]["staleness_level"] == 0  # the data itself is fresh; as_of is far
 
 
+@pytest.mark.any_release
 async def test_default_as_of_is_the_pinned_clock(live: LiveServer) -> None:
     async with mcp_client(live) as c:
         r = await c.call_tool("about_corpus", {})

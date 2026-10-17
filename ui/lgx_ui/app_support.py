@@ -14,6 +14,7 @@ from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from typing import Any
 
+from lgx_core.urls import is_internal_url
 from lgx_ui.llm import ChatModel, LlmConfig, OpenAICompatChat
 from lgx_ui.mcp_client import (
     HealthStatus,
@@ -40,6 +41,29 @@ from lgx_ui.tools_bridge import (
 HEALTH_TTL_S = 30.0
 CORPUS_TTL_S = 300.0
 HISTORY_MESSAGES = 6  # prior user/assistant messages sent with a new question
+# Sidebar widgets live in app.py and must keep their values across page switches: since streamlit 1.65 a keyed
+# widget's value is dropped on a page switch unless persist_state="session" (the LLM fields came back empty).
+KEEP = "session"
+# Every keyed sidebar widget. Their defaults are set through st.session_state (never a widget `value=`), and each run
+# re-saves them before any widget exists: the first session after a server start attributes its first run to the
+# entrypoint and the next one to the default page, a pseudo page switch that persist_state does not cover (the chat
+# then found an empty base URL and model: e2e 2026-10-17).
+SIDEBAR_KEYS = (
+    "llm_preset",
+    "llm_base_url",
+    "llm_model",
+    "llm_temperature",
+    "llm_max_iter",
+    "chat_mode",
+    "prompt_lang",
+    "retrieval_mode",
+    "retrieval_hybrid",
+    "f_in_force",
+    "f_doc_types",
+    "f_as_of",
+    "f_model_as_of",
+    "f_top_k",
+)
 
 
 @dataclass
@@ -79,6 +103,12 @@ class SidebarState:
 
 
 # ------------------------------------------------------------------------------------------- state
+
+
+def endpoint_allowed(cfg: UiSettings, base_url: str) -> bool:
+    """A configured / preset URL, an internal service URL, or anything only with LGX_ALLOW_CLOUD_LLM=1: a URL
+    typed into the sidebar must not send questions and retrieved texts to a public endpoint (review 2026-10-17)."""
+    return base_url.rstrip("/") in cfg.known_llm_urls() or cfg.allow_cloud or is_internal_url(base_url)
 
 
 def settings(st: Any) -> UiSettings:
@@ -203,6 +233,10 @@ def _apply_preset(st: Any) -> None:
 
 
 def render_sidebar(st: Any) -> SidebarState:
+    state = st.session_state
+    for key in SIDEBAR_KEYS:  # re-save (see SIDEBAR_KEYS): turns last run's widget values into set values
+        if key in state:
+            state[key] = state[key]
     cfg = settings(st)
     specs = tools(st)
     status = health(st)
@@ -238,21 +272,28 @@ def render_sidebar(st: Any) -> SidebarState:
         list(labels),
         format_func=lambda k: labels.get(k, k),
         key="llm_preset",
+        persist_state=KEEP,
         on_change=_apply_preset,
         args=(st,),
     )
     preset = cfg.preset(st.session_state["llm_preset"])
     if preset is not None and preset.note:
         sb.caption(preset.note)
-    base_url = sb.text_input("Base URL", key="llm_base_url").strip()
-    model = sb.text_input("Modèle", key="llm_model").strip()
-    temperature = sb.slider("Température", 0.0, 1.0, float(cfg.llm_temperature), 0.05, key="llm_temperature")
-    max_iter = int(sb.number_input("Itérations max", 1, 10, min(10, cfg.max_tool_iterations), key="llm_max_iter"))
+    base_url = sb.text_input("Base URL", key="llm_base_url", persist_state=KEEP).strip()
+    model = sb.text_input("Modèle", key="llm_model", persist_state=KEEP).strip()
+    state.setdefault("llm_temperature", float(cfg.llm_temperature))
+    state.setdefault("llm_max_iter", min(10, cfg.max_tool_iterations))
+    temperature = sb.slider("Température", 0.0, 1.0, step=0.05, key="llm_temperature", persist_state=KEEP)
+    max_iter = int(sb.number_input("Itérations max", 1, 10, key="llm_max_iter", persist_state=KEEP))
     modes = {"auto": "outils, repli retrieve-first", "tools": "outils uniquement", "retrieve_first": "retrieve-first"}
-    chat_mode = sb.radio("Mode", list(modes), format_func=lambda k: modes[k], key="chat_mode", horizontal=False)
+    state.setdefault("chat_mode", "auto")
+    chat_mode = sb.radio(
+        "Mode", list(modes), format_func=lambda k: modes[k], key="chat_mode", horizontal=False, persist_state=KEEP
+    )
     st.session_state.setdefault("prompt_lang", cfg.ui_lang if cfg.ui_lang in ("fr", "de", "en") else "fr")
-    prompt_lang = sb.selectbox("Langue du prompt système", ["fr", "de", "en"], key="prompt_lang")
+    prompt_lang = sb.selectbox("Langue du prompt système", ["fr", "de", "en"], key="prompt_lang", persist_state=KEEP)
     key_ok = base_url.rstrip("/") in cfg.known_llm_urls()
+    allowed = endpoint_allowed(cfg, base_url) if base_url else True
     llm = (
         LlmConfig(
             base_url=base_url,
@@ -262,9 +303,14 @@ def render_sidebar(st: Any) -> SidebarState:
             timeout_s=cfg.llm_timeout_s,
             trust_env=cfg.llm_trust_env,
         )
-        if base_url and model
+        if base_url and model and allowed
         else None
     )
+    if not allowed:
+        sb.error(
+            "Endpoint externe refusé : seuls les services internes (nom de service, localhost, IP privée, *.internal…)"
+            " sont autorisés. Un LLM cloud passe uniquement par le profil cloudllm (LGX_ALLOW_CLOUD_LLM=1)."
+        )
     if llm is not None and not key_ok:
         sb.caption("URL saisie librement : la clé API configurée n'est pas envoyée.")
     probe: ProbeResult | None = st.session_state.get("lgx_probe")
@@ -278,19 +324,35 @@ def render_sidebar(st: Any) -> SidebarState:
 
     sb.markdown("### Recherche")
     doc_options, top_max, top_default, _ = search_schema_info(specs)
-    base_mode = sb.selectbox("retrieval_mode", ["auto", "lexical"], key="retrieval_mode")
+    state.setdefault("retrieval_mode", "auto")
+    state.setdefault("retrieval_hybrid", False)
+    base_mode = sb.selectbox("retrieval_mode", ["auto", "lexical"], key="retrieval_mode", persist_state=KEEP)
     vectors_ok = vstatus == "ok"
-    hybrid = sb.toggle("hybride", key="retrieval_hybrid", disabled=not vectors_ok)
+    hybrid = sb.toggle("hybride", key="retrieval_hybrid", disabled=not vectors_ok, persist_state=KEEP)
     if not vectors_ok:
         why = vstatus or "état inconnu"
         sb.caption(f"hybride indisponible : vecteurs désactivés ({why})" + (f" — {vreason}" if vreason else ""))
     retrieval_mode = "hybrid" if hybrid and vectors_ok else base_mode
 
     sb.markdown("### Filtres (surcharges)")
-    in_force = sb.checkbox("En vigueur uniquement", value=True, key="f_in_force")
-    doc_types = sb.multiselect("Types de document", doc_options, key="f_doc_types")
-    as_of_value = sb.date_input("as_of (vide = date du serveur)", value=None, key="f_as_of", format="YYYY-MM-DD")
-    top_k = int(sb.slider("top_k (plafond)", 1, top_max, top_default, key="f_top_k"))
+    state.setdefault("f_in_force", True)
+    state.setdefault("f_doc_types", [])
+    state.setdefault("f_as_of", None)
+    state.setdefault("f_model_as_of", False)
+    state.setdefault("f_top_k", top_default)
+    state["f_top_k"] = max(1, min(int(state["f_top_k"]), top_max))
+    in_force = sb.checkbox("En vigueur uniquement", key="f_in_force", persist_state=KEEP)
+    doc_types = sb.multiselect("Types de document", doc_options, key="f_doc_types", persist_state=KEEP)
+    as_of_value = sb.date_input(
+        "as_of (vide = date du serveur)", key="f_as_of", format="YYYY-MM-DD", persist_state=KEEP
+    )
+    model_as_of = sb.checkbox(
+        "as_of choisi par le modèle si vide",
+        key="f_model_as_of",
+        persist_state=KEEP,
+        help="Désactivé : la date proposée par le modèle est ignorée (les petits modèles inventent souvent une date).",
+    )
+    top_k = int(sb.slider("top_k (plafond)", 1, top_max, key="f_top_k", persist_state=KEEP))
     as_of = as_of_value.isoformat() if isinstance(as_of_value, dt.date) else None
     sb.caption("Dans le chat, ces valeurs remplacent les arguments du modèle (outils qui les acceptent).")
 
@@ -302,6 +364,7 @@ def render_sidebar(st: Any) -> SidebarState:
         prompt_lang=prompt_lang,
         overrides=SidebarOverrides(
             as_of=as_of,
+            model_as_of=bool(model_as_of),
             in_force_only=bool(in_force),
             doc_types=tuple(doc_types) or None,
             retrieval_mode=retrieval_mode,

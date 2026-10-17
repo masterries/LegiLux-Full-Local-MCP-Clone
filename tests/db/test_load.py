@@ -220,6 +220,9 @@ def test_offline_ingest_end_to_end_with_package_and_restore(
     release = json.loads(bundle.with_suffix(".release.json").read_text(encoding="utf-8"))
     assert release["release_id"] == "data-20261016-sample" and release["requires"]["embedding"] is None
     assert release["dump"]["sha256"] == sha256_hex(bundle.read_bytes())
+    for f in (bundle, bundle.with_suffix(".release.json"), bundle.with_suffix(".sha256")):
+        assert f.stat().st_mode & 0o777 == 0o644, f  # dev db-load (no capabilities) reads them as another uid
+    assert by_name["cc_by_legalcode"]["status"] == "pass"
     with pg_server.connect(rt) as conn:
         assert _one(conn, "SHOW default_transaction_read_only") == "on"
         assert _one(conn, "SELECT count(*) FROM pg_namespace WHERE nspname = 'build'") == 0

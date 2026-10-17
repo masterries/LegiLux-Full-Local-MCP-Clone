@@ -10,13 +10,17 @@ from pathlib import Path
 from pydantic import BaseModel
 
 
-def atomic_write_text(path: Path, text: str) -> None:
-    """Write ``text`` to ``path`` via a temp file + rename, so readers never see partial files."""
+def atomic_write_text(path: Path, text: str, *, mode: int | None = None) -> None:
+    """Write ``text`` to ``path`` via a temp file + rename, so readers never see partial files.
+
+    The temp file of ``mkstemp`` is 0600; pass ``mode`` (e.g. 0o644) for files other users or containers read."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(text)
+        if mode is not None:
+            Path(tmp).chmod(mode)
         Path(tmp).replace(path)
     except BaseException:
         Path(tmp).unlink(missing_ok=True)

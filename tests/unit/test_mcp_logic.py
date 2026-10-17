@@ -13,7 +13,7 @@ from lgx_mcp.annotate import Annotator, acts_phrase, article_short, clip, status
 from lgx_mcp.context import Clock, ToolFailure, WarningBag, make_context
 from lgx_mcp.facts import Act, AmendingAct, Version, normalise_eli, short_title_of
 from lgx_mcp.release import ReleaseInfo
-from lgx_mcp.render import fit, render_error
+from lgx_mcp.render import fit, render_article, render_error
 from lgx_mcp.resolve import AMBIGUITY_MARGIN, Resolver
 from lgx_mcp.settings import McpSettings
 from lgx_mcp.tools.article import decode_cursor, encode_cursor, page_of, page_size, page_starts
@@ -208,6 +208,18 @@ def test_normalise_eli_forms() -> None:
     assert normalise_eli(e) == e
 
 
+def test_empty_article_text_is_not_called_repealed() -> None:
+    """Review 2026-10-17: 86 live articles with an empty source <p/> were rendered « article abrogé »."""
+    cit = {"key": "C1", "citation_string": "Art. 2, Code (…) — eli", "status_as_of": {"as_of": "2026-10-16",
+           "status": "in-force"}, "text_basis": "consolidated", "valid_from": "2026-10-11"}  # fmt: skip
+    base = {"citation": cit, "text": "", "page_info": {}, "warnings": [], "attribution": "a", "disclaimer": "d"}
+    live = render_article({**base, "is_repealed": False}, 4000)
+    assert "abrogé" not in live and "texte vide dans la source" in live
+    assert "(texte vide : article abrogé)" in render_article({**base, "is_repealed": True}, 4000)
+    future = render_article({**base, "citation": {**cit, "valid_from": "2026-10-20"}}, 4000)
+    assert "texte affiché pas encore applicable (à partir du 2026-10-20)" in future
+
+
 # --------------------------------------------------------------------------------- ranking rule
 def test_never_guess_margin() -> None:
     cit = Citation(span=(0, 1), text="x")
@@ -220,4 +232,6 @@ def test_never_guess_margin() -> None:
     assert weak.status == "ambiguous"
     single = Resolver._ranked(cit, [(a1, 0.3)], "alias")
     assert single.status == "resolved"
+    # a lone weak candidate is not resolved either (review 2026-10-17: no guessing with one candidate)
+    assert Resolver._ranked(cit, [(a1, 0.1)], "title_fuzzy", weak_is_ambiguous=True).status == "ambiguous"
     assert Resolver._ranked(cit, [], "alias").status == "not_found"

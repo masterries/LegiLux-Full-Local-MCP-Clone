@@ -61,12 +61,17 @@ async def get_act(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> ToolOu
     if bool(eli) == bool(citation):
         raise ToolFailure(ToolErrorCode.BAD_INPUT, "donnez soit `eli`, soit `citation` (exactement un des deux)")
     resolution: dict[str, Any] | None = None
+    resolver = rt.resolver(ctx.release, facts)
     if eli:
-        act, _, _ = await facts.find_act_by_eli(eli)
-        if act is None:
-            raise ToolFailure(ToolErrorCode.NOT_FOUND, f"ELI inconnu dans cette base : {eli}")
+        # exact work / jo / version / article ELI or a code family; a truncated dated ELI lists that date's acts
+        res = await resolver.resolve_eli(eli)
+        res.article_status = "resolved"
+        if res.status != "resolved":
+            _raise_for(res, ctx)
+        act = res.candidates[0].act
+        if res.candidates[0].reason != "eli":
+            resolution = {"status": res.status, "reason": res.candidates[0].reason, "parsed": None}
     else:
-        resolver = rt.resolver(ctx.release, facts)
         res = await resolver.resolve_text(citation, ctx.as_of, want_article=False)
         res.article_status = "resolved"  # an act card needs no article
         if res.status != "resolved":
@@ -87,15 +92,12 @@ async def get_act(rt: Runtime, ctx: CallContext, args: dict[str, Any]) -> ToolOu
     )
     next_version = None
     if serving.next_version_date:
-        nv = await facts.db.fetchone(
-            "SELECT eli_version, has_text FROM lgx.act_version WHERE act_id = %s AND kind <> 'original'"
-            " AND date_applicability = %s ORDER BY version_id LIMIT 1",
-            [act.act_id, serving.next_version_date],
-        )
+        nv = await facts.next_version(act.act_id, serving.next_version_date)
         next_version = {
             "applicable_from": iso(serving.next_version_date),
             "has_text": bool(serving.next_version_has_text),
-            "version_eli": nv["eli_version"] if nv else None,
+            "has_files": bool(nv.has_files) if nv else False,  # published on Legilux (stored or not)
+            "version_eli": nv.eli_version if nv else None,
         }
     # --- warnings: the act card is "C1"; with a stored text the same rules as for an article apply
     annot = Annotator(ctx, facts)

@@ -21,7 +21,7 @@ import tomllib
 import urllib.request
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import pytest
 from streamlit.testing.v1 import AppTest
@@ -115,6 +115,63 @@ def test_app_and_every_page_render_without_a_server(ui_env: None, loopback_only:
     assert not [p for p in seen.values() if "Traceback" in p]
 
 
+class _RecordingSidebar:
+    """Stands in for ``st.sidebar``: records every widget call, returns a plausible value."""
+
+    VALUES: ClassVar[dict[str, Any]] = {
+        "button": False,
+        "text_input": "x",
+        "slider": 1,
+        "number_input": 5,
+        "radio": "auto",
+        "selectbox": "auto",
+        "toggle": False,
+        "checkbox": True,
+        "multiselect": [],
+        "date_input": None,
+    }
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = []
+
+    def __getattr__(self, name: str) -> Any:
+        def widget(*args: Any, **kwargs: Any) -> Any:
+            self.calls.append((name, args, kwargs))
+            return self.VALUES.get(name)
+
+        return widget
+
+
+def test_sidebar_widgets_keep_their_values_across_pages(ui_env: None) -> None:
+    """Regression (e2e 2026-10-17, seen in a real browser; AppTest's switch_page does not reproduce it): streamlit
+    1.65 drops a keyed widget's value on a page switch unless ``persist_state="session"``, and the first session after
+    a server start sees a pseudo page switch on its second run. The sidebar's LLM base URL and model came back empty,
+    which disabled the chat. Every keyed sidebar widget persists, takes its default from session_state (no ``value=``,
+    which would warn once the value is re-saved) and is re-saved at the start of each run."""
+    from types import SimpleNamespace
+
+    from lgx_ui import app_support
+
+    sidebar = _RecordingSidebar()
+    fake_st = SimpleNamespace(session_state={}, sidebar=sidebar)
+    fake_st.session_state["lgx_deps"] = UiDeps(
+        open_session=session_factory(FakeSession()),
+        make_llm=lambda cfg: OpenAICompatChat(cfg),
+        readyz=lambda s: HealthStatus(True, True, 200, {"release_id": "r", "vector_status": "disabled:provider_none"}),
+    )
+    app_support.render_sidebar(fake_st)
+    keyed = [(name, args, kw) for name, args, kw in sidebar.calls if "key" in kw and name != "button"]
+    assert {kw["key"] for _, _, kw in keyed} == set(app_support.SIDEBAR_KEYS)
+    assert [kw["key"] for _, _, kw in keyed if kw.get("persist_state") != "session"] == []
+    assert [kw["key"] for _, _, kw in keyed if "value" in kw or "index" in kw] == []
+    assert [kw["key"] for name, args, kw in keyed if name in ("slider", "number_input") and len(args) > 3] == []
+    assert set(app_support.SIDEBAR_KEYS) <= set(fake_st.session_state)
+    assert fake_st.session_state["llm_base_url"] == "http://llm:11434/v1"
+    fake_st.session_state["llm_model"] = "kept-model"
+    app_support.render_sidebar(fake_st)
+    assert fake_st.session_state["llm_model"] == "kept-model"
+
+
 def fake_deps(session: FakeSession, server: FakeOpenAIServer) -> UiDeps:
     return UiDeps(
         open_session=session_factory(session),
@@ -197,7 +254,8 @@ def test_direct_search_eval_and_corpus_with_fakes(ui_env: None, loopback_only: l
     at.switch_page("pages/4_Corpus.py").run()
     assert not at.exception
     values = {m.label: m.value for m in at.metric}
-    assert values["Données au (T)"] == "2026-10-16" and values["Vecteurs"] == "disabled:provider_none"
+    assert values["Données au (T)"] == "2026-10-16" and values["Vecteurs"] == "désactivés"
+    assert "vecteurs désactivés : provider=none" in texts(at), "the reason stays visible under the metrics"
 
 
 def test_cloud_banner_only_with_the_opt_in_flag(ui_env: None, monkeypatch: pytest.MonkeyPatch) -> None:
