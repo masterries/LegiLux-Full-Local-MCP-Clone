@@ -61,7 +61,7 @@ and `PGHOST/PGPORT/PGUSER/PGPASSWORD`. Each release is a fresh database ("rebuil
 `make ingest-sample` (offline sample ingest incl. the m2 PDF codes + package into `lgx-dev-db`, which `make dev-db`
 creates if needed; ≈ 2 min with warm caches, the first PDF parse of the 5 sample PDFs ≈ 7 min on 4 CPUs),
 `make dev-up` / `dev-down` / `dev-logs` / `dev-ps` (`deploy/compose.dev.yml`: db, db-load, mcp, lgx-streamlit; waits
-until healthy; `make dev-up DEV_PROFILES=rerank` adds the TEI reranker and `LGX_RERANK=auto`), `make fetch-models` (pinned reranker into `data/models/hf`, once, connected host;
+until healthy; the TEI reranker is OFF by default everywhere — `make dev-up DEV_PROFILES=rerank` adds it and `LGX_RERANK=auto`), `make fetch-models` (pinned reranker into `data/models/hf`, once, connected host;
 `FETCH_MODELS_ARGS=--verify-only` checks `deploy/models.lock` offline), `make rerank-up` / `rerank-down` (start or stop
 TEI on a running stack and switch the dev `mcp` to `LGX_RERANK=auto` / `off`; TEI is ready ≈ 1.5 min after start on an
 idle 4-vCPU host, ≈ 6 min on a busy one), `make eval` (below),
@@ -75,15 +75,18 @@ payload and reports a reranker slower than the budget as unavailable. `tests/uni
 coupling in both compose files.
 `make e2e` (scripted questions through the UI container; `E2E_STUB=1` runs them against `scripts/openai_stub.py`, a
 deterministic keyless OpenAI-compatible stub started inside the UI container), `make embed-plan` (`lgx embed --dry-run`),
-`make egress-check` (airgap egress check; the chat goes to the stub on the internal network), and host runs `make mcp`
+`make egress-check` (airgap egress check of `data/bundles/data-$LGX_T-sample.dump`; sudo drops an exported `LGX_T`, so
+pass `LGX_T=…` on the make line; the chat goes to the stub on the internal network), and host runs `make mcp`
 (:8001) / `make ui` (:8511). Behind a TLS-intercepting proxy pass `LGX_DEV_CA_BUNDLE=/path/ca-bundle.crt` to `dev-up`
 (image builds). `db-load` restores the bundle only while the stack's `legilux` database is missing: after a new
 `make ingest-sample` run `make dev-down`, `docker volume rm legilux-dev-pgdata` and `make dev-up`. Results of the first
-end-to-end run and the egress check: `docs/dev/e2e-2026-10-17.md`.
+end-to-end run and the egress check: `docs/dev/e2e-2026-10-17.md`. Airgap package: `make airgap-export`
+(`scripts/airgap_export.sh`) and, as root on the airgap host, `scripts/airgap_import.sh install|update-data|rollback|keys|
+firewall|check` (`make airgap-import AIRGAP_BUNDLE=…` for a test install); operator guide: `docs/ANLEITUNG.md`.
 
 **Chat LLM.** No LLM runtime is bundled (user decision 2026-10-17). The UI talks to one external OpenAI-compatible
 endpoint: `OPENAI_BASE_URL` (`LGX_LLM_BASE_URL`, default `https://api.mistral.ai/v1`), the key file `LGX_LLM_KEY_FILE`
-(`make dev-up` uses `secrets/llm_api_key` when it exists; default `/dev/null` = no key) and `LGX_LLM_MODEL` (default
+(`make dev-up` uses `secrets/llm_api_key` when it exists — owned by uid 10001, mode 0400, or the non-root UI stops with `UiSettingsError`; default `/dev/null` = no key) and `LGX_LLM_MODEL` (default
 `mistral-small-latest`, [U]: whatever the endpoint serves). In the airgap the same variables name the user's on-prem
 Mistral domain (same API as Mistral SaaS). The sidebar's Base URL / model fields accept any OpenAI-compatible URL; the
 key is only ever sent to the configured one. Open WebUI (optional, M5) points to the same URL.
@@ -122,9 +125,9 @@ uv run lgx --t 2026-10-16 load                     # attaches the vectors (all s
 - **Throughput** ≈ `max_concurrency × texts_per_request / (latency + cooldown_s)` texts/s. With the defaults and an
   assumed 2 s per request [E]: ≤ 5 × 64 / 22 ≈ **14.5 texts/s** at full batches. On the dev sample the token budget
   binds first (≈ 374 estimated tokens per chunk → 41.8 texts per request), so `lgx embed --dry-run` (2026-10-17, T =
-  2026-10-16) reports 20,529 searchable chunks → 20,477 distinct texts, 490 requests, ≈ 7.7M estimated tokens,
-  **≈ 9.5 texts/s, ≈ 36 min** (98 waves × 22 s). **Full corpus** (≈ 400k chunks [E], PLAN §0): ≈ 9,600 requests ≈
-  **11.7 h** at the default throttle (7.6 h if every request carried 64 texts); the cooldown dominates — with
+  2026-10-16) reports 19,682 searchable chunks → 19,634 distinct texts, 459 requests,
+  **≈ 9.7 texts/s, ≈ 0.56 h** (sample after the M2 review fixes; `make embed-plan`). **Full corpus** (≈ 400k chunks [E], PLAN §0): ≈ 9,350 requests ≈
+  **11.4 h** at the default throttle (7.6 h if every request carried 64 texts); the cooldown dominates — with
   `LGX_EMBED_COOLDOWN_S=0` the same run would take ≈ 1.1 h at 2 s latency. Resumable: re-run the same command.
 - **Cache** `data/emb/<model>-<dim>.sqlite` (build side only, never shipped): `content_sha256 → float16 vector` plus
   the model id the API reported; every finished request is committed, so an interrupted run resumes and a re-run only

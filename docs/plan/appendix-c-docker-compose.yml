@@ -178,7 +178,7 @@ services:
       LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000"      # /mcp only; /livez and /readyz are exempt (PLAN §8.1)
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
       LGX_RERANK_URL: http://rerank:8080
-      LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto (unavailable -> unreranked + reason) | on (-> BACKEND_UNAVAILABLE) | off
+      LGX_RERANK: "${LGX_RERANK:-off}"                  # off (default, 2026-10-17) | auto (unavailable -> unreranked + reason) | on (-> BACKEND_UNAVAILABLE)
       LGX_RERANK_K: "${LGX_RERANK_K:-16}"               # CPU-safe (M2 measurement); 40 only with a GPU or the int8 export
       LGX_RERANK_BATCH: "32"                            # client-side split, <= TEI --max-client-batch-size (defence in depth)
       LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 16 x 600 chars ≈ 17-20 s on 4 vCPU fp32 (1,800: 60 s)

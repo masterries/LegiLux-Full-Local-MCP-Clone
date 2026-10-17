@@ -1,6 +1,8 @@
 # LegiLux Local MCP Clone – Kurzfassung des Plans
 
 > Stand 16.10.2026, Änderungen vom 17.10.2026 eingearbeitet. Der ausführliche Plan steht in [`PLAN.md`](PLAN.md), die Anhänge in [`plan/`](plan/).
+> **Schritt-für-Schritt-Anleitung** (Build-Rechner, Mistral SaaS/On-Prem, Stichprobe und Vollabzug, Embeddings,
+> Airgap-Paket, Installation, Updates, Fehlerbehebung): [`ANLEITUNG.md`](ANLEITUNG.md).
 > Status: **geprüft.** Zwei Gegenprüfungen (Fakten; Anforderungen, Airgap und Umsetzbarkeit) mit 22 Befunden
 > (9 schwer, 13 leicht) sind eingearbeitet. Die DB-Größe ist neu geschätzt: ohne Vektoren ca. 0,9–1,3 GB.
 
@@ -59,7 +61,7 @@ ausführlich, mit Zitaten auf Artikelebene.
 | Textformat | Akoma-Ntoso-XML; HTML für Originaltexte, deren XML nicht unter CC-BY steht; PDF nur für die Codes, die es nur als PDF gibt |
 | Lizenz | Standardmäßig nur CC-BY-4.0-Texte, nur interne Nutzung; jede Antwort enthält Quelle, ELI und Fassungsdatum; Anfrage an das SCL wegen der „Licence SCL“ |
 | Datenbank | PostgreSQL 18 + pgvector 0.8.7 mit französischer Volltextsuche; jede Datenversion wird neu gebaut, nicht migriert |
-| Suche | Zitat-Erkennung („Art. L. 121-1 C. trav.“) → Volltext → Reranker (bge-reranker-v2-m3) → mit Vektoren zusätzlich dichte Suche, per RRF zusammengeführt |
+| Suche | Zitat-Erkennung („Art. L. 121-1 C. trav.“) → Volltext → optional Reranker (bge-reranker-v2-m3, **standardmäßig aus**; einziges Modell außerhalb von Mistral) → mit Vektoren zusätzlich dichte Suche, per RRF zusammengeführt |
 | Embeddings | **Ein Anbieter (`mistral`), standardmäßig aus.** Build-Seite: Mistral Embed (`mistral-embed`, 1024-d) über die SaaS-API; Airgap: dieselbe API unter deiner On-Prem-Domain. Durchsatzgrenze per Konfiguration (5 parallel, 20 s Pause pro Slot); Starttest beim MCP-Start; schlägt er fehl, wird automatisch nur mit Volltext gesucht |
 | MCP-Server | Python (offizielles SDK), Streamable HTTP + stdio; Tools: `search_legislation`, `get_article`, `get_act`, `resolve_citation`, `about_corpus` |
 | Test-UI | **Streamlit** mit jeder OpenAI-kompatiblen API (Standard: dein Mistral-Endpunkt) und Tool-Calling über MCP; zeigt Tool-Aufrufe, Quellen und Warnhinweise; Tab für direkte Suche ohne LLM; Tab für Testfragen |
@@ -89,9 +91,9 @@ Artikel in XML-Recueils werden entfernt; Mitgliedsakte ohne eigenen Text (z. B. 
 Code-Text umgeleitet und so zitiert: « Art. 12 de l'arrêté grand-ducal du 23 novembre 1955 … (Code de la route, version
 consolidée applicable au 12/06/2026) ». Die Volltextsuche gewichtet jetzt nach Seltenheit der Wörter (IDF); der
 Reranker (bge-reranker-v2-m3 in TEI) ist optional, weil er auf 4 CPUs 17–25 s pro Suche braucht. Messwerte auf der
-Stichprobe (20.529 durchsuchbare Abschnitte): Treffer unter den ersten 10 bei 84 % der 205 Testfragen (mit Reranker auf
+Stichprobe (19.682 durchsuchbare Abschnitte): Treffer unter den ersten 10 bei 82 % der 218 Testfragen (mit Reranker auf
 einer festen Teilmenge von 40 Fragen gleich gut wie vor den PDF-Daten), Pflicht-Warnhinweise 100 %, Zitat-Auflösung
-99,6 %. Offen: Prüfung der Mitgliederliste und der Testfragen durch eine Juristin oder einen Juristen, der Vollabzug
+99,7 %. Offen: Prüfung der Mitgliederliste und der Testfragen durch eine Juristin oder einen Juristen, der Vollabzug
 (`lgx ingest --full`, ≈ 25.600 Dateien, 4 Nachtfenster à 4 h; `--dry-run` zeigt den Plan ohne Abruf). Details:
 [`../eval/reports/m2-acceptance.md`](../eval/reports/m2-acceptance.md).
 
@@ -102,19 +104,21 @@ Linux-Rechner mit Docker und [uv](https://docs.astral.sh/uv/); alle Dienste laus
 ```sh
 uv sync --all-extras          # Python-3.13-Abhängigkeiten aus uv.lock (+ Entwicklungswerkzeuge)
 make ingest-sample            # Stichproben-DB + Paket data/bundles/data-2026-10-16-sample.dump (offline aus data/;
-                              #   frischer Checkout: make ingest-sample INGEST_FLAGS=  → höflicher Stichproben-Abruf, nie Vollabzug)
+                              #   frischer Checkout: ANLEITUNG.md § 3.1 → höflicher Stichproben-Abruf, nie Vollabzug)
 make dev-up                   # DB + Wiederherstellung + MCP + Streamlit, wartet bis alles gesund ist
-                              #   DEV_PROFILES=rerank: + TEI-Reranker (einmalig `make fetch-models`, 2,2 GB)
+                              #   DEV_PROFILES=rerank: + optionaler TEI-Reranker (standardmäßig aus; einmalig `make fetch-models`, 2,2 GB)
 open http://127.0.0.1:8501    # Test-UI (Chat, Recherche directe, Évaluation, Corpus); MCP: http://127.0.0.1:8000/mcp
 make e2e                      # optional: 5 Testfragen (FR/DE) über den Code-Pfad der UI, JSON in data/reports/e2e/
                               #   E2E_STUB=1: gegen den schlüssellosen OpenAI-kompatiblen Stub scripts/openai_stub.py
 make embed-plan               # optional: was `lgx embed` senden würde (Abschnitte, Anfragen, Dauer mit Drossel)
 make eval                     # optional: Testsätze G0–G3 ohne Reranker (mit Reranker nur auf einer festen Teilmenge)
 make dev-down                 # stoppen (Volumes bleiben); make dev-logs SERVICE=mcp zeigt die Logs eines Dienstes
+make airgap-export            # Airgap-Paket → data/airgap/<verzeichnis>; im Airgap: sudo ./scripts/airgap_import.sh install .
 ```
 
 Das Chat-LLM ist ein externer OpenAI-kompatibler Endpunkt: standardmäßig Mistral (`https://api.mistral.ai/v1`, Modell
-`mistral-small-latest`; der Schlüssel liegt in der 0600-Datei `secrets/llm_api_key`, `make dev-up` nimmt ihn mit).
+`mistral-small-latest`; der Schlüssel liegt in der Datei `secrets/llm_api_key` mit Eigentümer 10001 und Modus 0400,
+damit der UI-Container ihn lesen kann – [`ANLEITUNG.md`](ANLEITUNG.md) § 2.2; `make dev-up` nimmt ihn mit).
 Ein anderer Endpunkt (deine On-Prem-Domain, jeder OpenAI-kompatible Server):
 `LGX_LLM_BASE_URL=https://…/v1 LGX_LLM_MODEL=<modell> make dev-up`, oder Basis-URL und Modell in der Seitenleiste
 eintragen (an eine eingetippte URL wird kein API-Schlüssel gesendet). Embeddings bleiben aus (`provider: none`, nur
@@ -127,7 +131,7 @@ Airgap-Prüfung: `make egress-check`.
 2. Details zum Mistral-On-Prem-Endpunkt: Domain und IP, Chat-Modell (Tool-Calling), die gemeldete Embedding-Modell-ID
    (**muss der der SaaS-API entsprechen**), API-Schlüssel, Ratenlimits (**von dir benötigt**)
 3. Wann die Embeddings über die Mistral-API berechnet werden (**nachdem der On-Prem-Endpunkt den Starttest besteht**;
-   Vollbestand ≈ 11,7 h mit der Standard-Drossel)
+   Vollbestand ≈ 11,4 h mit der Standard-Drossel)
 4. Hardware (**kein GPU nötig**, das LLM ist extern; 8–16 Kerne, 32 GB RAM)
 5. Lizenz (**nur CC-BY, nur interne Nutzung**, bis SCL und Rechtsberatung antworten)
 6. Open WebUI zusätzlich zu Streamlit (**optional**)

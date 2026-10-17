@@ -147,6 +147,8 @@ def test_runtime_secret_ownership_table_matches_the_services() -> None:
 def test_rerank_is_an_opt_in_offline_internal_profile() -> None:
     """M2 reranker (PLAN §8.3, Appendix C): profile ``rerank`` only, offline, read-only model mount, no route out."""
     assert "rerank" not in rendered(DEV)["services"] and "rerank" not in rendered(RUNTIME)["services"]
+    for cfg in (rendered(DEV), rendered(RUNTIME)):  # user decision 2026-10-17: reranker off by default
+        assert cfg["services"]["mcp"]["environment"]["LGX_RERANK"] == "off"
     dev = rendered(DEV, ("rerank",))["services"]["rerank"]
     assert "@sha256:" in dev["image"] and dev["read_only"] is True
     assert all(p["host_ip"] == "127.0.0.1" for p in dev["ports"])

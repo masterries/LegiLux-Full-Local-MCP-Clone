@@ -226,6 +226,7 @@ def test_ranker_settings() -> None:
     s = McpSettings.from_env({"LGX_MCP_TOKEN": TOKEN})
     assert (s.lexical_ranker, s.query_expansion, s.lexical_opts, s.rerank_body_chars) == ("bm25", True, {}, 600)
     assert (s.rerank_k, s.rerank_timeout_s) == (16, 15.0)  # CPU-safe defaults (M2 review)
+    assert s.rerank == "off"  # user decision 2026-10-17: the optional reranker is off by default
     s = McpSettings.from_env({
         "LGX_MCP_TOKEN": TOKEN, "LGX_LEXICAL_RANKER": "rank_cd", "LGX_QUERY_EXPANSION": "0",
         "LGX_LEXICAL_OPTS": '{"length_b": 0.5, "act_boost": 2}', "LGX_RERANK_BODY_CHARS": "1800",

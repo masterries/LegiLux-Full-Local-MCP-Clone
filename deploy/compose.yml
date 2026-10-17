@@ -6,8 +6,10 @@
 # prometheus, db-bm25, oxigraph. Until the proxy exists, lgx-streamlit here has no published port (by design:
 # Streamlit has no authentication and must only be reached through Caddy in the airgap).
 #
-#   docker compose -f compose.yml --profile testui up -d                      (after `lgx install`)
-#   docker compose -f compose.yml --profile rerank --profile testui up -d     (+ the reranker)
+#   docker compose -f compose.yml --profile testui up -d     (after scripts/airgap_import.sh install, docs/ANLEITUNG.md §7)
+#   + the OPTIONAL reranker (off by default; the only non-Mistral model): --profile rerank together with
+#     LGX_RERANK=auto and LGX_RERANK_URL=http://rerank:8080 in deploy/.env (airgap_import.sh --with-rerank writes both)
+#   compose.localhost.yml (override): publishes Streamlit and MCP on 127.0.0.1 of the host until the proxy exists
 # For the connected dev host use compose.dev.yml (standalone, dev defaults, 127.0.0.1 ports).
 #
 # No LLM runtime is bundled (user decision 2026-10-17): the chat LLM and, when enabled, the query embeddings are the
@@ -114,7 +116,7 @@ services:
       LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000"
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
       LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 with the rerank profile (deploy/.env, lgx install)
-      LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto: unavailable -> unreranked + reason | on: BACKEND_UNAVAILABLE | off
+      LGX_RERANK: "${LGX_RERANK:-off}"                  # OFF by default (optional); auto (+ profile rerank): unavailable -> unreranked + reason | on
       # CPU-safe defaults (M2 review, PLAN §8.3): the pinned fp32 model needs ≈ 17-20 s for 16 x 600 characters on 4
       # vCPU; 40 x 1,800 (≈ 150 s on 4 vCPU, ≈ 37 s on 16 cores) needs a GPU or the int8 ONNX export (ADR 0001)
       LGX_RERANK_K: "${LGX_RERANK_K:-16}"

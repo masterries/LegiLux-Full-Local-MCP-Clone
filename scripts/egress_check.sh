@@ -124,6 +124,11 @@ services:
     volumes: ["$ROOT/scripts/openai_stub.py:/opt/stub/openai_stub.py:ro"]
     depends_on: { $DEP }
     networks: [backend]
+    healthcheck:                # the UI image's own check probes :8501, which the stub does not serve
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8089/v1/models', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
   lgx-streamlit:
     $DNS
     pull_policy: never

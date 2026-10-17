@@ -27,22 +27,25 @@ same API under the on-prem domain in the airgap). Embeddings are off: the hybrid
 
 ## Screenshots
 
-Dev stack on 4 vCPUs with a local OpenAI-compatible test server (`qwen3:4b-instruct-2507-q4_K_M`; details:
-`docs/dev/e2e-2026-10-17.md`).
+Dev stack (`make dev-up`: reranker off, embeddings off) on the 2026-10-16 sample, retaken 2026-10-17 from the code at
+HEAD; the sidebar shows the Mistral defaults (`https://api.mistral.ai/v1`, `mistral-small-latest`) and the banner names
+the external host. No Mistral key existed yet, so there is no chat screenshot (it follows the first run with a key).
 
-| Chat (answer, sources, warnings) | Recherche directe « art. L. 121-1 C. trav. » | Corpus |
-|---|---|---|
-| ![Chat](../docs/screenshots/chat.png) | ![Recherche directe](../docs/screenshots/direct-search.png) | ![Corpus](../docs/screenshots/corpus.png) |
+| Recherche directe « art. L. 121-1 C. trav. » | Corpus |
+|---|---|
+| ![Recherche directe](../docs/screenshots/direct-search.png) | ![Corpus](../docs/screenshots/corpus.png) |
 
-Retake them with `scripts/ui_browser.cjs` (Playwright, headless Chromium; commands in the e2e document), then
-reduce them to 128-colour PNGs (≤ 400 KB each).
+Retake them with `scripts/ui_browser.cjs` (Playwright, headless Chromium, never downloads a browser:
+`PLAYWRIGHT_BROWSERS_PATH=… NODE_PATH=$(npm root -g) node scripts/ui_browser.cjs --url http://127.0.0.1:8501
+--shot-height 2200 --direct "art. L. 121-1 C. trav." --corpus --shots <dir>`), then reduce them to 128-colour PNGs
+(Pillow `quantize(colors=128, dither=NONE)`, ≤ 400 KB each).
 
 ## Run
 
 ```sh
 # Dev stack (db + sample restore + mcp + UI, ports on 127.0.0.1 only), from the repo root
 make dev-up                     # = docker compose -f deploy/compose.dev.yml up -d --build --wait
-# LLM: Mistral by default; key in secrets/llm_api_key (0600, gitignored), or any OpenAI-compatible URL:
+# LLM: Mistral by default; key in secrets/llm_api_key (uid 10001, 0400, gitignored), or any OpenAI-compatible URL:
 make dev-up LGX_LLM_BASE_URL=https://api.mistral.ai/v1 LGX_LLM_MODEL=mistral-small-latest
 make e2e E2E_STUB=1             # scripted chat against scripts/openai_stub.py (keyless, deterministic)
 

@@ -85,7 +85,7 @@ class McpSettings:
     allowed_hosts: tuple[str, ...] = DEFAULT_ALLOWED_HOSTS
     allowed_origins: tuple[str, ...] = ()
     rerank_url: str | None = None
-    rerank: RerankMode = "auto"
+    rerank: RerankMode = "off"  # user decision 2026-10-17: the optional TEI reranker is off unless asked for
     rerank_k: int = 16  # CPU-safe defaults (M2 review): PLAN §8.3's 40 × 1,800 needs a GPU or the int8 export
     rerank_batch: int = 32
     rerank_timeout_s: float = 15.0  # total budget of one search's re-ranking; keep below the client tool timeout
@@ -143,7 +143,7 @@ class McpSettings:
         info.setdefault("connect_timeout", "3")
         token = _read_secret(g("LGX_MCP_TOKEN_FILE")) or g("LGX_MCP_TOKEN") or None
         hmac_key = _read_secret(g("LGX_AUDIT_HMAC_KEY_FILE"))
-        rerank = (g("LGX_RERANK") or "auto").strip().lower()
+        rerank = (g("LGX_RERANK") or "off").strip().lower()
         if rerank not in ("auto", "on", "off"):
             raise SettingsError(f"LGX_RERANK must be auto|on|off, got {rerank!r}")
         ranker = (g("LGX_LEXICAL_RANKER") or "bm25").strip().lower()

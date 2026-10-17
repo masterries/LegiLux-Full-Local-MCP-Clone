@@ -1,0 +1,24 @@
+# =====================================================================================================
+# deploy/compose.localhost.yml — OVERRIDE for deploy/compose.yml on the airgap host (docs/ANLEITUNG.md §7).
+#
+# Until the Caddy proxy of Appendix C exists, compose.yml publishes no port at all. This override publishes the
+# tester UI and the MCP endpoint on 127.0.0.1 of the airgap host ONLY, for the test phase: reach them from the host
+# itself or through an SSH tunnel (ssh -L 8501:127.0.0.1:8501 -L 8000:127.0.0.1:8000 <airgap host>). Streamlit has
+# no authentication: never change 127.0.0.1 to another address.
+#
+#   docker compose -f compose.yml -f compose.localhost.yml up -d --wait
+#
+# Docker publishes ports only through a network with a gateway: here `enclave` (mcp and lgx-streamlit already sit
+# on it); the DOCKER-USER rules (scripts/airgap_import.sh firewall) still drop every NEW outbound connection except
+# the one to the on-prem Mistral endpoint.
+# =====================================================================================================
+services:
+  mcp:
+    environment:
+      LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000,127.0.0.1:${LGX_LOCAL_MCP_PORT:-8000},localhost:${LGX_LOCAL_MCP_PORT:-8000}"
+    ports: ["127.0.0.1:${LGX_LOCAL_MCP_PORT:-8000}:8000"]
+
+  lgx-streamlit:
+    environment:
+      STREAMLIT_BROWSER_SERVER_ADDRESS: localhost
+    ports: ["127.0.0.1:${LGX_LOCAL_UI_PORT:-8501}:8501"]

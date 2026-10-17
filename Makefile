@@ -42,10 +42,15 @@ EVAL_MODE ?= lexical
 EVAL_ARGS ?=
 # not committed: `make eval` never overwrites the baselines in eval/reports (write those with --out-dir eval/reports)
 EVAL_OUT ?= data/reports/eval
+# Airgap bundle (docs/ANLEITUNG.md §6-§7): export on the build host, import (root) on the airgap host or as a test
+AIRGAP_DATA ?=
+AIRGAP_EXPORT_ARGS ?=
+AIRGAP_BUNDLE ?=
+AIRGAP_IMPORT_ARGS ?=
 
 .PHONY: help sync lint fmt test test-db test-live config-check db-image db-up db-down db-schema db-psql sample \
 	dev-db ingest-sample dev-up dev-down dev-logs dev-ps fetch-models rerank-up rerank-down mcp ui e2e \
-	egress-check eval embed-plan
+	egress-check eval embed-plan airgap-export airgap-import
 
 help:
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-13s %s\n", $$1, $$2}'
@@ -156,8 +161,9 @@ e2e: ## scripted FR/DE chat through the running dev stack (UI container -> LLM e
 	  lgx-streamlit python - $(E2E_ARGS) < scripts/e2e_chat.py > $(E2E_OUT)
 	@echo "e2e report: $(E2E_OUT)"
 
-egress-check: ## airgap egress check (internal network, DNS sentinel, DOCKER-USER counters, browser requests)
-	scripts/egress_check.sh $(EGRESS_ARGS)
+egress-check: ## airgap egress check of the sample bundle for LGX_T (internal network, DNS sentinel, DOCKER-USER counters, browser requests)
+	@test -f data/bundles/data-$(LGX_T)-sample.dump || { echo "no sample bundle data-$(LGX_T)-sample.dump: pass LGX_T=<T> (sudo drops it) or run 'make ingest-sample'"; exit 1; }
+	LGX_DEV_BUNDLE=data-$(LGX_T)-sample.dump scripts/egress_check.sh $(EGRESS_ARGS)
 
 embed-plan: ## embedding plan for T (chunks, requests, tokens, duration under the throttle); never a request
 	$(UV) run lgx --t $(LGX_T) embed --dry-run
@@ -168,3 +174,11 @@ eval: ## eval harness: EVAL_SETS (G0 G1 G2 G3) in EVAL_MODE (lexical | rerank) a
 	  $(UV) run python -m eval.harness run --set $$s --mode $(EVAL_MODE) --dsn '$(EVAL_DSN)' --out-dir $(EVAL_OUT) \
 	    --tag $$s-$(EVAL_MODE)-$$(date -u +%Y%m%dT%H%M%SZ) $(EVAL_ARGS) || exit 1; \
 	done
+
+airgap-export: ## airgap bundle -> data/airgap/: images + data bundle + compose + import script (AIRGAP_DATA, AIRGAP_EXPORT_ARGS)
+	scripts/airgap_export.sh $(if $(AIRGAP_DATA),--data $(AIRGAP_DATA)) \
+	  $(if $(LGX_DEV_CA_BUNDLE),--ca-bundle $(LGX_DEV_CA_BUNDLE)) $(AIRGAP_EXPORT_ARGS)
+
+airgap-import: ## install a bundle as root: AIRGAP_BUNDLE=<dir> [AIRGAP_IMPORT_ARGS="--home DIR --project NAME ..."]
+	@test -n "$(AIRGAP_BUNDLE)" || { echo "AIRGAP_BUNDLE=<directory written by make airgap-export> is required"; exit 2; }
+	scripts/airgap_import.sh install $(AIRGAP_BUNDLE) $(AIRGAP_IMPORT_ARGS)

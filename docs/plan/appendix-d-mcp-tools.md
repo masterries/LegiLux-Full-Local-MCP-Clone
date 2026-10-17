@@ -35,7 +35,7 @@ The JSON Schemas below are written in draft 2020-12. Every block that is marked 
   - `OUT_OF_SCOPE` (EU text, case law, communal, Mémorial B);
   - `BAD_INPUT`;
   - `AS_OF_OUT_OF_RANGE`;
-  - `BACKEND_UNAVAILABLE`: the database is down, or the reranker is down while `LGX_RERANK=on`. With the default `LGX_RERANK=auto`, an unavailable reranker gives unreranked lexical results with `retrieval.reranked = false` and a reason. A vector failure never raises this error (see `retrieval`).
+  - `BACKEND_UNAVAILABLE`: the database is down, or the reranker is down while `LGX_RERANK=on`. The reranker is off by default (`LGX_RERANK=off`); with `LGX_RERANK=auto`, an unavailable reranker gives unreranked lexical results with `retrieval.reranked = false` and a reason. A vector failure never raises this error (see `retrieval`).
 
 **Health endpoints** (custom HTTP routes outside the MCP transport; no corpus data)
 - `GET /livez` returns 200 while the process runs.
