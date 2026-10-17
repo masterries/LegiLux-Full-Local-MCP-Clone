@@ -1,0 +1,167 @@
+# =====================================================================================================
+# deploy/compose.yml — AIRGAPPED RUNTIME (PLAN §10.2; Appendix C document 1).
+#
+# M1b scope: the services the dev stack exercises today — db, mcp, llm-cpu (profile cpu) and lgx-streamlit
+# (profile testui). Still to come from Appendix C: rerank (TEI, M2), llm-gpu / llm-vllm (gpu24 / gpu48),
+# proxy (Caddy basic auth on :8443 in front of lgx-streamlit), webui, egress-sentinel, lgx-ctl, prometheus,
+# db-bm25, oxigraph, embed-local. Until the proxy exists, lgx-streamlit here has no published port (by design:
+# Streamlit has no authentication and must only be reached through Caddy in the airgap).
+#
+#   docker compose -f compose.yml --profile cpu --profile testui up -d        (after `lgx install`)
+# For the connected dev host use compose.dev.yml (standalone, dev defaults, 127.0.0.1 ports).
+#
+# Conventions (Appendix C): images lgx.local/<name>:<tag> loaded from the signed platform bundle and verified by
+# image ID (pins in images.lock); pull_policy never; secrets are 0600 files under ${LGX_HOME}/secrets written by
+# `lgx install`; networks backend/front are internal, edge is the only network with a gateway.
+# =====================================================================================================
+name: legilux
+
+x-base: &base
+  pull_policy: never
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  pids_limit: 512
+  logging: { driver: local, options: { max-size: "50m", max-file: "5" } }
+
+x-offline-env: &offline
+  HF_HUB_OFFLINE: "1"
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  TRANSFORMERS_OFFLINE: "1"
+  DO_NOT_TRACK: "1"
+  NO_PROXY: "*"
+
+x-ollama-env: &ollama_env
+  <<: *offline
+  OLLAMA_NO_CLOUD: "1"
+  OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-32768}"
+  OLLAMA_KEEP_ALIVE: "-1"
+  OLLAMA_NUM_PARALLEL: "${LGX_LLM_PARALLEL:-2}"
+  OLLAMA_HOST: "0.0.0.0:11434"
+  OLLAMA_MODELS: /models/ollama
+
+networks:
+  backend:
+    internal: true
+    driver_opts: { com.docker.network.bridge.name: br-lgx-back }
+    ipam: { config: [{ subnet: 172.30.0.0/24 }] }
+  front:
+    internal: true
+    driver_opts: { com.docker.network.bridge.name: br-lgx-front }
+    ipam: { config: [{ subnet: 172.30.2.0/24 }] }
+  edge:
+    driver_opts: { com.docker.network.bridge.name: br-lgx-edge }
+    ipam: { config: [{ subnet: 172.30.1.0/24 }] }
+
+volumes:
+  pgdata: {}
+  ollama-models: {}
+  audit: {}
+
+secrets:
+  pg_superuser_pw: { file: "${LGX_HOME:-/opt/legilux}/secrets/pg_superuser_pw" }
+  pg_ro_pw: { file: "${LGX_HOME:-/opt/legilux}/secrets/pg_ro_pw" }
+  mcp_token: { file: "${LGX_HOME:-/opt/legilux}/secrets/mcp_token" }
+  llm_api_key: { file: "${LGX_HOME:-/opt/legilux}/secrets/llm_api_key" }
+
+# No compose `configs` with inline content: compose copies them into the container, which fails for read_only
+# services such as lgx-streamlit ("`file` is the sole supported option"; Appendix C's streamlit_config). The offline
+# config.toml is baked into the image (ui/.streamlit/config.toml); the per-host values are STREAMLIT_* variables.
+
+services:
+  db:
+    <<: *base
+    image: lgx.local/lgx-db:18-0.8.7-${LGX_PLATFORM:-2026.10.0}
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER]          # [U] minimal set, tested in M5
+    shm_size: 1g
+    environment: { POSTGRES_PASSWORD_FILE: /run/secrets/pg_superuser_pw }
+    secrets: [pg_superuser_pw]
+    volumes: ["pgdata:/var/lib/postgresql"]
+    command: ["postgres", "-c", "shared_buffers=${LGX_PG_SHARED_BUFFERS:-2GB}", "-c", "effective_cache_size=6GB",
+              "-c", "maintenance_work_mem=2GB", "-c", "max_parallel_maintenance_workers=4",
+              "-c", "password_encryption=scram-sha-256", "-c", "listen_addresses=*"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres"], interval: 10s, retries: 30 }
+    networks: [backend]
+    mem_limit: ${LGX_PG_MEM:-8g}
+
+  mcp:
+    <<: *base
+    image: lgx.local/lgx-mcp:${LGX_PLATFORM:-2026.10.0}
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp"]
+    environment:
+      <<: *offline
+      LGX_DB_HOST: db
+      LGX_DB_NAME: legilux
+      LGX_DB_USER: lgx_ro
+      LGX_DB_PASSWORD_FILE: /run/secrets/pg_ro_pw
+      LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
+      LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000"
+      LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
+      LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 once the TEI service is added (M2)
+      LGX_RERANK: "${LGX_RERANK:-auto}"
+      LGX_RERANK_K: "${LGX_RERANK_K:-40}"
+      LGX_RERANK_BATCH: "32"
+      LGX_RETRIEVAL_MODE_DEFAULT: auto
+      LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"
+      LGX_EMBED_URL: "${LGX_EMBED_URL:-}"
+      LGX_EMBED_MODEL: "${LGX_EMBED_MODEL:-}"
+      LGX_EMBED_TIMEOUT_S: "5"
+      LGX_TZ: Europe/Luxembourg
+      LGX_STALENESS_WARN_DAYS: "30"
+      LGX_STALENESS_CRITICAL_DAYS: "90"
+      LGX_MAX_RESULT_TOKENS: "${LGX_MAX_RESULT_TOKENS:-4000}"
+      LGX_AUDIT_QUERY_TEXT: "false"
+    secrets: [pg_ro_pw, mcp_token]
+    volumes: ["audit:/var/log/lgx"]
+    depends_on: { db: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/readyz', timeout=3)"]
+      interval: 15s
+      retries: 20
+    networks: [backend]
+
+  llm-cpu:                                              # TEST FIRST: gemma4:26b-a4b; dev fallback ministral-3:8b
+    <<: *base
+    profiles: [cpu]
+    image: lgx.local/ollama:0.40.5                      # ollama/ollama:0.40.5@sha256:5d3a2f25…
+    environment: { <<: *ollama_env, OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-16384}" }
+    volumes: ["ollama-models:/models/ollama"]
+    networks: { backend: { aliases: [llm] } }
+    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, retries: 10 }
+
+  lgx-streamlit:                                        # tester UI (profile testui): chat + direct search + eval + corpus
+    <<: *base
+    profiles: [testui]
+    image: lgx.local/lgx-streamlit:${LGX_PLATFORM:-2026.10.0}
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp"]
+    environment:
+      <<: *offline
+      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-http://llm:11434/v1}"
+      OPENAI_API_KEY_FILE: /run/secrets/llm_api_key
+      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-gemma4:26b-a4b}"
+      LGX_LLM_PRESETS: "ollama,vllm,mistral-onprem"     # 'cloud' exists only in compose.dev.yml (opt-in)
+      LGX_MCP_URL: http://mcp:8000/mcp
+      LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
+      LGX_MAX_TOOL_ITERATIONS: "5"
+      LGX_MCP_TIMEOUT_S: "20"
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
+      LGX_EVAL_DIR: /data/eval
+      LGX_HOSTNAME: "${LGX_HOSTNAME:-legilux.intra}"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+      STREAMLIT_BROWSER_SERVER_ADDRESS: "${LGX_HOSTNAME:-legilux.intra}"
+      STREAMLIT_LOGGER_HIDE_WELCOME_MESSAGE: "true"
+      STREAMLIT_SERVER_HEADLESS: "true"
+      STREAMLIT_SERVER_FILE_WATCHER_TYPE: "none"
+      STREAMLIT_CLIENT_SHOW_ERROR_DETAILS: "none"
+    secrets: [mcp_token, llm_api_key]
+    volumes: ["${LGX_HOME:-/opt/legilux}/bundles/current/eval:/data/eval:ro"]
+    depends_on: { mcp: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 30s
+      retries: 10
+    networks: [backend, front]                          # internal only; users reach it through the proxy (M1b: Caddy)

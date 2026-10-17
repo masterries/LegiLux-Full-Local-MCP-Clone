@@ -1,0 +1,12 @@
+# Build context filter for ui/Dockerfile (BuildKit reads <Dockerfile>.dockerignore). Only what the image needs.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!lgx_core/**
+!ui/lgx_ui/**
+!ui/app.py
+!ui/pages/**
+!ui/.streamlit/**
+**/__pycache__
+**/*.pyc

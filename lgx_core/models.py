@@ -99,6 +99,7 @@ class MetadataReason(StrEnum):
     ROBOTS = "robots"
     EXCLUDED_BY_CONFIG = "excluded_by_config"
     NOT_YET_TEXT = "not_yet_text"
+    NOT_LOADED = "not_loaded"  # text selected, but not in this build (sample release, fetch/parse gap)
 
 
 class SourceFormat(StrEnum):

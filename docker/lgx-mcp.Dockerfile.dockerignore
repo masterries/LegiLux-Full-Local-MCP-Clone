@@ -1,0 +1,11 @@
+# Build context filter for docker/lgx-mcp.Dockerfile (BuildKit reads <Dockerfile>.dockerignore). Only what the
+# image needs: never data/, secrets/, the GDPR denylist or the research notes.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!lgx_core/**
+!lgx_mcp/**
+!config/aliases.yaml
+**/__pycache__
+**/*.pyc

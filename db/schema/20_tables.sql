@@ -2,8 +2,16 @@
 -- Part 20: enums and tables (Appendix B.3–B.12).
 -- psql variable embed_dim (default 1024) sets the halfvec dimension of lgx.chunk.embedding. The column
 -- stays NULL unless the optional embedding stage runs (provider none = default = no vectors).
--- Deviation from Appendix B: lgx.warning_def gains `variants jsonb` (texts that replace the base text,
--- e.g. W_STUB old_fallback; Appendix D writes them as optional [ ]/{ } fragments).
+-- Deviations from Appendix B:
+--   * lgx.warning_def gains `variants jsonb` (texts that replace the base text, e.g. W_STUB old_fallback;
+--     Appendix D writes them as optional [ ]/{ } fragments).
+--   * lgx.act.metadata_reason gains 'not_loaded': the selection chose a text for the act, but this build
+--     holds none (a sample release, or a file that could not be fetched/parsed; reported by the gates).
+--   * lgx.relation: the natural key (src_eli, rel_type, dst_eli, source) collapsed AKN edges (one row per
+--     modifying act and target work, although a textualMod targets one article and an akn-ref belongs to one
+--     citing unit: 6,452 sample edges -> 1,618). It now has a surrogate `relation_id`, a resolved
+--     `dst_unit_id` (destination unit of a textualMod / note hint or an article ELI) and a unique key over
+--     the endpoints incl. the units (NULLS NOT DISTINCT).
 -- =====================================================================================================
 \set ON_ERROR_STOP on
 \if :{?embed_dim}
@@ -108,7 +116,8 @@ CREATE TABLE lgx.act (
   institutions      text[] NOT NULL DEFAULT '{}',
   text_basis        lgx.text_basis NOT NULL,    -- label at T; runtime recomputes with lgx.serving_at()
   metadata_reason   text CHECK (metadata_reason IN ('repealed', 'repealed_base', 'type', 'licence', 'pdf_only',
-                                                   'temporary', 'robots', 'excluded_by_config', 'not_yet_text')),
+                                                   'temporary', 'robots', 'excluded_by_config', 'not_yet_text',
+                                                   'not_loaded')),
   flags             text[] NOT NULL DEFAULT '{}'
                     CHECK (flags <@ ARRAY['consolidation_lags', 'pdf_extracted', 'superseded_by_code',
                                           'consolidation_discontinued', 'base_legale_abrogee', 'acte_temporaire',
@@ -225,20 +234,25 @@ CREATE TABLE lgx.article_alias (                 -- 'Art. 9 et 10.' -> art_9_10 
 
 -- ----------------------------------------------------------------------------------------------- B.9
 CREATE TABLE lgx.relation (
+  relation_id  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   src_eli      text NOT NULL,
   src_act_id   bigint REFERENCES lgx.act ON DELETE CASCADE,
-  src_unit_id  bigint REFERENCES lgx.unit ON DELETE CASCADE,
+  src_unit_id  bigint REFERENCES lgx.unit ON DELETE CASCADE,   -- citing unit (akn-ref)
   rel_type     text NOT NULL CHECK (rel_type IN ('modifies', 'repeals', 'based_on', 'cites', 'transposes',
                                                  'rectifies', 'refers_to')),
   dst_eli      text NOT NULL,                   -- may point outside the metadata scope (EU ELIs, adm acts)
   dst_act_id   bigint REFERENCES lgx.act ON DELETE SET NULL,
-  dst_unit_hint text,                           -- '#art_5' from textualMod destination
+  dst_unit_id  bigint REFERENCES lgx.unit ON DELETE SET NULL,  -- resolved destination unit (hint / article ELI)
+  dst_unit_hint text,                           -- 'art_5' from textualMod destination (raw, kept when unresolved)
   src_dei      date,                            -- for 'amending acts since text date'
   source       text NOT NULL CHECK (source IN ('sparql', 'akn-ref', 'akn-textualmod', 'akn-note')),
-  PRIMARY KEY (src_eli, rel_type, dst_eli, source)
+  CONSTRAINT relation_endpoints_key UNIQUE NULLS NOT DISTINCT
+    (src_eli, rel_type, dst_eli, source, src_unit_id, dst_unit_id, dst_unit_hint)
 );
-CREATE INDEX relation_dst ON lgx.relation (dst_act_id, rel_type);
-CREATE INDEX relation_src ON lgx.relation (src_act_id, rel_type);
+CREATE INDEX relation_dst      ON lgx.relation (dst_act_id, rel_type);
+CREATE INDEX relation_src      ON lgx.relation (src_act_id, rel_type);
+CREATE INDEX relation_dst_unit ON lgx.relation (dst_unit_id) WHERE dst_unit_id IS NOT NULL;
+CREATE INDEX relation_src_unit ON lgx.relation (src_unit_id) WHERE src_unit_id IS NOT NULL;
 
 CREATE TABLE lgx.recueil_member (                -- derived (wId / headings) + lawyer-reviewed routing
   recueil_version_id bigint NOT NULL REFERENCES lgx.act_version ON DELETE CASCADE,

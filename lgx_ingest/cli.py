@@ -257,30 +257,8 @@ def report(ctx: typer.Context, sample: Sample = True) -> None:
     _run("lgx_ingest.report:run_report", _context(ctx, sample=sample))
 
 
-@app.command()
-def ingest(
-    ctx: typer.Context,
-    sample: Sample = True,
-    with_load: Annotated[bool, typer.Option("--load/--no-load", help="Also load into PostgreSQL")] = False,
-) -> None:
-    """robots → discover → select → fetch → parse → chunk [→ load]. `--full` is the operator crawl."""
-    stage_ctx = _context(ctx, sample=sample)
-    steps = [
-        "lgx_ingest.robots:run_robots",
-        "lgx_ingest.sparql:run_discover",
-        "lgx_ingest.select:run_select",
-        "lgx_ingest.fetch:run_fetch",
-        "lgx_ingest.parse:run_parse",
-        "lgx_ingest.chunk:run_chunk",
-    ]
-    if with_load:
-        steps.append("lgx_ingest.load:run_load")
-    for target in steps:
-        err.print(f"[bold]▶ {target}[/bold]")
-        _run(target, stage_ctx)
-
-
 from lgx_ingest import cli_content as _cli_content  # noqa: E402, F401  — `lgx content fetch|parse` (agent B)
+from lgx_ingest import cli_ingest as _cli_ingest  # noqa: E402, F401  — `lgx ingest`, `lgx package` (loader stage)
 from lgx_ingest import cli_meta as _cli_meta  # noqa: E402, F401  — `lgx meta …`, `lgx robots check` (agent A)
 
 if __name__ == "__main__":  # pragma: no cover

@@ -17,7 +17,7 @@ change and say so in your report.
 | Shared foundation (M0) | `lgx_core/{models,config,eli,io}.py`, `lgx_core/warnings/`, `lgx_core/embed/`, `lgx_ingest/{cli,context,sparql_templates}.py`, `config/*.yaml`, `sparql/`, `db/`, `scripts/`, `pyproject.toml`, `uv.lock`, `Makefile`, CI | orchestrator (M0) |
 | **Agent A** — metadata + selection | `lgx_ingest/{robots,sparql,select}.py`, `lgx_core/rules/*`, tests under `tests/unit/test_{robots,sparql,select,rules}*.py`, `tests/golden/` | agent A |
 | **Agent B** — fetch + parsers | `lgx_ingest/{fetch,structure,chunk}.py`, `lgx_ingest/parse/*`, `lgx_core/normalise/*`, tests under `tests/unit/test_{fetch,parse,akn,html,chunk,normalise}*.py`, small CC-BY fixtures in `tests/fixtures/legilux/` | agent B |
-| Loader + gates (after A and B) | `lgx_ingest/{load,gates,report}.py` | loader stage |
+| Loader + gates (after A and B) | `lgx_ingest/{load,gates,report,package,cli_ingest}.py`, `db/schema/*` (since M1), tests `tests/{unit,db}/test_load*.py`, `tests/unit/load_fixture.py` | loader stage |
 | MCP server | `lgx_mcp/`, `lgx_core/citeparse/`, `lgx_core/verify/` | MCP stage |
 | Streamlit UI | `ui/` (package `lgx_ui`) | M1b |
 
@@ -54,8 +54,9 @@ A stage that raises `NotImplementedError` makes the CLI exit with code **3** ("n
 | `lgx chunk` | `lgx_ingest.chunk:run_chunk` | `(ctx) -> StageResult` |
 | — | `lgx_ingest.chunk:chunk_units` | `(units: Sequence[Unit], *, title_short: str, version_label: str) -> list[Chunk]` |
 | `lgx load [--dsn] [--db-name] [--recreate]` | `lgx_ingest.load:run_load` | `(ctx, *, dsn: str \| None = None, db_name: str \| None = None, recreate: bool = True) -> StageResult` |
-| `lgx gates` / `lgx report` | `lgx_ingest.gates:run_gates` / `lgx_ingest.report:run_report` | `(ctx) -> StageResult` |
-| `lgx ingest [--sample/--full] [--load]` | runs robots → discover → select → fetch → parse → chunk [→ load] | — |
+| `lgx gates` / `lgx report` | `lgx_ingest.gates:run_gates` / `lgx_ingest.report:run_report` | `(ctx) -> StageResult` (gates also take `*, dsn=, db_name=`; CLI: `--opt dsn=… --opt db_name=…`) |
+| `lgx ingest [--sample/--full] [--refresh] [--offline] [--revalidate] [--load/--no-load] [--dsn] [--db-name] [--package [--container C] [--restore-to DB]] [--include-m2]` | `lgx_ingest.cli_ingest:run_ingest` | robots → discover → select → fetch → parse → chunk → load → gates → report [→ package] (§6) |
+| `lgx package [--dsn] [--db-name] [--out-dir] [--container C] [--restore-to DB]` | `lgx_ingest.package:run_package` | `(ctx, *, dsn=None, db_name=None, out_dir=None, container=None, restore_to=None) -> StageResult` |
 | `lgx embed` | built in: provider `none` → no-op | — |
 | `lgx config-check`, `lgx paths`, `lgx version` | built in | — |
 
@@ -96,7 +97,8 @@ messages, details}`; the CLI prints it as JSON and exits 1 when `ok` is false.
 | `units/<T>/<eli_slug(version)>.jsonl` | `Unit`, one line per unit, document order | parse/structure → chunk, load |
 | `units/<T>/<eli_slug(version)>.relations.jsonl` | `Relation` from AKN (`akn-ref`, `akn-textualmod`, `akn-note`) | parse → load |
 | `chunks/<T>/<eli_slug(version)>.jsonl` | `Chunk` | chunk → load |
-| `reports/<T>/…` | gates, sizing report | gates/report |
+| `reports/<T>/{load,gates,sizing}.json` | loader result, gate results, sizing report | load/gates/report |
+| `bundles/data-<T>[-sample].{dump,release.json,sha256}` | `pg_dump -Fc` of the release + manifest + checksums | package → restore |
 
 `eli_slug("http://data.legilux.public.lu/eli/etat/leg/code/travail/20260726") == "eli-etat-leg-code-travail-20260726"`.
 
@@ -279,18 +281,119 @@ M1 implementation notes (agent B):
 - **PDF** (`parse/pdf.py`) and recueil dedup (`parse/recueil.py`) are M2 stubs; `lgx parse` reports PDF
   entries as `skipped_pdf`.
 
-## 6. Loader (S8) and gates (S9) — next stage
+## 6. Loader (S8), gates (S9), ingest, package (S10, minimal) — implemented (loader stage, M1)
 
-Inputs: `manifest/<T>/{acts,versions,relations}.jsonl`, `raw/index.jsonl` (provenance per `eli_version`:
-`sha256`, `bytes`, `fetched_at`, `http_last_modified`), `parsed/*.json` (`parser_version`), `units/<T>/`,
-`chunks/<T>/`, `config/{warnings,legal_texts,aliases}.yaml`, `meta/<T>/vocab.parquet`.
+**Inputs** (`lgx_ingest.load.read_inputs`): `manifest/<T>/{acts,versions,manifest,relations,data_quality}.jsonl`,
+`selection_report.json`, `meta/<T>/_snapshot.json` + `vocab.parquet`, `raw/index.jsonl`, `parsed/<sha>.<parser>.json`
+(parser version + parse issues), `units/<T>/<slug>.jsonl` (+ `.relations.jsonl`), `chunks/<T>/<slug>.jsonl`,
+`robots/<T>/{robots,denylist}.json`, `logs/fetch_log.jsonl`, `config/{warnings,legal_texts,aliases,recueil_members}.yaml`.
+A version gets **text** iff its manifest entry has a `file`, the file is in the raw index, a units file exists
+whose `source_sha256` equals that raw file (else `LoadError`: stale units → re-run parse/chunk) and a chunks
+file exists (else `LoadError`). Everything else is a metadata row (`has_text = false`, `text_valid = NULL`).
 
-Steps: `scripts/db_apply.sh --dbname legilux_build_<T> --recreate` (or the same SQL via psql) → COPY in FK
-order (act → act_version → unit → article_alias → relation → chunk; ELI → id maps in memory; hex → bytea;
-`DateWindow` → `daterange '[)'`) → `lgx.warning_def` (with `variants`), `lgx.legal_text` (`{T}` filled),
-`lgx.vocab`, `lgx.act_alias` → `lgx_meta.release` → `scripts/db_apply.sh --postload-only` (ANALYZE +
-conditional HNSW, a no-op without vectors) → `SELECT * FROM lgx_meta.invariant_violations WHERE n <> 0` must
-be empty → gates (PLAN §6.8). Denylisted ELIs must be absent (checked in Python; the denylist is never shipped).
+**Release naming.** `release_id = data-<YYYYMMDD>[-sample]`, database `legilux_build_<YYYYMMDD>[_sample]`
+(`--db-name` / `--opt db_name=`), bundle `data/bundles/data-<T ISO>[-sample].dump`. The DSN is the build/owner
+role (`--dsn`, `--opt dsn=`, `LGX_PG_DSN`); the loader connects to the DSN's database (or `postgres`) to
+`DROP … WITH (FORCE)` + `CREATE` the release database. Idempotent per release name: surrogate ids are assigned
+in ELI order (act, version, unit by version+ordinal, chunk by unit+part, relation by key), so a rebuild of the
+same inputs gives the same rows and the same `lgx_meta.release.content_digest`.
+
+**Steps** (`run_load`): `apply_schema` (all `db/schema/*.sql`; the psql subset `\set`, `\if :{?v}`, `:v`, `:'v'` is
+rendered in Python, no `psql` needed; `embed_dim` = `config/embedding.yaml: dim`) → one transaction of COPYs
+in FK order (vocab, legal_text, warning_def, act, act_version, unit, article_alias, act_alias, relation,
+recueil_member, chunk, data_quality_issue, lgx_meta.release, build.fetch_log, build.sync_state; identity
+sequences advanced) → `90_postload.sql` → `lgx_meta.invariant_violations` must be empty, no denylisted ELI in
+any table, row counts == plan → `release.gates.loader`. Any constraint violation raises `LoadError` naming the
+table, the constraint and the record (e.g. `load failed in lgx.act_version (record: …/consolide/20270101):
+conflicting key value violates exclusion constraint "one_text_per_act_and_date"`). Report: `reports/<T>/load.json`.
+
+**Transforms worth knowing (MCP stage):**
+- **Relabel `not_loaded`.** An act whose selected text is not in this build (every act outside the sample in a
+  sample release; a fetch/parse gap in a full build) is loaded as `text_basis = metadata_only`,
+  `metadata_reason = not_loaded`, `basis_version_id = NULL`; its versions keep their selection `role`. The
+  planned label is in `lgx_meta.release.counts.not_loaded_by_planned_text_basis` (sample at T0: 25,516 acts).
+  Render it as « texte non chargé dans cette base (échantillon) ».
+- `act.title` / `title_short` / `citation_title`: the literal two-character `\n` of 5,301 SPARQL titles is a space.
+- Relations: SPARQL rows keep `/jo` IRIs; `src_act_id`/`dst_act_id` resolve exact work/`/jo`/version ELIs and
+  else walk the path up (`…/art_5`, `…/code/travail/art_l_121-1` → the code's act via its version family).
+  AKN rows: `src_unit_id` = citing unit (`akn-ref`), `dst_unit_id` = the unit whose anchor/akn_id matches
+  `dst_unit_hint` in the same version (textualMod/note), or the stored unit with that `eli_unit` (article ELI
+  targets; the version serving at T preferred). Missing `src_dei` of AKN rows = the source act's `dei_min`.
+  Edges touching a denylisted ELI are dropped (`counts.relations.dropped_denylist`).
+- `article_alias` holds only the **extra** keys of article units (`lgx_core.normalise.num_aliases`); the primary
+  key is `unit.num_norm`.
+- `act_alias`: `config/aliases.yaml` entries with a target (`alias_norm`, kind, reviewed) + `title_short` /
+  `citation_title` of acts. Out-of-scope aliases (RGPD → EU law) are not in the database (open issue).
+- `recueil_member`: derived from units' `member_act_eli` (method `wid`, `reviewed_by` NULL); entries of
+  `config/recueil_members.yaml` override.
+- `data_quality_issue`: selection issues + parse issues of loaded versions, deduplicated on (entity, code),
+  details joined. `legal_text`: `{T}` filled (fr 16/10/2026, de 16.10.2026, en 2026-10-16);
+  `attribution_vectors` replaces `attribution` only with vectors; `LICENSES/CC-BY-4.0.txt` (if present) is the en body.
+- Embeddings off: **zero** `lgx.embedding_model` rows (its CHECK has no `none` provider), all `chunk.embedding`
+  NULL; `lgx_meta.release.config` = `{release_kind, loader_version, config_digest, snapshot_digest, scope,
+  embedding, vector_status: "disabled:provider_none", sample_works, …}`; `counts` = per table / text_basis / flag /
+  role / unit type, relations, texts missing, selection counts. `inputs_digest` = sha256(snapshot digest,
+  config digest, robots sha256s, loaded file sha256s, parser + rules versions).
+
+**Gates** (`lgx_ingest.gates`, `reports/<T>/gates.json`, also stored in `lgx_meta.release.gates`): `pass` /
+`fail` / `warn` / `skip` (no previous snapshot/selection/release to compare with). File gates: robots,
+sparql_completeness (Q17), q01_rows / q02_rows (≤ 2 % drop vs previous snapshot), usable_consolidations (≤ 2 %),
+text_basis_buckets (≤ 10 %), stubs (+20), flag_window_disagreements (≤ 5: `applicable` flag on an ended
+window), fetch_errors (≤ 1 % of URLs, **final outcome per URL** — a transient error recovered by a retry is
+reported, not counted), parse_failures (≤ 1 %, none on CODE/Constitution), sample_expectations. DB gates:
+invariants, denylist_absent, release_row, acts/versions vs selection, text_basis_vs_selection (loaded +
+not_loaded == planned per bucket), metadata_reason_consistent, unit/chunk/relation counts vs plan,
+chunk_unit_consistency (chunk ↔ unit ↔ version, chunks inside the version's `text_valid`, no chunk of a
+repealed/modifying unit, text versions have units), text_basis_consistent (labels vs stored texts vs
+`lgx.serving_at(T)`; windows starting after T excepted), core_texts_present (sample: the m1 `core` /
+`code_recueil` works; full: every CODE/Constitution with text), sample_texts_loaded (every m1 XML/HTML sample
+file), core_article_counts (≤ 2 % vs previous gates report), licence_cc_by_only, embedding_off,
+canned_lexical_query.
+
+**Ingest** (`lgx_ingest.cli_ingest.run_ingest`): robots reused when `robots/<T>/` exists (fetched again with
+`--refresh` or before any download); snapshot reused unless `--refresh`; select always; fetch **cache first**
+(cached files are marked done for T in `logs/fetch_progress_<T>.txt` and never re-requested; only missing ones are
+fetched; `--revalidate` = conditional GETs for all; `--offline` = no request at all, gaps are gated); parse, chunk;
+load when a DSN is configured (`--load/--no-load`); gates; report; `--package` (only when the gates pass, or
+`--opt package_on_fail=1`). `--full` requires `--confirm-full-crawl`. **Pass `--t 2026-10-16`**: T=auto is the
+Luxembourg date, which is already 2026-10-17 at 22:00 UTC.
+
+**Package** (`lgx_ingest.package`): `pg_dump -Fc -Z zstd:9 --exclude-schema=build --no-owner --no-privileges` →
+`data/bundles/data-<T>[-sample].dump` + `.release.json` (release row, `requires {schema_version: 1, embedding:
+null, postgres_major}`, dump size/sha256) + `.sha256`. `--restore-to NAME`: fresh `NAME_next`, `pg_restore -j 4
+--exit-on-error --no-owner --no-privileges`, `95_roles.sql` (GRANTs), `ANALYZE`, `ALTER DATABASE … SET
+default_transaction_read_only = on`, row counts == source, smoke (invariants, canned query, `lgx_ro` SELECT only),
+then rename-swap to `NAME` (`NAME_prev` kept unless `--opt keep_prev=0`). Local `pg_dump`/`pg_restore` must be ≥ the
+server major; otherwise pass `--container lgx-dev-db` (tools run inside the container). `--opt
+ro_password_file=PATH` sets the `lgx_ro` password.
+
+**Sizing report** (`lgx_ingest.report`, `reports/<T>/sizing.json`): per version and per stratum (sample group,
+doc type, kind, format): units, articles, repealed, text bytes, raw bytes, chunks, tokens, split articles; an [E]
+extrapolation (sample means × stored-text counts per kind; codes as measured) and the database size per table.
+
+### 6.1 Persistent dev database (used by the MCP and UI stages)
+
+| What | Value |
+|---|---|
+| Container | `lgx-dev-db` (image `lgx.local/lgx-db:dev` from `db/Dockerfile`), `--restart unless-stopped` |
+| Volume | `lgx-dev-pgdata` → `/var/lib/postgresql` (PG18 layout) |
+| Address | `127.0.0.1:55432` |
+| Superuser (build/load/package) | `postgres` / `lgx-dev-only` → `LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres` |
+| Runtime database (MCP) | `legilux` — restored from `data/bundles/data-2026-10-16-sample.dump`, read-only by default |
+| Read-only role (MCP) | `lgx_ro` / `lgx-ro-dev-only` → `postgresql://lgx_ro:lgx-ro-dev-only@127.0.0.1:55432/legilux` (compose names: `LGX_DB_HOST=127.0.0.1`, `LGX_DB_PORT=55432`, `LGX_DB_NAME=legilux`, `LGX_DB_USER=lgx_ro`, `LGX_DB_PASSWORD_FILE`) |
+| Build database | `legilux_build_20261016_sample` (writable as `postgres`; `lgx gates` updates its release row) |
+
+Re-create everything (offline, ≈ 90 s): `LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres
+uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --package --container lgx-dev-db
+--restore-to legilux`. The container must not be removed by `make db-down` (that target removes the throwaway
+`lgx-db-dev` container, which also wants port 55432: do not run `make db-up` while `lgx-dev-db` runs).
+
+Sample release at T = 2026-10-16: 58,390 acts, 29,133 versions (44 with text), 13,052 units, 10,220 chunks
+(all searchable, no vectors), 174,396 relations (168,655 SPARQL + 5,741 AKN after de-duplication), 300 article
+aliases, 30 act aliases, 3,785 vocab concepts, 623 data-quality rows; labels: consolidated 23, stub_fallback 1,
+original_never_amended 11, original_possibly_outdated 7, metadata_only 58,348 (25,516 of them `not_loaded`).
+Database 282 MB (build) / 261 MB (restored); dump 9.4 MB; load ≈ 40 s (COPY 22 s); restore ≈ 7 s + 4 s
+ANALYZE/GRANTs.
 
 ## 7. MCP stage and UI
 
@@ -313,3 +416,17 @@ be empty → gates (PLAN §6.8). Denylisted ELIs must be absent (checked in Pyth
 - `DISTINCT` added to Q07-fallback, Q08, Q09 (A.0 rule).
 - `loi/1978/07/14/n1/jo` XML is licenceSCL: under `cc_by_only` it is served (and tested) from HTML.
 - `config/denylist_gdpr.yaml` is gitignored (personal-data ELIs); the loader treats it as optional.
+
+## 9. Schema changes made by the loader stage (M1; `db/schema/*`)
+
+- `lgx.act.metadata_reason` (+ `MetadataReason.NOT_LOADED`, shared-file change in `lgx_core/models.py`): `not_loaded`.
+- `lgx.relation`: surrogate `relation_id` (identity PK), new `dst_unit_id` (FK unit, ON DELETE SET NULL), unique
+  `relation_endpoints_key` (NULLS NOT DISTINCT) over `(src_eli, rel_type, dst_eli, source, src_unit_id,
+  dst_unit_id, dst_unit_hint)`, indexes on `src_unit_id` / `dst_unit_id`. The Appendix B natural key collapsed AKN
+  edges (one row per modifying act and target work: 6,452 sample edges → 1,618).
+- `lgx.search_candidates(…, p_limit, p_act_ids bigint[] DEFAULT NULL, p_in_force_only boolean DEFAULT true)`:
+  act filter and `in_force_only` on every branch (PLAN §8.3); the cited branch honours window, doc types and acts;
+  deterministic tie-breaks (`chunk_id`). Helper `lgx.chunk_window_ok(from, to, as_of, in_force_only)`.
+  Existing 6/7-argument calls are unchanged.
+- `95_roles.sql`: the `REVOKE … ON SCHEMA build` is skipped when `build` does not exist (a restored dump has no
+  `build` schema; the script failed on every restore).

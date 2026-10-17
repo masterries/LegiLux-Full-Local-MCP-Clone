@@ -29,6 +29,26 @@ make db-psql      # psql shell
 make db-down      # removes the container (it is --rm, all data is disposable)
 ```
 
+**Persistent dev database** (created by the loader stage; the MCP and UI stages use it — details and counts in
+`docs/dev/INTERFACES.md` §6.1):
+
+```sh
+docker build -t lgx.local/lgx-db:dev db
+docker volume create lgx-dev-pgdata
+docker run -d --name lgx-dev-db --restart unless-stopped -e POSTGRES_PASSWORD=lgx-dev-only \
+  -v lgx-dev-pgdata:/var/lib/postgresql -p 127.0.0.1:55432:5432 lgx.local/lgx-db:dev
+export LGX_PG_DSN=postgresql://postgres:lgx-dev-only@127.0.0.1:55432/postgres     # build/owner role
+uv run lgx --t 2026-10-16 --opt keep_prev=0 ingest --sample --offline --package --container lgx-dev-db --restore-to legilux
+docker exec lgx-dev-db psql -U postgres -c "ALTER ROLE lgx_ro PASSWORD 'lgx-ro-dev-only'"   # once per cluster
+psql postgresql://lgx_ro:lgx-ro-dev-only@127.0.0.1:55432/legilux                     # what the MCP server uses
+```
+
+`legilux` is the runtime database (restored from `data/bundles/data-2026-10-16-sample.dump`, read-only by
+default, `lgx_ro` = SELECT only, 5 s statement timeout); `legilux_build_20261016_sample` is the build database.
+`make db-up` / `db-down` manage a different, throwaway container (`lgx-db-dev`) on the same port: stop
+`lgx-dev-db` first (`docker stop lgx-dev-db`) if you need it. Always pass `--t 2026-10-16` for the dev
+sample (T=auto follows the Luxembourg date).
+
 `scripts/db_apply.sh --dbname NAME --recreate [--embed-dim 1024] [--container NAME] [--postload-only]`
 applies the parts `00_extensions … 95_roles` in order. Without `--container` it uses the local `psql`
 and `PGHOST/PGPORT/PGUSER/PGPASSWORD`. Each release is a fresh database ("rebuild, don't migrate").
@@ -55,10 +75,14 @@ make test-live    # tests marked live: a few polite requests to Legilux (opt-in)
 ```sh
 uv run lgx --help
 uv run lgx paths                      # where each stage reads/writes under data/
-uv run lgx ingest --sample            # robots → discover → select → fetch → parse → chunk
+uv run lgx --t 2026-10-16 ingest --sample --offline   # robots → discover → select → fetch → parse → chunk
+                                                     #   → load → gates → report (+ --package)
+uv run lgx --t 2026-10-16 load | gates | report | package --container lgx-dev-db [--restore-to legilux]
 ```
 
-Stages not implemented yet exit with code 3. Contracts between stages: `docs/dev/INTERFACES.md`.
+`ingest` reuses the robots state and the SPARQL snapshot of T (`--refresh` pulls again), fetches only files
+missing from `data/raw/` (`--offline`: never a request), and loads when `LGX_PG_DSN`/`--dsn` is set. Reports go
+to `data/reports/<T>/` (`load.json`, `gates.json`, `sizing.json`). Stages not implemented yet exit with code 3. Contracts between stages: `docs/dev/INTERFACES.md`.
 Politeness is built in: ≤ 1 request/s (`LGX_RATE_LIMIT_S`, default 1.2 s), User-Agent
 `LegiLux-Local-Clone/0.1 (+https://github.com/masterries/LegiLux-Full-Local-MCP-Clone)`, robots.txt checked
 every run, only `https://legilux.public.lu/filestore/eli/etat/leg/…` is ever fetched.

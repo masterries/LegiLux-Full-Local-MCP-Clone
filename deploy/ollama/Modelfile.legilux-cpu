@@ -1,0 +1,8 @@
+# Ollama Modelfile for the cpu profile (PLAN §9.1, §9.2). Derives a local alias from an already present base model;
+# Ollama does not re-quantize on import. pull-models.sh rewrites FROM to the first pulled tag when LGX_OLLAMA_ALIAS
+# is set. For the GGUF fallback (airgap install without an Ollama store archive) replace FROM with the GGUF path:
+#   FROM /models/gguf/<file>.gguf
+FROM ministral-3:8b
+# 16k context on cpu (OLLAMA_CONTEXT_LENGTH also sets it); low temperature for legal answers.
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.2

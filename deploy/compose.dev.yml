@@ -1,0 +1,269 @@
+# =====================================================================================================
+# deploy/compose.dev.yml — CONNECTED dev/test host (PLAN §9.3, §10.2; Appendix C document 2).
+#
+# Standalone file (it does not need compose.yml): `docker compose -f deploy/compose.dev.yml config` validates.
+#   docker compose -f deploy/compose.dev.yml up -d --build          # db + db-load + mcp + lgx-streamlit
+#   docker compose -f deploy/compose.dev.yml --profile cpu up -d     # + Ollama (LLM on the internal network)
+#   docker compose -f deploy/compose.dev.yml --profile ollama-pull run --rm ollama-pull   # fetch the dev model once
+#   docker compose -f deploy/compose.dev.yml --profile cloudllm up -d lgx-streamlit-cloud # OPT-IN cloud LLM (:8502)
+# UI: http://127.0.0.1:8501 · MCP: http://127.0.0.1:8000/mcp (/livez, /readyz).
+#
+# - No secrets are required to start: dev defaults (override with LGX_DEV_* variables, deploy/.env.example) reach
+#   the read-only services as the plain dev variables LGX_DB_PASSWORD / LGX_MCP_TOKEN / OPENAI_API_KEY that both
+#   lgx-mcp and lgx-streamlit accept in development. Compose `configs` with inline `content` cannot be used there:
+#   compose copies them into the container, which fails on a read_only root filesystem ("`file` is the sole
+#   supported option"). The airgap (compose.yml) uses file-based Docker secrets, which are bind mounts.
+# - Streamlit reads the offline config.toml baked into the image (ui/.streamlit/config.toml); per-deployment values
+#   come from STREAMLIT_* variables, which take precedence over the file.
+# - `backend` is internal (db <-> mcp <-> ui <-> llm, no route out). Docker does not publish ports of containers
+#   that sit only on internal networks, so mcp and lgx-streamlit also join `edge`, published on 127.0.0.1 only.
+#   The egress gates therefore run on the offline VM, not here (PLAN §11.6).
+# - The database is its own volume, filled once by `db-load` from the sample bundle built by
+#   `lgx ingest --sample --offline --package` (data/bundles/data-2026-10-16-sample.dump). It is independent of the
+#   host-side lgx-dev-db container. To reuse that container's volume instead, STOP lgx-dev-db first and set
+#   LGX_DEV_PGDATA_VOLUME=lgx-dev-pgdata: two servers must never share a data directory, and the db service then
+#   refuses to start while a postmaster.pid is present (LGX_DEV_DB_FORCE=1 overrides after a crash).
+# - A cloud LLM is possible ONLY through the explicit `cloudllm` profile (red banner in the UI); the default
+#   command never starts lgx-streamlit-cloud.
+# =====================================================================================================
+name: legilux-dev
+
+x-base: &base
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  pids_limit: 512
+  logging: { driver: local, options: { max-size: "20m", max-file: "3" } }
+
+x-offline-env: &offline
+  HF_HUB_OFFLINE: "1"
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  TRANSFORMERS_OFFLINE: "1"
+  DO_NOT_TRACK: "1"
+  NO_PROXY: "*"
+
+x-ollama-image: &ollama_image "${LGX_OLLAMA_IMAGE:-mirror.gcr.io/ollama/ollama:0.40.5@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241}"
+
+networks:
+  backend:
+    internal: true                                      # no gateway, no route out
+  edge: {}                                              # gateway network, only for the 127.0.0.1-published ports
+  dev-egress: {}                                        # internet-capable; only ollama-pull and lgx-streamlit-cloud
+
+volumes:
+  pgdata:
+    name: "${LGX_DEV_PGDATA_VOLUME:-legilux-dev-pgdata}"
+  ollama-models:
+    name: "${LGX_DEV_OLLAMA_VOLUME:-legilux-dev-ollama}"
+
+x-dev-credentials:                                      # dev defaults only; the airgap uses 0600 Docker secrets
+  pg_superuser_pw: &pg_superuser_pw "${LGX_DEV_PG_PASSWORD:-lgx-dev-only}"
+  pg_ro_pw: &pg_ro_pw "${LGX_DEV_RO_PASSWORD:-lgx-ro-dev-only}"
+  mcp_token: &mcp_token "${LGX_DEV_MCP_TOKEN:-lgx-dev-mcp-token}"
+  llm_api_key: &llm_api_key "${LGX_DEV_LLM_API_KEY:-sk-no-key}"
+
+configs:
+  db_load_script:                                       # one-shot restore of the sample bundle (`lgx dev-load` light)
+    content: |
+      set -eu
+      export PGHOST=db PGUSER=postgres PGDATABASE=postgres
+      : "$${PGPASSWORD:?}" "$${LGX_RO_PASSWORD:?}"
+      DB="$${LGX_DB_NAME:-legilux}"
+      i=0; until pg_isready -q; do i=$$((i + 1)); [ "$$i" -lt 60 ] || { echo "db-load: db not ready"; exit 1; }; sleep 1; done
+      if [ "$$(psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$$DB'")" = "1" ]; then
+        echo "db-load: database $$DB exists; nothing to restore"
+      else
+        DUMP="/bundles/$$LGX_DEV_BUNDLE"
+        if [ ! -f "$$DUMP" ]; then
+          echo "db-load: $$DUMP not found. Build it on the host:"
+          echo "  LGX_PG_DSN=... uv run lgx --t 2026-10-16 ingest --sample --offline --package --container lgx-dev-db"
+          exit 1
+        fi
+        SUMS="/bundles/$${LGX_DEV_BUNDLE%.dump}.sha256"
+        if [ -f "$$SUMS" ]; then (cd /bundles && grep " $$LGX_DEV_BUNDLE\$$" "$$SUMS" | sha256sum -c -); fi
+        NEXT="$${DB}_next"
+        psql -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS \"$$NEXT\" WITH (FORCE)" -c "CREATE DATABASE \"$$NEXT\""
+        pg_restore -d "$$NEXT" -j 4 --exit-on-error --no-owner --no-privileges "$$DUMP"
+        psql -d "$$NEXT" -v ON_ERROR_STOP=1 -q -f /schema/95_roles.sql
+        psql -d "$$NEXT" -v ON_ERROR_STOP=1 -q -c "ANALYZE"
+        psql -v ON_ERROR_STOP=1 -c "ALTER DATABASE \"$$NEXT\" SET default_transaction_read_only = on" \
+             -c "ALTER DATABASE \"$$NEXT\" RENAME TO \"$$DB\""
+        echo "db-load: restored $$DUMP into $$DB"
+      fi
+      printf '%s\n' "ALTER ROLE lgx_ro PASSWORD :'pw';" | psql -v ON_ERROR_STOP=1 -q -v pw="$$LGX_RO_PASSWORD"
+      echo "db-load: lgx_ro password set (LGX_DEV_RO_PASSWORD)"
+
+secrets:
+  cloud_llm_api_key:                                    # cloudllm profile only; repo-root secrets/ (gitignored, 0600)
+    file: "${LGX_CLOUD_LLM_KEY_FILE:-../secrets/cloud_llm_api_key}"
+
+services:
+  # -------------------------------------------------------------------------------------------- data
+  db:
+    <<: *base
+    image: lgx.local/lgx-db:dev
+    build: { context: ../db }
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER]
+    shm_size: 256m
+    environment:
+      POSTGRES_PASSWORD: *pg_superuser_pw               # used only when the data volume is initialised
+      LGX_DEV_DB_GUARD: "${LGX_DEV_PGDATA_VOLUME:-}"   # non-empty = a shared, pre-existing data volume
+      LGX_DEV_DB_FORCE: "${LGX_DEV_DB_FORCE:-0}"
+    volumes: ["pgdata:/var/lib/postgresql"]             # PG18 layout: PGDATA=/var/lib/postgresql/18/docker
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        if [ -n "$$LGX_DEV_DB_GUARD" ] && [ "$$LGX_DEV_DB_FORCE" != 1 ] && [ -f "$$PGDATA/postmaster.pid" ]; then
+        echo "db: $$PGDATA/postmaster.pid exists - is another server (lgx-dev-db?) using volume $$LGX_DEV_DB_GUARD?
+        Stop it first; after a crash set LGX_DEV_DB_FORCE=1." >&2; exit 1; fi;
+        exec docker-entrypoint.sh "$$@"
+      - --
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "password_encryption=scram-sha-256",
+              "-c", "listen_addresses=*"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"], interval: 5s, timeout: 3s, retries: 60 }
+    networks: [backend]                                 # never published
+
+  db-load:
+    <<: *base
+    image: lgx.local/lgx-db:dev
+    restart: "no"
+    user: "0:0"                                         # reads the 0600 bundle files on the host; no capabilities
+    entrypoint: ["/bin/sh", "/run/lgx/db-load.sh"]
+    environment:
+      LGX_DEV_BUNDLE: "${LGX_DEV_BUNDLE:-data-2026-10-16-sample.dump}"
+      LGX_DB_NAME: legilux
+      PGPASSWORD: *pg_superuser_pw
+      LGX_RO_PASSWORD: *pg_ro_pw
+    configs: [{ source: db_load_script, target: /run/lgx/db-load.sh }]   # db-load is not read-only
+    volumes:
+      - "${LGX_DEV_BUNDLES_DIR:-../data/bundles}:/bundles:ro"
+      - "../db/schema:/schema:ro"                       # 95_roles.sql from the repo (GRANTs; the image copy may be older)
+    depends_on: { db: { condition: service_healthy } }
+    networks: [backend]
+
+  # -------------------------------------------------------------------------------------------- MCP
+  mcp:
+    <<: *base
+    image: lgx.local/lgx-mcp:dev
+    build: { context: .., dockerfile: docker/lgx-mcp.Dockerfile }   # created by the MCP stage
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp"]
+    environment:
+      <<: *offline
+      LGX_DB_HOST: db
+      LGX_DB_PORT: "5432"
+      LGX_DB_NAME: legilux
+      LGX_DB_USER: lgx_ro
+      LGX_DB_PASSWORD: *pg_ro_pw                        # dev only (airgap: LGX_DB_PASSWORD_FILE secret)
+      LGX_MCP_TOKEN: *mcp_token                         # dev only (airgap: LGX_MCP_TOKEN_FILE secret)
+      LGX_ALLOWED_HOSTS: "mcp:8000,localhost:8000,127.0.0.1:8000,localhost:${LGX_DEV_MCP_PORT:-8000},127.0.0.1:${LGX_DEV_MCP_PORT:-8000}"
+      LGX_ALLOWED_ORIGINS: "http://localhost:${LGX_DEV_UI_PORT:-8501},http://127.0.0.1:${LGX_DEV_UI_PORT:-8501}"
+      LGX_RERANK: "${LGX_RERANK:-off}"                  # the TEI reranker joins in M2 (Appendix C service rerank)
+      LGX_RERANK_URL: "${LGX_RERANK_URL:-}"
+      LGX_RERANK_K: "${LGX_RERANK_K:-16}"
+      LGX_RETRIEVAL_MODE_DEFAULT: auto
+      LGX_EMBED_PROVIDER: none                          # user decision: embeddings off (lexical-only)
+      LGX_TZ: Europe/Luxembourg
+      LGX_STALENESS_WARN_DAYS: "30"
+      LGX_STALENESS_CRITICAL_DAYS: "90"
+      LGX_MAX_RESULT_TOKENS: "${LGX_MAX_RESULT_TOKENS:-2500}"   # cpu profile budget (PLAN §9.1)
+      LGX_AUDIT_QUERY_TEXT: "false"
+    depends_on: { db-load: { condition: service_completed_successfully } }
+    healthcheck:                                        # /readyz: 200 iff DB reachable + schema supported
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/readyz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    ports: ["127.0.0.1:${LGX_DEV_MCP_PORT:-8000}:8000"]
+    networks: [backend, edge]
+
+  # -------------------------------------------------------------------------------------------- LLM (optional)
+  ollama:                                               # profile cpu: dev fallback model ministral-3:8b (6.0 GB)
+    <<: *base
+    profiles: [cpu]
+    image: *ollama_image
+    environment:
+      <<: *offline
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_CONTEXT_LENGTH: "${LGX_CTX:-16384}"        # always set: Ollama's default depends on VRAM (PLAN §9.2)
+      OLLAMA_KEEP_ALIVE: "-1"
+      OLLAMA_NUM_PARALLEL: "${LGX_LLM_PARALLEL:-1}"
+      OLLAMA_HOST: "0.0.0.0:11434"
+      OLLAMA_MODELS: /models/ollama
+    volumes: ["ollama-models:/models/ollama"]
+    healthcheck: { test: ["CMD", "ollama", "list"], interval: 30s, timeout: 10s, retries: 10 }
+    networks: { backend: { aliases: [llm] } }
+
+  ollama-pull:                                          # one-shot, connected dev host only: model into the volume
+    <<: *base
+    profiles: [ollama-pull]
+    restart: "no"
+    image: *ollama_image
+    entrypoint: ["/bin/sh", "/opt/lgx/pull-models.sh"]
+    environment:
+      OLLAMA_MODELS: /models/ollama
+      OLLAMA_HOST: "127.0.0.1:11434"
+      LGX_OLLAMA_PULL: "${LGX_OLLAMA_PULL:-${LGX_LLM_MODEL:-ministral-3:8b}}"
+      LGX_OLLAMA_ALIAS: "${LGX_OLLAMA_ALIAS:-}"
+    volumes:
+      - "ollama-models:/models/ollama"
+      - "./ollama:/opt/lgx:ro"
+    networks: [dev-egress]
+
+  # -------------------------------------------------------------------------------------------- UI
+  lgx-streamlit:                                        # on by default in dev (PLAN §9.3)
+    <<: *base
+    image: lgx.local/lgx-streamlit:dev
+    build: { context: .., dockerfile: ui/Dockerfile }
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp"]
+    environment:
+      <<: *offline
+      OPENAI_BASE_URL: "${LGX_LLM_BASE_URL:-http://llm:11434/v1}"   # Ollama /v1 | vLLM | on-prem Mistral
+      OPENAI_API_KEY: *llm_api_key                      # dev only (airgap: OPENAI_API_KEY_FILE secret)
+      LGX_LLM_MODEL: "${LGX_LLM_MODEL:-ministral-3:8b}"
+      LGX_LLM_PRESETS: "ollama,vllm,mistral-onprem"      # 'cloud' only in lgx-streamlit-cloud
+      LGX_MISTRAL_ONPREM_URL: "${LGX_MISTRAL_ONPREM_URL:-}"
+      LGX_MISTRAL_ONPREM_MODEL: "${LGX_MISTRAL_ONPREM_MODEL:-}"
+      LGX_MCP_URL: "${LGX_DEV_MCP_URL:-http://mcp:8000/mcp}"
+      LGX_MCP_TOKEN: *mcp_token
+      LGX_MAX_TOOL_ITERATIONS: "5"
+      LGX_MCP_TIMEOUT_S: "20"
+      LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
+      LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"
+      LGX_HOSTNAME: "${LGX_HOSTNAME:-localhost}"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+      STREAMLIT_BROWSER_SERVER_ADDRESS: "${LGX_HOSTNAME:-localhost}"
+      STREAMLIT_LOGGER_HIDE_WELCOME_MESSAGE: "true"     # prevents the startup checkip.amazonaws.com lookup
+      STREAMLIT_SERVER_HEADLESS: "true"
+      STREAMLIT_SERVER_FILE_WATCHER_TYPE: "none"
+      STREAMLIT_SERVER_ADDRESS: "0.0.0.0"               # inside the container; published on 127.0.0.1 only
+      STREAMLIT_CLIENT_SHOW_ERROR_DETAILS: "full"       # dev; the image default is "none"
+    extra_hosts: ["host.docker.internal:host-gateway"]  # LGX_DEV_MCP_URL=http://host.docker.internal:8000/mcp
+    depends_on: { mcp: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+    ports: ["127.0.0.1:${LGX_DEV_UI_PORT:-8501}:8501"]
+    networks: [backend, edge]
+
+  lgx-streamlit-cloud:                                  # OPT-IN (profile cloudllm): quick tests against a cloud API
+    extends: { service: lgx-streamlit }
+    profiles: [cloudllm]
+    ports: !override ["127.0.0.1:${LGX_DEV_CLOUD_UI_PORT:-8502}:8501"]
+    environment:
+      LGX_ALLOW_CLOUD_LLM: "1"                          # red banner: questions + retrieved public texts leave the host
+      OPENAI_BASE_URL: "${LGX_CLOUD_LLM_BASE_URL:-}"
+      OPENAI_API_KEY_FILE: /run/secrets/cloud_llm_api_key   # file-based secret (bind mount): fine on read_only
+      LGX_LLM_MODEL: "${LGX_CLOUD_LLM_MODEL:-}"
+      LGX_LLM_PRESETS: "cloud"
+      LGX_LLM_TRUST_ENV: "1"                            # may use the host's HTTPS proxy settings
+      NO_PROXY: "mcp,llm,localhost,127.0.0.1"
+    secrets: [cloud_llm_api_key]
+    depends_on: { mcp: { condition: service_healthy } }
+    networks: !override [backend, dev-egress]

@@ -1,0 +1,35 @@
+# lgx-streamlit offline configuration (PLAN §9.3 "Offline", Appendix C configs.streamlit_config).
+# Keys verified in the streamlit 1.65.0 wheel. The same values are also set as STREAMLIT_* environment
+# variables in ui/Dockerfile and the compose files; compose mounts its own copy with LGX_HOSTNAME filled in.
+
+[browser]
+# The frontend metrics call fires only when this is true.
+gatherUsageStats = false
+# Must be set explicitly: with server.headless = true and no serverAddress, 1.65.0 GETs
+# checkip.amazonaws.com at startup (net_util.get_external_ip, server side). It is also the first
+# address the websocket/CORS origin check tries before falling back to that lookup.
+serverAddress = "localhost"
+
+[server]
+headless = true
+# No file watcher in containers (read-only filesystem; no watchdog/inotify).
+fileWatcherType = "none"
+runOnSave = false
+enableXsrfProtection = true
+enableStaticServing = false
+
+[logger]
+# Without it, headless = true makes 1.65.0 print the "External URL" banner, which looks up checkip.amazonaws.com.
+hideWelcomeMessage = true
+
+[client]
+toolbarMode = "minimal"
+# "none" hides exception types and tracebacks in the browser. The plan's `false` is deprecated in 1.65.0 and
+# maps to "stacktrace", which still shows tracebacks. The dev compose overrides this with "full".
+showErrorDetails = "none"
+showSidebarNavigation = false
+
+[global]
+developmentMode = false
+
+# No [theme] font URLs (no external fonts or CDN); the app never uses st.map, pydeck or a remote st.image.
