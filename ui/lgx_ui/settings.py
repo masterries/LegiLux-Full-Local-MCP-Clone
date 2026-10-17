@@ -52,7 +52,7 @@ DOC_TYPES_FALLBACK: tuple[str, ...] = (
 class UiSettings:
     mcp_url: str = DEFAULT_MCP_URL
     mcp_token: str | None = None
-    mcp_timeout_s: float = 20.0
+    mcp_timeout_s: float = 30.0  # > the server's default rerank budget (LGX_RERANK_TIMEOUT_S 15) + SQL + margin
     llm_base_url: str = DEFAULT_LLM_BASE_URL
     llm_api_key: str = NO_KEY
     llm_model: str = DEFAULT_LLM_MODEL
@@ -127,7 +127,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> UiSettings:
     return UiSettings(
         mcp_url=env.get("LGX_MCP_URL", "").strip() or DEFAULT_MCP_URL,
         mcp_token=_read_secret(env, "LGX_MCP_TOKEN"),
-        mcp_timeout_s=_float(env, "LGX_MCP_TIMEOUT_S", 20.0),
+        mcp_timeout_s=_float(env, "LGX_MCP_TIMEOUT_S", 30.0),
         llm_base_url=base_url,
         llm_api_key=_read_secret(env, "OPENAI_API_KEY") or NO_KEY,
         llm_model=model,

@@ -223,4 +223,151 @@ def test_apply_members_by_heading_and_key() -> None:
     assert member["agd_1955-11-23.art_1"] == member["agd_1955-11-23.preamble"] == E + "agd/1955/11/23/n1"
     assert member["loi_1955-02-14.art_1"] == E + "loi/1955/02/14/n3"  # by key (the heading differs)
     assert member["membre_1.art_1"] is None
-    assert stats == {"member_parts_resolved": 2, "member_parts_unresolved": 1, "units_with_member": 6}
+    assert stats == {
+        "member_parts_resolved": 2,
+        "member_parts_unresolved": 1,
+        "units_with_member": 6,
+        "routed_members": 0,
+        "routed_unattached": 0,
+        "routed_unattached_examples": [],
+    }
+
+
+# ------------------------------------------------------------------------------- M2 review (2026-10-17)
+def _pdf(ordinal: int, utype: UnitType, anchor: str, **kw: Any) -> Unit:
+    return u(ordinal, utype, anchor, **kw).model_copy(update={"source_format": SourceFormat.PDF})
+
+
+def test_apply_members_matches_truncated_headings_and_suffixed_anchors_and_reports_unattached_routes() -> None:
+    """The YAML keeps the first 300 characters of a heading and two members of one date share a key: a long title
+    never matched exactly and the key fallback was off, so routed members became unreachable."""
+    long_title = (
+        "Règlement grand-ducal du 26 janvier 2016 sur le contrôle technique des véhicules routiers " + "x" * 400
+    )
+    units = [
+        _pdf(1, UnitType.PART, "rgd_2016-01-26", heading=long_title),
+        _pdf(2, UnitType.ARTICLE, "rgd_2016-01-26.art_1", parent_ordinal=1, num_raw="Art. 1er.", text_plain="a"),
+        _pdf(3, UnitType.PART, "rgd_2016-01-26~2", heading="Règlement grand-ducal du 26 janvier 2016 autre"),
+        _pdf(4, UnitType.ARTICLE, "rgd_2016-01-26~2.art_1", parent_ordinal=3, num_raw="Art. 1er.", text_plain="b"),
+    ]
+    members = [
+        R.MemberRef(E + "rgd/2016/01/26/n1", "rgd_2016-01-26", long_title[:300], route=True),
+        R.MemberRef(E + "rgd/2016/01/26/n2", "rgd_2016-01-26~2", "Règlement grand-ducal du 26 janvier 2016 changé"),
+        R.MemberRef(E + "rgd/2016/01/26/n9", "rgd_2016-01-26~3", "Règlement grand-ducal absent", route=True),
+    ]
+    out, stats = R.apply_members(units, members)
+    member = {x.anchor: x.member_act_eli for x in out}
+    assert member["rgd_2016-01-26.art_1"] == E + "rgd/2016/01/26/n1"  # heading prefix
+    assert member["rgd_2016-01-26~2.art_1"] == E + "rgd/2016/01/26/n2"  # anchor with its occurrence suffix
+    assert stats["routed_members"] == 2 and stats["routed_unattached"] == 1
+    assert stats["routed_unattached_examples"] == [E + "rgd/2016/01/26/n9"]
+
+
+def test_pdf_copies_of_members_with_a_stored_consolidation_are_dropped_and_differences_logged() -> None:
+    """PLAN §2.6.2: the member's own consolidation is canonical; the CSS PDF reprints 217 Code du travail articles
+    (106 with older wording) that competed with the code in search."""
+    units = [
+        _pdf(
+            1,
+            UnitType.PART,
+            "loi_2006-07-31",
+            heading="Loi du 31 juillet 2006 portant introduction d'un Code du travail",
+        ),
+        _pdf(
+            2,
+            UnitType.ARTICLE,
+            "loi_2006-07-31.art_l411-1",
+            parent_ordinal=1,
+            num_raw="Art. L. 411-1.",
+            num_norm="l411-1",
+            text_plain="Texte Art. L. 411-1.",
+            member_act_eli=TRAV_W,
+        ),
+        _pdf(
+            3,
+            UnitType.ARTICLE,
+            "loi_2006-07-31.art_l999-1",
+            parent_ordinal=1,
+            num_raw="Art. L. 999-1.",
+            num_norm="l999-1",
+            text_plain="Inconnu",
+            member_act_eli=TRAV_W,
+        ),
+        _pdf(4, UnitType.ARTICLE, "art_5", num_raw="Art. 5.", num_norm="5", text_plain="Code's own"),
+    ]
+    trav = u(1, UnitType.ARTICLE, "art_l_411-1", version=TRAV_V, work=TRAV_W, num_raw="Art. L. 411-1.",
+             num_norm="l411-1", text_plain="Le salarié peut convenir autrement.")  # fmt: skip
+    canon = {TRAV_V: R.Canonical.of(TRAV_V, TRAV_W, [trav])}
+    d = R.dedup_pdf_copies(units, [], canonical=canon, served=SERVED, consolidated={TRAV_V}, first_seen=DAY)
+    assert [x.anchor for x in d.units] == ["loi_2006-07-31", "loi_2006-07-31.art_l999-1", "art_5"]
+    assert [x.ordinal for x in d.units] == [1, 2, 3] and d.units[1].parent_ordinal == 1
+    assert d.report["counts"] == {"copy_differs": 1, "dropped_duplicate": 1, "kept_unmatched": 1}
+    assert [i.code for i in d.issues] == ["recueil_copy_differs"] and d.issues[0].entity_eli.endswith(
+        "#loi_2006-07-31.art_l411-1"
+    )
+
+
+def test_pdf_copies_of_a_member_served_from_its_jo_original_are_kept() -> None:
+    """M2 review follow-up: rgd/2000/07/24/n3 is served from its JO original (no consolidation of its own, amended
+    three times); the code's « Texte coordonné » copy is the current text and the routed member is answered from
+    it — dropping it left the member part without articles."""
+    jo_v = E + "rgd/2000/07/24/n3/jo"
+    units = [
+        _pdf(1, UnitType.PART, "rgd_2000-07-24", heading="Règlement grand-ducal du 24 juillet 2000"),
+        _pdf(2, UnitType.ARTICLE, "rgd_2000-07-24.art_7", parent_ordinal=1, num_raw="Art. 7.", num_norm="7",
+             text_plain="Texte coordonné.", member_act_eli=E + "rgd/2000/07/24/n3"),
+    ]  # fmt: skip
+    jo = u(1, UnitType.ARTICLE, "art_7", version=jo_v, work=E + "rgd/2000/07/24/n3", num_raw="Art. 7.",
+           num_norm="7", text_plain="Texte original.")  # fmt: skip
+    canon = {jo_v: R.Canonical.of(jo_v, E + "rgd/2000/07/24/n3", [jo])}
+    served = {E + "rgd/2000/07/24/n3": jo_v}
+    d = R.dedup_pdf_copies(units, [], canonical=canon, served=served, consolidated=set(), first_seen=DAY)
+    assert [x.anchor for x in d.units] == ["rgd_2000-07-24", "rgd_2000-07-24.art_7"]
+    assert d.report["counts"] == {"kept_member_original": 1} and d.report["kept"] == 1 and not d.issues
+
+
+def test_structure_checks_routed_members_on_the_final_units() -> None:
+    """A routed member whose code copies all go in the dedup is as unreachable as an unattached one: the check runs
+    after the dedup (the copy of rgd/2000/07/24/n3 was dropped against its JO original and nothing noticed)."""
+    from lgx_core.models import ManifestEntry, ParseResult, VersionRole
+    from lgx_ingest.parse import structure_recueil
+
+    code_v = E + "code/education_nationale/20260915"
+    trav = u(1, UnitType.ARTICLE, "art_l_411-1", version=TRAV_V, work=TRAV_W, num_raw="Art. L. 411-1.",
+             num_norm="l411-1", text_plain="Texte.")  # fmt: skip
+    units = [
+        _pdf(1, UnitType.PART, "loi_2006-07-31", heading="Loi du 31 juillet 2006 portant introduction"),
+        _pdf(2, UnitType.ARTICLE, "loi_2006-07-31.art_l411-1", parent_ordinal=1, num_raw="Art. L. 411-1.",
+             num_norm="l411-1", text_plain="Texte."),
+    ]  # fmt: skip
+    res = ParseResult(eli_work=E + "code/education_nationale", eli_version=code_v, parser="pdf", parser_version="pdf-2",
+                      source_sha256="0" * 64, source_format=SourceFormat.PDF, units=units)  # fmt: skip
+    entry = ManifestEntry(eli_work=res.eli_work, eli_version=code_v, role=VersionRole.CURRENT, doc_type="CODE_RECUEIL",
+                          text_basis=TextBasis.CONSOLIDATED, reason="test")  # fmt: skip
+    kw: dict[str, Any] = {
+        "canonical": {TRAV_V: R.Canonical.of(TRAV_V, TRAV_W, [trav])},
+        "served": {TRAV_W: TRAV_V},
+        "version_work": {},
+        "members": [R.MemberRef(TRAV_W, "loi_2006-07-31", "Loi du 31 juillet 2006 portant introduction", route=True)],
+        "first_seen": DAY,
+    }
+    kept, _ = structure_recueil(res, entry, **kw)  # the member's version not known as a consolidation: copy kept
+    assert kept.stats["routed_unattached"] == 0 and len(kept.units) == 2
+    out, report = structure_recueil(res, entry, consolidated={TRAV_V}, **kw)
+    assert out.stats["routed_unattached"] == 1 and len(out.units) == 1
+    assert report is not None and [i["code"] for i in report["issues"]] == ["recueil_route_unattached"]
+
+
+def test_the_same_article_printed_twice_in_one_xml_recueil_is_kept_once() -> None:
+    """code/fonction_publique prints loi/2015/03/25 art. 42 under « I. Fonctionnaires » and « II. Employés » (same
+    wId, same text): two search hits and an ambiguous lookup. The second position is dropped (logged)."""
+    wid = E + "loi/2015/03/25/n2/art_42/consolide/20260717"
+    units = [
+        u(1, UnitType.PART, "_part.1", heading="I. Fonctionnaires de l'État"),
+        art(2, wid, "Art. 42."),
+        u(3, UnitType.PART, "_part.2", heading="II. Employés de l'État"),
+        art(4, wid, "Art. 42.").model_copy(update={"parent_ordinal": 3}),
+    ]
+    d = R.deduplicate(units, [], canonical={}, served={}, version_work={}, first_seen=DAY)
+    assert d.report["counts"]["dropped_repeat_in_recueil"] == 1 and d.report["dropped"] == 1
+    assert [x.anchor for x in d.units if x.unit_type is UnitType.ARTICLE] == [units[1].anchor]

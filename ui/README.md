@@ -57,7 +57,7 @@ docker build -f ui/Dockerfile -t lgx.local/lgx-streamlit:dev .       # --secret 
 Environment (Appendix C names): `LGX_MCP_URL`, `LGX_MCP_TOKEN_FILE` (or `LGX_MCP_TOKEN` in dev),
 `OPENAI_BASE_URL` (default `https://api.mistral.ai/v1`), `OPENAI_API_KEY_FILE` (or `OPENAI_API_KEY`), `LGX_LLM_MODEL`
 (default `mistral-small-latest` [U]), `LGX_LLM_TRUST_ENV` (0; 1 = through the environment's HTTPS proxy),
-`LGX_MAX_TOOL_ITERATIONS` (5), `LGX_MCP_TIMEOUT_S` (20), `LGX_LLM_TIMEOUT_S` (120), `LGX_TOOL_RESULT_TOKENS`
+`LGX_MAX_TOOL_ITERATIONS` (5), `LGX_MCP_TIMEOUT_S` (30; keep it above the server's `LGX_RERANK_TIMEOUT_S` + SQL + a margin, or a slow re-ranking times out in the UI instead of falling back), `LGX_LLM_TIMEOUT_S` (120), `LGX_TOOL_RESULT_TOKENS`
 (4000; dev compose 2500), `LGX_TURN_BUDGET_S` (600), `LGX_EVAL_DIR`, `LGX_HOSTNAME`. A `*_FILE` that cannot be read
 stops the UI at start (`UiSettingsError`; airgap secrets must be readable by uid 10001). The sidebar's Base URL and
 model can point the chat at any OpenAI-compatible endpoint; the configured API key is only sent to the configured

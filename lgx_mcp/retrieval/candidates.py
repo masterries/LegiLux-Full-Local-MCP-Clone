@@ -16,6 +16,8 @@ Two SQL generations (``ReleaseInfo.search_api``; releases are rebuilt, never mig
   distinct-term coverage itself.
 * **1** (M1 releases): ``ts_rank_cd`` over the OR query; coverage is computed here and :func:`coverage_order`
   re-orders the candidates (native FTS has no IDF).
+* **3** (M2 review): search API 2 plus ``member_act_id`` — the member restriction of ``filters.act_eli`` (a member
+  act superseded by a code-recueil) applied on every branch inside the SQL, before its candidate caps.
 """
 
 from __future__ import annotations
@@ -100,6 +102,23 @@ SQL_V1 = """
          ORDER BY s.score DESC, s.chunk_id
         """
 
+SQL_V3 = """
+        WITH ex AS (
+          SELECT (SELECT string_agg('(' || q::text || ')', ' | ')
+                    FROM (SELECT phraseto_tsquery('lgx.simple_ua', t) AS q FROM unnest(%(toks)s::text[]) AS t) z
+                   WHERE q::text <> '')::tsquery AS q
+        )
+        SELECT s.chunk_id, s.score, s.lex_rank, s.dense_rank, s.exact_hit, s.cited_hit,
+               c.unit_id, c.act_id, c.version_id, c.part_no, c.part_count, c.header, c.body, c.doc_type,
+               c.valid_from, c.valid_to, s.coverage, s.lex_score, s.phrase_hits, s.act_boosted
+          FROM ex,
+               lgx.search_candidates(%(q)s, %(qvec)s::halfvec, %(as_of)s, %(cited)s::bigint[], ex.q,
+                                     %(doc_types)s::text[], %(limit)s, %(act_ids)s::bigint[], %(ifo)s,
+                                     %(expansion)s, %(boost)s::bigint[], %(opts)s::jsonb, %(member)s::bigint) s
+          JOIN lgx.chunk c ON c.chunk_id = s.chunk_id
+         ORDER BY s.score DESC, s.chunk_id
+        """
+
 SQL_V2 = """
         WITH ex AS (
           SELECT (SELECT string_agg('(' || q::text || ')', ' | ')
@@ -134,9 +153,11 @@ async def search_candidates(
     expansion: str | None = None,
     boost_act_ids: Sequence[int] | None = None,
     opts: dict[str, Any] | None = None,
+    member_act_id: int | None = None,
 ) -> list[ChunkHit]:
     """One ``lgx.search_candidates`` call. ``api`` = the release's search API (``expansion``, ``boost_act_ids``
-    and ``opts`` need 2 and are ignored by 1)."""
+    and ``opts`` need 2 and are ignored by 1; ``member_act_id`` needs 3 — callers of older releases filter the
+    returned hits themselves)."""
     vec = "[" + ",".join(f"{x:.6f}" for x in qvec) + "]" if qvec else None
     params: dict[str, Any] = {
         "toks": list(exact_tokens),
@@ -155,7 +176,9 @@ async def search_candidates(
             boost=list(boost_act_ids) if boost_act_ids else None,
             opts=json.dumps(opts or {}),
         )
-    rows = await db.fetch(SQL_V2 if api >= 2 else SQL_V1, params)
+    if api >= 3:
+        params["member"] = member_act_id
+    rows = await db.fetch(SQL_V3 if api >= 3 else SQL_V2 if api >= 2 else SQL_V1, params)
     return [
         ChunkHit(
             chunk_id=int(r["chunk_id"]),

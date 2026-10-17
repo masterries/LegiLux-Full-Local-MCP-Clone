@@ -144,4 +144,4 @@ def pg_server() -> Iterator[PgServer]:
         _wait_tcp(server)
         yield server
     finally:
-        _run(["docker", "rm", "-f", name])
+        _run(["docker", "rm", "-f", "-v", name])  # -v: the anonymous data volume too (≈ 200 MB leaked per run)

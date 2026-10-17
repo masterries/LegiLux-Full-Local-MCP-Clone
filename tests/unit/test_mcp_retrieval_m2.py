@@ -119,7 +119,7 @@ def test_compact_header_drops_version_labels_and_keeps_the_inner_levels() -> Non
 
 
 def test_rerank_text_cuts_the_body() -> None:
-    assert len(rerank_text("H", "b" * 5000)) == 2 + 1800
+    assert len(rerank_text("H", "b" * 5000)) == 2 + 600  # CPU-safe default body (M2 review)
     assert rerank_text("H", "b" * 5000, 600) == "H\n" + "b" * 600
     rr = Reranker("http://rerank:8080", "auto", body_chars=300)
     assert rr.text("H — Version consolidée applicable au 01/01/2020 > Art. 1.", "x" * 900).endswith("\n" + "x" * 300)
@@ -149,6 +149,35 @@ async def test_reranker_records_batch_latency_and_skips_calls_after_a_failure() 
     with pytest.raises(RerankUnavailableError, match="ConnectError"):  # degrades at once, no second request
         await bad.rerank("q", ["a"])
     assert len(calls) == n and bad.recently_failed()
+
+
+async def test_rerank_budget_falls_back_and_the_probe_times_a_search_sized_payload() -> None:
+    """M2 review: LGX_RERANK_TIMEOUT_S is the total budget of one search's re-ranking (below the UI's tool timeout);
+    the first probe sends k texts of body_chars and reports a reranker slower than the budget as unavailable."""
+    import anyio
+
+    seen: list[tuple[int, int]] = []
+
+    async def slow(request: httpx.Request) -> httpx.Response:
+        texts = json.loads(request.content)["texts"]
+        seen.append((len(texts), max(len(t) for t in texts)))
+        await anyio.sleep(0.2)
+        return httpx.Response(200, json=[{"index": i, "score": float(i)} for i in range(len(texts))])
+
+    rr = Reranker("http://rerank:8080", "auto", batch=8, timeout_s=0.3, k=16, body_chars=600,
+                  transport=httpx.MockTransport(slow))  # fmt: skip
+    state = await rr.probe()
+    assert seen[0] == (8, 600) and state.status == "unavailable" and "too slow" in (state.reason or "")
+    assert "LGX_RERANK_K" in (state.reason or "")
+    with pytest.raises(RerankUnavailableError):  # degrades at once after the slow probe, no request
+        await rr.rerank("q", ["a"])
+    fast = Reranker("http://rerank:8080", "auto", batch=32, timeout_s=5.0, k=16, body_chars=600,
+                    transport=httpx.MockTransport(slow))  # fmt: skip
+    seen.clear()
+    assert (await fast.probe()).status == "ok" and seen == [(16, 600)]
+    budget = Reranker("http://rerank:8080", "auto", batch=1, timeout_s=0.3, transport=httpx.MockTransport(slow))
+    with pytest.raises(RerankUnavailableError, match=r"budget of 0\.3 s exceeded"):
+        await budget.rerank("q", ["a", "b", "c"])  # 3 batches x 0.2 s > 0.3 s
 
 
 # ------------------------------------------------------------------------------------- search SQL API
@@ -195,12 +224,13 @@ async def test_search_api_2_passes_expansion_boosts_and_options() -> None:
 # ------------------------------------------------------------------------------------------- settings
 def test_ranker_settings() -> None:
     s = McpSettings.from_env({"LGX_MCP_TOKEN": TOKEN})
-    assert (s.lexical_ranker, s.query_expansion, s.lexical_opts, s.rerank_body_chars) == ("bm25", True, {}, 1800)
+    assert (s.lexical_ranker, s.query_expansion, s.lexical_opts, s.rerank_body_chars) == ("bm25", True, {}, 600)
+    assert (s.rerank_k, s.rerank_timeout_s) == (16, 15.0)  # CPU-safe defaults (M2 review)
     s = McpSettings.from_env({
         "LGX_MCP_TOKEN": TOKEN, "LGX_LEXICAL_RANKER": "rank_cd", "LGX_QUERY_EXPANSION": "0",
-        "LGX_LEXICAL_OPTS": '{"length_b": 0.5, "act_boost": 2}', "LGX_RERANK_BODY_CHARS": "600",
+        "LGX_LEXICAL_OPTS": '{"length_b": 0.5, "act_boost": 2}', "LGX_RERANK_BODY_CHARS": "1800",
     })  # fmt: skip
-    assert (s.lexical_ranker, s.query_expansion, s.rerank_body_chars) == ("rank_cd", False, 600)
+    assert (s.lexical_ranker, s.query_expansion, s.rerank_body_chars) == ("rank_cd", False, 1800)
     assert s.lexical_opts == {"length_b": 0.5, "act_boost": 2.0}
     assert s.describe()["lexical_ranker"] == "rank_cd"
     for env, msg in (

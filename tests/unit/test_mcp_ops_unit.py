@@ -209,7 +209,7 @@ def test_reranker_disabled_states() -> None:
     assert Reranker(None).state.status == "off" and not Reranker(None).enabled
     off = Reranker("http://rerank:8080", "off")
     assert off.state.status == "off" and off.state.reason == "LGX_RERANK=off"
-    assert len(rerank_text("H", "b" * 5000)) == 2 + 1800
+    assert len(rerank_text("H", "b" * 5000)) == 2 + 600  # CPU-safe default body (M2 review)
 
 
 @pytest.mark.parametrize(

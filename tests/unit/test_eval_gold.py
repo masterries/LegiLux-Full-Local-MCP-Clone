@@ -33,6 +33,18 @@ def test_g1_covers_the_citation_styles_and_abstention() -> None:
             assert i["expect"]["act_eli"].startswith("http://data.legilux.public.lu/eli/etat/leg/")
 
 
+def test_g1_has_pdf_code_items_from_an_independent_source() -> None:
+    """M2 review: the DB-derived G1 could not see segmentation errors; the PDF items come from pdftotext."""
+    import json
+
+    doc = json.loads((gold.GOLD_DIR / "G1" / "pdf_codes.json").read_text(encoding="utf-8"))
+    items = doc["items"]
+    assert len(items) >= 40 and all(i["style"].startswith("pdf:") for i in items)
+    resolved = [i for i in items if i["expect"]["status"] == "resolved"]
+    assert resolved and all(i["expect"]["article"] and i["expect"]["page"] >= 1 for i in resolved)
+    assert sum(1 for i in items if i["expect"]["status"] == "not_found") >= 5
+
+
 def test_g2_questions_are_grounded_and_frozen() -> None:
     items, meta = gold.load_set("G2")
     assert set(meta["status"]) <= ALLOWED_STATUS
@@ -46,6 +58,10 @@ def test_g2_questions_are_grounded_and_frozen() -> None:
             assert t["key"] and t["act_eli"] and t["article"] and len(t["text_sha256"]) == 64, i["id"]
             assert t["grade"] in (1, 2)
         assert any(t["grade"] == 2 for t in i["targets"]), i["id"]
+        if i["lang"] == "fr":  # lexical leakage measured on every French question (eval/harness/leak.py)
+            assert isinstance(i.get("leak"), int) and bool(i.get("leaky")) == (i["leak"] >= 5), i["id"]
+    pdf = [i for i in items if i.get("pdf")]
+    assert len(pdf) >= 10 and all(t.get("page") for i in pdf if i["id"] >= "G2-206" for t in i["targets"])
 
 
 def test_g3_covers_every_triggerable_warning() -> None:

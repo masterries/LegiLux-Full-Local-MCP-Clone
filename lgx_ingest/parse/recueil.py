@@ -14,20 +14,30 @@ PLAN §2.6 and research « gaps-and-reconciliation » §2.3).
   unmatched article, malformed ``wId``) is **kept and logged**, never silently dropped. The full list of
   outcomes is returned for ``units/<T>/<slug>.dedup.json``.
 * :func:`apply_members` (PDF code-recueils): member parts (``agd_1955-11-23``) get the member act ELI from
-  ``config/recueil_members.yaml`` (lawyer-reviewed), inherited by every unit inside the part.
+  ``config/recueil_members.yaml`` (lawyer-reviewed), inherited by every unit inside the part. A part is matched
+  by its heading (the YAML keeps the first 300 characters: prefix match), then by its anchor with the occurrence
+  suffix (``rgd_2016-01-26~2``), then by the bare key when only one member has it; every ``route: true`` entry
+  that attaches to no part with an article is reported (``routed_unattached``, a gate).
+* :func:`dedup_pdf_copies` (PDF code-recueils, M2 review): an article of a member part whose member has its own
+  served consolidation **stored in this build** with an article of that number is the recueil's copy — dropped,
+  the member consolidation is canonical (PLAN §2.6.2, like the XML dedup); a copy whose wording differs from the
+  canonical article is logged (``recueil_copy_differs``: the PDF may be older or newer than the consolidation).
+  A member served from its JO original (no consolidation of its own) keeps the code's copy: it is the coordinated
+  text, and a routed member (``superseded_by_code``) is answered from it.
 """
 
 from __future__ import annotations
 
 import collections
+import difflib
 import re
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Container, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from lgx_core.eli import ELI_BASE
 from lgx_core.models import DataQualityIssue, Relation, Unit, UnitType
-from lgx_core.normalise import key_from_eid, num_norm, unaccent
+from lgx_core.normalise import key_from_eid, normalise_whitespace, num_norm, unaccent
 
 _GENERATED_ID = re.compile(r"^[a-z]+_N[0-9A-F]{4,}$")
 _DATA_HOST = "http://data.legilux.public.lu"
@@ -178,6 +188,7 @@ def deduplicate(
     counts: collections.Counter[str] = collections.Counter()
     counts_norm: collections.Counter[str] = collections.Counter()
     examples: dict[str, list[str]] = collections.defaultdict(list)
+    first_copy: dict[tuple[str, str | None], Unit] = {}  # (normalised wId, text hash) -> first position
     for u in units:
         if u.unit_type is not UnitType.ARTICLE:
             continue
@@ -185,6 +196,14 @@ def deduplicate(
             counts["kept_no_wid"] += 1
             continue
         ref = parse_wid(u.from_recueil_wid)
+        seen = first_copy.setdefault((ref.wid, u.text_sha256), u)
+        if seen is not u:  # the recueil prints the same article twice (two parts, same wId and text)
+            drop.add(u.ordinal)
+            counts["dropped_repeat_in_recueil"] += 1
+            if len(examples["dropped_repeat_in_recueil"]) < 8:
+                examples["dropped_repeat_in_recueil"].append(u.anchor)
+            outcomes.append(_outcome(u, "dropped_repeat_in_recueil", first_anchor=seen.anchor))
+            continue
         if ref.normalised and ref.kind != "malformed":
             counts_norm["wid_normalised"] += 1
             if len(examples["wid_normalised"]) < 8:
@@ -256,7 +275,7 @@ def deduplicate(
         "version": DEDUP_VERSION,
         "counts": dict(sorted(counts.items())),
         "wid_normalised": counts_norm["wid_normalised"],
-        "dropped": counts["dropped_duplicate"],
+        "dropped": counts["dropped_duplicate"] + counts["dropped_repeat_in_recueil"],
         "kept": sum(v for k, v in counts.items() if k.startswith("kept")),
         "relations_dropped": len(relations) - len(relations_out),
         "articles": outcomes,
@@ -310,25 +329,39 @@ def _norm_heading(text: str | None) -> str:
 @dataclass(frozen=True, slots=True)
 class MemberRef:
     member_eli: str
-    member_key: str | None
-    part_heading: str | None
+    member_key: str | None  # the part anchor, with its occurrence suffix (``rgd_2016-01-26~2``)
+    part_heading: str | None  # the first 300 characters of the part heading
+    route: bool = False
 
 
-def apply_members(units: Sequence[Unit], members: Sequence[MemberRef]) -> tuple[list[Unit], dict[str, int]]:
-    """Set ``member_act_eli`` on PDF member parts (matched by heading, then by member key when the key is
-    unique) and on every unit inside them."""
-    by_heading = {_norm_heading(m.part_heading): m.member_eli for m in members if m.part_heading}
-    keys = collections.Counter(m.member_key for m in members if m.member_key)
-    by_key = {m.member_key: m.member_eli for m in members if m.member_key and keys[m.member_key] == 1}
+def _heading_match(part: str, refs: Sequence[tuple[str, MemberRef]]) -> MemberRef | None:
+    """The member whose (possibly truncated) normalised heading is the part's heading or a prefix of it; the
+    longest such heading wins."""
+    hits = [(len(h), m) for h, m in refs if h and (part == h or part.startswith(h))]
+    return max(hits, key=lambda x: x[0])[1] if hits else None
+
+
+def apply_members(units: Sequence[Unit], members: Sequence[MemberRef]) -> tuple[list[Unit], dict[str, Any]]:
+    """Set ``member_act_eli`` on PDF member parts (matched by heading prefix, then by anchor, then by member key
+    when the key is unique) and on every unit inside them. ``stats['routed_unattached']`` lists the routed
+    members that no part with an article took."""
+    refs = [(_norm_heading(m.part_heading), m) for m in members if m.part_heading]
+    by_anchor = {m.member_key: m for m in members if m.member_key}
+    keys = collections.Counter(member_key_of(m.member_key) for m in members if m.member_key)
+    by_key = {
+        member_key_of(m.member_key): m for m in members if m.member_key and keys[member_key_of(m.member_key)] == 1
+    }
     resolved: dict[int, str] = {}
     stats: collections.Counter[str] = collections.Counter()
     for u in units:
         if u.unit_type is UnitType.PART and u.parent_ordinal is None and u.num_raw is None:
-            eli = (by_heading.get(_norm_heading(u.heading)) if u.heading else None) or by_key.get(
-                member_key_of(u.anchor)
+            m = (
+                (_heading_match(_norm_heading(u.heading), refs) if u.heading else None)
+                or by_anchor.get(u.anchor)
+                or by_key.get(member_key_of(u.anchor))
             )
-            if eli:
-                resolved[u.ordinal] = eli
+            if m is not None:
+                resolved[u.ordinal] = m.member_eli
                 stats["member_parts_resolved"] += 1
             elif re.match(r"^[a-z]+_\d{4}-\d{2}-\d{2}", u.anchor) or u.anchor.startswith("membre_"):
                 stats["member_parts_unresolved"] += 1
@@ -342,7 +375,82 @@ def apply_members(units: Sequence[Unit], members: Sequence[MemberRef]) -> tuple[
             stats["units_with_member"] += 1
         else:
             out.append(u)
-    return out, dict(stats)
+    unattached = routed_unattached(out, members)
+    result: dict[str, Any] = dict(stats)
+    result["routed_members"] = len({m.member_eli for m in members if m.route})
+    result["routed_unattached"] = len(unattached)
+    result["routed_unattached_examples"] = unattached[:20]
+    return out, result
+
+
+def routed_unattached(units: Sequence[Unit], members: Sequence[MemberRef]) -> list[str]:
+    """The ``route: true`` members that no article unit carries (their JO original would be hidden for nothing)."""
+    with_articles = {x.member_act_eli for x in units if x.unit_type is UnitType.ARTICLE and x.member_act_eli}
+    return sorted({m.member_eli for m in members if m.route and m.member_eli not in with_articles})
+
+
+def dedup_pdf_copies(
+    units: Sequence[Unit],
+    relations: Sequence[Relation],
+    *,
+    canonical: Mapping[str, Canonical],
+    served: Mapping[str, str],
+    consolidated: Container[str],
+    first_seen: Any = None,
+) -> DedupResult:
+    """Drop the PDF code-recueil copies of member articles whose member consolidation is stored and served in this
+    build (PLAN §2.6.2: the member's own consolidation is canonical); log copies whose wording differs.
+
+    ``consolidated``: the served versions that are consolidations. A member served from its JO original keeps the
+    code's copy (the coordinated text; a routed member is answered from it)."""
+    outcomes: list[dict[str, Any]] = []
+    drop: set[int] = set()
+    counts: collections.Counter[str] = collections.Counter()
+    issues: list[DataQualityIssue] = []
+    for u in units:
+        if u.unit_type is not UnitType.ARTICLE or not u.member_act_eli or not u.num_norm:
+            continue
+        served_v = served.get(u.member_act_eli)
+        canon = canonical.get(served_v or "")
+        if canon is None:
+            counts["kept_member_not_stored"] += 1
+            continue
+        if served_v not in consolidated:
+            counts["kept_member_original"] += 1
+            continue
+        hit = canon.find(WidRef(wid="", kind="plain"), u.num_norm)
+        if hit is None:
+            counts["kept_unmatched"] += 1
+            outcomes.append(_outcome(u, "kept_unmatched", member_version=canon.eli_version))
+            continue
+        drop.add(u.ordinal)
+        counts["dropped_duplicate"] += 1
+        a, b = normalise_whitespace(u.text_plain or ""), normalise_whitespace(hit.text_plain or "")
+        ratio = 1.0 if a == b else difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()
+        extra = {"canonical_version": canon.eli_version, "canonical_anchor": hit.anchor, "similarity": f"{ratio:.3f}"}
+        if ratio < 0.98:
+            counts["copy_differs"] += 1
+            issues.append(
+                DataQualityIssue(
+                    entity_eli=f"{u.eli_version}#{u.anchor}",
+                    code="recueil_copy_differs",
+                    detail=f"PDF copy of {hit.num_raw or u.num_raw} differs from {canon.eli_version}#{hit.anchor} "
+                    f"(similarity {ratio:.2f}); the member consolidation is served",
+                    first_seen=first_seen,
+                )
+            )
+        outcomes.append(_outcome(u, "dropped_duplicate", **extra))
+    kept, relations_out = _renumber(units, relations, drop)
+    report = {
+        "version": DEDUP_VERSION,
+        "kind": "pdf_member_copies",
+        "counts": dict(sorted(counts.items())),
+        "dropped": counts["dropped_duplicate"],
+        "kept": counts["kept_member_not_stored"] + counts["kept_member_original"] + counts["kept_unmatched"],
+        "relations_dropped": len(relations) - len(relations_out),
+        "articles": outcomes,
+    }
+    return DedupResult(kept, relations_out, issues, report)
 
 
 def _inherited(u: Unit, done: Sequence[Unit]) -> str | None:

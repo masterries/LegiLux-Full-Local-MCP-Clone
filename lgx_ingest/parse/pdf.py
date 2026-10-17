@@ -38,15 +38,16 @@ import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from lgx_core.models import ActFlag, ManifestEntry, ParseResult, RawFile, SourceFormat, UnitType, VersionKind
+from lgx_core.models import ActFlag, ManifestEntry, ParseResult, RawFile, SourceFormat, Unit, UnitType, VersionKind
 from lgx_core.normalise import LATIN_SUFFIXES, is_repeal_stub_text, normalise_whitespace, num_norm, unaccent
 from lgx_ingest.parse.common import Draft, ParseError, UnitBuilder
 from lgx_ingest.parse.pdf_layout import LAYOUT_VERSION, CleanStats, Line, Page, clean_document, extract_pages
 
-PARSER_VERSION = "pdf-1"
+PARSER_VERSION = "pdf-2"
 ARTICLE_GATE_TOLERANCE = 0.01
 __all__ = [
     "ARTICLE_GATE_TOLERANCE",
+    "EU_PART_PREFIX",
     "PARSER_VERSION",
     "ArticleHead",
     "MemberHead",
@@ -103,14 +104,34 @@ _HIER_TYPE = {
     "sous-section": UnitType.SUBSECTION,
 }
 _ANNEX = re.compile(r"^(?:[«\"“]\s*)?(?:ANNEXES?\b|Annexes?\s+(?:[IVXLC]+|\d+[a-z]?)\b)")
+_ANNEX_LINE = re.compile(r"^[«\"“]?\s*(?:ANNEXES?|Annexes?)(?:\s+(?:[IVXLC]+|\d+[a-z]?))?\s*[»”\"]?\.?$")
+_EXCERPT_LINE = re.compile(r"^\(?\s*extraits?\b", re.IGNORECASE)
+_ENUM_TITLE = re.compile(r"^(?:[IVXLC]+|[A-H])\.\s+\S")  # « II. Nominations », « G. Généralités »
 _JURIS = re.compile(r"^jurisprudences?$", re.IGNORECASE)
 _LABEL = re.compile(
     r"^(?:[«\"“]\s*)?(?:\(\d+[a-z]*(?:[- ]\d+)?\)|\d+[°º]|\d+\)|\d+\.(?!\d)|[a-z]{1,2}\)|[a-z]\.(?=\s)|[ivx]+\)"
     r"|[-–•·▪◦]|\(\w{1,4}\))\s"
 )
 _TERMINAL = re.compile(r"[.;:!?»\")]$")
-_PROVENANCE_LINE = re.compile(r"^\(\s*(?:Loi|L\.|Règlement|R\.|Arrêté|A\.|Rectificatif|Acte|Décret|Ordonnance)\b.*\)$")
+_PROVENANCE_LINE = re.compile(
+    r"^\(\s*(?:Loi|L\.|Règlement|Règl\.|R\.|Arrêté|A\.|Rectificatif|Acte|Décret|Ordonnance)(?:\b|(?<=\.)).*\)$"
+)
 _VERSION_LINE = re.compile(r"^Version consolidée applicable au\b", re.IGNORECASE)
+# the end of an amending instruction: « … sont remplacés par deux nouveaux articles 8 et 14 libellés comme suit: »
+_INSTRUCTION = re.compile(
+    r"(?:\bsuit|\bsuivante?s?|\blibell[ée]e?s?|\bteneur|\bcon[çc]ue?s?|\br[ée]dig[ée]e?s?)\b[^:]{0,40}:\s*[…»\"]?\s*$",
+    re.IGNORECASE,
+)
+# EU / international texts printed as a « Complément » of a code (« Règlement (CE) N° 1082/2006 du Parlement … »):
+# out of scope (PLAN §1.2) — an own part, never attached to the preceding Luxembourg act, never chunked
+_EU_HEAD = re.compile(
+    r"^(?:[«\"“]\s*)?(?:Règlement|Directive|Décision|Recommandation)(?:\s+(?:délégué|d['’]exécution))?"
+    r"\s*\((?:CE|UE|CEE|Euratom|CECA)\)",
+    re.IGNORECASE,
+)
+_COMPLEMENT = re.compile(r"^compl[ée]ments?$", re.IGNORECASE)
+EU_PART_PREFIX = "ue_"  # anchor of an out-of-scope EU part: ue_<n>, its units ue_<n>.art_8 … (not chunked)
+_LEAD = re.compile(r"^[\s«\"“(]*")
 _KEEP_HYPHEN = frozenset(
     [
         "vingt",
@@ -179,7 +200,7 @@ def match_article(text: str) -> ArticleHead | None:
     kw = "Article" if m["kw"] == "Article" else "Art."
     num_raw = f"{kw} {num}{'.' if end == '.' else ''}"
     rest = text[m.end() :].strip()
-    if end in ("–", "—", "-", ":"):
+    if end in ("–", "—", "-", ":") or rest[:1] in ("–", "—", "-"):  # « Art. 7. - Dissolution », « Art. 1er.- Un … »
         rest = rest.lstrip("–—-: ")
     return ArticleHead(num_raw, rest, bool(m["lead"]))
 
@@ -262,6 +283,22 @@ def is_recueil(entry: ManifestEntry) -> bool:
     )
 
 
+def strip_heading_numbers(pages: Sequence[Page]) -> int:
+    """« 1    Art. 7. Le bénéfice … »: a margin number (``lead_number``, set apart by a wide gap) in front of an
+    article heading is an alinea number, never text — moved to ``alinea`` so that the heading starts the line
+    (CSS pp. 69–247: 173 articles were glued to the previous one). Footnotes are already marked."""
+    n = 0
+    for p in pages:
+        for ln in p.lines:
+            if ln.kind != "body" or ln.lead_number is None or ln.alinea is not None:
+                continue
+            first, _, rest = ln.text.partition(" ")
+            if first == ln.lead_number and rest and _ART_HEAD.match(rest):
+                ln.alinea, ln.text = first, rest
+                n += 1
+    return n
+
+
 # ---------------------------------------------------------------------------------------- paragraphs
 @dataclass(slots=True)
 class Para:
@@ -326,11 +363,30 @@ def _join(prev: str, nxt: str, vocab: collections.Counter[str]) -> str:
     return f"{prev} {nxt}"
 
 
+def capitalised(text: str) -> bool:
+    """The first letter (after quotes, spaces, an opening parenthesis) is upper case: titles and headings start so,
+    the wrapped line « loi du 12 septembre 2003 relative … » / « titre V relatif à … » of a long title does not."""
+    rest = _LEAD.sub("", text, count=1)
+    return bool(rest) and rest[0].isupper()
+
+
+def _hier_match(text: str) -> re.Match[str] | None:
+    m = _HIER.match(text)
+    return m if m and capitalised(text) else None
+
+
 def _is_heading_line(ln: Line) -> bool:
     t = ln.text
-    return bool(_ART_HEAD.match(t) or _HIER.match(t) or _JURIS.match(t) or (_ANNEX.match(t) and len(t) < 120)) or bool(
+    return bool(_ART_HEAD.match(t) or _hier_match(t) or _JURIS.match(t) or (_ANNEX.match(t) and len(t) < 120)) or bool(
         _VERSION_LINE.match(t)
     )
+
+
+def _heading_shaped(text: str) -> bool:
+    """A short line without final punctuation that starts like a heading (« Système de classification par niveau de
+    risque », « 3. DISPOSITIONS COMMUNES », « Chapitre II: Les … »): after a repeal note, the next unit's title."""
+    t = text.strip()
+    return 0 < len(t) <= 120 and "\n" not in t and not _TERMINAL.search(t) and (capitalised(t) or t[:1].isdigit())
 
 
 def _page_metrics(lines: Sequence[Line]) -> tuple[float, float, float]:
@@ -349,7 +405,16 @@ def _starts_new(a: Line, b: Line, metrics: dict[int, tuple[float, float, float]]
     """Does line ``b`` start a new paragraph after line ``a``?"""
     if a.kind == "table" or b.kind == "table" or b.alinea is not None:
         return True
-    if (b.bold or b.size >= body + 0.5) and _MEMBER_HEAD.match(b.text):
+    if (
+        a.page == b.page
+        and a.size >= body + 0.5
+        and abs(a.size - b.size) < 0.3
+        and a.bold == b.bold
+        and not _TERMINAL.search(a.text)
+        and b.top - a.bottom <= 0.6 * b.size
+    ):
+        return False  # a large (member) title wrapped over several lines: « …; 5. modification de la » + « loi du … »
+    if (b.bold or b.size >= body + 0.5) and _MEMBER_HEAD.match(b.text) and capitalised(b.text):
         return True  # a member-act title never continues the previous paragraph
     if a.page != b.page and a.size >= body + 0.5:
         return True  # headings do not run across pages
@@ -404,6 +469,7 @@ class _Item:
     md: str
     page_from: int
     page_to: int
+    title: bool = False  # a short title-like paragraph (intertitle, section title)
 
 
 @dataclass
@@ -422,19 +488,27 @@ class _Node:
         self.page_from = a if self.page_from is None else min(self.page_from, a)
         self.page_to = b if self.page_to is None else max(self.page_to, b)
 
-    def add(self, para: Para, plain: str | None = None, md: str | None = None) -> None:
+    def add(self, para: Para, plain: str | None = None, md: str | None = None, *, title: bool = False) -> None:
         plain = para.text if plain is None else plain
         md = (para.md or plain) if md is None else md
         self.notes.extend(para.notes)
         self.touch(para.page_from, para.page_to)
         if plain:
-            self.items.append(_Item(plain, md, para.page_from, para.page_to))
+            self.items.append(_Item(plain, md, para.page_from, para.page_to, title))
+
+    def pop_last(self) -> _Item:
+        """Remove the last text item (a title that belongs to the next unit) and shrink the page range."""
+        it = self.items.pop()
+        ends = [i.page_to for i in self.items] + ([self.head_item.page_to] if self.head_item else [])
+        self.page_to = max(ends) if ends else self.page_from
+        return it
 
 
 class _Segmenter:
-    def __init__(self, body: float, *, recueil: bool) -> None:
+    def __init__(self, body: float, *, recueil: bool, page_edges: dict[int, tuple[float, float]] | None = None) -> None:
         self.body = body
         self.recueil = recueil
+        self.page_edges = page_edges or {}  # (left, right) text edges per page (indented quoted amendments)
         self.nodes: list[_Node] = []
         self.cur: _Node | None = None  # article / annex / preamble / paragraph receiving text
         self.member: _Node | None = None
@@ -446,6 +520,14 @@ class _Segmenter:
         self.seen_nums: set[str] = set()  # article keys of the current member (numbering restarts)
         self.last_title: Para | None = None  # last title-like paragraph since the previous article
         self.anonymous: list[_Node] = []
+        self.prev: Para | None = None  # the paragraph fed before the current one
+        self.quote = False  # the current article announced replacement text (« … libellés comme suit: »)
+        self.in_quote = False  # the current article has absorbed a quoted heading
+        self.last_quoted: Para | None = None
+        self.head_x0: tuple[int, float] | None = None  # (page, x0) of the current article's heading
+        self.complement = False  # a « Complément » label was seen: the next title is an EU / international text
+        self.eu_parts: list[_Node] = []
+        self.out_of_scope = False  # the current member part is an EU text (its units are not chunked)
 
     # --- helpers ---------------------------------------------------------------------------
     def _parent(self) -> Draft | None:
@@ -472,12 +554,17 @@ class _Segmenter:
             self._feed_one(i, para, paras)
             if not self.in_juris and not para.is_table:
                 self.stats["article_candidates"] += sum(1 for ln in para.lines if _ART_LOOSE.match(ln.text))
+            self.prev = para
 
     def _feed_one(self, i: int, para: Para, paras: Sequence[Para]) -> None:
         text = para.text
         if not para.is_table and _JURIS.match(text.strip()):
             self.in_juris, self.cur = True, None
             self.stats["jurisprudence_sections"] += 1
+            return
+        if not para.is_table and self._quoted_heading(para):
+            return
+        if self.recueil and not para.is_table and self._eu_heading(para):
             return
         mh = self._member_heading(para, paras[i + 1 : i + 5]) if self.recueil else None
         if mh is not None:
@@ -500,7 +587,7 @@ class _Segmenter:
         if para.is_table or len(para.text) > 1500:
             return None
         mh = match_member(para.text)
-        if mh is None:
+        if mh is None or not capitalised(para.text):
             return None
         larger = para.size >= self.body + 0.5
         large = para.size >= 1.15 * self.body
@@ -518,6 +605,7 @@ class _Segmenter:
     def _open_member(self, para: Para, mh: MemberHead) -> None:
         self.member, self.stack, self.in_juris = None, [], False
         self.seen_nums, self.last_title = set(), None
+        self.quote = self.in_quote = self.out_of_scope = False
         self.member_keys[mh.key] += 1
         key = mh.key if self.member_keys[mh.key] == 1 else f"{mh.key}~{self.member_keys[mh.key]}"
         node = self._new(UnitType.PART, key, para, parent=None, heading=mh.title)
@@ -543,25 +631,153 @@ class _Segmenter:
             else:
                 rest = head.rest
         key = num_norm(head.num_raw) or "x"
+        # a title and a provenance line printed just above the heading belong to this unit, not the previous one
+        title, prov = self._take_above()
         if self.recueil and key in ("1", "premier", "unique") and key in self.seen_nums:
-            self._restart_member(para)  # numbering restarts: a member whose title was not recognised
+            self._restart_member(para, title)  # numbering restarts: a member whose title was not recognised
+        elif title is not None:
+            heading = f"{title} – {heading}" if heading else title
+            self.stats["intertitles"] += 1
         self.seen_nums.add(key)
         anchor = f"{self._prefix()}art_{key}"
         node = self._new(UnitType.ARTICLE, anchor, para, parent=self._parent(), num_raw=head.num_raw, heading=heading)
+        node.notes.extend(i.plain for i in prov)  # « (Loi du 28 juillet 2011) » above « «Art. 99bis. »: provenance
         if rest:
             node.add(para, rest, para.md if para.md else rest)
         else:
             node.notes.extend(para.notes)
         self.cur = node
         self.last_title = None
+        self.quote = self.in_quote = False
+        self.head_x0 = (para.page_from, para.first.x0)
         self.stats["articles"] += 1
         self.stats["inserted_articles"] += head.inserted
 
-    def _restart_member(self, para: Para) -> None:
+    # --- titles, quoted amendments, EU parts ---------------------------------------------------
+    def _title_like(self, para: Para) -> bool:
+        t = para.text.strip()
+        styled = para.bold or para.size >= self.body + 0.5 or (len(t) <= 80 and bool(_ENUM_TITLE.match(t)))
+        return (
+            not para.is_table
+            and styled
+            and len(t) <= 160
+            and len(para.lines) <= 2
+            and not _TERMINAL.search(t)
+            and not _LABEL.match(t)
+            and not _PROVENANCE_LINE.match(t)
+            and not _EXCERPT_LINE.match(t)  # « Extrait: Art. 9 » is a note of the member part, not a title
+            and capitalised(t)
+        )
+
+    def _take_above(self) -> tuple[str | None, list[_Item]]:
+        """What the previous unit holds after its own text but was printed above the next heading: a short title
+        (« Extension de l'assurance », CSS p. 72) and provenance lines (« (Loi du 28 juillet 2011) »). Detached from
+        the previous unit and returned (title text, provenance items in document order)."""
+        cur, prev = self.cur, self.prev
+        if cur is None or prev is None or not cur.items or cur.items[-1].plain != prev.text:
+            return None, []
+        prov: list[_Item] = []
+        while cur.items and len(prov) < 3 and _PROVENANCE_LINE.match(cur.items[-1].plain):
+            prov.insert(0, cur.pop_last())
+        title = None
+        if cur.items and cur.items[-1].title:
+            title = normalise_whitespace(cur.pop_last().plain)
+        return title, prov
+
+    def _indented(self, para: Para, *, loose: bool = False) -> bool:
+        """A block set in from the page's text edge (and, on the heading's page, from the article heading itself):
+        every line of the paragraph starts ≥ 15 pt right of the left edge and the block is justified to the right
+        edge (quoted replacement text) — a centred heading or title (« Article 14 », « Chapitre 3.- … ») is not a
+        set-in block. ``loose``: one left-aligned set-in line is enough (a heading inside an open quote)."""
+        page = para.page_from
+        edges = self.page_edges.get(page)
+        if edges is None:
+            return False
+        left, right = edges
+        lines = [ln for ln in para.lines if ln.page == page]
+        if any(ln.x0 < left + 15 for ln in lines):
+            return False
+        if loose:
+            gap_l, gap_r = lines[0].x0 - left, right - lines[0].x1
+            if abs(gap_l - gap_r) < max(12.0, 0.2 * (gap_l + gap_r)):
+                return False  # centred
+        elif not any(ln.x1 >= right - 20 for ln in lines):
+            return False
+        return self.head_x0 is None or self.head_x0[0] != page or para.first.x0 >= self.head_x0[1] + 8
+
+    def _quoted_heading(self, para: Para) -> bool:
+        """A heading inside the replacement text of an amending article (« … libellés comme suit: » then the
+        indented or quoted « «Art. 8. … » »): text of the current article, never a unit of its own (PLAN §2.7;
+        the article is_modifying and contains_quoted_amendment, like the HTML embeddedStructure quotes)."""
+        cur = self.cur
+        if cur is None or cur.draft.unit_type is not UnitType.ARTICLE or not self.quote:
+            return False
+        text = para.text
+        member = bool(_MEMBER_HEAD.match(text))
+        if not (_ART_HEAD.match(text) or _HIER.match(text) or member):
+            return False
+        lead = text.lstrip()[:1] in ("«", '"', "“")
+        prev = self.prev
+        after_instruction = prev is not None and bool(_INSTRUCTION.search(prev.text))
+        # the next quoted heading of the same replacement text (« «Art. 14. … » » after « «Art. 8. … » »); never
+        # after a provenance line: « (Loi du 28 juillet 2011) » + « «Art. 99bis. » is an inserted article
+        after_quote = (
+            self.in_quote
+            and prev is not None
+            and not _PROVENANCE_LINE.match(prev.text)
+            and (prev is self.last_quoted or self._indented(prev) or prev.text.rstrip().endswith(("»", "”", '"')))
+        )
+        # inside an open quote a heading set in like the quote is part of it (« Chapitre Ier. - … » then « Art. 11. »)
+        set_in = self._indented(para) or (after_quote and not member and self._indented(para, loose=True))
+        if not (set_in or (lead and (after_instruction or after_quote))):
+            return False
+        cur.add(para)
+        cur.draft.is_modifying = cur.draft.contains_quoted_amendment = True
+        self.in_quote = True
+        self.last_quoted = para
+        self.stats["quoted_headings"] += 1
+        # quoted article headings are not articles of this text: not candidates of the article gate either
+        self.stats["quoted_article_lines"] += sum(1 for ln in para.lines if _ART_LOOSE.match(ln.text))
+        return True
+
+    def _eu_heading(self, para: Para) -> bool:
+        """« Complément » + « Règlement (CE) N° 1082/2006 du Parlement européen … »: an out-of-scope part."""
+        text = para.text.strip()
+        if (para.bold or para.size >= self.body + 0.5) and _COMPLEMENT.match(text):
+            self.complement = True
+            return True
+        if not (para.bold or para.size >= self.body + 0.5) or len(text) > 600:
+            return False
+        if not (_EU_HEAD.match(text) and capitalised(text)) and not (self.complement and capitalised(text)):
+            return False
+        self.complement = False
+        self.member, self.stack, self.in_juris = None, [], False
+        self.seen_nums, self.last_title = set(), None
+        self.quote = self.in_quote = False
+        key = f"{EU_PART_PREFIX}{len(self.eu_parts) + 1}"
+        node = self._new(UnitType.PART, key, para, parent=None, heading=normalise_whitespace(text))
+        self.member = node
+        node.member = node
+        self.eu_parts.append(node)
+        self.out_of_scope = True
+        self.cur = self._new(UnitType.PREAMBLE, f"{key}.preamble", None, parent=node.draft)
+        self.cur.touch(para.page_from, para.page_to)
+        self.stats["eu_parts"] += 1
+        return True
+
+    def _restart_member(self, para: Para, taken: str | None = None) -> None:
         """Open an anonymous member part (``membre_N``) when article numbering restarts at 1 inside a
         member: the title of the new text was not recognised (no date, e.g. « Statuts de … »)."""
         self.stats["anonymous_members"] += 1
-        title = self.last_title.text if self.last_title is not None else None
+        title = self.last_title.text if self.last_title is not None else taken
+        prev_cur = self.cur
+        if (
+            self.last_title is not None
+            and prev_cur is not None
+            and prev_cur.items
+            and prev_cur.items[-1].plain == self.last_title.text
+        ):
+            prev_cur.pop_last()  # the new text's title is not the end of the previous article
         key = f"membre_{self.stats['anonymous_members']}"
         self.member, self.stack = None, []
         node = self._new(UnitType.PART, key, para, parent=None, heading=title)
@@ -570,12 +786,14 @@ class _Segmenter:
         self.anonymous.append(node)
         self.seen_nums = set()
         self.last_title = None
+        self.out_of_scope = False
 
     def _hierarchy(self, para: Para) -> bool:
-        m = _HIER.match(para.text)
+        m = _hier_match(para.text)
         if not m or len(para.text) > 220 or len(para.lines) > 3 or para.text.rstrip().endswith((";", ",")):
             return False
-        if not (para.bold or para.italic or para.size > self.body + 0.2 or para.first.x0 > 120):
+        styled = para.bold or para.italic or para.size > self.body + 0.2 or para.first.x0 > 120
+        if not (styled or m["kind"].isupper()):  # « CHAPITRE 6.- RÉÉDUCATION … » in plain type
             return False
         kind = m["kind"].lower()
         rank = _HIER_RANK[kind]
@@ -595,12 +813,16 @@ class _Segmenter:
         )
         self.stack.append((rank, node))
         self.cur = None
+        self.quote = self.in_quote = False
         self.stats["hierarchy"] += 1
         return True
 
     def _annex(self, para: Para) -> bool:
-        if not _ANNEX.match(para.text) or len(para.text) > 160 or not (para.bold or para.size > self.body + 0.2):
+        if not _ANNEX.match(para.text) or len(para.text) > 160:
             return False
+        if not (para.bold or para.size > self.body + 0.2 or _ANNEX_LINE.match(para.text.strip())):
+            return False  # a plain-style annex heading only as a line of its own (« « Annexe I », éducation p. 469)
+        _title, prov = self._take_above()
         self.stats["annexes"] += 1
         num, _, heading = para.text.partition(" – ")
         self.cur = self._new(
@@ -611,6 +833,8 @@ class _Segmenter:
             num_raw=num.strip('«"“ ')[:80],
             heading=heading.strip() or None,
         )
+        self.cur.notes.extend(i.plain for i in prov)
+        self.quote = self.in_quote = False
         return True
 
     def _text(self, para: Para) -> None:
@@ -628,7 +852,9 @@ class _Segmenter:
             self.stats["tables"] += 1
         elif para.bold and para.size >= self.body + 0.5 and len(para.text) <= 400:
             self.last_title = para
-        self.cur.add(para)
+        self.cur.add(para, title=self._title_like(para))
+        if self.cur.draft.unit_type is UnitType.ARTICLE and not para.is_table and _INSTRUCTION.search(para.text):
+            self.quote = True
 
     # --- output ------------------------------------------------------------------------------
     def finish(self, *, mode: str) -> list[_Node]:
@@ -641,14 +867,25 @@ class _Segmenter:
                 md = "\n".join(i.md for i in node.items if i.md)
                 d.text_plain = plain or None
                 d.text_md = md if md and md != plain else None
-            if d.unit_type is not UnitType.ARTICLE:
+            if d.unit_type not in (UnitType.ARTICLE, UnitType.ANNEX):
                 continue
             prov = [i.plain for i in node.items if _PROVENANCE_LINE.match(i.plain)]
             notes = list(dict.fromkeys([*(n for n in node.notes if n), *prov]))
             if notes:
                 d.provenance = "; ".join(notes)[:500]
+            if d.unit_type is not UnitType.ARTICLE:
+                continue
+            first = node.items[0].plain if node.items else None
             if d.text_plain and is_repeal_stub_text(d.text_plain):
                 d.is_repealed, d.repeal_note = True, d.text_plain
+            elif (
+                first
+                and is_repeal_stub_text(first)
+                and all(i.title or _PROVENANCE_LINE.match(i.plain) or _heading_shaped(i.plain) for i in node.items[1:])
+            ):
+                # « (abrogé) » followed only by a title the segmenter could not move (end of a member part)
+                d.is_repealed, d.repeal_note = True, first
+                self.stats["repealed_before_title"] += 1
             elif not d.text_plain and d.heading and is_repeal_stub_text(d.heading):
                 d.is_repealed, d.repeal_note = True, d.heading
         return nodes
@@ -731,27 +968,58 @@ def parse_pages(
     pages, clean, body = clean_document(pages)
     if not any(p.has_text for p in pages):
         raise ParseError(f"{entry.eli_version}: no page has a text layer (scanned PDF: OCR is out of scope)")
+    strip_heading_numbers(pages)
     paras = build_paragraphs(pages, body)
-    seg = _Segmenter(body, recueil=is_recueil(entry))
+    edges = {}
+    for p in pages:
+        _gap, left, right = _page_metrics([ln for ln in p.lines if ln.kind == "body"])
+        edges[p.number] = (left, right)
+    seg = _Segmenter(body, recueil=is_recueil(entry), page_edges=edges)
     seg.feed(paras)
     nodes = seg.finish(mode=mode)
     builder = UnitBuilder(entry, raw)
-    for p in pages:
+    for p in pages:  # page-level entity: a version-level row would flag every article of the code (W_DATA_QUALITY)
         if not p.has_text:
-            builder.issue("pdf_page_without_text", f"page {p.number}: no text layer (skipped)")
+            builder.issue(
+                "pdf_page_without_text",
+                f"page {p.number}: no text layer (skipped)",
+                entity=f"{entry.eli_version}#p.{p.number}",
+            )
     for n in nodes:
         builder.add(n.draft)
     units = builder.units()
     for u in units:
         if ActFlag.PDF_EXTRACTED not in u.flags:
             u.flags = [*u.flags, ActFlag.PDF_EXTRACTED]
+    repeats = repeated_numbers(units)
     stats = _stats(seg, clean, pages, units, body)
+    stats["article_number_repeats"] = sum(len(v) for v in repeats.values())
+    stats["member_parts_with_repeats"] = len(repeats)
     gate = _article_gate(stats)
     if gate is not None and mode == "articles":
         builder.issue("pdf_article_gate", gate)
+    # part-level issues (entity ``<version>#<part anchor>``): a version-level row would put W_DATA_QUALITY on
+    # every article of the code (M2 review)
+    part_entity = f"{entry.eli_version}#{{}}"
     for node, _ in seg.members:
         if not any(n.member is node and n.draft.unit_type is UnitType.ARTICLE for n in nodes):
-            builder.issue("pdf_member_without_articles", f"{node.draft.anchor}: {node.draft.heading}"[:300])
+            builder.issue(
+                "pdf_member_without_articles",
+                f"{node.draft.anchor}: {node.draft.heading}"[:300],
+                entity=part_entity.format(node.draft.anchor),
+            )
+    for part, nums in repeats.items():
+        builder.issue(
+            "pdf_article_number_repeated",
+            f"article number(s) {', '.join(nums[:12])} repeated in one member part (a missed member boundary?)",
+            entity=part_entity.format(part or "document"),
+        )
+    for node in seg.eu_parts:
+        builder.issue(
+            "pdf_out_of_scope_part",
+            f"EU / international text, not chunked: {node.draft.heading}"[:300],
+            entity=part_entity.format(node.draft.anchor),
+        )
     return ParseResult(
         eli_work=entry.eli_work,
         eli_version=entry.eli_version,
@@ -766,8 +1034,8 @@ def parse_pages(
     )
 
 
-def _stats(seg: _Segmenter, clean: CleanStats, pages: Sequence[Page], units: list, body: float) -> dict[str, int]:
-    candidates = seg.stats["article_candidates"]
+def _stats(seg: _Segmenter, clean: CleanStats, pages: Sequence[Page], units: list[Unit], body: float) -> dict[str, int]:
+    candidates = seg.stats["article_candidates"] - seg.stats["quoted_article_lines"]
     arts = [u for u in units if u.unit_type is UnitType.ARTICLE]
     s = {
         "pages": len(pages),
@@ -794,10 +1062,35 @@ def _stats(seg: _Segmenter, clean: CleanStats, pages: Sequence[Page], units: lis
         "page_units": sum(1 for u in units if u.unit_type is UnitType.PAGE),
         "page_fallback_sections": seg.stats["page_fallback_sections"],
         "inserted_articles": seg.stats["inserted_articles"],
+        "quoted_headings": seg.stats["quoted_headings"],
+        "modifying": sum(1 for u in arts if u.is_modifying),
+        "intertitles": seg.stats["intertitles"],
+        "repealed_before_title": seg.stats["repealed_before_title"],
+        "eu_parts": seg.stats["eu_parts"],
         "chars": sum(len(u.text_plain or "") for u in units),
         "body_size_x10": round(body * 10),
     }
     return s
+
+
+def repeated_numbers(units: Sequence[Unit]) -> dict[str, list[str]]:
+    """Member part anchor (or ``""`` for the document) → article numbers that occur more than once in it, outside
+    annexes. A repeat means two texts share a part (a member heading was missed); ``~N`` parts are separate."""
+    by_ordinal = {u.ordinal: u for u in units}
+    seen: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
+    for u in units:
+        if u.unit_type is not UnitType.ARTICLE or not u.num_norm:
+            continue
+        part, p, annex = "", u.parent_ordinal, False
+        while p is not None:
+            parent = by_ordinal[p]
+            annex = annex or parent.unit_type is UnitType.ANNEX
+            if parent.unit_type is UnitType.PART and parent.parent_ordinal is None and parent.num_raw is None:
+                part = parent.anchor
+            p = parent.parent_ordinal
+        if not annex:
+            seen[part][u.num_norm] += 1
+    return {k: sorted(n for n, c in v.items() if c > 1) for k, v in seen.items() if any(c > 1 for c in v.values())}
 
 
 def _article_gate(stats: dict[str, int]) -> str | None:

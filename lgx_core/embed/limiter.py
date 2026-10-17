@@ -74,8 +74,14 @@ class SlotLimiter:
                 return slot
             wait: float | None = min(self._free_at[i] for i in idle) - now if idle else None
             if timeout is not None:
-                left = start + timeout - now
-                if left <= 0:
+                deadline = start + timeout
+                left = deadline - now
+                # no slot can be free in time: every idle slot cools down past the deadline, and a slot in flight
+                # would cool down for cooldown_s after its release — fail at once instead of sleeping the whole
+                # timeout for nothing (the MCP query path: 5 s timeout, 20 s cooldown, M2 review)
+                idle_late = not idle or min(self._free_at[i] for i in idle) > deadline
+                hopeless = idle_late and (self.in_flight == 0 or now + self.cooldown_s > deadline)
+                if left <= 0 or hopeless:
                     raise ThrottledError(
                         f"no embedding request slot free within {timeout:g} s "
                         f"(max_concurrency {self.max_concurrency}, cooldown {self.cooldown_s:g} s)"

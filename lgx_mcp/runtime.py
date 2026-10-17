@@ -206,6 +206,7 @@ def create_runtime(settings: McpSettings) -> Runtime:
             batch=settings.rerank_batch,
             timeout_s=settings.rerank_timeout_s,
             body_chars=settings.rerank_body_chars,
+            k=settings.rerank_k,
         ),
         vectors=QueryVectors(settings.embedding, settings.embed_api_key),
         clock=Clock(settings.tz, settings.clock_override),

@@ -259,3 +259,111 @@ def test_parallel_extraction_is_identical() -> None:
     one = P.extract_pages(data, workers=1, chunk=3)
     two = P.extract_pages(data, workers=2, chunk=3)
     assert [[ln.text for ln in p.lines] for p in one] == [[ln.text for ln in p.lines] for p in two]
+
+
+# ------------------------------------------------------------------------------- M2 review (2026-10-17) fixtures
+def test_alinea_number_before_a_heading_does_not_glue_the_article_to_the_previous_one() -> None:
+    """CSS p. 72 « 1    Art. 7. Le bénéfice … »: the left-margin alinea number stayed in the line (the running footer
+    « Février 2026 » set the column edge), so 173 of the code's articles were glued to their predecessor. Also
+    p. 76 (a page whose dominant size is the footnotes') and p. 127 (two layouts on one page)."""
+    res = parsed("css2")
+    a = arts(res)
+    assert {"art_6", "art_7", "art_8", "art_17", "art_18", "art_100", "art_101", "art_102", "art_103"} <= set(a)
+    six = a["art_6"].text_plain or ""
+    assert "Art. 7" not in six and "Extension de l’assurance" not in six and six.endswith("la Sécurité sociale.")
+    assert a["art_7"].heading == "Extension de l’assurance"  # the title printed above belongs to art. 7
+    assert (a["art_7"].text_plain or "").startswith("Le bénéfice de l’assurance obligatoire")
+    assert a["art_17"].heading == "Prestations de soins de santé"
+    assert res.stats["articles"] == res.stats["article_candidates"]
+
+
+def test_repealed_article_followed_by_the_next_title_is_flagged() -> None:
+    a = arts(parsed("css2"))
+    assert a["art_22"].is_repealed and a["art_22"].text_plain == "(abrogé)"  # CSS p. 472, loi du 30 juillet 1960
+    assert a["art_23"].heading == "Recours contre les décisions du fonds" and not a["art_23"].is_repealed
+
+
+def test_a_wrapped_bold_title_is_one_member() -> None:
+    """CSS p. 569: « …; 5.modification de la » + « loi du 12 septembre 2003 … » and « titre V relatif à … » are lines
+    of the title of the loi du 28 novembre 2006, not a member heading and a hierarchy heading."""
+    res = parsed("css2")
+    parts = [u for u in res.units if u.unit_type is UnitType.PART]
+    assert [p.anchor for p in parts] == ["loi_2006-11-28"]
+    assert (
+        (parts[0].heading or "")
+        .rstrip(".")
+        .endswith("5.modification de la loi du 12 septembre 2003 relative aux personnes handicapées")
+    )
+    assert {"loi_2006-11-28.art_1", "loi_2006-11-28.art_2", "loi_2006-11-28.art_3"} <= set(arts(res))
+    assert P.capitalised("« Loi du 1er août") and not P.capitalised("loi du 12 septembre 2003")
+
+
+def test_quoted_amending_provisions_stay_in_the_modifying_article() -> None:
+    """Éducation p. 871: « … libellés comme suit: » + the indented « «Art. 8. … » «Art. 14. … » » and art. 63 (2)'s
+    replacement « Titre II … Chapitre Ier … Art. 11. … » are text of the amending article (is_modifying, not
+    chunked), never articles 8, 11, 14 of the amending law."""
+    res = parsed("educ2")
+    a = arts(res)
+    art59, art63 = a["rgd_1980-09-09.art_59"], a["rgd_1980-09-09.art_63"]  # the excerpt lacks the law's title page
+    assert art59.is_modifying and art59.contains_quoted_amendment
+    assert "«Art. 8. Le régime professionnel" in (art59.text_plain or "") and "«Art. 14." in (art59.text_plain or "")
+    assert art63.is_modifying and "Art. 11. Le cadre du personnel" in (art63.text_plain or "")
+    quoted = ("Le régime professionnel comprend", "Le régime de la formation de technicien", "Le cadre du personnel du")
+    assert not [u.anchor for u in a.values() if (u.text_plain or "").startswith(quoted)]  # no unit of their own
+    assert "rgd_1980-09-09.art_64" in a and not a["rgd_1980-09-09.art_62"].is_modifying
+    assert res.stats["quoted_headings"] >= 5 and res.stats["modifying"] == 3
+    assert res.stats["articles"] == res.stats["article_candidates"]  # quoted headings are not gate candidates
+
+
+def test_annex_after_a_repealed_article_is_its_own_unit() -> None:
+    res = parsed("educ2")
+    a = arts(res)
+    assert a["art_20"].is_repealed and a["art_20"].text_plain == "(abrogé par la loi du 13 août 1992)"
+    annex = next(u for u in res.units if u.unit_type is UnitType.ANNEX)
+    assert (annex.text_plain or "").startswith("Domaines prioritaires de la formation continue")
+    assert annex.provenance == "(Loi du 1er août 2019)"
+
+
+def test_member_titles_of_one_date_and_dash_headings() -> None:
+    res = parsed("educ2")
+    a = arts(res)
+    assert [k for k in a if k.startswith("rgd_1999-05-31.")] == [f"rgd_1999-05-31.art_{i}" for i in range(1, 7)]
+    assert "rgd_1999-05-31~2.art_1" in a
+    assert a["rgd_1980-09-09.art_7"].heading == "Dissolution" and a["rgd_1999-04-14.art_1"].heading is None
+
+
+def test_eu_complement_is_an_out_of_scope_part() -> None:
+    """Code communal pp. 139–141: « Complément » + « Règlement (CE) N° 1082/2006 … » is an EU text: its own part
+    (``ue_1``), never articles 8–18 of the loi du 19 mai 2009 (7 articles), and not chunked."""
+    from lgx_ingest.chunk import chunk_units, skip_reason
+
+    res = parsed("communal2")
+    a = arts(res)
+    assert [k for k in a if k.startswith("loi_2009-05-19.")] == [f"loi_2009-05-19.art_{i}" for i in range(1, 8)]
+    eu = next(u for u in res.units if u.anchor == "ue_1")
+    assert eu.unit_type is UnitType.PART and (eu.heading or "").startswith("Règlement (CE) N° 1082/2006")
+    assert any(k.startswith(P.EU_PART_PREFIX) for k in a) and res.stats["eu_parts"] == 1
+    assert all(skip_reason(u) == "out_of_scope" for u in a.values() if u.anchor.startswith("ue_1."))
+    chunks = chunk_units(res.units, title_short="Code communal", version_label="v")
+    by_ordinal = {u.ordinal: u for u in res.units}
+    assert chunks and not any(by_ordinal[c.unit_ordinal].anchor.startswith("ue_") for c in chunks)
+    issue = next(i for i in res.issues if i.code == "pdf_out_of_scope_part")
+    assert issue.entity_eli.endswith("#ue_1")
+
+
+def test_part_level_issues_do_not_flag_the_whole_code() -> None:
+    """A version-level data-quality row puts W_DATA_QUALITY on every article of the code: PDF part issues name the
+    part (``<version>#<anchor>``)."""
+    for name in ("css", "route", "css2", "educ2", "communal2"):
+        for i in parsed(name).issues:
+            if i.code in ("pdf_member_without_articles", "pdf_article_number_repeated", "pdf_out_of_scope_part"):
+                assert "#" in i.entity_eli, (name, i)
+
+
+def test_repeated_numbers_inside_a_member_part() -> None:
+    res = parsed("route")
+    assert P.repeated_numbers(res.units) == {}
+    dup = [u.model_copy(update={"ordinal": 1000 + u.ordinal}) for u in res.units if u.anchor == "loi_1955-02-14.art_2"]
+    clone = dup[0].model_copy(update={"anchor": "loi_1955-02-14.art_2b"})
+    assert P.repeated_numbers([*res.units, clone]) == {"loi_1955-02-14": ["2"]}
+    assert P.EU_PART_PREFIX == __import__("lgx_mcp.annotate", fromlist=["x"]).EU_PART_PREFIX

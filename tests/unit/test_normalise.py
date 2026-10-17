@@ -90,6 +90,7 @@ def test_whitespace_unaccent_alias_norm() -> None:
         "Abrogés implicitement (Const. art. 18)",
         "Abrogé ( L. 13 juin 1994 et L. 8 juillet 1996 )",
         "(Section 3. – Comité permanent de l’emploi abrogée par la loi du 21 décembre 2007 )",
+        "(abrogé)\n[...]",  # PDF codes print an omission mark after the note (CSS rgd_2002-12-12 art. 22)
     ],
 )
 def test_repeal_stub_texts(text: str) -> None:

@@ -287,6 +287,14 @@ def _unit(row: dict[str, Any]) -> Unit:
     )
 
 
+# a code-recueil member part: top-level, without a number (lgx_ingest.parse.pdf), in a recueil version
+MEMBER_PART_SQL = (
+    "p.unit_type = 'part' AND p.parent_id IS NULL AND p.num_raw IS NULL"
+    " AND EXISTS (SELECT 1 FROM lgx.act_version v WHERE v.version_id = p.version_id"
+    " AND v.kind IN ('code_recueil', 'recueil'))"
+)
+
+
 def normalise_eli(text: str) -> str:
     """Accept data ELIs, display URLs, ``legilux://eli/…`` and relative ``etat/leg/…`` forms."""
     t = text.strip().rstrip("/")
@@ -494,7 +502,8 @@ class Facts:
         return [_unit(r) for r in rows]
 
     async def under_part(self, unit_ids: Iterable[int]) -> set[int]:
-        """Those of ``unit_ids`` with a ``part`` ancestor (in a code-recueil: a member act's part, named or not)."""
+        """Those of ``unit_ids`` under a code-recueil **member part** (named or not): a top-level ``part`` without a
+        number — a hierarchy « Partie I » (``num_raw`` set) of an ordinary text is not one (M2 review)."""
         want = list(dict.fromkeys(int(x) for x in unit_ids))
         if not want:
             return set()
@@ -502,22 +511,24 @@ class Facts:
             "WITH RECURSIVE anc AS (SELECT u.unit_id AS start, u.parent_id AS pid FROM lgx.unit u"
             " WHERE u.unit_id = ANY(%s) UNION ALL SELECT a.start, p.parent_id FROM anc a JOIN lgx.unit p"
             " ON p.unit_id = a.pid) SELECT DISTINCT a.start FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid"
-            " WHERE p.unit_type = 'part'",
+            f" WHERE {MEMBER_PART_SQL}",
             [want],
         )
         return {int(r["start"]) for r in rows}
 
-    async def member_part(self, unit_id: int) -> tuple[bool, str | None]:
-        """(has a ``part`` ancestor, its heading): a PDF code-recueil unit without ``member_act_id`` under a member
-        part whose act was not identified (``membre_N`` or an unresolved « Loi du … » heading)."""
+    async def member_part(self, unit_id: int) -> tuple[bool, str | None, str | None]:
+        """(under a member part, its heading, its anchor) for a PDF code-recueil unit without ``member_act_id``: a
+        member whose act was not identified (``membre_N``, an unresolved « Loi du … » heading) or an EU text printed
+        as a « Complément » (anchor ``ue_<n>``). Hierarchy « Partie » headings of an ordinary PDF text are not
+        member parts (« Art. 1er d'un acte membre non identifié » on the 1993 financial-sector law, M2 review)."""
         rows = await self.db.fetch(
             "WITH RECURSIVE anc AS (SELECT u.parent_id AS pid, 0 AS depth FROM lgx.unit u WHERE u.unit_id = %s"
             " UNION ALL SELECT p.parent_id, a.depth + 1 FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid)"
-            " SELECT p.heading FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid WHERE p.unit_type = 'part'"
+            f" SELECT p.heading, p.anchor FROM anc a JOIN lgx.unit p ON p.unit_id = a.pid WHERE {MEMBER_PART_SQL}"
             " ORDER BY a.depth DESC LIMIT 1",
             [unit_id],
         )
-        return (True, rows[0]["heading"]) if rows else (False, None)
+        return (True, rows[0]["heading"], rows[0]["anchor"]) if rows else (False, None, None)
 
     async def recueil_part_heading(self, version_id: int, member_act_id: int) -> str | None:
         """The part heading under which a code-recueil version holds a member act (``lgx.recueil_member``)."""

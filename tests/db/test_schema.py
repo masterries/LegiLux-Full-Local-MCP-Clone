@@ -469,6 +469,49 @@ def test_search_candidates_lexical_and_exact(db: psycopg.Connection, loaded: dic
     assert hits("zzz", T, "2016/679", ["LOI"]) == []
 
 
+def test_search_api_3_member_filter_and_exact_header_first(db: psycopg.Connection, loaded: dict[str, int]) -> None:
+    """M2 review: the member restriction runs inside the SQL on every branch (it used to filter the 40 returned
+    candidates afterwards), and an identifier in the chunk's own header outranks a text that only cites it."""
+    with db.transaction(force_rollback=True):
+        code = _act(db, "code/x", "LOI", "consolidated", dei_min=dt.date(2000, 1, 1), rdf_status="in-force")
+        member = _act(db, "rgd/2000/01/01/n1", "RGD", "original_possibly_outdated", dei_min=dt.date(2000, 1, 1),
+                      rdf_status="in-force")  # fmt: skip
+        ver = _version(db, code, "code/x/20260101", "code_recueil", "current", Range(dt.date(2026, 1, 1), None, "[)"))
+        db.execute("UPDATE lgx.act SET basis_version_id = %s WHERE act_id = %s", (ver, code))
+
+        def chunk(ordinal: int, header: str, body: str, member_id: int | None) -> int:
+            unit = scalar(
+                db,
+                "INSERT INTO lgx.unit (version_id, act_id, member_act_id, unit_type, anchor, num_raw, num_norm,"
+                " ordinal, depth, text_plain) VALUES (%s, %s, %s, 'article', %s, 'Art. 1er.', '1', %s, 1, %s)"
+                " RETURNING unit_id",
+                (ver, code, member_id, f"m{ordinal}.art_1", ordinal, body),
+            )
+            return int(scalar(  # type: ignore[arg-type]
+                db,
+                "INSERT INTO lgx.chunk (unit_id, act_id, version_id, header, body, doc_type, text_basis, valid_from,"
+                " content_sha256) VALUES (%s, %s, %s, %s, %s, 'LOI', 'consolidated', %s, %s) RETURNING chunk_id",
+                (unit, code, ver, header, body, dt.date(2026, 1, 1), bytes([ordinal]) * 32),
+            ))  # fmt: skip
+
+        own = chunk(1, "Art. L. 121-1.", "Le contrôle technique périodique des remorques.", None)
+        cites = chunk(2, "Art. 7.", "Le contrôle technique visé à l'article L. 121-1 et à l'article L. 121-1.", member)
+
+        def run(query: str, exact: str | None = None, member_id: int | None = None) -> list[int]:
+            rows = db.execute(
+                "SELECT chunk_id FROM lgx.search_candidates(%s, NULL, %s, '{}', "
+                "CASE WHEN %s::text IS NULL THEN NULL ELSE phraseto_tsquery('lgx.simple_ua', %s) END, NULL, 40,"
+                " NULL, true, NULL, NULL, NULL, %s) ORDER BY score DESC, chunk_id",
+                (query, T, exact, exact, member_id),
+            ).fetchall()
+            return [r[0] for r in rows]
+
+        assert set(run("contrôle technique")) >= {own, cites}
+        assert run("contrôle technique", member_id=member) == [cites]  # inside the SQL, every branch
+        assert run("zzz", "L. 121-1", member_id=member) == [cites]
+        assert run("zzz", "L. 121-1")[:2] == [own, cites]  # the article itself before the one citing it twice
+
+
 def test_exclude_one_text_per_act_and_date(db: psycopg.Connection, loaded: dict[str, int]) -> None:
     with pytest.raises(psycopg.errors.ExclusionViolation), db.transaction():
         _version(

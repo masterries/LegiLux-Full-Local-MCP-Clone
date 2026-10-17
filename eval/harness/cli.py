@@ -5,6 +5,7 @@ python -m eval.harness run --set G2 --mode rerank --rerank-k 16 --rerank-body-ch
 python -m eval.harness run --set G1 --url http://127.0.0.1:8000/mcp --token …   # a running server
 python -m eval.harness compare eval/reports/G2-*.json          # side-by-side Markdown
 python -m eval.harness gen-g1 | gen-g3 | freeze-g2              # (re)build the generated sets from the DB
+python -m eval.harness gen-g1-pdf | mark-leaks                  # PDF G1 items (pdftotext); G2 lexical leakage
 python -m eval.harness subset --set G2 --size 40                # fixed stratified subset (CPU-bound rerank runs)
 python -m eval.harness run --set G2 --mode rerank --subset eval/gold/subsets/G2-rerank-40.json
 """
@@ -48,10 +49,12 @@ def run(
     subset: Annotated[
         str | None, typer.Option(help="only these item ids: a subset file (`subset` command) or a comma list")
     ] = None,
-    out_dir: Annotated[Path, typer.Option()] = gold.REPORTS_DIR,
+    out_dir: Annotated[
+        Path, typer.Option(help="default data/reports/eval (not committed); eval/reports holds the baselines")
+    ] = gold.RUNS_DIR,
     tag: Annotated[str | None, typer.Option(help="report name suffix")] = None,
 ) -> None:
-    """Run one gold set and write ``eval/reports/<set>-<label>.json|md``."""
+    """Run one gold set and write ``<out-dir>/<set>-<label>.json|md`` (``--out-dir eval/reports`` for a baseline)."""
     if mode not in ("lexical", "rerank"):
         raise typer.BadParameter("--mode must be lexical or rerank")
     items, meta = gold.load_set(set_name)
@@ -144,6 +147,18 @@ def gen_g1(
     print(f"wrote {len(items)} items to {out}", file=sys.stderr)
 
 
+@app.command("gen-g1-pdf")
+def gen_g1_pdf(
+    out: Annotated[Path, typer.Option()] = gold.GOLD_DIR / "G1" / "pdf_codes.json",
+) -> None:
+    """G1 items for the PDF code-recueils from pdftotext alone (independent of the parser and the database)."""
+    from eval.harness.gen_g1_pdf import generate
+
+    items, meta = generate()
+    gold.write_set(out, "G1", items, **meta)
+    print(f"wrote {len(items)} items to {out}", file=sys.stderr)
+
+
 @app.command("gen-g3")
 def gen_g3(
     dsn: Annotated[str, typer.Option()] = DEV_DSN,
@@ -167,6 +182,18 @@ def freeze_g2(
 
     n = freeze(dsn, path)
     print(f"froze {n} targets in {path}", file=sys.stderr)
+
+
+@app.command("mark-leaks")
+def mark_leaks(
+    dsn: Annotated[str, typer.Option()] = DEV_DSN,
+    path: Annotated[Path, typer.Option()] = gold.GOLD_DIR / "G2" / "retrieval.json",
+) -> None:
+    """Mark French G2 questions that reuse ≥ 5 tokens of their first target's wording (``leak``, ``leaky``)."""
+    from eval.harness.leak import mark_file
+
+    hist, leaky = mark_file(dsn, path)
+    print(f"leak histogram (run length: items) {hist}; {leaky} leaky items in {path}", file=sys.stderr)
 
 
 def main() -> None:  # pragma: no cover

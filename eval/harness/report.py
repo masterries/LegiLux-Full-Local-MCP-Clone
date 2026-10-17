@@ -50,7 +50,7 @@ def markdown(r: Mapping[str, Any]) -> str:
     ]
     if r["set"] == "G2":
         lines += ["| subset | n | " + " | ".join(RETRIEVAL_COLS) + " |", "|---" * (len(RETRIEVAL_COLS) + 2) + "|"]
-        for key in ("all", "fr", "de", "en"):
+        for key in ("all", "fr", "de", "en", "non_leaky", "pdf_codes"):
             if key in s:
                 row = s[key]
                 lines.append(f"| {key} | {row['n']} | " + " | ".join(_fmt(row[c]) for c in RETRIEVAL_COLS) + " |")
@@ -126,6 +126,10 @@ def restrict(report: Mapping[str, Any], ids: Sequence[str]) -> dict[str, Any]:
     summary: dict[str, Any] = {"all": metrics.summarise_retrieval(rows)}
     for lang in sorted({r["lang"] for r in rows}):
         summary[lang] = metrics.summarise_retrieval([r for r in rows if r["lang"] == lang])
+    if any("leaky" in r for r in rows):
+        summary["non_leaky"] = metrics.summarise_retrieval([r for r in rows if not r.get("leaky")])
+    if any(r.get("pdf") for r in rows):
+        summary["pdf_codes"] = metrics.summarise_retrieval([r for r in rows if r.get("pdf")])
     summary["errors"] = sum(1 for r in rows if r.get("error"))
     summary["reranked_items"] = sum(1 for r in rows if r.get("reranked"))
     summary["latency"] = {"tool": metrics.latency_summary([r["latency_ms"] for r in rows])}
@@ -141,7 +145,7 @@ def compare_markdown(reports: Sequence[Mapping[str, Any]]) -> str:
     for name, runs in by_set.items():
         out += [f"### {name}", ""]
         if name == "G2":
-            for subset in ("all", "fr", "de", "en"):
+            for subset in ("all", "fr", "de", "en", "non_leaky", "pdf_codes"):
                 rows = [r for r in runs if subset in r["summary"]]
                 if not rows:
                     continue

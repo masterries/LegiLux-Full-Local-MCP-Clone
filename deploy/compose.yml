@@ -115,10 +115,15 @@ services:
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
       LGX_RERANK_URL: "${LGX_RERANK_URL:-}"             # http://rerank:8080 with the rerank profile (deploy/.env, lgx install)
       LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto: unavailable -> unreranked + reason | on: BACKEND_UNAVAILABLE | off
-      LGX_RERANK_K: "${LGX_RERANK_K:-40}"               # 16 on a small CPU host (deploy/.env, lgx install)
+      # CPU-safe defaults (M2 review, PLAN §8.3): the pinned fp32 model needs ≈ 17-20 s for 16 x 600 characters on 4
+      # vCPU; 40 x 1,800 (≈ 150 s on 4 vCPU, ≈ 37 s on 16 cores) needs a GPU or the int8 ONNX export (ADR 0001)
+      LGX_RERANK_K: "${LGX_RERANK_K:-16}"
       LGX_RERANK_BATCH: "32"                            # client-side split, <= TEI --max-client-batch-size (defence in depth)
-      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-1800}"  # body cut per candidate (PLAN §8.3: ~512 tokens)
-      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-30}"
+      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # body cut per candidate
+      # TOTAL rerank budget of one search (all batches; past it: lexical order + reason, LGX_RERANK=auto). Keep it
+      # below the UI's LGX_MCP_TIMEOUT_S (lgx-streamlit, 45 s) minus SQL time and a margin; the startup probe times
+      # k x body-chars texts and reports a reranker slower than the budget as unavailable (« too slow … »)
+      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-20}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
       LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"   # none (default) | mistral: query embeddings, startup probe
       LGX_EMBED_BASE_URL: "${LGX_EMBED_BASE_URL:-https://mistral.invalid}"   # the on-prem domain (no /v1)
@@ -184,7 +189,7 @@ services:
       LGX_MCP_URL: http://mcp:8000/mcp
       LGX_MCP_TOKEN_FILE: /run/secrets/mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
-      LGX_MCP_TIMEOUT_S: "20"
+      LGX_MCP_TIMEOUT_S: "${LGX_MCP_TIMEOUT_S:-45}"     # per tool call; > mcp LGX_RERANK_TIMEOUT_S (20) + SQL + margin
       LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"
       LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-600}"
       LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-4000}"

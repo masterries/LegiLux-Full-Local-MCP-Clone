@@ -18,6 +18,7 @@ from lgx_core.models import RawFile, sha256_hex
 from lgx_ingest.chunk import run_chunk
 from lgx_ingest.context import StageContext
 from lgx_ingest.load import build_plan, read_inputs
+from lgx_ingest.parse import pdf as P
 from lgx_ingest.parse import run_parse
 from lgx_ingest.select import run_select
 from unit.load_fixture import T, build_fixture_sample
@@ -85,11 +86,13 @@ def test_pdf_version_is_loaded_with_its_parser_and_counts(route_plan: Any) -> No
     _ctx, plan = route_plan
     versions = {r["eli_version"]: r for r in _rows(plan, "lgx.act_version")}
     v = versions[ROUTE_V]
-    assert v["has_text"] and v["parser_version"] == "pdf-1" and v["source_url"].endswith("-fr-pdf.pdf")
+    assert v["has_text"] and v["parser_version"] == P.PARSER_VERSION and v["source_url"].endswith("-fr-pdf.pdf")
     pdf = plan.counts["pdf"][ROUTE_V]
     assert pdf["articles"] == pdf["article_candidates"] and pdf["pages"] == 8
     assert pdf["members"] >= 2 and pdf["member_parts_resolved"] >= 2
-    assert ROUTE_V not in plan.counts["recueil_dedup"]  # dedup is for XML recueils (wIds) only
+    # PDF code-recueils: member-copy dedup (M2 review); none of the excerpt's members has a stored consolidation
+    dedup = plan.counts["recueil_dedup"].get(ROUTE_V)
+    assert dedup is None or dedup["dropped"] == 0
 
 
 def test_pdf_units_carry_pages_flag_and_member_acts(route_plan: Any) -> None:

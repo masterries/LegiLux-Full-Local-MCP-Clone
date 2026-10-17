@@ -8,10 +8,11 @@ the *current* manifest entry (label, flags, doc type …), because one file can 
 
 Structure pass (PLAN §2.6, after every file of the run is parsed): XML code-recueils and recueils are
 deduplicated against the member consolidations stored in this build (:func:`.recueil.deduplicate`);
-PDF code-recueils get their member act ELIs from
-``config/recueil_members.yaml`` (:func:`.recueil.apply_members`). Report per recueil version:
-``units/<T>/<slug>.structure.json`` (stats, issues, every dedup outcome). The parse cache always holds the
-un-deduplicated parser output.
+PDF code-recueils get their member act ELIs from ``config/recueil_members.yaml``
+(:func:`.recueil.apply_members`), then lose the copies of member articles whose member consolidation is stored
+and served in this build (:func:`.recueil.dedup_pdf_copies`; a member served from its JO original keeps the copy).
+Report per recueil version: ``units/<T>/<slug>.structure.json`` (stats, issues, every dedup outcome). The parse
+cache always holds the un-deduplicated parser output.
 """
 
 from __future__ import annotations
@@ -25,7 +26,17 @@ from typing import Any
 
 from lgx_core.eli import expand
 from lgx_core.io import atomic_write_text, write_jsonl
-from lgx_core.models import ActFlag, ManifestEntry, ParseResult, RawFile, SourceFormat, VersionRole, sha256_hex
+from lgx_core.models import (
+    ActFlag,
+    DataQualityIssue,
+    ManifestEntry,
+    ParseResult,
+    RawFile,
+    SourceFormat,
+    TextBasis,
+    VersionRole,
+    sha256_hex,
+)
 from lgx_ingest.context import StageContext, StageResult
 from lgx_ingest.parse import akn, html, pdf, recueil
 from lgx_ingest.parse.common import ParseError
@@ -141,16 +152,47 @@ def structure_recueil(
     members: list[recueil.MemberRef],
     first_seen: dt.date,
     dedup: bool = True,
+    consolidated: frozenset[str] | set[str] = frozenset(),
 ) -> tuple[ParseResult, dict[str, Any] | None]:
-    """S5 for one recueil version: member ELIs (PDF) and wId deduplication (XML)."""
+    """S5 for one recueil version: member ELIs (PDF) and wId deduplication (XML).
+
+    ``consolidated``: the served versions that are consolidations (a PDF copy is dropped only for those; default
+    none, i.e. every copy kept)."""
     units, relations, issues = list(res.units), list(res.relations), list(res.issues)
     stats = dict(res.stats)
     added: dict[str, int] = {"units_before_structure": len(units)}
-    new_issues = []
+    new_issues: list[DataQualityIssue] = []
     dedup_report: dict[str, Any] | None = None
     if res.source_format is SourceFormat.PDF:
         units, mstats = recueil.apply_members(units, members)
+        mstats.pop("routed_unattached_examples", None)
         added.update(mstats)
+        if dedup:
+            d = recueil.dedup_pdf_copies(
+                units,
+                relations,
+                canonical=canonical,
+                served=served,
+                consolidated=consolidated,
+                first_seen=first_seen,
+            )
+            units, relations, dedup_report = d.units, d.relations, d.report
+            new_issues.extend(d.issues)
+            added.update({f"dedup_{k}": v for k, v in d.report["counts"].items()})
+            added["dedup_relations_dropped"] = d.report["relations_dropped"]
+        # checked on the final units: a routed member whose copies were all dropped is as bad as an unattached one
+        unattached = recueil.routed_unattached(units, members)
+        added["routed_unattached"] = len(unattached)
+        if unattached:
+            new_issues.append(
+                DataQualityIssue(
+                    entity_eli=entry.eli_version or entry.eli_work,
+                    code="recueil_route_unattached",
+                    detail=f"{len(unattached)} routed member(s) without an article in the code text: "
+                    + ", ".join(e.rsplit("/eli/", 1)[-1] for e in unattached[:20]),
+                    first_seen=first_seen,
+                )
+            )
     elif dedup and any(u.from_recueil_wid for u in units):
         d = recueil.deduplicate(
             units, relations, canonical=canonical, served=served, version_work=version_work, first_seen=first_seen
@@ -179,7 +221,7 @@ def _members_for(ctx: StageContext, entry: ManifestEntry) -> list[recueil.Member
     for m in ctx.config.recueil_members.members:
         rec = expand(m.recueil)
         if rec in keys or (m.recueil_version and expand(m.recueil_version) in keys):
-            out.append(recueil.MemberRef(expand(m.member), m.member_key, m.part_heading))
+            out.append(recueil.MemberRef(expand(m.member), m.member_key, m.part_heading, route=m.route))
     return out
 
 
@@ -244,6 +286,7 @@ def run_parse(ctx: StageContext, *, cache_only: bool = False) -> StageResult:
     # ---- S5 structure: recueil deduplication (XML) and member ELIs (PDF), after every file is parsed
     version_work = {e.eli_version: e.eli_work for e in entries if e.eli_version}
     served = served_versions(entries)
+    consolidated = {e.eli_version for e in entries if e.eli_version and e.text_basis is TextBasis.CONSOLIDATED}
     canonical = {
         e.eli_version: recueil.Canonical.of(e.eli_version, e.eli_work, res.units)
         for e, res, _ in done
@@ -262,6 +305,7 @@ def run_parse(ctx: StageContext, *, cache_only: bool = False) -> StageResult:
                 version_work=version_work,
                 members=_members_for(ctx, entry),
                 dedup=ctx.config.scope.recueil_dedup,
+                consolidated=consolidated,
             )
             path = ctx.layout.units_path(entry.eli_version).with_suffix(".structure.json")
             atomic_write_text(path, json.dumps(report, indent=1, ensure_ascii=False) + "\n")

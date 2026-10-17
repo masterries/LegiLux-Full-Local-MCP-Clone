@@ -16,6 +16,8 @@ from lgx_core.models import Severity, WarningCode
 from lgx_mcp.context import CallContext, fr_date, iso
 from lgx_mcp.facts import Act, AmendingAct, Facts, Serving, Unit, Version, short_title_of
 
+EU_PART_PREFIX = "ue_"  # lgx_ingest.parse.pdf.EU_PART_PREFIX (the runtime image does not ship lgx_ingest)
+
 TEXT_BASIS_FR = {
     "consolidated": "version consolidée",
     "stub_fallback": "consolidation annoncée sans texte — version antérieure affichée",
@@ -167,14 +169,16 @@ class Annotator:
             text_basis = act.text_basis if act.text_basis != "metadata_only" else "original_never_amended"
         member_eli = None
         member_of = None
+        out_of_scope = False
         if unit is not None and unit.member_act_id:
             member = await self.facts.act(unit.member_act_id)
             member_eli = member.eli_work if member else None
             member_of = of_member(member.title) if member else None
-        elif unit is not None and version.source_format == "pdf":
-            in_part, heading = await self.facts.member_part(unit.unit_id)
+        elif unit is not None and version.source_format == "pdf" and version.kind in ("code_recueil", "recueil"):
+            in_part, heading, part_anchor = await self.facts.member_part(unit.unit_id)
             if in_part:  # never cite a member's article as the code's own
                 member_of = of_member(heading) if _ACT_TITLE.match(heading or "") else "d'un acte membre non identifié"
+                out_of_scope = (part_anchor or "").startswith(EU_PART_PREFIX)
         article = article_short(unit.num_raw) if unit else None
         article_eli = unit.eli_unit if unit else None
         if unit is not None and unit.num_norm:
@@ -214,6 +218,8 @@ class Annotator:
             article, short, version, act, text_basis, article_eli, member=member_of
         )
         await self.add_warnings(key, act, version, unit, serving, effective, text_basis)
+        if out_of_scope:  # an EU text the code prints as a « Complément »: shown, never the code's own law
+            ctx.bag.add(WarningCode.W_OUT_OF_SCOPE, ref=key, what="droit de l'UE reproduit en complément du code")
         cit["warnings"] = ctx.bag.codes_for(key)
         return Annotated(citation=cit, act=act, version=version, unit=unit, serving=serving, effective=effective)
 

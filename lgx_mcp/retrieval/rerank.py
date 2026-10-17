@@ -8,10 +8,17 @@
 * httpx with ``trust_env=False`` (no proxy, no netrc); only the configured internal URL is ever called.
 * After a failure the reranker is not called again until the next probe (``REPROBE_FAIL_S``): searches degrade at
   once with the recorded reason instead of each waiting for the timeout.
+* ``LGX_RERANK_TIMEOUT_S`` is the **total budget** of one search's re-ranking (every batch): past it the search
+  returns the lexical order with the reason (``auto``). It must stay below the client's tool timeout (the UI's
+  ``LGX_MCP_TIMEOUT_S``), or the designed fallback never reaches the user (M2 review: 20 s UI vs 60 s server).
+* The probe times a **realistic payload** (``k`` texts of ``body_chars``) when the reranker is first checked and
+  after a failure; a reranker slower than the budget is reported unavailable (« too slow … ») instead of making
+  every search wait for the budget. Re-probes of a healthy reranker use the cheap two-text pair.
 * Text per candidate (:func:`rerank_text`): the chunk header without its version label (« — Version consolidée
-  applicable au … » carries no relevance signal) plus the body cut to ``LGX_RERANK_BODY_CHARS`` (default 1,800 ≈
-  512 tokens, PLAN §8.3). On 4 idle vCPU (fp32): 16 candidates with 600 body characters ≈ 19 s, with 1,800
-  ≈ 60 s; one 1,800-character pair ≈ 3.8 s (eval/reports/m2-baseline.md).
+  applicable au … » carries no relevance signal) plus the body cut to ``LGX_RERANK_BODY_CHARS``. CPU-safe defaults
+  (M2 review): ``k`` 16, 600 body characters, 15 s budget. Measured on 4 idle vCPU (fp32 safetensors): 16 × 600
+  characters ≈ 17–20 s, 16 × 1,800 ≈ 60 s, one 1,800-character pair ≈ 3.8 s (eval/reports/m2-baseline.md); 40 ×
+  1,800 needs the int8 ONNX export (ADR 0001).
 """
 
 from __future__ import annotations
@@ -22,11 +29,14 @@ import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
+import anyio
 import httpx
 
 log = logging.getLogger("lgx_mcp.rerank")
 
-BODY_CHARS = 1800  # ≈ 512 tokens by ceil(chars / 3.5); TEI --auto-truncate cuts anything longer
+BODY_CHARS = 600  # CPU-safe default (≈ 170 tokens); PLAN §8.3's 1,800 (≈ 512 tokens) needs a GPU or the int8 export
+K = 16  # CPU-safe default number of re-ranked candidates
+TIMEOUT_S = 15.0  # total budget of one search's re-ranking
 HEADER_CHARS = 400  # compacted header (title + innermost breadcrumb levels + article + index terms)
 PROBE_QUERY = "durée du préavis de licenciement du salarié"
 PROBE_TEXTS = (
@@ -68,14 +78,16 @@ class Reranker:
         mode: str = "auto",
         *,
         batch: int = 32,
-        timeout_s: float = 10.0,
+        timeout_s: float = TIMEOUT_S,
         body_chars: int = BODY_CHARS,
+        k: int = K,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         self.url = url.rstrip("/") if url else None
         self.mode = mode
         self.batch = max(1, min(32, batch))
         self.timeout_s = timeout_s
+        self.k = max(2, k)
         self.body_chars = max(100, body_chars)
         self.last = RerankStats()
         self._transport = transport
@@ -118,20 +130,30 @@ class Reranker:
             raise RerankUnavailableError(self.state.reason or "reranker disabled")
         if self.recently_failed():
             raise RerankUnavailableError(self.state.reason or "reranker unavailable")
-        scores: list[float] = []
-        stats = RerankStats(texts=len(texts), chars=sum(len(t) for t in texts))
-        try:
-            async with self._client() as client:
-                for i in range(0, len(texts), self.batch):
-                    t0 = time.perf_counter()
-                    scores.extend(await self._call(client, query, texts[i : i + self.batch]))
-                    stats.batch_ms.append(round((time.perf_counter() - t0) * 1000, 1))
-        except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
-            self.state = RerankState("unavailable", f"reranker error: {type(exc).__name__}", time.monotonic())
-            raise RerankUnavailableError(self.state.reason or "reranker error") from exc
+        scores, stats = await self._scored(query, texts)
         self.state = RerankState("ok", None, time.monotonic())
         self.last = stats
         return scores
+
+    async def _scored(self, query: str, texts: Sequence[str]) -> tuple[list[float], RerankStats]:
+        """Every batch within the total budget ``timeout_s``; a failure or the budget records ``unavailable``."""
+        scores: list[float] = []
+        stats = RerankStats(texts=len(texts), chars=sum(len(t) for t in texts))
+        try:
+            with anyio.fail_after(self.timeout_s):
+                async with self._client() as client:
+                    for i in range(0, len(texts), self.batch):
+                        t0 = time.perf_counter()
+                        scores.extend(await self._call(client, query, texts[i : i + self.batch]))
+                        stats.batch_ms.append(round((time.perf_counter() - t0) * 1000, 1))
+        except TimeoutError as exc:
+            reason = f"rerank budget of {self.timeout_s:g} s exceeded ({len(texts)} texts)"
+            self.state = RerankState("unavailable", reason, time.monotonic())
+            raise RerankUnavailableError(reason) from exc
+        except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
+            self.state = RerankState("unavailable", f"reranker error: {type(exc).__name__}", time.monotonic())
+            raise RerankUnavailableError(self.state.reason or "reranker error") from exc
+        return scores, stats
 
     def text(self, header: str, body: str) -> str:
         return rerank_text(header, body, self.body_chars)
@@ -147,16 +169,33 @@ class Reranker:
             and age < (REPROBE_OK_S if self.state.status == "ok" else REPROBE_FAIL_S)
         ):
             return self.state
+        realistic = self.state.status != "ok"  # first check, or after a failure: time a search-sized payload
+        texts = list(PROBE_TEXTS)
+        if realistic:
+            texts += [probe_filler(i, self.body_chars) for i in range(self.k - len(texts))]
+        t0 = time.perf_counter()
         try:
-            async with self._client() as client:
-                scores = await self._call(client, PROBE_QUERY, PROBE_TEXTS)
-            best = max(range(len(scores)), key=scores.__getitem__)
-            if best == PROBE_EXPECTED_BEST:
-                self.state = RerankState("ok", None, time.monotonic())
-            else:
+            scores, _stats = await self._scored(PROBE_QUERY, texts)
+            elapsed = time.perf_counter() - t0
+            pair = scores[: len(PROBE_TEXTS)]
+            if max(range(len(pair)), key=pair.__getitem__) != PROBE_EXPECTED_BEST:
                 self.state = RerankState("unavailable", "probe pair ranked in the wrong order", time.monotonic())
-        except (httpx.HTTPError, RerankUnavailableError, ValueError, KeyError, TypeError) as exc:
-            self.state = RerankState("unavailable", f"reranker unreachable: {type(exc).__name__}", time.monotonic())
+            else:
+                self.state = RerankState("ok", None, time.monotonic())
+                if realistic:
+                    log.info(
+                        "reranker probe: %d texts of ≤ %d characters in %.1f s", len(texts), self.body_chars, elapsed
+                    )
+        except RerankUnavailableError as exc:
+            reason = str(exc)
+            if reason.startswith("rerank budget"):
+                reason = (
+                    f"reranker too slow: {len(texts)} texts of {self.body_chars} characters exceed the "
+                    f"{self.timeout_s:g} s budget (lower LGX_RERANK_K / LGX_RERANK_BODY_CHARS)"
+                )
+            else:
+                reason = reason.replace("reranker error", "reranker unreachable")
+            self.state = RerankState("unavailable", reason, time.monotonic())
         if self.state.status != "ok":
             log.warning("reranker %s: %s", self.url, self.state.reason)
         return self.state
@@ -189,6 +228,18 @@ def compact_header(header: str, limit: int = HEADER_CHARS) -> str:
     if index:
         out += sep + index[: limit // 4]
     return out[:limit]
+
+
+_FILLER = (
+    "Le ministre peut, par voie de règlement, préciser les modalités d'application des dispositions qui précèdent, "
+    "notamment les délais, les formes et les pièces à joindre à la demande. "
+)
+
+
+def probe_filler(i: int, chars: int) -> str:
+    """A neutral legal-style text of ``chars`` characters (the probe's realistic payload)."""
+    text = f"Art. {i + 1}. " + _FILLER * (chars // len(_FILLER) + 1)
+    return text[:chars]
 
 
 def rerank_text(header: str, body: str, body_chars: int = BODY_CHARS) -> str:

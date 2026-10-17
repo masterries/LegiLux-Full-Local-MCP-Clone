@@ -9,7 +9,69 @@
 - Machine-readable reports next to this file: `G{0,1,2,3}-*.json` (per-item results, config, latency) and `.md`;
   `*-m2data.*` are the « after » runs.
 
-## Final M2 baseline (frozen 2026-10-17, release with the PDF codes)
+## M2 review re-baseline (2026-10-17, after the review fixes) — **current, frozen for the M4 gates**
+
+Same release id `data-20261016-sample`, rebuilt after the M2 review (PDF parser `pdf-2`: 173 CSS articles no longer
+glued to their predecessor, quoted amendments kept inside the amending article, EU « Complément » parts out of scope;
+PDF copies of members with their own consolidation dropped; XML same-`wId` repeats dropped; search API 3; resolver:
+a code-recueil's « art. N » is its own article). Runtime database `legilux`: 25,316 units (12,586 from PDF), 19,696
+chunks (19,682 searchable), 345 acts `superseded_by_code`, 855 data-quality rows; gates 28 pass / 6 skip / 1 warn
+(`pdf_member_numbering`: 13 member parts still repeat an article number). Gold changes: G1 + 60 PDF items from
+`pdftotext` (`gold/G1/pdf_codes.json`, independent of the parser and the DB), G2 + 13 PDF-code questions (218 items)
+and per-item lexical leakage (31 French questions reuse ≥ 5 tokens of their target: `non_leaky` slice), G3 v3
+regenerated. Reports `*-m2review.*`.
+
+| set | metric (gate) | integration baseline (same ids) | **review re-baseline** |
+|---|---|---|---|
+| G0 smoke (20) | checks passed (20/20) | 20/20 | **20/20** lexical |
+| G1 citations v2 (564) + **PDF codes (60)** | exact / ambiguity recall / not-found | 0.996 (562/564) / 1.000 / 1.000 | **0.997 (622/624) / 1.000 / 1.000**; PDF items **60/60** (CSS own 30, CSS member-only numbers → not_found 6, route members 16, communal 7 + its EU complement → not_found 1); the 2 misses are the known resolver gaps G1-285 / G1-562 |
+| G2 lexical bm25, the 205 integration ids | R@1 / R@5 / R@10 / R@20 / MRR@10 | 0.556 / 0.773 / 0.844 / 0.878 / 0.662 | 0.556 / 0.778 / 0.839 / 0.878 / 0.664 |
+| G2 lexical bm25, **all 218** | R@1 / R@5 / R@10 / R@20 / MRR@10 / nDCG@10 / act R@10 | — | **0.532 / 0.764 / 0.821 / 0.862 / 0.643 / 0.682 / 0.968** |
+| G2 lexical, **non-leaky** (187 of 218) | R@10 / MRR@10 | 0.823 / 0.634 (175 of the 205) | **0.797 / 0.616** (0.817 / 0.636 on the same 175) |
+| G2 lexical, **PDF-code questions** (15) | R@1 / R@5 / R@10 / R@20 / MRR@10 | — | 0.200 / 0.600 / 0.600 / 0.667 / 0.369 |
+| G2 subset (40), lexical bm25 | R@1 / R@10 / R@20 / MRR@10 / nDCG@10 | 0.463 / 0.825 / 0.825 / 0.597 / 0.650 | 0.463 / 0.825 / 0.825 / 0.597 / 0.650 |
+| G2 subset (40), **lexical + rerank** (k 16, 600 chars) | R@1 / R@10 / R@20 / MRR@10 / nDCG@10 | 0.713 / 0.825 / 0.825 / 0.745 / 0.763 | **0.713 / 0.825 / 0.825 / 0.749 / 0.766** (40/40 reranked, 0 errors; non-leaky 37: R@10 0.811, MRR 0.729) |
+| G3 warnings | mandatory coverage / forbidden / status | v2: 1.000 (628/628) / 0 / 1.000 | **v3 (199, regenerated): 1.000 (618/618) / 0 / 1.000**; v2 on the review data: 0.981 (616/628), 11 items, all expected (below) |
+| latency, lexical search tool (G2, idle host) | p50 / p95 / max | 0.30 / 0.59 / 0.91 s (SQL p50 0.25 s) | **0.23 / 0.44 / 0.74 s** (SQL p50 0.19 s, p95 0.39 s) |
+| latency, reranked search tool (subset, idle host) | p50 / p95 / max | 17.1 / 22.6 / 25.3 s | 17.8 / 21.9 / 22.8 s (rerank p50 17.5 s, p95 21.7 s; 698 s for 40) |
+
+**Frozen for the M4 gates (PLAN §11.3):** G2 lexical, all 218 items: **R@10 0.821, MRR@10 0.643** (non-leaky 187: 0.797
+/ 0.616); G2 lexical + rerank on `eval/gold/subsets/G2-rerank-40.json`: **R@10 0.825, MRR@10 0.749**. Compare on the
+same ids only (`compare --subset`).
+
+- **Retrieval held through the data fix.** On the 205 integration ids R@10 −0.5 points (G2-119: 10 → 11), MRR +0.2;
+  14 items moved (10 up, 4 down by one rank). The SQL is faster (G2 SQL p50 255 → 186 ms): `query_terms`
+  materialises df once per term, and terms at the df cap no longer count as selective (the worst query 378 → 74 ms).
+- **The PDF-code questions are the weak slice** (R@10 0.60 lexical): paraphrased questions on the CSS compete with the
+  Code du travail and the member laws of the same field (G2-206 « travailleur … caisse maladie étrangère » → C. trav.
+  L. 511-9 first). They are not in the fixed rerank subset (chosen before them, results never looked at); the rerank
+  effect on them is not measured.
+- **Leakage.** 31 of 198 French questions share ≥ 5 consecutive tokens with their target (e.g. G2-055 « divorce pour
+  rupture irrémédiable des relations conjugales », 8): the lexical baseline loses 2.4 points R@10 / 2.7 MRR without
+  them. They stay in the set (marked `leaky`); a lawyer-written G2 is the real fix (open).
+- **G3 v2 on the review data (11 items, all expected):** 9 items expected `W_DATA_QUALITY` from version-level
+  data-quality rows that are now part- or page-level (the four PDF codes, the secteur financier stub); « art. 139 » of
+  the CSS is now the code's own article (in force), not the repealed member article on p. 664 that v2 had sampled;
+  « art. L. 327-2 » of the CSS is now `NOT_FOUND` (a Code du travail article reprinted in the CSS: its copy is
+  deduplicated and a base act no longer answers with a member's article). v3 = `gen-g3` on this release.
+- **G1 PDF items** found two generator errors before they were frozen (a case-law digest « Article 11bis » on p. 55,
+  « Art. 14.³ » with a footnote marker): the generator now skips « JURISPRUDENCE » sections and superscript-marked
+  headings; no parser or resolver error was found by them.
+- **Reranker on this 4-vCPU dev host:** 16 × 600 characters take 17.5 s p50 / 21.7 s p95, above the shipped 15 s total
+  budget (sized for the OD4 runtime host, 8–16 cores): on a host this small use the dev compose budget (45 s) or the
+  probe reports « reranker too slow » and searches stay lexical with that reason.
+
+Reproduce (dev stack with `DEV_PROFILES=rerank`, TEI at :8090; never two reranked runs at a time):
+
+```sh
+python -m eval.harness gen-g1-pdf && python -m eval.harness gen-g3 && python -m eval.harness freeze-g2 && python -m eval.harness mark-leaks
+for s in G0 G1 G3; do python -m eval.harness run --set $s --out-dir eval/reports --tag $s-lexical-m2review; done
+python -m eval.harness run --set G2 --out-dir eval/reports --tag G2-lexical-bm25-m2review                       # 57 s
+python -m eval.harness run --set G2 --mode rerank --rerank-k 16 --rerank-body-chars 600 \
+    --subset eval/gold/subsets/G2-rerank-40.json --out-dir eval/reports --tag G2-rerank-bm25-subset40-m2review  # 698 s
+```
+
+## M2 integration baseline (2026-10-17, superseded by the review re-baseline above)
 
 | set | metric (gate) | before (Task B, 10,220 chunks) | **after (M2 release, 20,529 chunks)** |
 |---|---|---|---|
@@ -25,7 +87,7 @@
 | latency, lexical search tool | p50 / p95 | 0.22 / 0.41 s | 0.30 / 0.59 s (SQL p50 0.25 s) |
 | latency, reranked search tool (subset, idle host) | p50 / p95 / max | 17.9 / 34.6 s (busy host, full G2) | 17.1 / 22.6 / 25.3 s (rerank p50 16.7 s) |
 
-**Frozen for the M4 gates (PLAN §11.3 « no drop > 2 / 3 points »):** G2 lexical (205 items) **R@10 0.844, MRR@10 0.662**;
+**Was frozen for the M4 gates (replaced by the review re-baseline):** G2 lexical (205 items) **R@10 0.844, MRR@10 0.662**;
 G2 lexical + rerank on the fixed subset `eval/gold/subsets/G2-rerank-40.json` **R@10 0.825, MRR@10 0.745** (the full-set
 reranked reference stays Task B's 0.880 / 0.823 on the pre-PDF data: re-ranking all 205 items costs ≈ 1 h of CPU on this
 host, the subset moved by 0.000 / −0.004 between the two data states).

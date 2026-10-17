@@ -54,8 +54,8 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
 | `LGX_MCP_TOKEN_FILE` / `LGX_MCP_TOKEN` / `LGX_MCP_AUTH` | — / — / on | bearer token (≥ 16 chars, constant-time compare); `off` for dev only |
 | `LGX_ALLOWED_HOSTS` | `127.0.0.1:*,localhost:*,[::1]:*,mcp:*` | Host allowlist for `/mcp` (`host:port`, `host:*`, `*`) → 421 |
 | `LGX_ALLOWED_ORIGINS` | none | Origin allowlist (absent Origin is fine) → 403 |
-| `LGX_RERANK_URL` / `LGX_RERANK` / `LGX_RERANK_K` / `LGX_RERANK_BATCH` | unset / auto / 40 / 32 | TEI `/rerank`; `auto` degrades with a reason, `on` → `BACKEND_UNAVAILABLE`, batches ≤ 32 |
-| `LGX_RERANK_BODY_CHARS` / `LGX_RERANK_TIMEOUT_S` | 1800 / 10 | body cut per candidate (the header is compacted, version label dropped); per-call timeout. Dev host (4 vCPU): 600 / 60 |
+| `LGX_RERANK_URL` / `LGX_RERANK` / `LGX_RERANK_K` / `LGX_RERANK_BATCH` | unset / auto / 16 / 32 | TEI `/rerank`; `auto` degrades with a reason, `on` → `BACKEND_UNAVAILABLE`, batches ≤ 32; K = 16 is the CPU-safe default (PLAN §8.3's 40 needs a GPU or the int8 export) |
+| `LGX_RERANK_BODY_CHARS` / `LGX_RERANK_TIMEOUT_S` | 600 / 15 | body cut per candidate (the header is compacted, version label dropped); **total** re-ranking budget of one search (all batches; keep it below the client's tool timeout, e.g. `LGX_UI_MCP_TIMEOUT_S`). The startup probe sends K realistic candidates and degrades (`reranker too slow …`) when they do not fit the budget. Dev compose: 45 s |
 | `LGX_LEXICAL_RANKER` / `LGX_QUERY_EXPANSION` / `LGX_LEXICAL_OPTS` | bm25 / on / `{}` | M2 releases: IDF-weighted lexical ranking in SQL (`rank_cd` = the M1 ordering); curated FR synonyms + DE/EN glossary (`retrieval/query_expansion.yaml`, override `$LGX_CONFIG_DIR/query_expansion.yaml`); ranker knobs as JSON (`40_search.sql` `p_opts`, eval/tuning only) |
 | `LGX_RETRIEVAL_MODE_DEFAULT` | auto | auto \| lexical \| hybrid |
 | `LGX_EMBED_PROVIDER` | none | embeddings OFF: `vector_status = disabled:provider_none`, `mode_used = lexical`. `mistral` = query embeddings from the Mistral embeddings API (the on-prem domain), used only for a release with vectors whose startup probe passed |
@@ -88,7 +88,10 @@ JSON; `n` = `num_norm`, e.g. `l121-1`). Prompt: `legal_answer(lang = fr | de | e
    one; anything else, or a failing query embedding, runs lexical with the reason). **Search API 2** (M2 `40_search.sql`): the
    lexical branch is BM25-like (idf × saturated tf, header matches weighted, proximity of adjacent query terms,
    soft length normalisation, act boost; formula and knobs in the SQL header, decision in
-   `docs/adr/0001-lexical-ranker.md`). **Search API 1** (releases built before M2): `ts_rank_cd` + the M1
+   `docs/adr/0001-lexical-ranker.md`). **Search API 3** (M2 review): a 13th parameter `p_member_act_id` restricts
+   every branch to one code-recueil member inside the SQL (`filters.act_eli` of a routed member; API 2 releases
+   filter the returned candidates afterwards), and the exact-identifier branch ranks the chunk whose own header
+   carries the identifier first. **Search API 1** (releases built before M2): `ts_rank_cd` + the M1
    re-ordering by cited unit → distinct query terms matched → RRF score. `retrieval.search_api`,
    `lexical_ranker` and `lexical_order` say which ran.
 4. The optional TEI reranker (`retrieval/rerank.py`) re-orders the first `LGX_RERANK_K` articles on « compact

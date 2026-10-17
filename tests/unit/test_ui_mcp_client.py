@@ -151,7 +151,7 @@ def test_settings_from_environment(tmp_path: Path) -> None:
         }
     )
     assert s.mcp_token == "file-token" and s.llm_api_key == "sk-plain"
-    assert s.max_tool_iterations == 7 and s.mcp_timeout_s == 20.0
+    assert s.max_tool_iterations == 7 and s.mcp_timeout_s == 30.0
     assert (s.llm_base_url, s.llm_model) == ("https://mistral.example.intra/v1", "mistral-medium")
     assert s.llm_trust_env is False and not s.llm_external  # *.intra counts as inside the organisation
     assert load_settings({"LGX_LLM_TRUST_ENV": "1"}).llm_trust_env is True

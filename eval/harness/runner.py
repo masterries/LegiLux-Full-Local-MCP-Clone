@@ -138,6 +138,8 @@ async def run_g2(backend: Backend, items: Sequence[Mapping[str, Any]], progress:
                 "id": it["id"],
                 "lang": it["lang"],
                 "query": it["query"],
+                "leaky": bool(it.get("leaky")),
+                "pdf": bool(it.get("pdf")),
                 **m,
                 "targets": [t.key for t in targets],
                 "top5": keys[:5],
@@ -153,6 +155,11 @@ async def run_g2(backend: Backend, items: Sequence[Mapping[str, Any]], progress:
     summary: dict[str, Any] = {"all": metrics.summarise_retrieval(rows)}
     for lang in sorted({r["lang"] for r in rows}):
         summary[lang] = metrics.summarise_retrieval([r for r in rows if r["lang"] == lang])
+    # M2 review: questions reusing ≥ 5 tokens of the target's wording (eval/harness/leak.py) inflate a lexical
+    # baseline — report it without them too; the PDF-code questions are their own slice
+    summary["non_leaky"] = metrics.summarise_retrieval([r for r in rows if not r["leaky"]])
+    if any(r["pdf"] for r in rows):
+        summary["pdf_codes"] = metrics.summarise_retrieval([r for r in rows if r["pdf"]])
     summary["errors"] = sum(1 for r in rows if r["error"])
     summary["reranked_items"] = sum(1 for r in rows if r["reranked"])
     summary["latency"] = {

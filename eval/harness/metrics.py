@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from statistics import mean, median
 from typing import Any
 
+from lgx_core.normalise import num_norm
+
 KS = (1, 3, 5, 10, 20)
 
 
@@ -96,6 +98,11 @@ def resolver_outcome(expect: Mapping[str, Any], got: Mapping[str, Any]) -> str:
             if top.get("act_eli") != expect.get("act_eli"):
                 return "wrong"
             if expect.get("unit_eli") and top.get("unit_eli") != expect["unit_eli"]:
+                return "wrong"
+            # PDF units have no article ELI: number key + page (eval/harness/gen_g1_pdf.py)
+            if expect.get("article") and num_norm(top.get("article") or "") != expect["article"]:
+                return "wrong"
+            if expect.get("page") is not None and top.get("page") != expect["page"]:
                 return "wrong"
             return "correct"
         if status == "ambiguous":

@@ -163,6 +163,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
         expansion=prepared.expansion if prepared else None,
         boost_act_ids=boost_acts if ranker == "bm25" else None,
         opts={**rt.settings.lexical_opts, "ranker": ranker},
+        member_act_id=member_filter.act_id if member_filter is not None and api >= 3 else None,
     )
     sql_ms = (time.perf_counter() - t_sql) * 1000
     lexical_order = None
@@ -173,7 +174,7 @@ async def search_legislation(rt: Runtime, ctx: CallContext, args: dict[str, Any]
             hits = coverage_order(hits)
             lexical_order = "coverage"
     units = best_per_unit(hits)
-    if member_filter is not None and units:  # of the code's articles, only that member's
+    if member_filter is not None and units and api < 3:  # older releases: of the code's articles, the member's
         rows = await facts.units([h.unit_id for h in units])
         keep = member_filter.act_id
         units = [h for h in units if h.act_id == keep or (h.unit_id in rows and rows[h.unit_id].member_act_id == keep)]

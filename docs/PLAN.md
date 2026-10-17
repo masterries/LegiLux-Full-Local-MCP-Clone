@@ -816,7 +816,7 @@ There is one dump file to ship, and the licences are permissive. The DDL in Appe
 | Option | Verdict |
 |---|---|
 | **PG18 + pgvector 0.8.7 + native FTS** | **Default.** One permissive container (0.17 GB) |
-| + `pg_textsearch` v1.5.1 (BM25, PostgreSQL License) [V tag, U build] | **Bake-off in M2** (lexical is the shipped mode). Adopt it if G2 gains ≥ 2–3 points and it builds and loads offline |
+| + `pg_textsearch` v1.5.1 (BM25, PostgreSQL License) [V tag, U build] | Bake-off **deferred** (M2, 2026-10-17, ADR 0001): M2 ships an IDF-weighted ranker in plain SQL (search API 2/3, no extension); the bake-off is re-opened if the lawyer-validated G2 or the M4 full-scale latency shows that ranker short. Adopt it then only if G2 gains ≥ 2–3 points and it builds and loads offline |
 | ParadeDB 0.26.2-pg18 (`pg_search` BM25) | Best lexical ranking in the prototype, but **AGPL-3.0**. Profile `bm25-agpl` for the bake-off only, after legal sign-off |
 | OpenSearch 3.9.0 / Elasticsearch 9.5.5 | Rejected: JVM, ≈ 1 GB images, still needs a relational store; Elasticsearch is AGPL/SSPL/ELv2 |
 | Qdrant 1.19.2 / Weaviate 1.39 + PG | Rejected: two stores to keep in sync; Qdrant full text is filtering only |
@@ -908,13 +908,13 @@ There is one dump file to ship, and the licences are permissive. The DDL in Appe
 1. **Citation parser** (port of the prototype `citeparse.py`, 9 of 10 test strings [V], plus backward "RGD du …, art. 3").
    - Resolution order: ELI → Mémorial reference → `act_alias` (code abbreviations, lawyer-curated acronyms such as CNPD, RGPD, CSSF, ADEM) → (type, date) candidates ranked by title trigram similarity.
    - **Never guess.** Only 2,078 of 8,060 in-force LOIs have a unique date, and up to 35 share one [V]. If the top two candidates are within 0.05 of each other, the result is `ambiguous`.
-2. **Candidates in one SQL statement** (`lgx.search_candidates`, Appendix B §B.14), all filtered to the validity window at `as_of` (plus stored future windows when `in_force_only = false`). Every tool filter (`doc_types`, `act_eli`) applies to every branch:
-   - lexical: OR-query over `fr_legal` lexemes, `ts_rank_cd`, top 50;
-   - exact identifiers on `tsv_exact`, top 20;
+2. **Candidates in one SQL statement** (`lgx.search_candidates`, Appendix B §B.14), all filtered to the validity window at `as_of` (plus stored future windows when `in_force_only = false`). Every tool filter (`doc_types`, `act_eli`; for a member act superseded by a code-recueil, the member restriction inside the code text — search API 3, M2 review) applies to every branch **before** its candidate limits:
+   - lexical: an **IDF-weighted, BM25-like ranker in SQL** over the `fr_legal` lexemes (search API 2, ADR 0001; `ts_rank_cd` has no IDF and stays only as the M1 comparison ranker): candidates are the chunks holding the query's selective terms (all of the user's terms when none is selective), scored by idf × saturated tf with header, phrase-proximity, length and named-act boosts, top 50;
+   - exact identifiers on `tsv_exact`, top 20 (the article whose own header carries the identifier first);
    - cited units (weight 10);
    - **dense top 50, only if the release has vectors, the startup probe passed (`vector_status = ok`) and the mode allows it.**
    - Fusion is RRF with k = 60, then the chunk's `rank_prior`.
-3. **Rerank** with `bge-reranker-v2-m3` on `header + body`, with the body cut to ≈ 1,800 characters (≈ 512 tokens by the estimate in §8.1). TEI's `--auto-truncate` (on by default in 1.9 [V]) cuts anything still too long. 40 candidates by default; **16 on a small CPU host**, where 40 candidates took 10.6–16.9 s on 4 vCPU [V]. The reranker is mandatory in lexical mode, because native FTS has no IDF: it ranked the target 6th where the reranker ranked it 1st [V].
+3. **Rerank** with `bge-reranker-v2-m3` on a compact `header + body`. **CPU-safe defaults (M2, measured 2026-10-17): 16 candidates, body cut to 600 characters, a total budget of 15–20 s per search** (`LGX_RERANK_K`, `LGX_RERANK_BODY_CHARS`, `LGX_RERANK_TIMEOUT_S`). The pinned fp32 safetensors on 4 vCPU take ≈ 17–20 s for 16 × 600 characters, ≈ 60 s for 16 × 1,800 and ≈ 3.8 s for one 1,800-character pair (eval/reports/m2-baseline.md, « Reranker cost »); the earlier « 40 candidates in 10.6–16.9 s on 4 vCPU » (E79, an int8 model) is **not** reproduced by the pinned model. 40 candidates × 1,800 characters (≈ 512 tokens, TEI `--auto-truncate`) needs a GPU or the int8 ONNX export (ADR 0001). The budget must stay below the client's tool timeout (the UI's `LGX_MCP_TIMEOUT_S`), or the fallback below never reaches the user; the startup probe times a search-sized payload (k texts of the body length) and reports a reranker slower than the budget as unavailable. The reranker is recommended in lexical mode: on G2 (M2 sample) it adds ≈ 17 points MRR@10 over the IDF-weighted lexical ranker.
    - **Batch limit.** TEI 1.9.4 rejects a `/rerank` request with more than `--max-client-batch-size` texts, which defaults to **32** [V]. The compose command sets 64, and `lgx_mcp/retrieval/rerank.py` also splits the candidates into batches of ≤ 32. An integration test reranks 40 candidates against the real TEI image (M2).
    - **Reranker unavailable.** With `LGX_RERANK=auto` (the default) the results come back unreranked, with `retrieval.reranked = false` and a reason. With `LGX_RERANK=on` the tool returns `BACKEND_UNAVAILABLE`.
 4. **Assembly.** Group by act. Attach computed status, `text_basis`, flags and warnings (`lgx_core.warnings` over `lgx.serving_at`). Stay within the token budget.
@@ -1471,6 +1471,15 @@ Assumptions:
 | **M5 Hardening + packaging** | wk 15–17, ≈ 13 pd | 2 bundle channels; Ed25519 + cosign; image-ID verification on both image stores; sentinel + capture for the whole stack (incl. the `enclave` allowlist to the Mistral endpoint); SBOM + licence gate; Caddy TLS hardening; **Open WebUI optional profile** + provisioning (pointing to the same Mistral endpoint); full `lgx` CLI (doctor, upgrades, backup, audit); backup drill; runbooks; counsel review | Install ≤ 60 min on a no-network VM; tampered bundle refused; egress 0 / HAR 0; restore drill ≤ 2 h; no critical CVE without a waiver |
 | **M6 Optional backlog** | ≈ 10–25 pd per item | Full-scale Mistral embeddings once the on-prem endpoint passes the probe (OD2/OD3; ≈ 11.7 h under the default throttle); answer gateway (≈ 15 pd); point-in-time history (OD1); Tier 2 data; LibreChat; lawyer pilot (3–5 lawyers, 2 weeks) | Per item |
 
+**M2 note (2026-10-17, review of the M2 sample release).** Measured and decided in M2, recorded here so that later stages
+size from the measurements: (1) the lexical ranker is the IDF-weighted SQL ranker of ADR 0001 (search API 2; API 3 adds
+the member filter inside the SQL), not `ts_rank_cd`; the pg_textsearch bake-off was **not run** and is deferred (OD7);
+(2) the reranker's CPU cost is ≈ 17–20 s for 16 candidates × 600 characters on 4 vCPU (fp32 safetensors), so the shipped
+defaults are k 16, 600 characters and a 15–20 s total budget below the UI's tool timeout (§8.3, OD4); (3) the PDF
+oracle (§11.4) is the `pdftotext` heading **recall** (every reference article heading starts a unit) plus the
+spot-check whose reference article ends at the next heading — the parse-time ±1 % gate alone counts candidates from
+the parser's own lines and could not see merged articles (eval/reports/m2-acceptance.md).
+
 **Totals to M5:** ≈ 82 person-days ≈ 16–17 weeks, plus ≈ 10–12 lawyer-days (GDPR list 1, recueil routing 2, G1–G3 validation 4, aliases 2, warning wording 1–2, plus spare).
 
 **Critical path:** M1 → M2 (parsers) → M4. M1b and M3 are deliberately small (M3's code is already in place). Start the offline-VM install harness in week 2: it catches every hidden outbound call early.
@@ -1489,7 +1498,7 @@ Assumptions:
 | R6 | 49 stubs incl. the secteur financier law | Certain / M | `stub_fallback` / original + `W_STUB` (+ "do not rely" > 5 years); listed in `about_corpus`; re-checked nightly; never a home-made consolidation |
 | R7 | PDF code parsing (969-page route, member contexts, tables) | M / H | Member-context segmentation with page fallback; ±1 % `Art.` gate; ≥ 98 % spot-check; `W_PDF_EXTRACTED`; lawyer review of route and CSS output |
 | R8 | **HTML parser drift** for the 15.5k CC-BY HTML acts (more critical in lexical-only mode) | M / H | HTML-twin oracle on 200 acts; parse-failure gate 1 %; fixtures per era |
-| R9 | **Lexical-only quality:** native FTS has no IDF; DE/EN questions need French keywords | M / H | Mandatory reranker; pg_textsearch bake-off in M2; tool description makes the LLM reformulate in French; aliases; resolver; vectors later (option A) |
+| R9 | **Lexical-only quality:** native FTS has no IDF; DE/EN questions need French keywords | M / H | IDF-weighted SQL ranker (M2, ADR 0001) + recommended reranker; pg_textsearch bake-off deferred (OD7); tool description makes the LLM reformulate in French; aliases; resolver; vectors later (option A) |
 | R10 | **Mistral on-prem endpoint unavailable or not serving the same embedding model** (version, quantisation) | M / M | Startup probe (model id, dim, probe cosine ≥ 0.99) → lexical with the reason; per-query model/dim check; calibrate `probe_min_cosine` on the real endpoint (OD2) |
 | R11 | Mistral API terms, cost or rate limits; public text sent to a third party | L / M | Embeddings: build side only, public CC BY text only; token estimate in `lgx embed --dry-run`; shared throttle (`max_concurrency`, `cooldown_s`) + backoff honouring `Retry-After`; terms reviewed (OD3) |
 | R12 | Build-side API key leak | L / M | Secret file / Docker secret; never in bundles, logs or `release.json`; secret scanning in CI; rotation |
@@ -1520,10 +1529,10 @@ Assumptions:
 | OD1 | **Point-in-time ("Stichtag") history** | none · N previous versions in full text (all, or codes + Constitution) · since a date | **none**. Knob `history.mode`, `history.embed: false`. Cheapest upgrade: N = 1 for codes + Constitution (≈ +0.1 GB [E]) |
 | OD2 | **Mistral on-prem endpoint details** (same API as SaaS, other domain — user statement 2026-10-17): base URL (domain) and its IP for the allowlist, chat model id and its tool calling, the embedding model id it reports (must equal the build side's), API keys, rate limits (→ `max_concurrency`, `cooldown_s`) | — | **Required from the user.** Until then: lexical-only; the chat works against any configured OpenAI-compatible URL |
 | OD3 | When to run the full Mistral API embed | now · after the on-prem probe passes · never | **After the on-prem endpoint passes the probe**; then ≈ $8–10 and ≈ 11.7 h under the default throttle per full corpus [E], deltas weekly |
-| OD4 | Runtime host size | — | **No GPU** (the LLM is external): 8–16 cores, 32 GB RAM; `rerank_k` 16 on ≤ 8 cores |
+| OD4 | Runtime host size | — | **No GPU** (the LLM is external): 8–16 cores, 32 GB RAM; reranker `rerank_k` 16, 600 body characters, 20 s budget (M2 measurement: 16 × 600 characters ≈ 17–20 s on 4 vCPU fp32; 40 × 1,800 needs a GPU or the int8 export) |
 | OD5 | Licence posture | CC BY only · also licenceSCL XML · redistribution | **CC BY only, internal use**, until SCL and counsel answer |
 | OD6 | UIs | Streamlit only · + Open WebUI · + LibreChat | **Streamlit for testers; Open WebUI optional for end users (≤ 50 users per 30 days or accepted branding); LibreChat above that** |
-| OD7 | Lexical engine | native FTS · pg_textsearch · ParadeDB (AGPL) | **Native FTS + reranker**; pg_textsearch if the M2 bake-off gains ≥ 2–3 points; ParadeDB only with AGPL sign-off |
+| OD7 | Lexical engine | native FTS · pg_textsearch · ParadeDB (AGPL) | **Native FTS with the IDF-weighted SQL ranker + optional reranker** (decided in M2, ADR 0001); the pg_textsearch bake-off was **deferred** (not run in M2) and is re-opened if the lawyer-validated G2 or the M4 full-scale latency shows the SQL ranker short; ParadeDB only with AGPL sign-off |
 | OD8 | LLM endpoint on the dev side | — | **Decided 2026-10-17: the user's Mistral endpoint (Mistral SaaS when connected); no separate cloud profile** |
 | OD9 | Text types | 18 core types · + historic · + circulars | **18 core types** |
 | OD10 | Temporary traffic RGDs (663) and `environnement_annexes` (239.9 MB) | metadata-only · text excluded from default search | **metadata-only** |

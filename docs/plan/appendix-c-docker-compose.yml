@@ -179,8 +179,10 @@ services:
       LGX_ALLOWED_ORIGINS: "https://${LGX_HOSTNAME:-legilux.intra},https://${LGX_HOSTNAME:-legilux.intra}:8443"
       LGX_RERANK_URL: http://rerank:8080
       LGX_RERANK: "${LGX_RERANK:-auto}"                 # auto (unavailable -> unreranked + reason) | on (-> BACKEND_UNAVAILABLE) | off
-      LGX_RERANK_K: "${LGX_RERANK_K:-40}"               # 16 on a small CPU host (written to .env by lgx install)
+      LGX_RERANK_K: "${LGX_RERANK_K:-16}"               # CPU-safe (M2 measurement); 40 only with a GPU or the int8 export
       LGX_RERANK_BATCH: "32"                            # client-side split, <= TEI --max-client-batch-size (defence in depth)
+      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 16 x 600 chars ≈ 17-20 s on 4 vCPU fp32 (1,800: 60 s)
+      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-20}"      # TOTAL budget per search; < the UI's LGX_MCP_TIMEOUT_S
       LGX_RETRIEVAL_MODE_DEFAULT: auto                  # auto|lexical|hybrid; auto = hybrid only if vector_status=ok
       LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}" # none (default) | mistral (the on-prem Mistral embeddings API)
       LGX_EMBED_BASE_URL: "${LGX_EMBED_BASE_URL:-https://mistral.invalid}"   # POST {base}/v1/embeddings
@@ -211,7 +213,8 @@ services:
     tmpfs: ["/tmp", "/data"]
     environment: { <<: *offline }
     command: ["--model-id", "/models/hf/bge-reranker-v2-m3@953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e", "--port", "8080",
-              "--max-client-batch-size", "64"]          # TEI default 32 would reject the 40-candidate /rerank calls [V]
+              "--max-client-batch-size", "64",          # TEI default 32 would reject the 40-candidate /rerank calls [V]
+              "--max-batch-tokens", "4096", "--auto-truncate", "true"]   # without them the CPU warm-up takes ≈ 9 min [V M2]
     volumes: ["${LGX_HOME:-/opt/legilux}/models/hf:/models/hf:ro"]
     networks: [backend]
 
@@ -358,12 +361,12 @@ services:
 ---
 # =====================================================================================================
 # deploy/compose.dev.yml — CONNECTED dev/test host overlay (Streamlit ON by default here). From deploy/:
-#   make dev-init        # = lgx dev-init: writes deploy/.env (LGX_HOME=./.dev, LGX_TESTUI_BCRYPT, LGX_HOSTNAME=localhost),
-#                        #   0600 secrets in deploy/.dev/secrets/ (llm_api_key = the user's Mistral key, or empty) and
-#                        #   fetches the reranker into deploy/.dev/models/ (same path as the airgap install)
-#   docker compose -f compose.yml -f compose.dev.yml --profile testui up -d
-#   make dev-load T=<T>  # = lgx dev-load ../out/data-<T>/: pg_restore into the dev `db` + GRANTs + read-only flag, and
-#                        #   links deploy/.dev/bundles/current -> ../out/data-<T> (eval gold sets); no signature check
+#   (as built in M2, 2026-10-17 — docs/dev/DEVELOPMENT.md « Dev stack »; the `make dev-init` / `deploy/.dev/models`
+#   flow sketched here earlier does not exist:)
+#   make fetch-models    # the pinned reranker into data/models/hf (one shared dir, sha256 in deploy/models.lock)
+#   make ingest-sample   # offline sample ingest + package into lgx-dev-db (data/bundles/data-<T>-sample.dump)
+#   make dev-up [DEV_PROFILES=rerank]   # deploy/compose.dev.yml: db, db-load (restores the bundle once), mcp,
+#                        #   lgx-streamlit (+ TEI rerank, LGX_RERANK=auto); make rerank-up / rerank-down toggle TEI
 # Streamlit and MCP are published on 127.0.0.1 without auth. Docker does not publish ports of containers that sit only
 # on internal networks (tested 2026-10-16), so this overlay attaches mcp and lgx-streamlit to `edge`. The chat LLM is
 # Mistral SaaS here (the same API as the airgap's on-prem endpoint): lgx-streamlit joins the internet-capable

@@ -13,7 +13,8 @@ therefore derived from the **cached texts** and resolved against the **metadata 
 Routing (``route``): a member is routed to the code text — JO original flagged ``superseded_by_code``, not
 searchable — only when (a) the recueil itself is served with text, (b) the member has no consolidation of
 its own (its JO original is the outdated text) and (c) the recueil part is not an excerpt (« …, art. 8 et 12 »,
-« (extraits) »); XML ``/jo`` members are not routed by default (``coverage: unknown`` — the recueil may
+« (extraits) » in the heading, or « Extrait: Art. 9 » at the start of the part's preamble, after the Mémorial
+reference); XML ``/jo`` members are not routed by default (``coverage: unknown`` — the recueil may
 reproduce only some articles). Every entry is ``reviewed: false`` until a lawyer signs it off; recueils
 whose text is not cached in this build are listed under ``pending``.
 """
@@ -37,8 +38,8 @@ from lgx_core.io import atomic_write_text, read_jsonl
 from lgx_core.models import Act, ManifestEntry, MetadataReason, TextBasis, Unit, UnitType, VersionRole
 from lgx_core.normalise import unaccent
 from lgx_ingest.context import StageContext, StageResult
-from lgx_ingest.parse.pdf import match_member
-from lgx_ingest.parse.recueil import member_key_of, parse_wid
+from lgx_ingest.parse.pdf import EU_PART_PREFIX, match_member
+from lgx_ingest.parse.recueil import parse_wid
 
 RECUEIL_TYPES = frozenset({"CODE_RECUEIL", "RECUEIL"})
 _CODE_TYPES = frozenset({"CODE", "CODE_RECUEIL", "Constitution"})
@@ -106,6 +107,8 @@ _STOP = frozenset(
     ]
 )
 _EXCERPT = re.compile(r",\s*(?:art\.|articles?)\s*\d|\(extraits?\)|\bextraits?\b", re.IGNORECASE)
+# « (Mém. A - 18 du 27 mars 1987, p. 230) … Extrait: Art. 9 » — the excerpt note printed under the Mémorial reference
+_EXCERPT_NOTE = re.compile(r"(?im)^\s*\(?\s*extraits?\s*(?:[:)]|$)|\(extraits?\)|\bextraits?\s*:\s*(?:art|chap|titre)")
 _ELI_DATE = re.compile(r"/eli/etat/leg/(?P<type>[a-z_]+)/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})/")
 
 
@@ -182,8 +185,11 @@ def derive(
     entries: Sequence[ManifestEntry],
     units_of: dict[str, list[Unit]],
     generated: str,
+    dropped_of: dict[str, list[str]] | None = None,
 ) -> RecueilMembersConfig:
-    """Membership entries for every recueil version whose units are available (pure)."""
+    """Membership entries for every recueil version whose units are available (pure). ``dropped_of``: version →
+    anchors of the PDF member-article copies the structure pass dropped (they still count as the part's articles:
+    the code reproduces that member, whose own consolidation is canonical)."""
     index = ActIndex.of(acts)
     acts_by_work = index.by_work
     served = _served_text(entries)
@@ -207,7 +213,8 @@ def derive(
             continue
         done_works.add(work)
         if any(u.source_format.value == "pdf" for u in units[:1]):
-            m, un = _from_pdf(work, version, units, index, acts_by_work, served, served_with_text)
+            dropped = (dropped_of or {}).get(version, [])
+            m, un = _from_pdf(work, version, units, index, acts_by_work, served, served_with_text, dropped)
         else:
             m, un = _from_xml(work, version, units, acts_by_work, served, version_work, served_with_text)
         members.extend(m)
@@ -265,20 +272,31 @@ def _from_pdf(
     acts_by_work: dict[str, Act],
     served: dict[str, str],
     served_with_text: bool,
+    dropped: Sequence[str] = (),
 ) -> tuple[list[RecueilMemberEntry], list[RecueilUnresolved]]:
     articles: collections.Counter[int] = collections.Counter()
+    part_of_anchor = {u.anchor: u.ordinal for u in units if _is_member_part(u)}
+    for anchor in dropped:  # copies dropped by the structure pass still are articles of their part
+        part = part_of_anchor.get(anchor.split(".", 1)[0])
+        if part is not None:
+            articles[part] += 1
     top: dict[int, int] = {}
+    preamble: dict[int, str] = {}  # part ordinal -> the first lines of its preamble (Mémorial reference, notes)
     for u in units:
         part = u.ordinal if _is_member_part(u) else top.get(u.parent_ordinal or 0)
         if part is not None:
             top[u.ordinal] = part
             if u.unit_type is UnitType.ARTICLE:
                 articles[part] += 1
+            elif u.unit_type is UnitType.PREAMBLE and part not in preamble:
+                preamble[part] = (u.text_plain or "")[:600]
+            if u.unit_type is UnitType.ARTICLE and articles[part] == 1 and u.heading:  # its first article's title
+                preamble[part] = f"{preamble.get(part, '')}\n{u.heading}"
     out: list[RecueilMemberEntry] = []
     unresolved: list[RecueilUnresolved] = []
     for u in units:
-        if not _is_member_part(u) or not u.heading:
-            continue
+        if not _is_member_part(u) or not u.heading or u.anchor.startswith(EU_PART_PREFIX):
+            continue  # EU / international « Complément » parts are out of scope, never members
         if not articles.get(u.ordinal):
             continue  # an empty title part (section title page, TOC heading): nothing to map
         mh = match_member(u.heading)
@@ -295,13 +313,13 @@ def _from_pdf(
                 RecueilUnresolved(
                     recueil=_rel(work),
                     part_heading=u.heading[:300],
-                    member_key=member_key_of(u.anchor),
+                    member_key=u.anchor,
                     candidates=[f"{_rel(a.eli_work)} ({s:.2f})" for a, s in scored[:4]],
                     reason="no act of that type and date" if not scored else "ambiguous or weak title match",
                 )
             )
             continue
-        partial = bool(_EXCERPT.search(u.heading))
+        partial = bool(_EXCERPT.search(u.heading) or _EXCERPT_NOTE.search(preamble.get(u.ordinal, "")))
         own = _own_consolidation(act, served)
         route, why = _route(act, own, served_with_text=served_with_text, partial=partial)
         out.append(
@@ -312,7 +330,7 @@ def _from_pdf(
                 method="heading",
                 reviewed=False,
                 route=route,
-                member_key=member_key_of(u.anchor),
+                member_key=u.anchor,  # with its occurrence suffix (« rgd_2016-01-26~2 »): two members may share a key
                 recueil_version=_rel(version),
                 member_title=(act.title or "")[:300] or None,
                 own_consolidation=_rel(own) if own else None,
@@ -429,12 +447,21 @@ def run_recueil_members(ctx: StageContext, *, write: Path | None = None) -> Stag
     acts = list(read_jsonl(layout.acts_path, Act))
     entries = list(read_jsonl(layout.manifest_path, ManifestEntry))
     units_of: dict[str, list[Unit]] = {}
+    dropped_of: dict[str, list[str]] = {}
     for e in entries:
         if e.eli_version and e.file and e.doc_type in RECUEIL_TYPES:
             path = layout.units_path(e.eli_version)
             if path.exists():
                 units_of[e.eli_version] = list(read_jsonl(path, Unit))
-    cfg = derive(acts=acts, entries=entries, units_of=units_of, generated=ctx.sync_date.isoformat())
+            structure = path.with_suffix(".structure.json")
+            if structure.exists():
+                dedup = (json.loads(structure.read_text(encoding="utf-8")) or {}).get("dedup") or {}
+                dropped_of[e.eli_version] = [
+                    a["anchor"] for a in dedup.get("articles", []) if a.get("outcome") == "dropped_duplicate"
+                ]
+    cfg = derive(
+        acts=acts, entries=entries, units_of=units_of, generated=ctx.sync_date.isoformat(), dropped_of=dropped_of
+    )
     by_recueil = collections.Counter(m.recueil for m in cfg.members)
     result.counts = {
         "members": len(cfg.members),

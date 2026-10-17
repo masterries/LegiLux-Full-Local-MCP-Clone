@@ -532,3 +532,57 @@ Found while serving the M2 sample release through the MCP tools; all in `lgx_mcp
   articles (probably a second heading of the same member, e.g. in an annex or the TOC; to triage); the recueil dedup made one G1 v1 item stale (« article 106 du
   Code de la fonction publique » is no longer ambiguous).
 
+
+## 12. M2 review (2026-10-17): fixes across stages — what other stages must know
+
+Applied from the M2 review; every item has a regression test. Shared files touched: `lgx_core/normalise/__init__.py`,
+`lgx_core/embed/limiter.py`, `config/recueil_members.yaml` (regenerated), `db/schema/40_search.sql`, `Makefile`,
+`deploy/*`, `docs/PLAN.md`, `docs/plan/appendix-c-docker-compose.yml`, `scripts/make_pdf_excerpt.py` (new).
+
+- **PDF parser `pdf-2` / layout `layout-2`** (`lgx_ingest/parse/pdf.py`, `pdf_layout.py`). An article heading after an
+  alinea number (« 1  Art. 7. … ») now starts an article (173 CSS articles were glued to their predecessor); quoted
+  amending provisions (« (…) est remplacé par : « Art. 8. … » ») stay inside the amending article
+  (`is_modifying`, `contains_quoted_amendment`; the chunker skips modifying articles, so the quoted « Art. 8 » is
+  never a search hit or a resolvable article of the code); « Complément » EU regulations printed after a
+  member become their own `ue_N` part (out of scope, `W_OUT_OF_SCOPE`, not chunked); the repeal stub residual ignores
+  `[ ]`. The parse cache key is `sha256 + PARSER_VERSION`: older `pdf-1` caches are simply not used; while developing
+  under one version, delete `data/parsed/*.pdf-2.json` to force a re-parse.
+- **PDF oracle** (`lgx_ingest/parse/pdf_check.py`): `heading_recall` — every `pdftotext` article heading (small-print
+  footnotes left out via `-bbox-layout` word heights) must start a unit with that number on that page, target 0.99;
+  the spot-check's reference article ends at the next reference heading. `spot_check` reports `headings` and fails
+  below the recall target.
+- **Recueils** (`lgx_ingest/parse/recueil.py`, `parse/__init__.py`): XML recueils drop a second copy of the same `wId`
+  with the same text (`dropped_repeat_in_recueil`); PDF code-recueils drop a member article copy **only** when the
+  member's served version is a **consolidation** stored in the build (`dedup_pdf_copies`, `consolidated=`; a member
+  served from its JO original keeps the code's coordinated copy — routed members are answered from it), logging
+  `recueil_copy_differs` below 0.98 similarity. The routing check runs on the **final** units (after the dedup).
+- **`config/recueil_members.yaml`** (regenerated, still `reviewed: false`): 756 members, 351 routed, 30 unresolved, 41
+  pending; member keys of repeated parts carry `~N`; excerpt parts (« Extrait: Art. 9 » at the start of the preamble or
+  as the first article heading) are `route: false`; EU complement parts are not members.
+- **Data-quality rows**: part-level issues use `entity_eli = "<version ELI>#<part anchor>"`
+  (`pdf_member_without_articles`, `pdf_article_number_repeated`, `pdf_out_of_scope_part`), page-level ones
+  `"<version ELI>#p.<n>"` (`pdf_page_without_text`): `W_DATA_QUALITY` no longer lands on every article of a PDF code.
+- **Gates**: `recueil_routing_attached` (every routed member keeps ≥ 1 article after the dedup, fail) and
+  `pdf_member_numbering` (member parts repeating an article number: fail above 5 %, warn above 0; sample: 13 parts).
+- **Search API 3** (`db/schema/40_search.sql`): 13th parameter `p_member_act_id bigint DEFAULT NULL` restricts every
+  branch inside the SQL (the API-2 server filtered the 40 returned candidates afterwards); the exact-identifier branch
+  ranks the chunk whose own header carries the identifier first; `lgx.query_terms` materialises df once per term and
+  the selective-term pool excludes terms at the df cap (G2 SQL total 54.5 s → 38.3 s, worst query 378 → 74 ms). The
+  server detects API 3 by `pronargs ≥ 13` (`lgx_mcp/release.py`). Loader: no change (the file is applied as is).
+- **MCP** (`lgx_mcp/resolve.py`, `facts.py`, `annotate.py`, `tools/search.py`): for a code-recueil base act
+  (`loi/1925/12/17/n1`) « art. N » is the code's own article only — none → `NOT_FOUND` naming the members that have an
+  article N (never a member's article); a routed member whose article is missing in the code text → `NOT_FOUND`
+  naming the code; member-part lookup only for PDF code-recueil/recueil versions.
+- **Reranker defaults** (`lgx_mcp/settings.py`, compose files, `.env.example`): K 16, 600 body characters,
+  `LGX_RERANK_TIMEOUT_S` = **total** budget of one search (15 s; dev compose 45 s, prod compose 20 s); the UI's MCP
+  timeout must exceed it (`ui/lgx_ui/settings.py` 30 s, dev 60 s, prod 45 s; `tests/unit/test_ui_compose.py` checks
+  the coupling); the startup probe sends K realistic candidates and reports « reranker too slow » when they do not fit.
+- **Ops**: `tests/db/conftest.py` and `make db-down` remove containers with their anonymous volumes (`docker rm -f -v`);
+  `python -m eval.harness run` writes to `data/reports/eval/` by default (`--out-dir eval/reports` for a committed
+  baseline; `make eval EVAL_OUT=…`); the embedding limiter raises `ThrottledError` at once when the deadline cannot be
+  met instead of sleeping for nothing.
+- **Eval harness**: G1 gains `eval/gold/G1/pdf_codes.json` (60 items from `pdftotext` + running headers + member
+  titles, independent of the parser and the DB: `gen-g1-pdf`; expectations carry `article` + `page`); G2 gains 13
+  PDF-code questions (`pdf: true`, targets pinned by `own` / `member` + `page`) and per-item lexical leakage
+  (`leak`, `leaky` ≥ 5 shared tokens: `mark-leaks`); reports add the `non_leaky` and `pdf_codes` slices. G3 v3 was
+  regenerated on the review release.

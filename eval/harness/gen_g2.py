@@ -2,7 +2,8 @@
 
 A target is written either as an article ELI (``{"eli": …}``) or, for articles without one (code-recueil and
 recueil members, a few code articles), as ``{"act": <work ELI suffix>, "num": <num_norm>, "member": <member work
-ELI suffix>?}``. Freezing checks that exactly one article unit of the version serving at T matches, and stores
+ELI suffix>?, "own": true?, "page": N?}`` (``own``: a code-recueil's own article; ``page``: the PDF page of its
+heading). Freezing checks that exactly one article unit of the version serving at T matches, and stores
 the match key the harness compares with the hits (:func:`hit_key`), the act ELI, the article label and the unit's
 ``text_sha256`` (drift: an item whose units changed is re-validated before it counts, PLAN §11.1).
 """
@@ -61,12 +62,17 @@ def _resolve(conn: psycopg.Connection[dict[str, Any]], t: Mapping[str, Any]) -> 
         if t.get("member"):
             where += " AND m.eli_work = %s"
             params.append(LEG + str(t["member"]))
+        elif t.get("own"):  # the code-recueil's own article (CSS), not a member's of the same number
+            where += " AND u.member_act_id IS NULL"
+        if t.get("page"):  # a PDF article: the page its heading is printed on (independent of the parser)
+            where += " AND u.page_from = %s"
+            params.append(int(t["page"]))
         rows = conn.execute(_SQL.format(where=where), params).fetchall()
     if len(rows) != 1:
         raise FreezeError(f"target {dict(t)} matches {len(rows)} served articles")
     r = rows[0]
     return {
-        **{k: v for k, v in t.items() if k in ("eli", "act", "num", "member")},
+        **{k: v for k, v in t.items() if k in ("eli", "act", "num", "member", "own", "page")},
         "grade": int(t.get("grade", 2)),
         "key": unit_key(r["eli_unit"], r["eli_work"], r["num_norm"], r["member"]),
         "act_eli": r["eli_work"],

@@ -426,8 +426,7 @@
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -444,14 +443,13 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
-    "article": "xviii"
+    "article": "lxxvii"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -470,7 +468,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Dans le cas qu’il fût dévolu à un",
+    "query": "Dans les paroisses où il n’y aura point",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal"
     },
@@ -500,8 +498,7 @@
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -518,14 +515,13 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
-    "article": "52-20"
+    "article": "1.26"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -544,7 +540,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "La réussite aux études de première année en",
+    "query": "(1.26.01) A l’occasion de soumissions, de demandes d’offres,",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale"
     },
@@ -591,7 +587,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique",
-    "article": "8.12"
+    "article": "114"
    },
    "expect": {
     "warnings": [
@@ -616,7 +612,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(8.12.01) Les compartiments et locaux techniques ne peuvent",
+    "query": "Le programme détaillé du cours «Statut des fonctionnaires",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/fonction_publique"
     },
@@ -645,8 +641,7 @@
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -663,14 +658,13 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
-    "article": "74"
+    "article": "113"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -689,7 +683,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(Règl. g.-d. du 13 janvier 2005) «1. Tout",
+    "query": "Les signaux mentionnés dans le présent arrêté et",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route"
     },
@@ -735,7 +729,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1",
-    "article": "108"
+    "article": "12"
    },
    "expect": {
     "warnings": [
@@ -759,7 +753,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les audiences des juridictions sont publiques, à moins",
+    "query": "La dignité humaine est inviolable.",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/constitution/1868/10/17/n1"
     },
@@ -873,7 +867,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
-    "article": "120"
+    "article": "410"
    },
    "expect": {
     "warnings": [
@@ -897,7 +891,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "( Arr. g.-d. 14 juillet 1943 ) Quiconque,",
+    "query": "Dans les cas mentionnés aux articles 398 à",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1"
     },
@@ -942,7 +936,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1",
-    "article": "15"
+    "article": "48"
    },
    "expect": {
     "warnings": [
@@ -966,7 +960,7 @@
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "La partie saisie ne peut, à compter du",
+    "query": "Si deux saisissants ont fait transcrire deux saisies",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1"
     },
@@ -1067,8 +1061,7 @@
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -1085,14 +1078,13 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
-    "article": "l327-2"
+    "article": "438"
    },
    "expect": {
     "warnings": [
      "W_NOT_OFFICIAL",
      "W_SNAPSHOT",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_NOT_CONSOLIDATED",
@@ -1111,7 +1103,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Sont punis d’un emprisonnement de huit jours à",
+    "query": "A l’exclusion de celles accordées en vertu du",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1"
     },
@@ -1156,7 +1148,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1",
-    "article": "12"
+    "article": "1"
    },
    "expect": {
     "warnings": [
@@ -1179,7 +1171,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le Conseil élabore son règlement d'ordre intérieur, qui",
+    "query": "Il est institué un Conseil National de Coordination",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1978/07/14/n1"
     },
@@ -1209,8 +1201,7 @@
      "W_SNAPSHOT",
      "W_STUB",
      "W_FUTURE_VERSION",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_REPEALED",
@@ -1225,7 +1216,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1",
-    "article": "12-1"
+    "article": "33"
    },
    "expect": {
     "warnings": [
@@ -1233,8 +1224,7 @@
      "W_SNAPSHOT",
      "W_STUB",
      "W_FUTURE_VERSION",
-     "W_PDF_EXTRACTED",
-     "W_DATA_QUALITY"
+     "W_PDF_EXTRACTED"
     ],
     "absent": [
      "W_REPEALED",
@@ -1251,7 +1241,7 @@
    "trigger": "search:stub_fallback",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(Loi du 21 novembre 1997) «(1) Les banques",
+    "query": "(Loi du 12 mars 1998) «(1) Un établissement",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1993/04/05/n1"
     },
@@ -1297,7 +1287,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2",
-    "article": "27"
+    "article": "76"
    },
    "expect": {
     "warnings": [
@@ -1321,7 +1311,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Sauf convention contraire, l'acquisition d'une œuvre plastique emporte",
+    "query": "Lorsque la juridiction constate une atteinte au droit",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/04/18/n2"
     },
@@ -1366,7 +1356,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5",
-    "article": "25"
+    "article": "10"
    },
    "expect": {
     "warnings": [
@@ -1390,7 +1380,7 @@
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "1) Le ministre de la Justice peut, après",
+    "query": "1) L'extradition n'est pas accordée lorsque, d'après la",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5"
     },
@@ -1435,7 +1425,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
-    "article": "l164-4"
+    "article": "l214-5"
    },
    "expect": {
     "warnings": [
@@ -1459,7 +1449,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) La commission paritaire ne peut délibérer que",
+    "query": "Chaque salarié mobile au sens de la présente",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2"
     },
@@ -1504,7 +1494,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1",
-    "article": "15"
+    "article": "7"
    },
    "expect": {
     "warnings": [
@@ -1528,7 +1518,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "La Caisse nationale de santé est substituée de",
+    "query": "La loi modifiée du 22 juin 1963 fixant",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2008/05/13/n1"
     },
@@ -1574,7 +1564,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1",
-    "article": "10-1"
+    "article": "45"
    },
    "expect": {
     "warnings": [
@@ -1599,7 +1589,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Les gestionnaires sont, après leur dissolution, réputés",
+    "query": "Sans préjudice des articles 37, 39 et 40",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2013/07/12/n1"
     },
@@ -1646,7 +1636,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2014/07/04/n2",
-    "article": "6"
+    "article": "8"
    },
    "expect": {
     "warnings": [
@@ -1671,7 +1661,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "L’OLAS organise les audits des bonnes pratiques de",
+    "query": "(1) Le département de la surveillance du marché",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2014/07/04/n2"
     },
@@ -1717,7 +1707,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2015/07/30/n2",
-    "article": "89"
+    "article": "76"
    },
    "expect": {
     "warnings": [
@@ -1741,7 +1731,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Une dispense de la fréquentation de tout ou",
+    "query": "Le cycle de formation de début de carrière",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2015/07/30/n2"
     },
@@ -1851,7 +1841,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446",
-    "article": "65"
+    "article": "6"
    },
    "expect": {
     "warnings": [
@@ -1874,7 +1864,7 @@
    "trigger": "search:stub_fallback",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les décisions de la CSSF prises en vertu",
+    "query": "(1) Les marchés réglementés sont obligés au titre",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/05/30/a446"
     },
@@ -1918,7 +1908,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686",
-    "article": "2"
+    "article": "69"
    },
    "expect": {
     "warnings": [
@@ -1942,7 +1932,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les dispositions du titre II s’appliquent aux responsables",
+    "query": "La loi modifiée du 25 mars 2015 fixant",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/01/a686"
     },
@@ -1987,7 +1977,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/09/a882",
-    "article": "4"
+    "article": "15"
    },
    "expect": {
     "warnings": [
@@ -2011,7 +2001,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Des aides à l’investissement peuvent être accordées",
+    "query": "(1) Les demandes d’aide sont présentées au ministre",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2018/08/09/a882"
     },
@@ -2121,7 +2111,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/07/29/a504",
-    "article": "2"
+    "article": "3"
    },
    "expect": {
     "warnings": [
@@ -2144,7 +2134,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les dépenses occasionnées par la présente loi ne",
+    "query": "Les dépenses occasionnées par le financement des frais",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2023/07/29/a504"
     },
@@ -2206,7 +2196,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88",
-    "article": "11"
+    "article": "4"
    },
    "expect": {
     "warnings": [
@@ -2229,7 +2219,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le ministre assure l’invalidation et la destruction des",
+    "query": "(1) Dans la mesure où le Grand-Duché de",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2026/02/25/a88"
     },
@@ -2274,7 +2264,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias",
-    "article": "27quinquies"
+    "article": "36"
    },
    "expect": {
     "warnings": [
@@ -2299,7 +2289,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Les services de médias audiovisuels fournis par",
+    "query": "Sans préjudice des autres voies de droit, toute",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/recueil/presse_medias"
     },
@@ -2347,7 +2337,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1988/07/15/n3",
-    "article": "18"
+    "article": "8"
    },
    "expect": {
     "warnings": [
@@ -2374,7 +2364,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Notre Ministre du travail et Notre Ministre de",
+    "query": "1. Jusqu’au 20 décembre 2029, les employeurs veillent",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1988/07/15/n3"
     },
@@ -2420,7 +2410,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1",
-    "article": "1"
+    "article": "3"
    },
    "expect": {
     "warnings": [
@@ -2443,7 +2433,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les administrations fiscales ne sont pas autorisées à",
+    "query": "La vérification de la comptabilité et le contrôle",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1989/03/24/n1"
     },
@@ -2487,7 +2477,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2",
-    "article": "13"
+    "article": "11"
    },
    "expect": {
     "warnings": [
@@ -2511,7 +2501,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les frais de garde sont taxés pour chaque",
+    "query": "Le droit fixe est alloué à l'huissier de",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1991/01/24/n2"
     },
@@ -2557,7 +2547,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4",
-    "article": "20"
+    "article": "3"
    },
    "expect": {
     "warnings": [
@@ -2582,7 +2572,7 @@
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les infractions aux dispositions du présent règlement et",
+    "query": "a) Les importateurs doivent communiquer au vétérinaire officiel",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4"
     },
@@ -2628,7 +2618,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4",
-    "article": "1004"
+    "article": "1265"
    },
    "expect": {
     "warnings": [
@@ -2652,7 +2642,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le délai dans lequel doivent être publiés les",
+    "query": "Les avoués qui ont occupé dans les causes",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/1998/08/03/n4"
     },
@@ -2699,7 +2689,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3",
-    "article": "5"
+    "article": "8"
    },
    "expect": {
     "warnings": [
@@ -2725,7 +2715,7 @@
    "trigger": "search:superseded_by_code",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Pour la rédaction de leur travail de candidature,",
+    "query": "Pour l'appréciation du travail de candidature, le ministre",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2000/07/24/n3"
     },
@@ -2773,7 +2763,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1",
-    "article": "7"
+    "article": "4bis"
    },
    "expect": {
     "warnings": [
@@ -2799,7 +2789,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "1. Les fournisseurs qui produisent des matériels de",
+    "query": "Les matériels de multiplication de plantes ornementales se",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2001/04/25/n1"
     },
@@ -2846,7 +2836,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324",
-    "article": "2"
+    "article": "7"
    },
    "expect": {
     "warnings": [
@@ -2870,7 +2860,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le rapport justificatif, qui accompagne les projets d’aménagement",
+    "query": "Notre Ministre de l’Intérieur est chargé de l’exécution",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/03/08/a324"
     },
@@ -2916,7 +2906,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/11/30/a1010",
-    "article": "2"
+    "article": "5"
    },
    "expect": {
     "warnings": [
@@ -2941,7 +2931,7 @@
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Les médecins effectuant personnellement et dans leur cabinet",
+    "query": "Le forfait de déplacement peut être mis en",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2017/11/30/a1010"
     },
@@ -2986,7 +2976,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/08/17/a1153",
-    "article": "2"
+    "article": "1"
    },
    "expect": {
     "warnings": [
@@ -3009,7 +2999,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Notre Ministre des Communications et des Médias est",
+    "query": "(1) Pour les immeubles neufs ou faisant l’objet",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/08/17/a1153"
     },
@@ -3052,7 +3042,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936",
-    "article": "7"
+    "article": "5"
    },
    "expect": {
     "warnings": [
@@ -3075,7 +3065,7 @@
    "trigger": "search:original_never_amended",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Notre Ministre de l’Environnement et Notre Ministre des",
+    "query": "Pour tous les ouvrages, dépôts, travaux, installations, établissements",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936"
     },
@@ -3119,7 +3109,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106",
-    "article": "1"
+    "article": "3"
    },
    "expect": {
     "warnings": [
@@ -3143,7 +3133,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Lors des élections législatives, communales et européennes, les",
+    "query": "Le Premier ministre et le Ministre ayant les",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2024/03/07/a106"
     },
@@ -3189,7 +3179,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629",
-    "article": "5"
+    "article": "4"
    },
    "expect": {
     "warnings": [
@@ -3214,7 +3204,7 @@
    "trigger": "search:original_possibly_outdated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le ministre ayant la Navigation et les transports",
+    "query": "Lors des opérations avec un aéronef sans équipage",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/12/22/a629"
     },
@@ -3261,7 +3251,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779",
-    "article": "26"
+    "article": "23"
    },
    "expect": {
     "warnings": [
@@ -3286,7 +3276,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "(1) Le Gouvernement met en place un comité",
+    "query": "(1) Les voitures mises à disposition des membres",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/ri/2023/11/27/a779"
     },
@@ -3331,7 +3321,7 @@
    "tool": "get_article",
    "arguments": {
     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rmin/1985/01/28/n1",
-    "article": "12"
+    "article": "3"
    },
    "expect": {
     "warnings": [
@@ -3355,7 +3345,7 @@
    "trigger": "search:consolidated",
    "tool": "search_legislation",
    "arguments": {
-    "query": "Le règlement ministériel du 5 novembre 1982 déterminant",
+    "query": "Les chiens doivent être vaccinés contre la rage",
     "filters": {
      "act_eli": "http://data.legilux.public.lu/eli/etat/leg/rmin/1985/01/28/n1"
     },
@@ -3444,8 +3434,8 @@
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
-    "article": "51quater"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+    "article": "13bis"
    },
    "expect": {
     "warnings": [
@@ -3457,38 +3447,6 @@
   },
   {
    "id": "G3-152",
-   "trigger": "article:repealed_stub",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
-    "article": "l211-28"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_ARTICLE_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-153",
-   "trigger": "article:repealed_stub",
-   "tool": "get_article",
-   "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1879/06/18/n1",
-    "article": "57-4"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_ARTICLE_REPEALED"
-    ]
-   }
-  },
-  {
-   "id": "G3-154",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
@@ -3504,12 +3462,44 @@
    }
   },
   {
+   "id": "G3-153",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+    "article": "l411-5"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_ARTICLE_REPEALED"
+    ]
+   }
+  },
+  {
+   "id": "G3-154",
+   "trigger": "article:repealed_stub",
+   "tool": "get_article",
+   "arguments": {
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2006/07/31/n2",
+    "article": "l411-4"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_ARTICLE_REPEALED"
+    ]
+   }
+  },
+  {
    "id": "G3-155",
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
-    "article": "45ter"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1804/03/21/n1",
+    "article": "430_et_431"
    },
    "expect": {
     "warnings": [
@@ -3524,8 +3514,8 @@
    "trigger": "article:repealed_stub",
    "tool": "get_article",
    "arguments": {
-    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
-    "article": "139"
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+    "article": "149ter"
    },
    "expect": {
     "warnings": [
@@ -3540,23 +3530,7 @@
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4/art_20"
-   },
-   "expect": {
-    "warnings": [
-     "W_NOT_OFFICIAL",
-     "W_SNAPSHOT",
-     "W_DERIVED_ELI",
-     "W_PARTIAL_REPEAL_UNKNOWN"
-    ]
-   }
-  },
-  {
-   "id": "G3-158",
-   "trigger": "article:derived_eli_citation",
-   "tool": "get_article",
-   "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l281-1"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/code/travail/art_l_291-5"
    },
    "expect": {
     "warnings": [
@@ -3570,11 +3544,27 @@
    }
   },
   {
+   "id": "G3-158",
+   "trigger": "article:derived_eli_citation",
+   "tool": "get_article",
+   "arguments": {
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/loi/2001/06/20/n5/art_10"
+   },
+   "expect": {
+    "warnings": [
+     "W_NOT_OFFICIAL",
+     "W_SNAPSHOT",
+     "W_DERIVED_ELI",
+     "W_PARTIAL_REPEAL_UNKNOWN"
+    ]
+   }
+  },
+  {
    "id": "G3-159",
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/2018/10/02/a936/art_7"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1/art_48"
    },
    "expect": {
     "warnings": [
@@ -3590,7 +3580,7 @@
    "trigger": "article:derived_eli_citation",
    "tool": "get_article",
    "arguments": {
-    "citation": "http://data.legilux.public.lu/eli/etat/leg/rgd/1993/02/10/n4/art_6"
+    "citation": "http://data.legilux.public.lu/eli/etat/leg/loi/1889/01/02/n1/art_82"
    },
    "expect": {
     "warnings": [

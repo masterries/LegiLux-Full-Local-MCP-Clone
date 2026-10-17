@@ -21,13 +21,23 @@
 --     capped at df_cap (cost bound at full scale; all very frequent terms share the floor idf); sat_tf =
 --     ts_rank({0,0,1,1}, tsv, t) (tf saturation, 1 → 0.61, 3 → 0.83, 9 → 0.94); w(t) = 1 for the user's words,
 --     expansion_weight for server-side expansion terms (p_expansion). Candidates: the chunks matching the
---     selective terms (df ≤ pool_df_max; all terms if none is), the pool_cap best by Σ idf of matched terms.
+--     selective terms (df ≤ pool_df_max and below df_cap; see search API 3 below if none is), the pool_cap best by
+--     Σ idf of matched terms.
 --     New optional trailing parameters: p_expansion (expansion text), p_boost_act_ids (acts the query names) and
 --     p_opts (jsonb knobs, defaults below; {"ranker": "rank_cd"} restores the M1 ts_rank_cd branch, with the
 --     M1 coverage column, for comparisons). New output columns: lex_score, coverage, phrase_hits, act_boosted.
 --     Defaults (G2 v1, both halves agreeing; eval/reports/m2-baseline.md): header_weight 0.5, phrase_weight 0.5,
 --     length_b 0.25, act_boost 1.0, expansion_weight 0.3, df_cap = pool_df_max 5000, pool_cap 1000, lex_limit 50.
 --     Earlier calls (6–9 arguments, gates, package smoke, readyz canned query) are unchanged.
+--   * ("search API 3", M2 review 2026-10-17) p_member_act_id: restrict every branch to one member act of a
+--     code-recueil (its own original and the code units carrying that member_act_id) INSIDE the SQL, before the
+--     lex_limit / pool caps — search_legislation filters.act_eli of a superseded member used to filter after the
+--     LIMIT and lost most of the member's matches (PLAN §8.3: every filter on every branch). The branch gates
+--     (ranker bm25 / rank_cd) test the parameter itself, a one-time filter, instead of a join with the options
+--     CTE (the rank_cd branch used to scan and rank every matching chunk on every bm25 search); query_terms
+--     counts each term's df once (MATERIALIZED); with no selective term the pool is the chunks holding all the
+--     user's terms (AND), the OR of every term only when that is empty; exact identifiers matched in a chunk's
+--     header (« Art. L. 124-3. ») rank before chunks that only cite them.
 -- =====================================================================================================
 \set ON_ERROR_STOP on
 
@@ -58,7 +68,7 @@ CREATE FUNCTION lgx.query_terms(p_query text, p_expansion text DEFAULT NULL,
   g AS (SELECT t.lexeme, max(t.w) AS w, min(t.pos) AS pos FROM t GROUP BY t.lexeme),
   n AS (SELECT greatest(1.0, coalesce(nullif(greatest(c.reltuples, 0), 0), (SELECT count(*) FROM lgx.chunk)))::float8 AS n
           FROM pg_class c WHERE c.oid = 'lgx.chunk'::regclass),
-  d AS (SELECT g.lexeme, g.w, g.pos,
+  d AS MATERIALIZED (SELECT g.lexeme, g.w, g.pos,  -- once per term: the idf expression reads df twice
                (SELECT count(*) FROM (SELECT 1 FROM lgx.chunk c
                                        WHERE c.searchable AND c.tsv @@ quote_literal(g.lexeme)::tsquery
                                        LIMIT greatest(p_df_cap, 1)) z) AS df
@@ -71,7 +81,8 @@ CREATE FUNCTION lgx.query_terms(p_query text, p_expansion text DEFAULT NULL,
 CREATE FUNCTION lgx.search_candidates(
     p_query text, p_qvec halfvec, p_as_of date, p_cited_units bigint[], p_exact tsquery,
     p_doc_types text[], p_limit int DEFAULT 40, p_act_ids bigint[] DEFAULT NULL, p_in_force_only boolean DEFAULT true,
-    p_expansion text DEFAULT NULL, p_boost_act_ids bigint[] DEFAULT NULL, p_opts jsonb DEFAULT NULL)
+    p_expansion text DEFAULT NULL, p_boost_act_ids bigint[] DEFAULT NULL, p_opts jsonb DEFAULT NULL,
+    p_member_act_id bigint DEFAULT NULL)
   RETURNS TABLE (chunk_id bigint, score double precision, lex_rank bigint, dense_rank bigint, exact_hit boolean,
                  cited_hit boolean, lex_score double precision, coverage int, phrase_hits int, act_boosted boolean)
   LANGUAGE sql STABLE
@@ -79,8 +90,7 @@ CREATE FUNCTION lgx.search_candidates(
   SET hnsw.iterative_scan = 'relaxed_order'
   AS $$
   WITH o AS (
-    SELECT coalesce(p_opts->>'ranker', 'bm25') AS ranker,
-           coalesce((p_opts->>'df_cap')::int, 5000) AS df_cap,
+    SELECT coalesce((p_opts->>'df_cap')::int, 5000) AS df_cap,
            coalesce((p_opts->>'pool_df_max')::int, 5000) AS pool_df_max,
            coalesce((p_opts->>'pool_cap')::int, 1000) AS pool_cap,
            coalesce((p_opts->>'header_weight')::float8, 0.5) AS hw,
@@ -89,18 +99,43 @@ CREATE FUNCTION lgx.search_candidates(
            coalesce((p_opts->>'act_boost')::float8, 1.0) AS ab,
            coalesce((p_opts->>'expansion_weight')::float8, 0.3) AS ew,
            coalesce((p_opts->>'lex_limit')::int, 50) AS lex_limit),
+  -- the member restriction (search API 3): NULL = none; otherwise the member's own units and its code copies
+  mem AS (SELECT u.unit_id FROM lgx.unit u WHERE p_member_act_id IS NOT NULL AND u.member_act_id = p_member_act_id),
   -- ------------------------------------------------------------------ bm25-like lexical branch
   qt AS (SELECT t.*, quote_literal(t.lexeme)::tsquery AS tq, (quote_literal(t.lexeme) || ':A')::tsquery AS tqa
            FROM o, lgx.query_terms(p_query, p_expansion, o.ew, o.df_cap) t
-          WHERE o.ranker = 'bm25' AND t.df > 0),
-  sel AS (SELECT string_agg(qt.tq::text, ' | ')::tsquery AS q FROM qt, o
-           WHERE qt.df <= o.pool_df_max OR NOT EXISTS (SELECT 1 FROM qt q2 WHERE q2.df <= o.pool_df_max)),
-  pool AS (
-    SELECT c.chunk_id, c.act_id, c.tsv, c.n_tokens FROM lgx.chunk c, sel, o
-     WHERE sel.q IS NOT NULL AND c.searchable AND c.tsv @@ sel.q
+          WHERE coalesce(p_opts->>'ranker', 'bm25') = 'bm25' AND t.df > 0),
+  sel AS (  -- selective terms (OR); none selective: all of the user's terms (AND), the OR of every term as fallback
+    -- a df at the cap means « at least df_cap »: never selective (with df_cap = pool_df_max every capped term
+    -- used to count as selective and the pool became every chunk matching any word of the question)
+    SELECT (SELECT string_agg(qt.tq::text, ' | ')::tsquery FROM qt, o
+             WHERE qt.df <= o.pool_df_max AND qt.df < o.df_cap) AS q_or,
+           (SELECT string_agg(qt.tq::text, ' & ')::tsquery FROM qt WHERE qt.qpos IS NOT NULL) AS q_and,
+           (SELECT string_agg(qt.tq::text, ' | ')::tsquery FROM qt) AS q_all),
+  cand AS (  -- scalar subqueries: one-time filters / index conditions, the fallback runs only when needed
+    SELECT c.chunk_id, c.act_id, c.tsv, c.n_tokens FROM lgx.chunk c
+     WHERE c.searchable AND c.tsv @@ (SELECT coalesce(sel.q_or, sel.q_and) FROM sel)
        AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
        AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
        AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
+       AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))
+    UNION ALL
+    SELECT c.chunk_id, c.act_id, c.tsv, c.n_tokens FROM lgx.chunk c
+     WHERE (SELECT sel.q_or FROM sel) IS NULL
+       AND NOT EXISTS (SELECT 1 FROM lgx.chunk c2
+                        WHERE c2.searchable AND c2.tsv @@ (SELECT sel.q_and FROM sel)
+                          AND lgx.chunk_window_ok(c2.valid_from, c2.valid_to, p_as_of, p_in_force_only)
+                          AND (p_doc_types IS NULL OR c2.doc_type = ANY (p_doc_types))
+                          AND (p_act_ids IS NULL OR c2.act_id = ANY (p_act_ids))
+                          AND (p_member_act_id IS NULL OR c2.act_id = p_member_act_id
+                               OR c2.unit_id IN (SELECT unit_id FROM mem)))
+       AND c.searchable AND c.tsv @@ (SELECT sel.q_all FROM sel)
+       AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
+       AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
+       AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
+       AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))),
+  pool AS (
+    SELECT c.chunk_id, c.act_id, c.tsv, c.n_tokens FROM cand c
      ORDER BY (SELECT sum(qt.idf * qt.qweight) FROM qt WHERE c.tsv @@ qt.tq) DESC, c.chunk_id
      LIMIT (SELECT pool_cap FROM o)),
   pairs AS (  -- adjacent query terms (by position, stopword gaps included): proximity window of 3
@@ -127,7 +162,7 @@ CREATE FUNCTION lgx.search_candidates(
     SELECT bm.chunk_id, bm.s, bm.cov, bm.ph, bm.boosted, row_number() OVER (ORDER BY bm.s DESC, bm.chunk_id) AS r
       FROM bm ORDER BY bm.s DESC, bm.chunk_id LIMIT (SELECT lex_limit FROM o)),
   -- ------------------------------------------------------------------ legacy branch (ts_rank_cd, no IDF)
-  q AS (SELECT lgx.or_query(p_query) AS tsq),
+  q AS (SELECT lgx.or_query(p_query) AS tsq WHERE coalesce(p_opts->>'ranker', 'bm25') = 'rank_cd'),
   lex_cd AS (
     SELECT x.chunk_id, x.s,
            (SELECT count(*) FROM unnest(tsvector_to_array(to_tsvector('lgx.fr_legal'::regconfig, coalesce(p_query, ''))))
@@ -135,11 +170,12 @@ CREATE FUNCTION lgx.search_candidates(
            0::bigint AS ph, false AS boosted,
            row_number() OVER (ORDER BY x.s DESC, x.chunk_id) AS r FROM (
       SELECT c.chunk_id, c.tsv, ts_rank_cd(c.tsv, q.tsq, 32)::float8 AS s
-        FROM lgx.chunk c, q, o
-       WHERE o.ranker = 'rank_cd' AND q.tsq IS NOT NULL AND c.searchable AND c.tsv @@ q.tsq
+        FROM lgx.chunk c, q
+       WHERE coalesce(p_opts->>'ranker', 'bm25') = 'rank_cd' AND q.tsq IS NOT NULL AND c.searchable AND c.tsv @@ q.tsq
          AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
          AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
          AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
+         AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))
        ORDER BY s DESC, c.chunk_id LIMIT 50) x),
   lex AS (SELECT * FROM lex_bm UNION ALL SELECT * FROM lex_cd),
   dense AS (
@@ -150,22 +186,26 @@ CREATE FUNCTION lgx.search_candidates(
          AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
          AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
          AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
+         AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))
        ORDER BY c.embedding <=> p_qvec LIMIT 50) y),
-  exact AS (
-    SELECT z.chunk_id, row_number() OVER (ORDER BY z.s DESC, z.chunk_id) AS r FROM (
-      SELECT c.chunk_id, ts_rank_cd(c.tsv_exact, p_exact) AS s
+  exact AS (  -- the identifier in the chunk's own header (the article itself) first, then by ts_rank_cd
+    SELECT z.chunk_id, row_number() OVER (ORDER BY z.own DESC, z.s DESC, z.chunk_id) AS r FROM (
+      SELECT c.chunk_id, ts_rank_cd(c.tsv_exact, p_exact) AS s,
+             to_tsvector('lgx.simple_ua'::regconfig, c.header) @@ p_exact AS own
         FROM lgx.chunk c
        WHERE p_exact IS NOT NULL AND c.searchable AND c.tsv_exact @@ p_exact
          AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
          AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
          AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
-       ORDER BY s DESC, c.chunk_id LIMIT 20) z),
+         AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))
+       ORDER BY own DESC, s DESC, c.chunk_id LIMIT 20) z),
   cited AS (
     SELECT c.chunk_id, 1::bigint AS r FROM lgx.chunk c
      WHERE c.unit_id = ANY (p_cited_units)
        AND lgx.chunk_window_ok(c.valid_from, c.valid_to, p_as_of, p_in_force_only)
        AND (p_doc_types IS NULL OR c.doc_type = ANY (p_doc_types))
-       AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))),
+       AND (p_act_ids IS NULL OR c.act_id = ANY (p_act_ids))
+       AND (p_member_act_id IS NULL OR c.act_id = p_member_act_id OR c.unit_id IN (SELECT unit_id FROM mem))),
   fused AS (
     SELECT u.chunk_id, sum(u.w / (60.0 + u.r)) AS s,
            min(u.r) FILTER (WHERE u.src = 'lex') AS lex_rank, min(u.r) FILTER (WHERE u.src = 'dense') AS dense_rank,

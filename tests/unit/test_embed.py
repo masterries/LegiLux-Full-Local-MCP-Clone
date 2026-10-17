@@ -143,12 +143,46 @@ async def test_limiter_timeout_raises_throttled() -> None:
         assert lim.occupied() == 1 and math.isclose(lim.next_free_in(), 20.0)
         with pytest.raises(ThrottledError):
             await lim.acquire(timeout=5.0)
-        assert clock.now == pytest.approx(5.0)
+        assert clock.now == pytest.approx(0.0)  # no slot can be free within 5 s: fails at once (M2 review)
         slot = await lim.acquire(timeout=30.0)  # free again after the cooldown
         assert clock.now == pytest.approx(20.0)
         lim.release(slot)
 
     await clock.run(main())
+
+
+async def test_limiter_waits_when_a_slot_can_free_in_time_and_fails_fast_otherwise() -> None:
+    clock = FakeClock()
+    lim = SlotLimiter(5, 20.0, clock=clock, sleep=clock.sleep)
+
+    async def main() -> None:
+        for _ in range(5):  # five requests: every slot cools down for 20 s
+            async with lim.slot():
+                pass
+        assert math.isclose(lim.next_free_in(), 20.0)
+        with pytest.raises(ThrottledError):
+            async with lim.slot(5):
+                pass
+        assert clock.now == pytest.approx(0.0)  # the query path's 5 s timeout: no 5 s sleep for nothing
+        clock.now = 17.0
+        async with lim.slot(5):  # the first slot frees at 20 s, within the 5 s: wait for it
+            assert clock.now == pytest.approx(20.0)
+
+    await clock.run(main())
+
+
+async def test_limiter_in_flight_slot_without_cooldown_is_worth_waiting_for() -> None:
+    lim = SlotLimiter(1, 0.0)
+    held = await lim.acquire()
+
+    async def later() -> None:
+        await asyncio.sleep(0.01)
+        lim.release(held)
+
+    task = asyncio.ensure_future(later())
+    slot = await lim.acquire(timeout=1.0)  # released (no cooldown) before the timeout
+    lim.release(slot)
+    await task
 
 
 async def test_limiter_without_cooldown_reuses_slots_at_once() -> None:

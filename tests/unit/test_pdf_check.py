@@ -73,14 +73,50 @@ def test_page_breaks_and_margin_notes_are_not_penalised() -> None:
     assert c.similarity == 1.0 and c.precision == 1.0
 
 
+def test_an_article_that_swallowed_its_neighbour_does_not_score_one() -> None:
+    """M2 review: the span used to run to the last token *we* matched, so art. 6 + all of art. 7 scored ≈ 1.0. The
+    reference article now ends at the next heading of the reference (with or without a margin number)."""
+    ref = (
+        "   Art. 6. Sont dispensées de l’assurance les personnes exerçant une activité au Luxembourg.\n"
+        "   Extension de l’assurance\n"
+        "1  Art. 7. Le bénéfice de l’assurance obligatoire et de l’assurance volontaire s’étend au conjoint.\n"
+    )
+    own = "Sont dispensées de l’assurance les personnes exerçant une activité au Luxembourg."
+    merged = own + "\nExtension de l’assurance\nArt. 7. Le bénéfice de l’assurance obligatoire et de l’assurance"
+    merged += " volontaire s’étend au conjoint."
+    good = C.check_unit(unit("Art. 6.", own), ref)
+    bad = C.check_unit(unit("Art. 6.", merged), ref)
+    assert good.similarity == 1.0 and good.numbering_ok
+    assert bad.similarity < 0.8 and bad.precision < 0.6
+
+
+def test_heading_recall_lists_the_headings_no_unit_starts() -> None:
+    page = (
+        "   Art. 6. Sont dispensées de l’assurance.\n"
+        "1  Art. 7. Le bénéfice de l’assurance s’étend.\n"
+        "   «Art. 8. L’assurance a pour objet.\n"
+        "   Art. 9 de la loi du 2 mars 1963 (not a heading)\n"
+        "Chapitre I. - Étendue ................................ Art. 1 - 7\n"
+    )
+    six = unit("Art. 6.", "Sont dispensées de l’assurance. Le bénéfice de l’assurance s’étend.").model_copy(
+        update={"num_norm": "6"}
+    )
+    eight = six.model_copy(update={"ordinal": 2, "anchor": "art_8", "num_raw": "Art. 8.", "num_norm": "8"})
+    r = C.heading_recall([six, eight], [page])
+    assert r["reference_headings"] == 3 and r["matched"] == 2 and r["missing"] == 1
+    assert r["missing_examples"] == [{"page": 1, "article": "7", "inside": "art_1"}]
+    assert r["recall"] == pytest.approx(2 / 3, abs=1e-3)
+
+
 @pytest.mark.skipif(shutil.which("pdftotext") is None, reason="pdftotext (poppler-utils) not installed")
 def test_spot_check_on_the_committed_excerpts() -> None:
-    for name in ("css", "route", "educ", "secfin"):
+    for name in ("css", "route", "educ", "secfin", "css2", "educ2", "communal2"):
         res = parsed(name)
         report = C.spot_check(PDF_DIR.parent / CATALOGUE["excerpts"][name]["path"], res.units, n=50, seed=1)
         assert report["sampled"] > 0, name
         assert report["precision_mean"] >= 0.99, (name, report["worst"])
         assert report["numbering_ok"] >= 0.98 and report["similarity_mean"] >= C.TARGET, (name, report["worst"])
+        assert report["headings"]["recall"] >= C.RECALL_TARGET, (name, report["headings"])
 
 
 # ----------------------------------------------------------------------------- full PDFs (opt-in, large)

@@ -36,7 +36,8 @@ class ReleaseInfo:
     aliases: dict[str, list[int]]  # alias_norm -> act ids
     alias_kinds: dict[str, str] = field(default_factory=dict)
     embedding_models: list[dict[str, Any]] = field(default_factory=list)
-    search_api: int = 1  # 1: lgx.search_candidates of M1 (9 arguments); 2: + expansion, act boosts, options (M2)
+    # 1: lgx.search_candidates of M1 (9 arguments); 2: + expansion, act boosts, options (M2); 3: + member act filter
+    search_api: int = 1
 
     def legal(self, code: str, lang: str = "fr") -> str:
         texts = self.legal_texts.get(code, {})
@@ -107,8 +108,15 @@ async def load_release(db: Database) -> ReleaseInfo:
         aliases=aliases,
         alias_kinds=kinds,
         embedding_models=models,
-        search_api=2 if api and (api["n"] or 0) >= 12 else 1,
+        search_api=_search_api(int(api["n"] or 0) if api else 0),
     )
+
+
+def _search_api(nargs: int) -> int:
+    """Search API generation of a release from the arity of ``lgx.search_candidates``."""
+    if nargs >= 13:
+        return 3
+    return 2 if nargs >= 12 else 1
 
 
 class ReleaseCache:

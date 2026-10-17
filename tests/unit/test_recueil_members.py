@@ -217,3 +217,34 @@ def test_routing_flags_superseded_by_code_only_for_routed_members() -> None:
         assert (ActFlag.SUPERSEDED_BY_CODE in a.flags) is flagged
         assert a.superseded_by_eli == (E + "code/education_nationale" if flagged else None)
         assert a.text_basis is TextBasis.ORIGINAL_POSSIBLY_OUTDATED  # the label never changes
+
+
+def test_excerpt_note_in_the_preamble_and_suffixed_member_keys() -> None:
+    """M2 review: the PDFs print « Extrait: Art. 9 » under the Mémorial reference, not in the heading — such a member
+    must not be routed (its other articles would be hidden). Member keys keep their occurrence suffix (~N)."""
+    out = units()
+    agd = next(u for u in out if u.anchor == "agd_1955-11-23")
+    pre = _u(len(out) + 1, UnitType.PREAMBLE, "agd_1955-11-23.preamble", parent=agd.ordinal).model_copy(
+        update={"text_plain": "(Mém. A - 18 du 27 mars 1987, p. 230)\nExtrait: Art. 9"}
+    )
+    cfg = M.derive(acts=ACTS, entries=[ENTRY], units_of={ROUTE_V: [*out, pre]}, generated="x")
+    entry = next(m for m in cfg.members if m.member.endswith("agd/1955/11/23/n1"))
+    assert not entry.route and entry.coverage == "partial" and entry.note and "excerpt" in entry.note
+    twice = [
+        *units(),
+        _u(30, UnitType.PART, "loi_1955-02-14~2", "Loi du 14 février 1955 portant approbation d'un accord"),
+    ]
+    twice.append(_u(31, UnitType.ARTICLE, "loi_1955-02-14~2.art_1", parent=30))
+    cfg2 = M.derive(acts=ACTS, entries=[ENTRY], units_of={ROUTE_V: twice}, generated="x")
+    keys = {m.member.rsplit("/leg/", 1)[1]: m.member_key for m in cfg2.members}
+    assert keys["loi/1955/02/14/n3"] == "loi_1955-02-14" and keys["loi/1955/02/14/n1"] == "loi_1955-02-14~2"
+
+
+def test_dropped_pdf_copies_still_count_as_articles_of_their_part() -> None:
+    only_part = [u for u in units() if u.anchor != "rgd_2015-01-01.art_1"]  # the copy was dropped by the dedup
+    cfg = M.derive(
+        acts=ACTS, entries=[ENTRY], units_of={ROUTE_V: only_part}, generated="x",
+        dropped_of={ROUTE_V: ["rgd_2015-01-01.art_1"]},
+    )  # fmt: skip
+    taxi = next(m for m in cfg.members if m.member.endswith("rgd/2015/01/01/a1"))
+    assert taxi.articles == 1 and not taxi.route

@@ -163,3 +163,16 @@ def test_dev_down_stops_every_profile() -> None:
     """`make dev-down` covers every profile (before M2 it left the rerank container and the networks behind)."""
     out = subprocess.run(["make", "-n", "-s", "dev-down"], cwd=ROOT, capture_output=True, text=True, timeout=30).stdout
     assert "--profile rerank" in out
+
+
+@pytest.mark.parametrize("file", [DEV, RUNTIME])
+def test_ui_tool_timeout_exceeds_the_server_rerank_budget(file: Path) -> None:
+    """M2 review: the UI's per-tool timeout must exceed the server's total rerank budget plus SQL and a margin,
+    or a slow re-ranking times out in the UI instead of falling back to the lexical order with a reason."""
+    services = rendered(file, ("rerank", "testui"))["services"]
+    budget = float(services["mcp"]["environment"]["LGX_RERANK_TIMEOUT_S"])
+    ui_name = next(n for n in services if "streamlit" in n or n == "testui")
+    ui = float(services[ui_name]["environment"]["LGX_MCP_TIMEOUT_S"])
+    assert ui >= budget + 5, (file.name, budget, ui)
+    assert int(services["mcp"]["environment"]["LGX_RERANK_K"]) <= 16  # CPU-safe defaults (PLAN §8.3, M2 review)
+    assert int(services["mcp"]["environment"]["LGX_RERANK_BODY_CHARS"]) <= 600

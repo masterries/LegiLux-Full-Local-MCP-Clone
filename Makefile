@@ -40,6 +40,8 @@ EVAL_DSN ?= $(LGX_MCP_PG_DSN)
 EVAL_SETS ?= G0 G1 G2 G3
 EVAL_MODE ?= lexical
 EVAL_ARGS ?=
+# not committed: `make eval` never overwrites the baselines in eval/reports (write those with --out-dir eval/reports)
+EVAL_OUT ?= data/reports/eval
 
 .PHONY: help sync lint fmt test test-db test-live config-check db-image db-up db-down db-schema db-psql sample \
 	dev-db ingest-sample dev-up dev-down dev-logs dev-ps fetch-models rerank-up rerank-down mcp ui e2e \
@@ -81,7 +83,7 @@ db-up: db-image ## start a throwaway dev PostgreSQL on 127.0.0.1:$(LGX_DB_PORT)
 	@docker exec $(LGX_DB_CONTAINER) pg_isready -h 127.0.0.1 -U postgres  # TCP: skips the init-time socket-only server
 
 db-down: ## stop and remove the dev PostgreSQL
-	-docker rm -f $(LGX_DB_CONTAINER)
+	-docker rm -f -v $(LGX_DB_CONTAINER)  # -v: drop the anonymous /var/lib/postgresql volume (≈ 200 MB per run)
 
 db-schema: ## (re)create $(LGX_DB_NAME) and apply db/schema/*.sql
 	scripts/db_apply.sh --container $(LGX_DB_CONTAINER) --dbname $(LGX_DB_NAME) --embed-dim $(EMBED_DIM) --recreate
@@ -160,8 +162,9 @@ egress-check: ## airgap egress check (internal network, DNS sentinel, DOCKER-USE
 embed-plan: ## embedding plan for T (chunks, requests, tokens, duration under the throttle); never a request
 	$(UV) run lgx --t $(LGX_T) embed --dry-run
 
-eval: ## eval harness: EVAL_SETS (G0 G1 G2 G3) in EVAL_MODE (lexical | rerank) against EVAL_DSN -> eval/reports/
+eval: ## eval harness: EVAL_SETS (G0 G1 G2 G3) in EVAL_MODE (lexical | rerank) against EVAL_DSN -> $(EVAL_OUT)
 	@for s in $(EVAL_SETS); do \
 	  echo "== $$s ($(EVAL_MODE))"; \
-	  $(UV) run python -m eval.harness run --set $$s --mode $(EVAL_MODE) --dsn '$(EVAL_DSN)' $(EVAL_ARGS) || exit 1; \
+	  $(UV) run python -m eval.harness run --set $$s --mode $(EVAL_MODE) --dsn '$(EVAL_DSN)' --out-dir $(EVAL_OUT) \
+	    --tag $$s-$(EVAL_MODE)-$$(date -u +%Y%m%dT%H%M%SZ) $(EVAL_ARGS) || exit 1; \
 	done

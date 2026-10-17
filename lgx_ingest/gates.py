@@ -47,6 +47,7 @@ from lgx_ingest.load import (
 Status = Literal["pass", "fail", "warn", "skip"]
 CORE_TYPES = frozenset({"CODE", "CODE_RECUEIL", "Constitution"})
 PDF_ARTICLE_TOLERANCE = 0.01  # PLAN §11.4: « Art. » line starts mapped within ±1 %
+PDF_REPEAT_TOLERANCE = 0.05  # member parts that repeat an article number (M2 review: missed member boundaries)
 CANNED_QUERY = "travail"
 
 
@@ -290,7 +291,7 @@ def pdf_and_recueil_gates(report: GateReport, stats: dict[str, dict[str, int]]) 
     for version, st in sorted(stats.items()):
         if "units_before_structure" not in st:
             continue
-        dropped = st.get("dedup_dropped_duplicate", 0)
+        dropped = sum(v for k, v in st.items() if k.startswith("dedup_dropped_"))
         rec_seen[version.rsplit("/eli/", 1)[-1]] = {"dropped": dropped, "units": st.get("units")}
         if st["units_before_structure"] - dropped != st.get("units"):
             rec_bad.append(version)
@@ -301,6 +302,44 @@ def pdf_and_recueil_gates(report: GateReport, stats: dict[str, dict[str, int]]) 
             rec_seen,
             "units after = units before − dropped duplicates (every other article kept)",
             examples=rec_bad,
+        )
+    # M2 review: every routed member must attach to a part with an article (else its original is hidden for nothing)
+    route_bad, route_seen = [], {}
+    for version, st in sorted(stats.items()):
+        if "routed_members" not in st:
+            continue
+        attached = st["routed_members"] - st.get("routed_unattached", 0)
+        route_seen[version.rsplit("/eli/", 1)[-1]] = f"{attached}/{st['routed_members']}"
+        if st.get("routed_unattached"):
+            route_bad.append(f"{version}: {st['routed_unattached']} routed member(s) without an attached article")
+    if route_seen:
+        report.check(
+            "recueil_routing_attached",
+            not route_bad,
+            route_seen,
+            "every route: true member of config/recueil_members.yaml keeps ≥ 1 article in the PDF code text "
+            "(after the copy deduplication)",
+            examples=route_bad,
+        )
+    # M2 review: an article number repeated inside one member part = a missed member boundary (or a wrong split)
+    num_bad, num_seen = [], {}
+    for version, st in sorted(stats.items()):
+        if "member_parts_with_repeats" not in st:
+            continue
+        parts = max(1, st.get("members", 0) + st.get("anonymous_members", 0))
+        share = st["member_parts_with_repeats"] / parts
+        num_seen[version.rsplit("/eli/", 1)[-1]] = f"{st['member_parts_with_repeats']}/{parts}"
+        if share > PDF_REPEAT_TOLERANCE:
+            num_bad.append(f"{version}: {st['member_parts_with_repeats']} of {parts} member parts repeat a number")
+    if num_seen:
+        worst = any(v.split("/")[0] != "0" for v in num_seen.values())
+        report.add(
+            "pdf_member_numbering",
+            "fail" if num_bad else ("warn" if worst else "pass"),
+            num_seen,
+            f"member parts repeating an article number ≤ {PDF_REPEAT_TOLERANCE:.0%} (warn above 0)",
+            "units: lgx_ingest.parse.pdf.repeated_numbers",
+            examples=num_bad,
         )
 
 

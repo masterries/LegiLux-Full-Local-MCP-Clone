@@ -1,0 +1,647 @@
+{
+ "set": "G1",
+ "release": "pdftotext of the cached sample PDFs (snapshot 2026-10-16)",
+ "status": "draft_unvalidated",
+ "note": "PDF code-recueil citations from an independent source (pdftotext headings, running headers, member titles; eval/harness/gen_g1_pdf.py) — not from the parser or the release database (M2 review)",
+ "items": [
+  {
+   "id": "G1-P001",
+   "text": "art. 363 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "363",
+    "page": 207
+   }
+  },
+  {
+   "id": "G1-P002",
+   "text": "art. 168 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "168",
+    "page": 137
+   }
+  },
+  {
+   "id": "G1-P003",
+   "text": "art. 381 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "381",
+    "page": 212
+   }
+  },
+  {
+   "id": "G1-P004",
+   "text": "art. 236 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "236",
+    "page": 172
+   }
+  },
+  {
+   "id": "G1-P005",
+   "text": "art. 348 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "348",
+    "page": 201
+   }
+  },
+  {
+   "id": "G1-P006",
+   "text": "art. 138 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "138",
+    "page": 134
+   }
+  },
+  {
+   "id": "G1-P007",
+   "text": "art. 433 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "433",
+    "page": 236
+   }
+  },
+  {
+   "id": "G1-P008",
+   "text": "art. 134 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "134",
+    "page": 133
+   }
+  },
+  {
+   "id": "G1-P009",
+   "text": "art. 245 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "245",
+    "page": 175
+   }
+  },
+  {
+   "id": "G1-P010",
+   "text": "art. 27 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "27",
+    "page": 82
+   }
+  },
+  {
+   "id": "G1-P011",
+   "text": "art. 195 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "195",
+    "page": 157
+   }
+  },
+  {
+   "id": "G1-P012",
+   "text": "art. 20bis du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "20bis",
+    "page": 79
+   }
+  },
+  {
+   "id": "G1-P013",
+   "text": "art. 63 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "63",
+    "page": 100
+   }
+  },
+  {
+   "id": "G1-P014",
+   "text": "art. 252 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "252",
+    "page": 177
+   }
+  },
+  {
+   "id": "G1-P015",
+   "text": "art. 180 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "180",
+    "page": 150
+   }
+  },
+  {
+   "id": "G1-P016",
+   "text": "art. 367 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "367",
+    "page": 208
+   }
+  },
+  {
+   "id": "G1-P017",
+   "text": "art. 384 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "384",
+    "page": 213
+   }
+  },
+  {
+   "id": "G1-P018",
+   "text": "art. 221 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "221",
+    "page": 168
+   }
+  },
+  {
+   "id": "G1-P019",
+   "text": "art. 269 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "269",
+    "page": 185
+   }
+  },
+  {
+   "id": "G1-P020",
+   "text": "art. 158 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "158",
+    "page": 137
+   }
+  },
+  {
+   "id": "G1-P021",
+   "text": "art. 126 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "126",
+    "page": 132
+   }
+  },
+  {
+   "id": "G1-P022",
+   "text": "art. 60 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "60",
+    "page": 94
+   }
+  },
+  {
+   "id": "G1-P023",
+   "text": "art. 163 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "163",
+    "page": 137
+   }
+  },
+  {
+   "id": "G1-P024",
+   "text": "art. 249 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "249",
+    "page": 176
+   }
+  },
+  {
+   "id": "G1-P025",
+   "text": "art. 278 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "278",
+    "page": 189
+   }
+  },
+  {
+   "id": "G1-P026",
+   "text": "art. 119 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "119",
+    "page": 130
+   }
+  },
+  {
+   "id": "G1-P027",
+   "text": "art. 196 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "196",
+    "page": 158
+   }
+  },
+  {
+   "id": "G1-P028",
+   "text": "art. 208 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "208",
+    "page": 161
+   }
+  },
+  {
+   "id": "G1-P029",
+   "text": "art. 59 du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "59",
+    "page": 94
+   }
+  },
+  {
+   "id": "G1-P030",
+   "text": "art. 455ter du Code de la sécurité sociale",
+   "style": "pdf:css_own",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+    "article": "455ter",
+    "page": 243
+   }
+  },
+  {
+   "id": "G1-P031",
+   "text": "art. 66bis du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P032",
+   "text": "art. 158bis du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P033",
+   "text": "art. 91 bis du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P034",
+   "text": "art. 71ter du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P035",
+   "text": "art. 71bis du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P036",
+   "text": "art. 16bis du Code de la sécurité sociale",
+   "style": "pdf:css_member_only_number",
+   "expect": {
+    "status": "not_found"
+   }
+  },
+  {
+   "id": "G1-P037",
+   "text": "article 168 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "168",
+    "page": 284
+   }
+  },
+  {
+   "id": "G1-P038",
+   "text": "article 138 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "138",
+    "page": 260
+   }
+  },
+  {
+   "id": "G1-P039",
+   "text": "article 134 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "134",
+    "page": 258
+   }
+  },
+  {
+   "id": "G1-P040",
+   "text": "article 27 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "27",
+    "page": 107
+   }
+  },
+  {
+   "id": "G1-P041",
+   "text": "article 63 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "63",
+    "page": 147
+   }
+  },
+  {
+   "id": "G1-P042",
+   "text": "article 158 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "158",
+    "page": 274
+   }
+  },
+  {
+   "id": "G1-P043",
+   "text": "article 126 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "126",
+    "page": 256
+   }
+  },
+  {
+   "id": "G1-P044",
+   "text": "article 60 de l'arrêté grand-ducal du 23 novembre 1955 portant règlement de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/agd/1955/11/23/n1",
+    "article": "60",
+    "page": 147
+   }
+  },
+  {
+   "id": "G1-P045",
+   "text": "article 6 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "6",
+    "page": 34
+   }
+  },
+  {
+   "id": "G1-P046",
+   "text": "article 9 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "9",
+    "page": 36
+   }
+  },
+  {
+   "id": "G1-P047",
+   "text": "article 11 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "11",
+    "page": 36
+   }
+  },
+  {
+   "id": "G1-P048",
+   "text": "article 18 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "18",
+    "page": 49
+   }
+  },
+  {
+   "id": "G1-P049",
+   "text": "article 10bis de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "10bis",
+    "page": 36
+   }
+  },
+  {
+   "id": "G1-P050",
+   "text": "article 15 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "15",
+    "page": 45
+   }
+  },
+  {
+   "id": "G1-P051",
+   "text": "article 1er de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "1",
+    "page": 13
+   }
+  },
+  {
+   "id": "G1-P052",
+   "text": "article 13 de la loi du 14 février 1955 concernant la réglementation de la circulation sur toutes les voies publiques",
+   "style": "pdf:route_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1955/02/14/n3",
+    "article": "13",
+    "page": 42
+   }
+  },
+  {
+   "id": "G1-P053",
+   "text": "article 1er de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "1",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P054",
+   "text": "article 2 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "2",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P055",
+   "text": "article 3 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "3",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P056",
+   "text": "article 4 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "4",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P057",
+   "text": "article 5 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "5",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P058",
+   "text": "article 6 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "6",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P059",
+   "text": "article 7 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:communal_member",
+   "expect": {
+    "status": "resolved",
+    "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+    "article": "7",
+    "page": 139
+   }
+  },
+  {
+   "id": "G1-P060",
+   "text": "article 8 de la loi du 19 mai 2009 portant diverses mesures d'application du règlement (CE) n° 1082/2006",
+   "style": "pdf:member_number_of_an_eu_complement",
+   "expect": {
+    "status": "not_found"
+   }
+  }
+ ]
+}

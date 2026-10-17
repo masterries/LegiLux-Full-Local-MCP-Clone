@@ -86,10 +86,10 @@ class McpSettings:
     allowed_origins: tuple[str, ...] = ()
     rerank_url: str | None = None
     rerank: RerankMode = "auto"
-    rerank_k: int = 40
+    rerank_k: int = 16  # CPU-safe defaults (M2 review): PLAN §8.3's 40 × 1,800 needs a GPU or the int8 export
     rerank_batch: int = 32
-    rerank_timeout_s: float = 10.0
-    rerank_body_chars: int = 1800
+    rerank_timeout_s: float = 15.0  # total budget of one search's re-ranking; keep below the client tool timeout
+    rerank_body_chars: int = 600
     lexical_ranker: str = "bm25"  # bm25 (IDF-weighted, release search API ≥ 2) | rank_cd (M1 ranking)
     query_expansion: bool = True  # curated French legal synonyms / DE-EN glossary (lgx_mcp/retrieval/expansion)
     lexical_opts: dict[str, float] = field(default_factory=dict)  # ranker knobs (40_search.sql p_opts; eval, tuning)
@@ -169,10 +169,10 @@ class McpSettings:
             "allowed_origins": _list(g("LGX_ALLOWED_ORIGINS"), ()),
             "rerank_url": (g("LGX_RERANK_URL") or "").strip() or None,
             "rerank": rerank,
-            "rerank_k": int(g("LGX_RERANK_K", "40")),
+            "rerank_k": int(g("LGX_RERANK_K", "16")),
             "rerank_batch": int(g("LGX_RERANK_BATCH", "32")),
-            "rerank_timeout_s": float(g("LGX_RERANK_TIMEOUT_S", "10")),
-            "rerank_body_chars": int(g("LGX_RERANK_BODY_CHARS", "1800")),
+            "rerank_timeout_s": float(g("LGX_RERANK_TIMEOUT_S", "15")),
+            "rerank_body_chars": int(g("LGX_RERANK_BODY_CHARS", "600")),
             "lexical_ranker": ranker,
             "query_expansion": _bool(g("LGX_QUERY_EXPANSION"), True),
             "lexical_opts": _opts(g("LGX_LEXICAL_OPTS")),

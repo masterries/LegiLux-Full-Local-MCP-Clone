@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import Any
 
 GOLD_DIR = Path(__file__).resolve().parents[1] / "gold"
-REPORTS_DIR = Path(__file__).resolve().parents[1] / "reports"
+REPORTS_DIR = Path(__file__).resolve().parents[1] / "reports"  # committed baselines (written only on purpose)
+# default output of `run`: not committed (data/ is gitignored) — a plain `make eval` must never overwrite a baseline
+RUNS_DIR = Path(__file__).resolve().parents[2] / "data" / "reports" / "eval"
 SETS = ("G0", "G1", "G2", "G3")
 REQUIRED = {
     "G0": ("id", "tool", "arguments", "checks"),

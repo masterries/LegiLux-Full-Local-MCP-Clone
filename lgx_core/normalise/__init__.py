@@ -229,5 +229,5 @@ def is_repeal_stub_text(text: str) -> bool:
     if not t or len(t) > 400 or not re.search(r"abrog|supprim", t):
         return False
     residual = _PAREN_GROUP.sub(" ", t)
-    residual = re.sub(r"[\s.,;:…«»\"'’\-–]+", " ", residual).strip()
+    residual = re.sub(r"[\s.,;:…«»\"'’\-–\[\]]+", " ", residual).strip()  # « (abrogé) [...] » omission marks
     return all(w in _STUB_WORDS for w in residual.split())

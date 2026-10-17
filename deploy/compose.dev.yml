@@ -177,8 +177,11 @@ services:
       LGX_RERANK_URL: "${LGX_RERANK_URL:-http://rerank:8080}"
       LGX_RERANK_K: "${LGX_RERANK_K:-16}"               # PLAN §8.3 cpu: 16 candidates
       LGX_RERANK_BATCH: "16"                            # client-side split, <= the TEI --max-client-batch-size below
-      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 4 vCPU fp32: 16 x 600 chars ~ 19 s (1,800: 60 s)
-      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-60}"
+      LGX_RERANK_BODY_CHARS: "${LGX_RERANK_BODY_CHARS:-600}"   # 4 vCPU fp32: 16 x 600 chars ~ 17-25 s (1,800: 60 s)
+      # TOTAL rerank budget of one search (all batches; past it: lexical order + reason). It MUST stay below the
+      # UI's LGX_MCP_TIMEOUT_S (lgx-streamlit below, 60 s): budget + SQL (< 1 s) + margin, or the fallback never
+      # reaches the UI (M2 review: 20 s UI vs 60 s server gave TIMEOUT while the server still answered)
+      LGX_RERANK_TIMEOUT_S: "${LGX_RERANK_TIMEOUT_S:-45}"
       LGX_RETRIEVAL_MODE_DEFAULT: auto
       LGX_EMBED_PROVIDER: "${LGX_EMBED_PROVIDER:-none}"  # user decision: embeddings off (lexical-only)
       LGX_EMBED_BASE_URL: "${LGX_EMBED_BASE_URL:-https://api.mistral.ai}"
@@ -251,7 +254,7 @@ services:
       LGX_MCP_URL: "${LGX_DEV_MCP_URL:-http://mcp:8000/mcp}"
       LGX_MCP_TOKEN: *mcp_token
       LGX_MAX_TOOL_ITERATIONS: "5"
-      LGX_MCP_TIMEOUT_S: "20"
+      LGX_MCP_TIMEOUT_S: "${LGX_MCP_TIMEOUT_S:-60}"     # per tool call; > mcp LGX_RERANK_TIMEOUT_S (45) + SQL + margin
       LGX_LLM_TIMEOUT_S: "${LGX_LLM_TIMEOUT_S:-120}"    # per LLM call
       LGX_TURN_BUDGET_S: "${LGX_TURN_BUDGET_S:-600}"    # whole chat turn
       LGX_TOOL_RESULT_TOKENS: "${LGX_TOOL_RESULT_TOKENS:-2500}"

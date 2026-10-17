@@ -65,6 +65,14 @@ until healthy; `make dev-up DEV_PROFILES=rerank` adds the TEI reranker and `LGX_
 `FETCH_MODELS_ARGS=--verify-only` checks `deploy/models.lock` offline), `make rerank-up` / `rerank-down` (start or stop
 TEI on a running stack and switch the dev `mcp` to `LGX_RERANK=auto` / `off`; TEI is ready ≈ 1.5 min after start on an
 idle 4-vCPU host, ≈ 6 min on a busy one), `make eval` (below),
+**Timeouts with the reranker on (coupled):** the mcp's `LGX_RERANK_TIMEOUT_S` is the *total* re-ranking budget of one
+search (all batches; past it the search returns the lexical order with `retrieval.rerank_reason`), and it must stay below
+the UI's per-tool timeout `LGX_MCP_TIMEOUT_S` minus the SQL time and a margin — otherwise a slow re-ranking times out in
+the UI instead of falling back (M2 review: 20 s UI vs 60 s server). Dev stack: budget 45 s, UI 60 s; airgap compose:
+budget 20 s, UI 45 s; server and UI code defaults 15 s / 30 s. CPU-safe reranker defaults everywhere: `LGX_RERANK_K` 16,
+`LGX_RERANK_BODY_CHARS` 600 (16 × 600 characters ≈ 17–25 s on this 4-vCPU host); the startup probe times a search-sized
+payload and reports a reranker slower than the budget as unavailable. `tests/unit/test_ui_compose.py` checks the
+coupling in both compose files.
 `make e2e` (scripted questions through the UI container; `E2E_STUB=1` runs them against `scripts/openai_stub.py`, a
 deterministic keyless OpenAI-compatible stub started inside the UI container), `make embed-plan` (`lgx embed --dry-run`),
 `make egress-check` (airgap egress check; the chat goes to the stub on the internal network), and host runs `make mcp`
@@ -83,12 +91,13 @@ key is only ever sent to the configured one. Open WebUI (optional, M5) points to
 ## Evaluation (PLAN §11, `eval/README.md`)
 
 ```sh
-make eval                                   # G0 G1 G2 G3, lexical, in process against legilux (lgx_ro)
+make eval                                   # G0 G1 G2 G3, lexical, in process against legilux -> data/reports/eval/
 make eval EVAL_SETS=G2 EVAL_MODE=rerank EVAL_ARGS="--subset eval/gold/subsets/G2-rerank-40.json --tag G2-rerank-subset40"
 uv run python -m eval.harness compare --subset eval/gold/subsets/G2-rerank-40.json eval/reports/G2-*.json
 ```
 
-Reranked runs cost 10–45 s per search on 4 vCPU: run them on the fixed stratified subset (`python -m eval.harness subset`)
+Reports go to `data/reports/eval/` by default (not committed; a run stamp in the name); the committed baselines in
+`eval/reports/` are written only with an explicit `--out-dir eval/reports --tag …`. Reranked runs cost 10–45 s per search on 4 vCPU: run them on the fixed stratified subset (`python -m eval.harness subset`)
 and never two at a time. Results and the M2 acceptance check: `eval/reports/m2-baseline.md`, `eval/reports/m2-acceptance.md`.
 
 ## Embeddings (off by default)

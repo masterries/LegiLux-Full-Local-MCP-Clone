@@ -1,0 +1,172 @@
+{
+ "set": "G0",
+ "started_at": "20261017T122002Z",
+ "items_total": 20,
+ "gold_status": "draft_unvalidated",
+ "gold_files": [
+  "smoke.json"
+ ],
+ "subset": null,
+ "config": {
+  "backend": "in-process",
+  "mode": "lexical",
+  "ranker": "bm25",
+  "expansion": true,
+  "lexical_opts": {},
+  "rerank_k": null,
+  "rerank_body_chars": null,
+  "rerank_url": null,
+  "release_id": "data-20261016-sample",
+  "sync_date": "2026-10-16",
+  "search_api": 3,
+  "clock": "2026-10-16T12:00:00+02:00"
+ },
+ "summary": {
+  "n": 20,
+  "passed": 20,
+  "gate": "G0 20/20",
+  "gate_ok": true
+ },
+ "items": [
+  {
+   "id": "G0-01",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 279.6,
+   "failed": []
+  },
+  {
+   "id": "G0-02",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 32.3,
+   "failed": []
+  },
+  {
+   "id": "G0-03",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 29.9,
+   "failed": []
+  },
+  {
+   "id": "G0-04",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 36.0,
+   "failed": []
+  },
+  {
+   "id": "G0-05",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 221.7,
+   "failed": []
+  },
+  {
+   "id": "G0-06",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 176.7,
+   "failed": []
+  },
+  {
+   "id": "G0-07",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 170.1,
+   "failed": []
+  },
+  {
+   "id": "G0-08",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 157.6,
+   "failed": []
+  },
+  {
+   "id": "G0-09",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 38.8,
+   "failed": []
+  },
+  {
+   "id": "G0-10",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 39.6,
+   "failed": []
+  },
+  {
+   "id": "G0-11",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 20.0,
+   "failed": []
+  },
+  {
+   "id": "G0-12",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 18.5,
+   "failed": []
+  },
+  {
+   "id": "G0-13",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 20.6,
+   "failed": []
+  },
+  {
+   "id": "G0-14",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 20.7,
+   "failed": []
+  },
+  {
+   "id": "G0-15",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 20.4,
+   "failed": []
+  },
+  {
+   "id": "G0-16",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 36.2,
+   "failed": []
+  },
+  {
+   "id": "G0-17",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 8.1,
+   "failed": []
+  },
+  {
+   "id": "G0-18",
+   "ok": true,
+   "is_error": false,
+   "latency_ms": 69.9,
+   "failed": []
+  },
+  {
+   "id": "G0-19",
+   "ok": true,
+   "is_error": true,
+   "latency_ms": 0.4,
+   "failed": []
+  },
+  {
+   "id": "G0-20",
+   "ok": true,
+   "is_error": true,
+   "latency_ms": 0.2,
+   "failed": []
+  }
+ ]
+}

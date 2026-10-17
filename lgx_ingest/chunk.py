@@ -5,7 +5,8 @@
 * Articles over ≈ 1,500 tokens (``lgx_core.textsize``: ``ceil(chars / 3.5)``) are split at paragraph
   boundaries (``(1)``, ``(2)`` … lines; then lines; then sentences), ``part_no/part_count`` set.
 * Articles are never merged. No chunk for repealed stubs, preamble/visas, hierarchy nodes, modifying
-  articles (``is_modifying``) or table/parcel annexes (digit ratio > 0.3 or > 50 % table lines).
+  articles (``is_modifying``), table/parcel annexes (digit ratio > 0.3 or > 50 % table lines) or the units of
+  an EU / international text printed in a PDF code (« Complément », anchors ``ue_<n>.…``: out of scope).
 * ``searchable = false`` for ``superseded_by_code`` / ``acte_temporaire``; ``rank_prior = 0.8`` for the
   autonomous articles of pure amending acts (PLAN §2.7).
 * ``valid_from/valid_to`` = the version's ``text_valid``; ``content_sha256 = sha256(header + body)``.
@@ -31,6 +32,7 @@ from lgx_core.models import (
     Chunk,
     DateWindow,
     ManifestEntry,
+    SourceFormat,
     Unit,
     UnitType,
     VersionKind,
@@ -38,6 +40,7 @@ from lgx_core.models import (
 )
 from lgx_core.textsize import estimate_tokens
 from lgx_ingest.context import StageContext, StageResult
+from lgx_ingest.parse.pdf import EU_PART_PREFIX
 
 CHUNKER_VERSION = "chunk-1"
 MAX_TOKENS = 1500
@@ -77,6 +80,8 @@ def skip_reason(unit: Unit) -> str | None:
         return "repealed"
     if unit.is_modifying:
         return "modifying"
+    if unit.source_format is SourceFormat.PDF and unit.anchor.startswith(EU_PART_PREFIX):
+        return "out_of_scope"
     if not (unit.text_plain or "").strip():
         return "empty"
     if is_table_annex(unit):
@@ -278,7 +283,7 @@ def run_chunk(ctx: StageContext) -> StageResult:
         counts["split_articles"] += len({c.unit_ordinal for c in chunks if c.part_count > 1})
         for u in units:
             reason = skip_reason(u)
-            if reason in ("repealed", "modifying", "table_annex", "preamble", "empty"):
+            if reason in ("repealed", "modifying", "table_annex", "preamble", "empty", "out_of_scope"):
                 counts[f"skipped_{reason}"] += 1
     result.counts.update(counts)
     result.details["manifest"] = str(manifest)

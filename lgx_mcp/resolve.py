@@ -22,7 +22,7 @@ from lgx_core.citeparse import ALIAS_EQUIVALENTS, ActMention, Citation, Citation
 from lgx_core.config import AliasesConfig, load_yaml
 from lgx_core.eli import ELI_BASE, LEG_PREFIX, expand
 from lgx_core.normalise import alias_norm
-from lgx_mcp.facts import ACT_COLS, Act, Facts, Unit, _act, normalise_eli
+from lgx_mcp.facts import ACT_COLS, Act, Facts, Unit, _act, normalise_eli, short_title_of
 
 log = logging.getLogger("lgx_mcp.resolve")
 
@@ -35,6 +35,11 @@ LONE_TITLE_SCORE = 0.4
 _ELI_DATE = re.compile("^" + re.escape(LEG_PREFIX) + r"(?P<seg>[a-z_]+)/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})$")
 Status = Literal["resolved", "ambiguous", "not_found", "out_of_scope"]
 ArticleStatus = Literal["resolved", "ambiguous", "not_found", "no_text", "not_requested"]
+
+
+def clip_text(text: str, n: int) -> str:
+    t = " ".join(text.split())
+    return t if len(t) <= n else t[: n - 1].rstrip() + "…"
 
 
 @dataclass(frozen=True)
@@ -79,6 +84,7 @@ class Candidate:
             "date_document": self.act.date_document.isoformat() if self.act.date_document else None,
             "article": self.unit.num_raw if self.unit else self.article,
             "unit_eli": self.unit.eli_unit if self.unit else None,
+            "page": self.unit.page_from if self.unit else None,  # PDF-derived units (no article ELI)
             "confidence": round(self.confidence, 3),
             "reason": self.reason,
             "text_basis_at_T": self.act.text_basis,
@@ -320,6 +326,15 @@ class Resolver:
         routable = version_id is None and key and best.act.superseded_by_act_id
         if routable and await self._route_to_code(res, best, key, raw, as_of):
             return
+        if routable:  # the act's text is in the code, but not this article: say so (not a licence / not-loaded reason)
+            code = await self.facts.act(best.act.superseded_by_act_id) if best.act.superseded_by_act_id else None
+            name = short_title_of(code) if code else "le code"
+            res.article_status = "not_found"
+            res.message = best.note = (
+                f"acte intégré au {name} (superseded_by_code) : le texte du code ne contient pas d'article {raw}"
+                ' de cet acte — vérifiez le numéro ou consultez le code (get_act include=["toc"])'
+            )
+            return
         if version_id is None:
             res.article_status = "no_text"
             reason = best.act.metadata_reason
@@ -345,8 +360,37 @@ class Resolver:
             return
         main = [u for u in units if not u.in_annex] or units
         exact = [u for u in main if u.num_norm == key] or main
-        if len(exact) > 1:
-            exact = await self._own_articles(best.act, exact)
+        if await self._is_code_recueil_base(best.act, version_id):
+            # « art. N du Code de la sécurité sociale » is the code's own article, never a member's (PLAN §8.3 « never
+            # guess »): one match in a member is not the code's article either
+            own = await self._own_articles(best.act, exact)
+            if not own:
+                best.unit = None
+                res.article_status = "not_found"
+                res.status = "not_found"
+                others = ", ".join(dict.fromkeys(u.breadcrumb.split(" > ")[0] for u in exact if u.breadcrumb))
+                res.message = best.note = (
+                    f"le texte de base du code n'a pas d'article {raw} ; "
+                    + (
+                        f"article(s) {raw} d'autres actes reproduits dans le code : {clip_text(others, 300)} — "
+                        "citez l'acte membre (loi, règlement…) pour l'obtenir"
+                        if exact
+                        else ""
+                    )
+                ).rstrip(" ;")
+                res.candidates = [best] + [
+                    Candidate(
+                        best.act,
+                        0.3,
+                        best.reason,
+                        unit=u,
+                        article=u.num_raw,
+                        note=f"autre acte reproduit dans le code : {u.breadcrumb or u.anchor}",
+                    )
+                    for u in exact[:19]
+                ]
+                return
+            exact = own
         if len(exact) > 1:
             res.article_status = "ambiguous"
             res.status = "ambiguous"
@@ -358,17 +402,20 @@ class Resolver:
         best.unit = exact[0]
         res.article_status = "resolved"
 
+    async def _is_code_recueil_base(self, act: Act, version_id: int) -> bool:
+        """A base act whose served text is a code-recueil (``loi/1925/12/17/n1`` = Code de la sécurité sociale): the
+        code has articles of its own besides its members'. Pure recueils (``…/code/route``, ``…/code/
+        fonction_publique``) and recueils (``…/recueil/…``) have none: there, ambiguous stays ambiguous."""
+        if "/code/" in act.eli_work or "/recueil/" in act.eli_work:
+            return False
+        version = await self.facts.version(version_id)
+        return version is not None and version.kind == "code_recueil"
+
     async def _own_articles(self, act: Act, units: list[Unit]) -> list[Unit]:
-        """A base act whose consolidation is a code-recueil (``loi/1925/12/17/n1`` = Code de la sécurité sociale):
-        its own articles come before the members' (« art. 24 du Code de la sécurité sociale » is the code's art. 24,
-        not that of a law printed after it): own = no member act and no member part above it (unnamed members are
-        ``part`` units too). Unchanged for pure recueils (``…/code/route``, ``…/code/fonction_publique``: every
-        article belongs to a member, ambiguous stays ambiguous) and outside code-recueils."""
-        if "/code/" in act.eli_work or "/recueil/" in act.eli_work or not any(u.member_act_id for u in units):
-            return units
+        """The code's own articles among ``units``: no member act and no member part above them (unnamed members
+        are member parts too)."""
         in_part = await self.facts.under_part(u.unit_id for u in units if u.member_act_id is None)
-        own = [u for u in units if u.member_act_id is None and u.unit_id not in in_part]
-        return own or units
+        return [u for u in units if u.member_act_id is None and u.unit_id not in in_part]
 
     async def code_articles(self, member: Act, key: str, as_of: dt.date) -> list[Unit]:
         """The article units numbered ``key`` of ``member`` in the text of the code-recueil that supersedes it."""

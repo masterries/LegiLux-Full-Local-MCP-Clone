@@ -245,7 +245,9 @@ async def test_real_tei_keeps_the_explicitly_cited_article_first(mcp_dsn: str, t
 
 
 async def test_real_tei_failure_falls_back_to_lexical_with_a_reason(mcp_dsn: str, tei: str) -> None:
-    # a timeout far below one CPU forward pass: the real container is reached but cannot answer in time
+    # a budget far below one CPU forward pass: the real container is reached but cannot answer in time. Since the
+    # M2 review the probe times a search-sized payload (k texts of the body length), so it reports the reranker as
+    # too slow for the budget before any search waits on it
     srv = start_server(make_settings(mcp_dsn, rerank_url=tei, rerank="auto", rerank_k=16, rerank_timeout_s=0.001))
     try:
         sc = await _search(srv, {"query": "délai de préavis en cas de licenciement", "top_k": 5})
@@ -253,4 +255,5 @@ async def test_real_tei_failure_falls_back_to_lexical_with_a_reason(mcp_dsn: str
         srv.stop()
     ret = sc["retrieval"]
     assert sc["hits"] and ret["reranked"] is False and ret["rerank_status"] == "unavailable"
-    assert "Timeout" in (ret["rerank_reason"] or "") and "non reclassés" in ret["rerank_reason"]
+    reason = ret["rerank_reason"] or ""
+    assert "reranker too slow" in reason and "0.001 s budget" in reason and "non reclassés" in reason

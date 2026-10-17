@@ -191,11 +191,14 @@ def content_pdf_check(
     n: Annotated[int, typer.Option(help="Articles to sample")] = 50,
     seed: Annotated[int, typer.Option(help="Random seed")] = 0,
 ) -> None:
-    """Spot-check N random articles of a parsed PDF against `pdftotext -layout` (target >= 98 %)."""
+    """Spot-check N random articles of a parsed PDF against `pdftotext -layout` (target >= 98 %) and the heading
+    recall. Checks the parser's output (the parse cache), not the deduplicated units: the recueil dedup drops member
+    copies on purpose."""
     from lgx_core.eli import expand
     from lgx_core.io import read_jsonl
-    from lgx_core.models import Unit
+    from lgx_core.models import ParseResult, SourceFormat, Unit
     from lgx_ingest.fetch import RawIndex
+    from lgx_ingest.parse import parser_version
     from lgx_ingest.parse.pdf_check import spot_check
 
     stage_ctx = _context(ctx)
@@ -210,6 +213,9 @@ def content_pdf_check(
     if raw is None:
         err.print(f"[red]raw file of {version} not in the raw index[/red]")
         raise typer.Exit(2)
+    cache = stage_ctx.layout.parsed_path(raw.sha256, parser_version(SourceFormat.PDF))
+    if cache.exists():  # the parser output, before the structure pass
+        units = ParseResult.model_validate_json(cache.read_text(encoding="utf-8")).units
     report = spot_check(index.path_of(raw), units, n=n, seed=seed)
     out = stage_ctx.layout.reports_dir / f"pdf_check-{units_path.stem}.json"
     from lgx_core.io import atomic_write_text

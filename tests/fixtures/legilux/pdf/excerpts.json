@@ -87,6 +87,57 @@
     "lower": "2003-10-01",
     "upper": null
    }
+  },
+  "css2": {
+   "path": "pdf/eli-etat-leg-code-securite_sociale-20260101-fr-pdf.p72_76-77_127_472_569-571.pdf",
+   "pages": "72,76-77,127,472,569-571",
+   "sha256": "7342b87ef13a54daf81e7d91d69464a6f1f825a2f1d72c2c13012b1458796fa6",
+   "bytes": 75097,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "css_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/securite_sociale/20260101/fr/pdf/eli-etat-leg-code-securite_sociale-20260101-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/securite_sociale/20260101",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-01-01",
+    "upper": null
+   }
+  },
+  "educ2": {
+   "path": "pdf/eli-etat-leg-code-education_nationale-20260915-fr-pdf.p469-470_871-872_922-923.pdf",
+   "pages": "469-470,871-872,922-923",
+   "sha256": "686d9d0c1d4408b76c7b4b5378763db082a623fb221b28617e330c2641b3a933",
+   "bytes": 83746,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "educ_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/education_nationale/20260915/fr/pdf/eli-etat-leg-code-education_nationale-20260915-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale/20260915",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-09-15",
+    "upper": null
+   }
+  },
+  "communal2": {
+   "path": "pdf/eli-etat-leg-code-communal-20260801-fr-pdf.p139-141.pdf",
+   "pages": "139-141",
+   "sha256": "5a2ef84f20580f345850ccbccaaa8837356921cb60210d3a5aae21fccfb4ef38",
+   "bytes": 42142,
+   "licence": "http://creativecommons.org/licenses/by/4.0/",
+   "derived_from": "communal_pdf",
+   "url": "https://legilux.public.lu/filestore/eli/etat/leg/code/communal/20260801/fr/pdf/eli-etat-leg-code-communal-20260801-fr-pdf.pdf",
+   "eli_version": "http://data.legilux.public.lu/eli/etat/leg/code/communal/20260801",
+   "eli_work": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+   "doc_type": "CODE_RECUEIL",
+   "kind": "code_recueil",
+   "text_valid": {
+    "lower": "2026-08-01",
+    "upper": null
+   }
   }
  }
 }

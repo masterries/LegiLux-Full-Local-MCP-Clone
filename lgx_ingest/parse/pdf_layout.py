@@ -33,7 +33,7 @@ from typing import Any
 
 from lgx_core.normalise import normalise_whitespace, unaccent
 
-LAYOUT_VERSION = "layout-1"
+LAYOUT_VERSION = "layout-2"
 
 _LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "st", "ﬆ": "st", "­": ""}
 _ORDINAL_SUP = re.compile(r"^(?:er|re|ère|e|ème|eme|o|nd|nde|d|me|bis|ter|quater)$", re.IGNORECASE)
@@ -69,6 +69,7 @@ class Line:
     italic: bool = False
     notes: list[str] = field(default_factory=list)  # right-margin notes (provenance)
     alinea: str | None = None  # dropped left-margin alinea number
+    lead_number: str | None = None  # a leading bare number set apart by a wide gap, kept in ``text``
     markers: int = 0  # footnote markers dropped from this line
     gap_split: bool = False  # the line has a wide internal gap (tab stops, TOC leaders)
     last_seg: str = ""  # text after the last wide gap (TOC page numbers, « Art. 1 - 7 »)
@@ -402,8 +403,21 @@ def _split_margins(built: list[tuple[Line, list[dict[str, Any]]]], height: float
         support = sum(1 for x in long_x1 if abs(x - edge) <= 1)
         if support >= max(5, 0.4 * len(long_x1)):  # a justified column edge, not ragged text
             col_right = edge
-    starts = [ln.words[0][0] for ln, _ in built if abs(ln.size - body) < 0.3 and not _BARE_INT.match(ln.words[0][2])]
+    # the text column's left edge: body-size lines of the page body only — the running footer (« Février 2026 »)
+    # sits at the alinea numbers' x and hid every alinea number of the page (CSS pp. 69–247: « 1 Art. 7. … »
+    # stayed one line and art. 7 was glued to art. 6). Numbers the column rule cannot see (pages whose dominant
+    # size is the footnotes', pages mixing two layouts) stay in the text as ``lead_number``; the segmenter strips
+    # them before an article heading, once the footnotes are known (:mod:`.pdf`).
+    starts = [
+        ln.words[0][0]
+        for ln, _ in built
+        if abs(ln.size - body) < 0.3
+        and not _BARE_INT.match(ln.words[0][2])
+        and 0.075 * height < ln.top
+        and ln.bottom < 0.925 * height
+    ]
     col_left = min(starts) if starts else None
+
     out: list[Line] = []
     for ln, chars in built:
         in_body = 0.075 * height < ln.top and ln.bottom < 0.925 * height
@@ -427,17 +441,13 @@ def _split_margins(built: list[tuple[Line, list[dict[str, Any]]]], height: float
             ln.gap_split = True
             ln.last_seg = normalise_whitespace(segs[-1][2])
         w = ln.words
-        if (
-            ln.kind == "body"
-            and col_left is not None
-            and len(w) > 1
-            and _BARE_INT.match(w[0][2])
-            and w[0][0] < col_left - 4
-            and w[1][0] - w[0][1] >= 5.0
-        ):
+        if ln.kind == "body" and len(w) > 1 and _BARE_INT.match(w[0][2]) and w[1][0] - w[0][1] >= 5.0:
             first, _, rest = ln.text.partition(" ")
             if first == w[0][2] and rest:
-                ln.alinea, ln.text, ln.x0 = first, rest, w[1][0]
+                if col_left is not None and w[0][0] < col_left - 4:
+                    ln.alinea, ln.text, ln.x0 = first, rest, w[1][0]
+                else:
+                    ln.lead_number = first  # a number set apart by a wide gap (alinea or footnote marker)
         ln.words = []
         out.append(ln)
     return out

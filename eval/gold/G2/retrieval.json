@@ -2,7 +2,7 @@
  "set": "G2",
  "release": "data-20261016-sample",
  "status": "draft_unvalidated",
- "note": "Retrieval v1 (PLAN §11.1 G2, M2): natural-language questions written by the developer from the article texts of the 2026-10-16 sample (no copied article wording; some keyword-style queries), each with 1-3 target articles (grade 2 = answers the question, 1 = related). DE/EN items ask the same legal points without French keywords (worst case: the LLM did not reformulate). Not lawyer-validated; the curated query expansion (lgx_mcp/retrieval/query_expansion.yaml) was written before these questions from general legal vocabulary, but by the same author: report ablations. Targets frozen by `python -m eval.harness freeze-g2` (key, act, article, text_sha256).",
+ "note": "Retrieval v1 (PLAN §11.1 G2, M2): natural-language questions written by the developer from the article texts of the 2026-10-16 sample (no copied article wording; some keyword-style queries), each with 1-3 target articles (grade 2 = answers the question, 1 = related). DE/EN items ask the same legal points without French keywords (worst case: the LLM did not reformulate). Not lawyer-validated; the curated query expansion (lgx_mcp/retrieval/query_expansion.yaml) was written before these questions from general legal vocabulary, but by the same author: report ablations. Targets frozen by `python -m eval.harness freeze-g2` (key, act, article, text_sha256). M2 review (2026-10-17): G2-206–G2-218 ask about PDF code-recueil articles (pdf: true; targets pinned by the page of the heading in pdftotext, independent of the parser); `leak` = longest run of the question's tokens found verbatim in the first target (eval/harness/leak.py), `leaky` when ≥ 5.",
  "items": [
   {
    "id": "G2-001",
@@ -17,7 +17,8 @@
      "article": "Art. L. 124-3.",
      "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-002",
@@ -32,7 +33,8 @@
      "article": "Art. L. 124-3.",
      "text_sha256": "8dcd47fb2709ba63e2140ee856e4dd1b82b3d6fea8e1311e969a7c7babfa01d3"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-003",
@@ -47,7 +49,8 @@
      "article": "Art. L. 124-4.",
      "text_sha256": "c2287dc3c9a147f4f15120402c693381f4741ff85537e14c75c249d9fca1961f"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-004",
@@ -62,7 +65,8 @@
      "article": "Art. L. 124-10.",
      "text_sha256": "3713265282bac7dfd85c423dd7a19a6e7a6f70cc7e1dc82c42699413ebba0bd0"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-005",
@@ -77,7 +81,8 @@
      "article": "Art. L. 124-2.",
      "text_sha256": "c76585a43347c3f1d467f939eb991aae029ed3339ac712787edb70c2feb55ac0"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-006",
@@ -92,7 +97,9 @@
      "article": "Art. L. 124-7.",
      "text_sha256": "10d84b4a352e9d323e15078a1bd4d56c39d423647138358a2e4712e61e1bd130"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-007",
@@ -107,7 +114,9 @@
      "article": "Art. L. 124-6.",
      "text_sha256": "838f1a3b7659e816aff07cb496ea8406c1ea49238181c82d91e2147b661d4ce4"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-008",
@@ -122,7 +131,8 @@
      "article": "Art. L. 124-5.",
      "text_sha256": "e720db4b7ab1b5992c0a3b067e6c2e8ae1191de2ba90c7b64ad61af78b7202db"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-009",
@@ -137,7 +147,9 @@
      "article": "Art. L. 121-5.",
      "text_sha256": "8a3544097f6b3fba36079f7bd3fe9117d7f59a5cc671a6d3aa89756253218fc4"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-010",
@@ -152,7 +164,9 @@
      "article": "Art. L. 121-4.",
      "text_sha256": "3843515006e6cbad13f62497e26b6240db5d8c5f226e41004398787cc847139c"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-011",
@@ -167,7 +181,8 @@
      "article": "Art. L. 121-6.",
      "text_sha256": "60180eb57f686d3fccb1c44ac166882cc0b8c161894abca7c71be77887aaf98c"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-012",
@@ -182,7 +197,9 @@
      "article": "Art. L. 122-1.",
      "text_sha256": "d5c13d52489523d31606b995cf4b1ea8977e3eb144a032763b2bb16a099d2945"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-013",
@@ -197,7 +214,8 @@
      "article": "Art. L. 122-2.",
      "text_sha256": "d02a35901a48224e72a7aace668533f2235146b17ff5dfa921016c248f687ee4"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-014",
@@ -212,7 +230,8 @@
      "article": "Art. L. 122-13.",
      "text_sha256": "e81fb12dcd792e3a856f6bfbd2d60f5078094b606fc16e109dd021528ebbf669"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-015",
@@ -235,7 +254,8 @@
      "article": "Art. L. 245-4.",
      "text_sha256": "2ed8c9f02c87f276752b5ea0e400b5ded2f6b950f9a22d916e48413e4269daa0"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-016",
@@ -251,7 +271,8 @@
      "article": "Art. L. 246-3.",
      "text_sha256": "ab00a2e19a2b1c931d1c9e363dec2cb2c0937940538018b0d82cab7c304acc1a"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-017",
@@ -267,7 +288,8 @@
      "article": "Art. L. 246-2.",
      "text_sha256": "4c7b5d0b56c5c529f38834b8a12c65d650a325a3d6350d68f9d0e21ba49e949f"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-018",
@@ -282,7 +304,8 @@
      "article": "Art. L. 337-1.",
      "text_sha256": "c342b91b6cc8b7a3e3cda1e5092578eb412f85b1039acf47dae858a92d3335c0"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-019",
@@ -297,7 +320,8 @@
      "article": "Art. L. 333-2.",
      "text_sha256": "33f0ed2cd25a84cf494be3bd6ad2e21317df922caaa00895317c97d352836efc"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-020",
@@ -312,7 +336,8 @@
      "article": "Art. L. 234-45",
      "text_sha256": "9abb281fbd03124f645c55d579142a51ba186b76f58afd21ff1b19161e32d50b"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-021",
@@ -327,7 +352,8 @@
      "article": "Art. L. 234-47.",
      "text_sha256": "e337daeedc49eabf8e0b1eb029ecf0d03e9330e1c10dcc806a2328e657408352"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-022",
@@ -342,7 +368,8 @@
      "article": "Art. L. 234-72.",
      "text_sha256": "21c41d7ce5de74856f27346de6926381fc8b5c170180ff2632bd609897ce8c36"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-023",
@@ -357,7 +384,8 @@
      "article": "Art. L. 234-74.",
      "text_sha256": "8575d3384ed8d1af3ed79ea2f560c44bc7c102ee277233fd2ab3b087b37ac375"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-024",
@@ -372,7 +400,9 @@
      "article": "Art. L. 234-61.",
      "text_sha256": "d93b8e973ad7661701d1e3774936f157d7b952ddb77cf93f0595003ce80c2445"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-025",
@@ -387,7 +417,8 @@
      "article": "Art. L. 234-13.",
      "text_sha256": "38e985d5638cff252d972d9ef2da720cde34bcb66b49cc2ce68ff7c43f98192f"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-026",
@@ -402,7 +433,8 @@
      "article": "Art. L. 211-22.",
      "text_sha256": "21cea950cb0a7ea87f60bc55c98b0c95bc0d9b4393b79269af490cc04bbd2c8a"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-027",
@@ -417,7 +449,9 @@
      "article": "Art. L. 213-1.",
      "text_sha256": "b5591d2cba4711e54912101f00c7a458e7845859e8e2b3b09d294da5528aab21"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-028",
@@ -432,7 +466,8 @@
      "article": "Art. L. 231-7.",
      "text_sha256": "88f322a73f88e018d9d4e10b39b1aef426e1df7d43d2c9d79b1652145e4bc4d0"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-029",
@@ -447,7 +482,8 @@
      "article": "Art. L. 325-2.",
      "text_sha256": "244c2c0e3a210437c44368279ee20a678692a2f97825054162c67491b7adbcf9"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-030",
@@ -462,7 +498,8 @@
      "article": "Art. L. 327-2.",
      "text_sha256": "5ec012a2daa0585f8eceea703ef6d0a37db573a2a5a76e35d0afa659c34c38cd"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-031",
@@ -477,7 +514,8 @@
      "article": "Art. L. 131-12.",
      "text_sha256": "d4982e7a186ccaeffe303abfdff41e41b9f90cbaab614c271c2d5e099e2681b3"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-032",
@@ -492,7 +530,8 @@
      "article": "Art. L. 131-18.",
      "text_sha256": "2ad8f272fea9aa7aaedab8c32be655e95bd9b956836856b88509dea04bf7ed5d"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-033",
@@ -507,7 +546,8 @@
      "article": "Art. L. 166-6.",
      "text_sha256": "c689c712411545b2bfd298d013beed2c674706aa9d366efddfb2aa6ca70b942b"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-034",
@@ -522,7 +562,8 @@
      "article": "Art. L. 531-2.",
      "text_sha256": "759a69e8ea707e4f33be5b2645421f380771711245481697841edd50a577749a"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-035",
@@ -537,7 +578,8 @@
      "article": "Art. L. 585-6.",
      "text_sha256": "f83db8c030094eb3bad64e0505605e17b76ad7320ef6d2d2d4122b1d4efa24e9"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-036",
@@ -552,7 +594,8 @@
      "article": "Art. L. 542-15.",
      "text_sha256": "c24b2651da1c61bde9f6180c986a092b567d5af72ab9240bdd618fe5761d370a"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-037",
@@ -567,7 +610,8 @@
      "article": "Art. L. 416-6.",
      "text_sha256": "7f8c5adfa07accb24d6d323b8808dd7991ec694337ff9a685ba703b50e54910d"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-038",
@@ -582,7 +626,8 @@
      "article": "Art. L. 151-5.",
      "text_sha256": "e14e26f16b576b5c3b27f255285fae9fc4afbf60ed4552c26243c4352ef9f38e"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-039",
@@ -597,7 +642,8 @@
      "article": "Art. L. 152-4.",
      "text_sha256": "11fbbe382eaca1c7946b1848553f6fe118bfbb8efa91a0c020d76b7a1e30d825"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-040",
@@ -612,7 +658,8 @@
      "article": "Art. L. 127-2.",
      "text_sha256": "a0758a0f963e0c0804e648b69dfcee968f5764fb0741af67834dee4e4e264e65"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-041",
@@ -627,7 +674,9 @@
      "article": "Art. L. 126-1.",
      "text_sha256": "c6174f6c94644cef5bc5f05973f2c3aa6f91140184928bbde0af1aff05ce6529"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-042",
@@ -642,7 +691,8 @@
      "article": "Art. L. 111-11.",
      "text_sha256": "7e78c31ec6cdf3796ba8157b239610affd61fbce3afc8aba46c13b0b97d08e23"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-043",
@@ -657,7 +707,8 @@
      "article": "Art. L. 123-3.",
      "text_sha256": "6bc76ad4d3307858126af0d2e8f88ac3102e9ae083188e2dafc331abe31054c0"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-044",
@@ -672,7 +723,8 @@
      "article": "Art. L. 241-11.",
      "text_sha256": "3f33cf499c969731ee0c4206e7f0796cbf4f5fd0a965faa3c5eb57061413cefd"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-045",
@@ -687,7 +739,9 @@
      "article": "Art. L. 241-1.",
      "text_sha256": "e1ff7f875beba30207c6f6b4104969e9c2886e5cfd318927ca776912e5e6ba6b"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-046",
@@ -702,7 +756,8 @@
      "article": "Art. L. 010-2.",
      "text_sha256": "0f5961b9e5e749c70edf4cb0972ccda45a7916c43e0e24ab52edea2c0b5ea95f"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-047",
@@ -717,7 +772,8 @@
      "article": "Art. 1382.",
      "text_sha256": "35ac2cc9097242f9b2599b14096f806bab9b7bbb4df35572316f4de81c919f89"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-048",
@@ -732,7 +788,8 @@
      "article": "Art. 1384.",
      "text_sha256": "cdf9448d1e89b18d46086ccb93fb7bad2ab4d3f754585686065a49cba1fcc9d7"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-049",
@@ -755,7 +812,8 @@
      "article": "Art. 213.",
      "text_sha256": "74b6e46c1bc6bc2017fe1ac7b487b4daa1aa497a5c18cb2dda3d272196a5f04d"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-050",
@@ -770,7 +828,8 @@
      "article": "Art. 223.",
      "text_sha256": "3d64cdf07054c8eb6bb7196836bd97b522f4dc8aebb6ab74453c43d15cb87898"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-051",
@@ -785,7 +844,8 @@
      "article": "Art. 144.",
      "text_sha256": "f7a52ffb44a268865c095e1df471f9c696d4a9e82fc9ba8553ebf4b82b643273"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-052",
@@ -800,7 +860,8 @@
      "article": "Art. 148.",
      "text_sha256": "36f38dcac0e4654438ee8fa94820aa2466dd0c2b89727081ec29cc72993c8d39"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-053",
@@ -815,7 +876,8 @@
      "article": "Art. 229.",
      "text_sha256": "826f1cdcb6bbffc3fc2878cdc425174bf1a9150a0032389a4528e6cef6718aeb"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-054",
@@ -838,7 +900,8 @@
      "article": "Art. 231.",
      "text_sha256": "9b349f3a9dbb32d792190f76ff7330b7c4b518635b3d6117518f55b3bafcef1e"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-055",
@@ -853,7 +916,9 @@
      "article": "Art. 232.",
      "text_sha256": "d7f411eed95c3ab25ef7c442183dc62116e5f83885d24e78bb89898efde6e855"
     }
-   ]
+   ],
+   "leak": 8,
+   "leaky": true
   },
   {
    "id": "G2-056",
@@ -868,7 +933,8 @@
      "article": "Art. 227.",
      "text_sha256": "c339b538ae8cfdcbeb6ebdc30ba09e7c62561fd35e44bd37e427cacf9c239377"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-057",
@@ -883,7 +949,8 @@
      "article": "Art. 253.",
      "text_sha256": "a00bb9f17d6f0d115ffdbccb5bb79d97902a5bc2b92f98aa63f825e0e6aafa87"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-058",
@@ -898,7 +965,8 @@
      "article": "Art. 544.",
      "text_sha256": "625a33db388b38e7d18f7c637f9a53ba020874f223cd7ef52913cc348406580f"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-059",
@@ -913,7 +981,8 @@
      "article": "Art. 1134.",
      "text_sha256": "ff3aca9c89451c93dfa8599fe69ca863f1516aaa3cef9e9ac25648ed38973e20"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-060",
@@ -928,7 +997,8 @@
      "article": "Art. 1643.",
      "text_sha256": "11ab9504b0de1899c6e58f3f746cd0065e319254f49337d3f0b1b27c6f9e99df"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-061",
@@ -943,7 +1013,8 @@
      "article": "Art. 1728.",
      "text_sha256": "8702bf44ef9cc2253e3f6b5504f9010907eff1da1c5bda7dbaf5ac0b785c0bf8"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-062",
@@ -958,7 +1029,8 @@
      "article": "Art. 1603.",
      "text_sha256": "28b623d8ad42054b173ca78086474eeb17d2a6bcd8efd40a2900d339c6877371"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-063",
@@ -973,7 +1045,8 @@
      "article": "Art. 1583.",
      "text_sha256": "d6b64298b58bd9c925814952e504218c7a90054f04b551e29357d95d2ad40d83"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-064",
@@ -988,7 +1061,8 @@
      "article": "Art. 970.",
      "text_sha256": "9d705f2c63733597c298a554d7a2bab0a391e94f05cfd7989d2b8bc7ac7b36a0"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-065",
@@ -1003,7 +1077,8 @@
      "article": "Art. 1007.",
      "text_sha256": "716cd96d5af54c59f9a1256d6fa5ef4eced850580a26abb3616a65c80f910044"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-066",
@@ -1018,7 +1093,9 @@
      "article": "Art. 2279.",
      "text_sha256": "e9e2ebae3925c052b3466d5ff354f399bc637d8b653591c636e1b82d4eb165e6"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-067",
@@ -1041,7 +1118,8 @@
      "article": "Art. 745.",
      "text_sha256": "73a50a67df0959b6b00df6d5c6707a31b128c1027b3f403b497dacedc8488bd4"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-068",
@@ -1056,7 +1134,8 @@
      "article": "Art. 745.",
      "text_sha256": "73a50a67df0959b6b00df6d5c6707a31b128c1027b3f403b497dacedc8488bd4"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-069",
@@ -1071,7 +1150,8 @@
      "article": "Art. 750.",
      "text_sha256": "192862219565c529de96eb02a8723744f7fa28c60d343620fc62c5bbbfa1f313"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-070",
@@ -1086,7 +1166,8 @@
      "article": "Art. 108.",
      "text_sha256": "e7185f506c849e5d7793ab0a5fafa07d31b4ee5657d468c1e3ccdaa6f93cfbdf"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-071",
@@ -1101,7 +1182,9 @@
      "article": "Art. 312.",
      "text_sha256": "bee7e77ceef04976300d7f56b58cdd7d5f930f788562a402a2899498d0ee314d"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-072",
@@ -1116,7 +1199,8 @@
      "article": "Art. 351.",
      "text_sha256": "a00c3a43af95687bc23bd8545ca21a06fec77f6e431c0e7d780fd9ca10e90f5c"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-073",
@@ -1131,7 +1215,9 @@
      "article": "Art. 490.",
      "text_sha256": "54aec632d589f40cf6501d2ebc1e4f2cfddf73ed778aad8057ede16d0f1e7efe"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-074",
@@ -1146,7 +1232,8 @@
      "article": "Art. 1096.",
      "text_sha256": "edae58820b5619b54197dba9510f14147f8b0c2f57210c53c8b4cd0f7bfd6645"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-075",
@@ -1161,7 +1248,8 @@
      "article": "Art. 595.",
      "text_sha256": "2f0905c701adcc9ebec60773f81850536e5cea179e7c81bf01ef55f078afe80e"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-076",
@@ -1176,7 +1264,8 @@
      "article": "Art. 2155.",
      "text_sha256": "73f948bdfaa8e012134826c510e21a2ca97eade6e90904bf5fb0a17010608716"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-077",
@@ -1191,7 +1280,8 @@
      "article": "Art. 1784.",
      "text_sha256": "cf08e76460f1b4680cb9ab0da95d991c2ea8d0077525ffa17ed44cb6b0b05db9"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-078",
@@ -1206,7 +1296,8 @@
      "article": "Art. 1387.",
      "text_sha256": "f11f49a5e40200360bd496d0185c30ab071c8c51387731301628546d59f8c2da"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-079",
@@ -1221,7 +1312,8 @@
      "article": "Art. 1850.",
      "text_sha256": "19a83d53ccb615739b7beca245d8a12e778e162eef590ac714019da68f15db4e"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-080",
@@ -1236,7 +1328,8 @@
      "article": "Art. 1125-1.",
      "text_sha256": "91420e9b22713d767aab6e051658431ea0fc4fd1f42e85e585d55389929b704e"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-081",
@@ -1251,7 +1344,9 @@
      "article": "Art. 1726.",
      "text_sha256": "ba3c408d044a2ca1525e8fa65789de605df8f950cc74beba91ab0b508464a860"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-082",
@@ -1266,7 +1361,8 @@
      "article": "Art. 461.",
      "text_sha256": "7ee372cccd7e79c8d5cf6a9c32a06e6dd86355fb442127c5694f34c662b496c3"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-083",
@@ -1281,7 +1377,8 @@
      "article": "Art. 393.",
      "text_sha256": "b8669b8b8b428bbd42d88be93bf81dba541a8a4a92eec72a9cf74e8ba871d154"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-084",
@@ -1304,7 +1401,8 @@
      "article": "Art. 393.",
      "text_sha256": "b8669b8b8b428bbd42d88be93bf81dba541a8a4a92eec72a9cf74e8ba871d154"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-085",
@@ -1319,7 +1417,8 @@
      "article": "Art. 399.",
      "text_sha256": "42e4030e0ca9592b5d3815f1045562544a52de7ae45282b660774d9ed0cc16f4"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-086",
@@ -1334,7 +1433,8 @@
      "article": "Art. 416.",
      "text_sha256": "7f26bc6dc82eb384abe76b92468e0425a60ac9f7a973a098e7cc422771f735f3"
     }
-   ]
+   ],
+   "leak": 0
   },
   {
    "id": "G2-087",
@@ -1349,7 +1449,9 @@
      "article": "Art. 419.",
      "text_sha256": "35b7d844c95a2763e5d8140b5d1a15a352785edf3038cea5e9bdca36838a1518"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-088",
@@ -1364,7 +1466,8 @@
      "article": "Art. 442-2.",
      "text_sha256": "009883eb303dde28403da80987d3897cbe1c50d7e280ba1af6646f56dea02d23"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-089",
@@ -1379,7 +1482,8 @@
      "article": "Art. 443.",
      "text_sha256": "36b2d87d5ea4c76eeb1b196167975d2ab6f1ad2aa34d29d8bbdbb080641cd09b"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-090",
@@ -1394,7 +1498,8 @@
      "article": "Art. 458.",
      "text_sha256": "c6a19ba0e3d3308ceb85c3e3e525c48b8b20b889bb263420e1fc8e2a9b69ce41"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-091",
@@ -1409,7 +1514,8 @@
      "article": "Art. 509-1.",
      "text_sha256": "e42ba891b2f45d1bdcaacface04cbe3e3f07e4b15af883826d1047e5af1a5190"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-092",
@@ -1424,7 +1530,8 @@
      "article": "Art. 506-5.",
      "text_sha256": "4cf1ddbed3fad6c79cfdbfc898821bae82a78fe386eea1e82229c52957d805bc"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-093",
@@ -1439,7 +1546,9 @@
      "article": "Art. 385-2.",
      "text_sha256": "a79534176ebcb8bf1687316986dbfff0ac38b319a8ac23f1490497aa5b788cdc"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-094",
@@ -1454,7 +1563,8 @@
      "article": "Art. 453.",
      "text_sha256": "c10f290832c76e8401da51b7aae1a9f01c8ba49d1c6b37ee0dfd91b03a7d4733"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-095",
@@ -1469,7 +1579,8 @@
      "article": "Art. 510.",
      "text_sha256": "5810b79c1bddfa491a81c7125a27cc7e7e11542f9a79d7f9ce49c035ebe6be09"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-096",
@@ -1484,7 +1595,9 @@
      "article": "Art. 22.",
      "text_sha256": "075316a0b1d5d79e7dcd7559141f40f959c4c90b28c90e266d558270aa5f03cd"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-097",
@@ -1499,7 +1612,8 @@
      "article": "Art. 21.",
      "text_sha256": "eb228a1f1837d42e65c0807b93466e1990f14d95ed0ede4d6bc834e02d76572b"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-098",
@@ -1514,7 +1628,8 @@
      "article": "Art. 30.",
      "text_sha256": "47a1921151181682257c7df0d47caf93a3f71250bd91f299b40bd189fafb6ffe"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-099",
@@ -1529,7 +1644,8 @@
      "article": "Art. 410-2.",
      "text_sha256": "4290fb5adb43be143feb633c79a1d3ab379f8132be189fe05ecabffc6eaa3df8"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-100",
@@ -1544,7 +1660,8 @@
      "article": "Art. 541.",
      "text_sha256": "63d8f5229760b9a98bb692a839007ac582cbb107e1871ad9480dfbc37cf16425"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-101",
@@ -1559,7 +1676,8 @@
      "article": "Art. 302.",
      "text_sha256": "546339ee35e80258ef6de955e0f810f42783f9d24c13fa24377da1b40ddb60a0"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-102",
@@ -1574,7 +1692,8 @@
      "article": "Art. 561.",
      "text_sha256": "b6cffe968bf5e7313ec8f0ada147d91542959732558a3828ab776a2854d56d65"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-103",
@@ -1589,7 +1708,8 @@
      "article": "Art. 284.",
      "text_sha256": "8f176f733a96b4e66d445ff94950852b5bd8b793bd6393c09547cf12c9b21308"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-104",
@@ -1604,7 +1724,8 @@
      "article": "Art. 194.",
      "text_sha256": "59df8059517b824f0073ceb5c3bdbde1cade24787a93275bcf0a24685938c851"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-105",
@@ -1619,7 +1740,8 @@
      "article": "Art. 136bis.",
      "text_sha256": "b69a0874d8ca7aced42ed3746f3db967438982c7b72f7a903d7a07548c882b1b"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-106",
@@ -1634,7 +1756,8 @@
      "article": "Art. 23.",
      "text_sha256": "e1af1468125ad926256c7cf90a9d4c8a60f6b2a95f05e4cd61d0cfd3549fb7fb"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-107",
@@ -1649,7 +1772,9 @@
      "article": "Art. 23.",
      "text_sha256": "e1af1468125ad926256c7cf90a9d4c8a60f6b2a95f05e4cd61d0cfd3549fb7fb"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-108",
@@ -1664,7 +1789,8 @@
      "article": "Art. 15.",
      "text_sha256": "0852457f7858e6a89f8202ce69d2c012315502acbe7b8ea1669085e5b873595f"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-109",
@@ -1679,7 +1805,8 @@
      "article": "Art. 21.",
      "text_sha256": "9299060e4b7cc448965cc562d5ca190d565f2753be590d92208d2080973174b4"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-110",
@@ -1694,7 +1821,8 @@
      "article": "Art. 24.",
      "text_sha256": "ca464e6a9930701a955a1ea963064c50e3bbb5a22b0ab9d7955c515fa8c87669"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-111",
@@ -1709,7 +1837,9 @@
      "article": "Art. 26.",
      "text_sha256": "30aef15998851a072d0f851fad26ff0429543cda6f16ec458801ef5d64459fec"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-112",
@@ -1724,7 +1854,8 @@
      "article": "Art. 38.",
      "text_sha256": "1bc56eb7d54ed593389d1021beb5256380556023ac59ec017618408f92c03b71"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-113",
@@ -1739,7 +1870,8 @@
      "article": "Art. 33.",
      "text_sha256": "cd32b943d406472689e3723610356c7cd064292f12233a3bd05159856cf22036"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-114",
@@ -1754,7 +1886,9 @@
      "article": "Art. 4.",
      "text_sha256": "67c18164bd3a8b552a7f3b32138e74605e2d99ab89ee0eabd781b481a94dd0f8"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-115",
@@ -1769,7 +1903,9 @@
      "article": "Art. 44.",
      "text_sha256": "a8c2054be41c66ad2748c0266a97108b7069c9cf24b22ca2eec8f7356a86c231"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-116",
@@ -1784,7 +1920,8 @@
      "article": "Art. 63.",
      "text_sha256": "6403ba0761bdce4e3b77985e827e9dfa69c8e1e297b4f7f51855afff9feeccd4"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-117",
@@ -1799,7 +1936,8 @@
      "article": "Art. 131.",
      "text_sha256": "d436195505fc926e0078d8a9abb56dcb6920cb5e8154605f2dcb6768494f0ee9"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-118",
@@ -1814,7 +1952,8 @@
      "article": "Art. 85.",
      "text_sha256": "7629a2faf4197ccf74568dd67896c41608ea4ba10091fd27f2141a6752d471fa"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-119",
@@ -1829,7 +1968,8 @@
      "article": "Art. 65.",
      "text_sha256": "7b8edf637de3c32b160aacd5fbf0ae6496864913e47cbb6573fff063e86e2110"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-120",
@@ -1844,7 +1984,8 @@
      "article": "Art. 20.",
      "text_sha256": "71edb2246a62aa387faf6aaf8eb9ab42b740dcd0fab6231b59d6ba8e6588e098"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-121",
@@ -1859,7 +2000,8 @@
      "article": "Art. 13.",
      "text_sha256": "549e14b9c6bf65781c71e9b697006f622804ef8c8a3619fc83a5c89571da4539"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-122",
@@ -1874,7 +2016,8 @@
      "article": "Art. 17.",
      "text_sha256": "ab5041da998f99f444d8b367b839f1c89e2730cee504a9f548b8b109ddfd5443"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-123",
@@ -1889,7 +2032,8 @@
      "article": "Art. 108.",
      "text_sha256": "3d4473bd190fdd36373034c3450ba161ae1b8c6d1f58ac7d4e9b990dd5be8038"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-124",
@@ -1904,7 +2048,9 @@
      "article": "Art. 112.",
      "text_sha256": "e738425aafcc62c9fcea53642fe950e03a44df7c995eb317a8323f166a237f61"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-125",
@@ -1919,7 +2065,8 @@
      "article": "Art. 29.",
      "text_sha256": "5379dff9b2fa57e6651083ceba3385801748cdac5aa70ca717fb4e74db12b7fa"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-126",
@@ -1934,7 +2081,8 @@
      "article": "Art. 41.",
      "text_sha256": "e5228db8df8364fd41258e5660e8b642a46af31962fc715fa04a6bbe60b340fe"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-127",
@@ -1949,7 +2097,9 @@
      "article": "Art. 5.",
      "text_sha256": "47be8557333bc0f72906dc82f077f91565d6a73fc2d2eeccd14d5dd2dd9b1443"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-128",
@@ -1964,7 +2114,8 @@
      "article": "Art. 81.",
      "text_sha256": "c4d4a59d216a2bc0f7804cdb2d5b75f8354e85a4ac105ad96606329381f61109"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-129",
@@ -1979,7 +2130,9 @@
      "article": "Art. 93.",
      "text_sha256": "2cca35af8e0149f386b4185074cc022cbd53446e35accf0032edaac4cf95f4a7"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-130",
@@ -1994,7 +2147,9 @@
      "article": "Art. 56.",
      "text_sha256": "ec83cbefa1b020680d152938f7feff4819ab3d920d7f1d731f7e6123aaa743b0"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-131",
@@ -2009,7 +2164,8 @@
      "article": "Art. 348.",
      "text_sha256": "18ea35183cee1e94af1fb09bd048d9b06bcb39717120948e04af59ebddb47f3f"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-132",
@@ -2024,7 +2180,9 @@
      "article": "Art. 467.",
      "text_sha256": "1a74260b21aa681282b3cea33b4f1be47aae1328ff32fd67e71db5646d3b1da7"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-133",
@@ -2039,7 +2197,9 @@
      "article": "Art. 418.",
      "text_sha256": "f71aef84999757df4ac26acbefe3664848c090c3fdbeae721d89d61a0dd72c1f"
     }
-   ]
+   ],
+   "leak": 7,
+   "leaky": true
   },
   {
    "id": "G2-134",
@@ -2054,7 +2214,8 @@
      "article": "Art. 1243.",
      "text_sha256": "a2140b4b441cf4c1960395da03fa50f472e671a8b46c03d3141e3e72de8b0a96"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-135",
@@ -2069,7 +2230,8 @@
      "article": "Art. 541.",
      "text_sha256": "149371abd288effd1b8cd5bdcd8cd1c829aa1976d5863981fdbad7883587fd96"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-136",
@@ -2084,7 +2246,8 @@
      "article": "Art. 707.",
      "text_sha256": "74e72f468750ee44c65f5a9b2cf853f8d1f2cd61a1e53012fc30aac0c34dc0e4"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-137",
@@ -2099,7 +2262,8 @@
      "article": "Art. 685-6.",
      "text_sha256": "f18a78534efdc9e5f0950aed9ce6ba7502a9ee32bbe80f6abebb4a2d68100dac"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-138",
@@ -2114,7 +2278,8 @@
      "article": "Art. 1032.",
      "text_sha256": "2899573d367eb2c031eff9d0c7d11a6b96353e87a486aa9f490875ae61c94dca"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-139",
@@ -2129,7 +2294,8 @@
      "article": "Art. 16.",
      "text_sha256": "14ae506d58c19808fe5dd7d12667b00a749180d8153db7e362f4bfd09eecdd5a"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-140",
@@ -2144,7 +2310,8 @@
      "article": "Art. 17.",
      "text_sha256": "c928bbbe7aa1d0c4be6715eb890118232df4359839ae78851ccddd671788a8c6"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-141",
@@ -2159,7 +2326,8 @@
      "article": "Art. 49.",
      "text_sha256": "c961a8ba3f49e6a4111213c0c6f8265a3a95e71c9cbbaa65e941a448149fe4ff"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-142",
@@ -2174,7 +2342,8 @@
      "article": "Art. 48.",
      "text_sha256": "389ee2738aba2034a321248a0870128fa91cb252aeb45dd218e46e37b7c43a8e"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-143",
@@ -2189,7 +2358,8 @@
      "article": "Art. 14.",
      "text_sha256": "eb7f737ca8c6490a8b4b888e8faa604d7032cd58d58a5c57c3b2508a8089592b"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-144",
@@ -2204,7 +2374,8 @@
      "article": "Art. 62.",
      "text_sha256": "475d7cfb3e6398f1e9f984cad91bdd3ee25d047d6c54ccbfe9f51ae7b121490a"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-145",
@@ -2219,7 +2390,8 @@
      "article": "Art. 9.",
      "text_sha256": "98d7b314f94371d49b3e88d7d64f5ec358a04ad23f91344cc990a266a2428c31"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-146",
@@ -2234,7 +2406,8 @@
      "article": "Art. 51.",
      "text_sha256": "51bc110f5b0bd0f4bef44fab080c50a76fb0578a7602ba975282f38bf7cb7c77"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-147",
@@ -2249,7 +2422,9 @@
      "article": "Art. 63.",
      "text_sha256": "c8615f7666890d1a7878afecaf8e0c0147eeadeab4480df5de357df8012ec7a4"
     }
-   ]
+   ],
+   "leak": 8,
+   "leaky": true
   },
   {
    "id": "G2-148",
@@ -2264,7 +2439,8 @@
      "article": "Art. 9.",
      "text_sha256": "4ab11442ab64e93fb9aa820def5bff19585d0ae67a242771808fb313a87c625a"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-149",
@@ -2279,7 +2455,8 @@
      "article": "Art. 31.",
      "text_sha256": "6b95f7544deb740497379b5cf3c81b4d10fbed386cdef18805b63308100ff478"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-150",
@@ -2294,7 +2471,9 @@
      "article": "Art. 35.",
      "text_sha256": "e4e39d1d2d94cd78cda40f3d48a70fcb164f5cc89a809f8c084f52e4fb614848"
     }
-   ]
+   ],
+   "leak": 5,
+   "leaky": true
   },
   {
    "id": "G2-151",
@@ -2317,7 +2496,8 @@
      "article": "Art. 11.",
      "text_sha256": "c482ec6b23e7bbdab314a0b0b93b01807c4aa37f53b8ad07114d1fe7b3b9bc7d"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-152",
@@ -2332,7 +2512,9 @@
      "article": "Art. 10.",
      "text_sha256": "b0bca39adb2421f984ed8919410fda4bbfbd7632c322499b6ca88855a1c1b4a3"
     }
-   ]
+   ],
+   "leak": 6,
+   "leaky": true
   },
   {
    "id": "G2-153",
@@ -2347,7 +2529,8 @@
      "article": "Art. 45.",
      "text_sha256": "e12472bf3481d8c050b786f030845afefc071aa61b6705ec60791c3f6ab1b779"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-154",
@@ -2362,7 +2545,8 @@
      "article": "Art. 15.",
      "text_sha256": "d53583c5fc52654e039d75bbefbd578ba2664d49bf4e03fad776e5674b9494e3"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-155",
@@ -2379,7 +2563,8 @@
      "article": "Art. 7.",
      "text_sha256": "ddec5962eb5d22b9153d4dc1894921547a57723f838df3f4b1b7ec9683dbee93"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-156",
@@ -2396,7 +2581,8 @@
      "article": "Art. 12.",
      "text_sha256": "39ea3b7d1ed407f68233066a87d89f91c1e774d229498e3e403bb274c96ba8f3"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-157",
@@ -2413,7 +2599,8 @@
      "article": "Art. 18.",
      "text_sha256": "86df6e4c9dd990991a3305aa53438249e7a2c8734db5dac2baf3ccbfa92c2477"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-158",
@@ -2430,7 +2617,8 @@
      "article": "Art. 6.",
      "text_sha256": "2dab0945eab02b5d8254924ee3eafe4c1e99f7b796d1fc15130b92937ab34707"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-159",
@@ -2447,7 +2635,8 @@
      "article": "Art. 4.",
      "text_sha256": "cfbcaea47758215388384fc8b79cbcd8f6517721dbdd49a97571528bc9a1cd50"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-160",
@@ -2464,7 +2653,8 @@
      "article": "Art. 10.",
      "text_sha256": "32c8025c71e65b4d9d01e84a60772d4aad9f48b9144e1df7ccfaa4a2c090501d"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-161",
@@ -2479,7 +2669,8 @@
      "article": "Art. 6.",
      "text_sha256": "2a8dffe35d4483688a44a02d85544a026cd1e664a019efe04b8d1b050ed1d290"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-162",
@@ -2494,7 +2685,8 @@
      "article": "Art. 4.",
      "text_sha256": "2eeb7b78e4f92cb252368a56328f38cf7e1dd6b7d658b9f60eda9a246da58fb6"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-163",
@@ -2509,7 +2701,8 @@
      "article": "Art. 12.",
      "text_sha256": "2c8707aa0308f3fed533e61ba1246e54f6b81bb9e524f432ab693ca94b7218da"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-164",
@@ -2524,7 +2717,8 @@
      "article": "Art. 13.",
      "text_sha256": "b094b265e1ec535bb90f29aa0454afa890f0b386a45b60dc0e52e9cab8cc4a64"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-165",
@@ -2539,7 +2733,8 @@
      "article": "Art. 4.",
      "text_sha256": "79cdda482197c6ffba6d2b1558dbbfa768d0c94d20a0d1d8e1791ccd8b3aa8c2"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-166",
@@ -2554,7 +2749,8 @@
      "article": "Art. 5.",
      "text_sha256": "8da5689ee9f2fd9c46954654c58bfe38bf3cdc548757985eef8c8ffb15fd1370"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-167",
@@ -2569,7 +2765,8 @@
      "article": "Art. 2.",
      "text_sha256": "f165b580e029af7e550910c28dbb4865db12e0c8811694bfe19746d42158cc4f"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-168",
@@ -2584,7 +2781,8 @@
      "article": "Art. 2.",
      "text_sha256": "a2bd42c867634a04a8e6d3ee3eed702cec517bacece3ce141c9d61cdd7ef699e"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-169",
@@ -2599,7 +2797,8 @@
      "article": "Art. 6.",
      "text_sha256": "332a2bc37fa245c28a01dbd909c908bf7bc886a988df09543f3937b32fd803b4"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-170",
@@ -2614,7 +2813,8 @@
      "article": "Art. 2.",
      "text_sha256": "49fdbf060c46ee57acce4ef3810552795077bc46dcd17ceec211145136f9a2b2"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-171",
@@ -2629,7 +2829,8 @@
      "article": "Art. 4.",
      "text_sha256": "cc633ff87ba8bb7c0a1dee537d4ff7ef93790290d1e7d203e252534d223f1d8d"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-172",
@@ -2652,7 +2853,8 @@
      "article": "Art. 2.",
      "text_sha256": "26f7c7960b443b4de70f422c9a44b48924bd408ed7cd0b2cadfc358cfb7b8f50"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-173",
@@ -2667,7 +2869,8 @@
      "article": "Art. 5.",
      "text_sha256": "a86f96992c9955d8762a240eeadcd3b3741eb9505fea37a8da6a4595f96689e6"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-174",
@@ -2682,7 +2885,8 @@
      "article": "Art. 11.",
      "text_sha256": "858dd1cfecaae97bc2d49e0e019890e65991a783c0986e5a6edebe9aa3b3514e"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-175",
@@ -2697,7 +2901,8 @@
      "article": "Art. 8.",
      "text_sha256": "abe56531baaa0c0951b8b0184189322fb1bb37c60d3d3ad3cf168ecbc1fb9dcf"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-176",
@@ -2720,7 +2925,8 @@
      "article": "Art. 2.",
      "text_sha256": "1d6859340c982cc0ab9091f56192b43a0ade27185e6e303090d55c3fb8b94b68"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-177",
@@ -2735,7 +2941,8 @@
      "article": "Art. 7.",
      "text_sha256": "d5675078e2e2229dce70be8328212594facd37b3164439eca6b0a4fe0849522c"
     }
-   ]
+   ],
+   "leak": 1
   },
   {
    "id": "G2-178",
@@ -2750,7 +2957,8 @@
      "article": "Art. 4.",
      "text_sha256": "e0e6f9153ff9651b2eec540fcc050558f5177e6f63663eeaf6d47902df454d91"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-179",
@@ -2765,7 +2973,8 @@
      "article": "Art. 6.",
      "text_sha256": "8123e95ef600349378365f24cdc01cb5621cc440e80b4169ca021dd8ade41f3a"
     }
-   ]
+   ],
+   "leak": 0
   },
   {
    "id": "G2-180",
@@ -2780,7 +2989,8 @@
      "article": "Art. 12.",
      "text_sha256": "6505890f6e40327e7153dca3ddea9b0caef962db2371800247068df87b92f3e1"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-181",
@@ -2798,7 +3008,9 @@
      "text_sha256": "4739353973d825ae8753c1e4475d585a2b2abf929901fa81a250636ffd5bd111"
     }
    ],
-   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 7 in the code text (art. 7 there is the amended wording)"
+   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 7 in the code text (art. 7 there is the amended wording)",
+   "pdf": true,
+   "leak": 4
   },
   {
    "id": "G2-182",
@@ -2816,7 +3028,9 @@
      "text_sha256": "e53f181073dffec28483c66672be8fe61e369f4dad9609437170e572e9998655"
     }
    ],
-   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 5 in the code text (art. 7 there is the amended wording)"
+   "revalidated": "2026-10-17 (M2 ingest): rgd/2000/07/24/n3 is superseded_by_code by the Code de l'éducation nationale; its JO original is no longer searchable (PLAN §6.4), the target is the member's art. 5 in the code text (art. 7 there is the amended wording)",
+   "pdf": true,
+   "leak": 3
   },
   {
    "id": "G2-183",
@@ -2831,7 +3045,8 @@
      "article": "Art. 4.",
      "text_sha256": "d30db82aa4eb2bc3e6ffbb11880b8a070d8b4f6b86cac11c554af135308de7bf"
     }
-   ]
+   ],
+   "leak": 2
   },
   {
    "id": "G2-184",
@@ -2846,7 +3061,8 @@
      "article": "Art. 1er.",
      "text_sha256": "b77dccf1fbe97294973511794ad105f74a9e0fa537d73432732c5154a06f068c"
     }
-   ]
+   ],
+   "leak": 3
   },
   {
    "id": "G2-185",
@@ -2861,7 +3077,8 @@
      "article": "Art. 8.",
      "text_sha256": "eca8012db8fecb6a3814246e73b3e78880228a5cfc7b93c98898abaca423009d"
     }
-   ]
+   ],
+   "leak": 4
   },
   {
    "id": "G2-186",
@@ -3162,6 +3379,267 @@
      "text_sha256": "79cdda482197c6ffba6d2b1558dbbfa768d0c94d20a0d1d8e1791ccd8b3aa8c2"
     }
    ]
+  },
+  {
+   "id": "G2-206",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Un travailleur occupé moins d'un an au Grand-Duché et couvert par une caisse maladie étrangère peut-il échapper à l'affiliation ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "6",
+     "own": true,
+     "page": 72,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/6|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 6.",
+     "text_sha256": "da7545c241333fab59bc98081f273001d4f2972d9588b15e69856a45df60e09c"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-207",
+   "lang": "fr",
+   "pdf": true,
+   "query": "L'époux et les enfants d'un assuré profitent-ils aussi de sa couverture maladie ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "7",
+     "own": true,
+     "page": 72,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/7|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 7.",
+     "text_sha256": "0356bb79ed403fdf7d51920a797245904d38ba7978639afd25155344b052bf90"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-208",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Comment calcule-t-on l'indemnité de maladie d'un salarié en arrêt de travail ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "10",
+     "own": true,
+     "page": 73,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/10|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 10.",
+     "text_sha256": "68d6954cd53c0bdb58e773a4f8d53ed31155cb63ffe9bb140b64f5f60a24db9c"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-209",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Le patient doit-il avancer les frais médicaux ou la CNS peut-elle payer directement le prestataire ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "24",
+     "own": true,
+     "page": 81,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/24|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 24.",
+     "text_sha256": "85a6e0f77955fa7bef78e720907e27483bedef487dbc84b05a4e68e3f65d33f8"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-210",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Une veuve remariée qui divorce récupère-t-elle sa pension de survie ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "205",
+     "own": true,
+     "page": 160,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/205|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 205.",
+     "text_sha256": "0bd96015b16764e49956a4fa51e8980c48462c9d1e4ab7816b5e8837418563a8"
+    }
+   ],
+   "leak": 1
+  },
+  {
+   "id": "G2-211",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Un assuré qui s'est rendu invalide volontairement a-t-il droit à une pension d'invalidité ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "207",
+     "own": true,
+     "page": 160,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/207|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 207.",
+     "text_sha256": "edc6d73a68ca881efe44976c6d8e0ffaeff9bde74de866294a4240622ef4cad6"
+    }
+   ],
+   "leak": 3
+  },
+  {
+   "id": "G2-212",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Selon quels principes les réserves de l'assurance pension doivent-elles être investies ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "248",
+     "own": true,
+     "page": 176,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/248|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 248.",
+     "text_sha256": "069ecbd319ba0db65374ba8124b9d6cf38ea624761c1e2d5ae800c44e9497c1f"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-213",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Qui nomme le président de la Caisse pour l'avenir des enfants ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "333",
+     "own": true,
+     "page": 196,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/333|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 333.",
+     "text_sha256": "04c4bd48138cc5084b2a1bee460ddb00fd65443cb1a6aa9390a085d0d5eff4b7"
+    }
+   ],
+   "leak": 8,
+   "leaky": true
+  },
+  {
+   "id": "G2-214",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Dans quel délai l'embauche ou le départ d'un salarié doit-il être signalé au Centre commun ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "425",
+     "own": true,
+     "page": 234,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/425|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 425.",
+     "text_sha256": "8d23ccff2e89f2bfb3c6fd1654f1575d29f8b2fd5665f1e418ca1bb203dc01b1"
+    }
+   ],
+   "leak": 3
+  },
+  {
+   "id": "G2-215",
+   "lang": "fr",
+   "pdf": true,
+   "query": "L'employeur doit-il transmettre chaque mois les salaires de son personnel et les heures supplémentaires ?",
+   "targets": [
+    {
+     "act": "loi/1925/12/17/n1",
+     "num": "426",
+     "own": true,
+     "page": 234,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/loi/1925/12/17/n1/art/426|",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/loi/1925/12/17/n1",
+     "article": "Art. 426.",
+     "text_sha256": "c76f8b914031b592b7522302527393c17f60b2a108d273355dc3ace2dd4acca1"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-216",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Faut-il une assurance responsabilité civile pour présenter sa voiture au contrôle technique ?",
+   "targets": [
+    {
+     "act": "code/route",
+     "num": "5",
+     "member": "rgd/2016/01/26/n1",
+     "page": 768,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/code/route/art/5|http://data.legilux.public.lu/eli/etat/leg/rgd/2016/01/26/n1",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/route",
+     "article": "Art. 5.",
+     "text_sha256": "36c78cfc4a21e2bf7775103993b8492366c8606da72af03f0b8b51ba26ddb7d8"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-217",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Quelles entités luxembourgeoises peuvent adhérer à un groupement européen de coopération territoriale ?",
+   "targets": [
+    {
+     "act": "code/communal",
+     "num": "2",
+     "member": "loi/2009/05/19/n2",
+     "page": 139,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/code/communal/art/2|http://data.legilux.public.lu/eli/etat/leg/loi/2009/05/19/n2",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/communal",
+     "article": "Art. 2.",
+     "text_sha256": "a62c82b16f445796c329aa95533f805f7534a270051c431000f238d77d5e8e75"
+    }
+   ],
+   "leak": 2
+  },
+  {
+   "id": "G2-218",
+   "lang": "fr",
+   "pdf": true,
+   "query": "Quel statut a un jeune en formation professionnelle de base sans contrat d'apprentissage ?",
+   "targets": [
+    {
+     "act": "code/education_nationale",
+     "num": "8",
+     "member": "loi/2008/12/19/n19",
+     "page": 858,
+     "grade": 2,
+     "key": "legilux://eli/etat/leg/code/education_nationale/art/8|http://data.legilux.public.lu/eli/etat/leg/loi/2008/12/19/n19",
+     "act_eli": "http://data.legilux.public.lu/eli/etat/leg/code/education_nationale",
+     "article": "Art. 8.",
+     "text_sha256": "c2d6406f48eec95de2afb5c40ef3752a519f6a1becfb8411cfb23044474abf15"
+    }
+   ],
+   "leak": 4
   }
  ]
 }

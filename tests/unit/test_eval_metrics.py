@@ -65,6 +65,13 @@ def test_summarise_retrieval_means() -> None:
         ({"status": "not_found"}, {"status": "resolved", "candidates": [{"act_eli": "A"}]}, "wrong"),
         ({"status": "out_of_scope"}, {"status": "out_of_scope", "candidates": []}, "correct"),
         ({"status": "out_of_scope"}, {"status": "not_found", "candidates": []}, "wrong"),
+        # PDF articles (no article ELI): number key and page of the heading (M2 review, gen_g1_pdf)
+        ({"status": "resolved", "act_eli": "A", "article": "24", "page": 81},
+         {"status": "resolved", "candidates": [{"act_eli": "A", "article": "Art. 24.", "page": 81}]}, "correct"),
+        ({"status": "resolved", "act_eli": "A", "article": "24", "page": 81},
+         {"status": "resolved", "candidates": [{"act_eli": "A", "article": "Art. 24.", "page": 331}]}, "wrong"),
+        ({"status": "resolved", "act_eli": "A", "article": "74bis"},
+         {"status": "resolved", "candidates": [{"act_eli": "A", "article": "Art. 74."}]}, "wrong"),
     ],
 )  # fmt: skip
 def test_resolver_outcome(expect: dict[str, Any], got: dict[str, Any], outcome: str) -> None:
@@ -163,6 +170,36 @@ async def test_run_g2_scores_hits_by_key() -> None:
     assert out["summary"]["latency"]["sql"]["p50_ms"] == 5.0
 
 
+async def test_run_g2_reports_non_leaky_and_pdf_slices() -> None:
+    hit = {"hits": [{"citation": {"article_eli": "t1", "act_eli": "A"}}], "retrieval": {"latency_ms": {}}}
+    items = [
+        {"id": "1", "lang": "fr", "query": "q1", "leaky": True, "targets": [{"key": "t1", "grade": 2, "act_eli": "A"}]},
+        {"id": "2", "lang": "fr", "query": "q2", "pdf": True, "targets": [{"key": "t2", "grade": 2, "act_eli": "A"}]},
+    ]
+    out = await run_g2(FakeBackend({"q1": hit, "q2": hit}), items)
+    s = out["summary"]
+    assert s["all"]["recall@5"] == 0.5 and s["non_leaky"]["n"] == 1 and s["non_leaky"]["recall@5"] == 0.0
+    assert s["pdf_codes"]["n"] == 1 and s["pdf_codes"]["recall@5"] == 0.0
+    sub = report.restrict(out, ["1"])
+    assert sub["summary"]["non_leaky"]["n"] == 0 and "pdf_codes" not in sub["summary"]
+
+
+def test_leakage_is_the_longest_verbatim_token_run() -> None:
+    from eval.harness import leak
+
+    text = "Les employeurs sont tenus de déclarer tous les mois pour chaque salarié l’ensemble des informations."
+    assert leak.longest_shared_run("Les employeurs sont-ils tenus de déclarer les salaires ?", [text]) == 3
+    assert leak.longest_shared_run("tous les mois pour chaque salarié", [text]) == 6
+    items = [
+        {"id": "a", "lang": "fr", "query": "déclarer tous les mois pour chaque salarié", "targets": [{"key": "k"}]},
+        {"id": "b", "lang": "fr", "query": "Quand faut-il déclarer ?", "leaky": True, "targets": [{"key": "k"}]},
+        {"id": "c", "lang": "de", "query": "tous les mois pour chaque salarié", "targets": [{"key": "k"}]},
+    ]
+    hist = leak.mark(items, {"k": [text]})
+    assert [i.get("leaky", False) for i in items] == [True, False, False] and items[0]["leak"] == 7
+    assert "leak" not in items[2] and hist == {0: 1, 6: 1}
+
+
 async def test_run_g1_maps_out_of_scope_errors() -> None:
     items = [
         {"id": "1", "text": "RGPD", "style": "oos", "expect": {"status": "out_of_scope"}},
@@ -203,3 +240,19 @@ def test_markdown_reports_render(tmp_path: Path) -> None:
     assert "lexical/bm25/no-exp/length_b=0.5" in text and "| all | 1 |" in text and "« q »" in text
     cmp = report.compare_markdown([g2, {**g2, "config": {"mode": "rerank", "ranker": "bm25", "rerank_k": 16}}])
     assert "### G2" in cmp and "rerank/bm25 k=16" in cmp
+
+
+def test_g1_pdf_generator_skips_case_law_and_footnote_markers() -> None:
+    """The independent PDF items once expected « Article 11bis » of a case-law digest (p. 55) and an article
+    « 14.3 » (« Art. 14. » + footnote marker ³, p. 44) of the Code de la route."""
+    from eval.harness import gen_g1_pdf as P
+
+    head = "CODE DE LA ROUTE – Loi du 14 février 1955"
+    pages = [f"{head}\n   Art. 11.\n  JURISPRUDENCE\n   Article 11bis", f"{head}\n Article 12", "AGD\n   Art. 1er."]
+    assert P.cut_jurisprudence(pages) == [f"{head}\n   Art. 11.\n", "", "AGD\n   Art. 1er."]
+    word = '<word xMin="{x}" yMin="{y0}" xMax="1" yMax="{y1}">{t}</word>'
+    line = "".join(word.format(x=i, y0=y0, y1=y1, t=t) for i, (y0, y1, t) in
+                   enumerate([(489.4, 499.5, "Art."), (489.4, 499.5, "14."), (490.2, 495.9, "3")]))  # fmt: skip
+    plain = "".join(word.format(x=i, y0=489.4, y1=499.5, t=t) for i, t in enumerate(["Art.", "15."]))
+    xhtml = f"<page a><line b>{line}</line><line c>{plain}</line></page>"
+    assert P.superscripted(xhtml) == [{"14.3"}]
