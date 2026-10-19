@@ -3,6 +3,8 @@
 > Stand 16.10.2026, Änderungen vom 17.10.2026 eingearbeitet. Der ausführliche Plan steht in [`PLAN.md`](PLAN.md), die Anhänge in [`plan/`](plan/).
 > **Schritt-für-Schritt-Anleitung** (Build-Rechner, Mistral SaaS/On-Prem, Stichprobe und Vollabzug, Embeddings,
 > Airgap-Paket, Installation, Updates, Fehlerbehebung): [`ANLEITUNG.md`](ANLEITUNG.md).
+> **Schnellstart** (ein Linux-Rechner mit Internet, ein Befehl, Stichprobe + MCP-Server + Test-UI):
+> [`SCHNELLSTART.md`](SCHNELLSTART.md).
 > Status: **geprüft.** Zwei Gegenprüfungen (Fakten; Anforderungen, Airgap und Umsetzbarkeit) mit 22 Befunden
 > (9 schwer, 13 leicht) sind eingearbeitet. Die DB-Größe ist neu geschätzt: ohne Vektoren ca. 0,9–1,3 GB.
 
@@ -99,7 +101,9 @@ einer festen Teilmenge von 40 Fragen gleich gut wie vor den PDF-Daten), Pflicht-
 
 ## Schnellstart (Entwicklung)
 
-Linux-Rechner mit Docker und [uv](https://docs.astral.sh/uv/); alle Dienste lauschen nur auf `127.0.0.1`.
+Linux-Rechner mit Docker und [uv](https://docs.astral.sh/uv/); alle Dienste lauschen nur auf `127.0.0.1`. Dasselbe in
+einem wiederholbaren Befehl (Prüfungen, `uv sync`, Stichprobe, Mistral-Schlüssel, Dev-Stack): `./scripts/quickstart.sh`
+([`SCHNELLSTART.md`](SCHNELLSTART.md)).
 
 ```sh
 uv sync --all-extras          # Python-3.13-Abhängigkeiten aus uv.lock (+ Entwicklungswerkzeuge)

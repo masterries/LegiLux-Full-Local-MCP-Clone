@@ -6,6 +6,10 @@ An airgap-deployable, Docker-packaged local clone of the **current and relevant*
 with article-level citations. No LLM runtime is bundled; embeddings (Mistral embeddings API, throttled) are optional
 and off by default.
 
+**Just want to see it running? → [`docs/SCHNELLSTART.md`](docs/SCHNELLSTART.md)** (German, one page): one Linux
+machine with internet, one command (`./scripts/quickstart.sh` = `make quickstart`) builds the sample once and starts the
+Streamlit UI and the MCP server; chat via Mistral with your key.
+
 - **Plan:** [`docs/PLAN.md`](docs/PLAN.md), with appendices in [`docs/plan/`](docs/plan/)
 - **Short summary (German):** [`docs/PLAN_KURZFASSUNG.md`](docs/PLAN_KURZFASSUNG.md)
 - **Step-by-step guide (German, for the operator):** [`docs/ANLEITUNG.md`](docs/ANLEITUNG.md) — build host, Mistral
@@ -24,7 +28,9 @@ questions), mandatory warnings 100 % (G3) — [`eval/reports/m2-baseline.md`](ev
 
 ## Quick start (dev)
 
-Linux host with Docker and [uv](https://docs.astral.sh/uv/); everything listens on `127.0.0.1` only.
+Linux host with Docker and [uv](https://docs.astral.sh/uv/); everything listens on `127.0.0.1` only. The same in one
+re-runnable command (checks, `uv sync`, sample, Mistral key, dev stack): `./scripts/quickstart.sh`
+([`docs/SCHNELLSTART.md`](docs/SCHNELLSTART.md)).
 
 ```sh
 uv sync --all-extras          # Python 3.13 deps from uv.lock (+ dev tools)

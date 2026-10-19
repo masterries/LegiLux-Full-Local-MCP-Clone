@@ -50,10 +50,13 @@ AIRGAP_IMPORT_ARGS ?=
 
 .PHONY: help sync lint fmt test test-db test-live config-check db-image db-up db-down db-schema db-psql sample \
 	dev-db ingest-sample dev-up dev-down dev-logs dev-ps fetch-models rerank-up rerank-down mcp ui e2e \
-	egress-check eval embed-plan airgap-export airgap-import
+	egress-check eval embed-plan airgap-export airgap-import quickstart
 
 help:
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-13s %s\n", $$1, $$2}'
+
+quickstart: ## one Linux host with internet: checks, uv sync, sample (once), Mistral key, dev stack (docs/SCHNELLSTART.md)
+	scripts/quickstart.sh
 
 sync: ## install all extras + dev tools from uv.lock
 	$(UV) sync --locked --all-extras

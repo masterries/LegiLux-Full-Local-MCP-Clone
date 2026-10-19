@@ -4,6 +4,7 @@
 > Für den Projekteigentümer: technisch, setzt aber keine Kenntnis des Codes voraus. Die Befehle wurden in genau dieser
 > Form ausprobiert; was in dieser Umgebung nicht ging (kein Mistral-Schlüssel, kein Vollabzug), steht in
 > [Anhang A](#anhang-a-was-am-17102026-getestet-wurde).
+> **Nur schnell ausprobieren** (ein Rechner mit Internet, ein Befehl): [SCHNELLSTART.md](SCHNELLSTART.md).
 
 **Verbindliche Vorgaben.** Das System läuft vollständig auf dem **Mistral-Stack**: Chat über die Mistral-Chat-API
 (OpenAI-kompatibel), Embeddings über Mistral Embed – heute Mistral SaaS (`https://api.mistral.ai`), später euer
@@ -185,7 +186,9 @@ install -m 0600 /dev/stdin secrets/mistral_api_key <<< "$MISTRAL_API_KEY"       
 unset MISTRAL_API_KEY
 ```
 
-Dann den Dev-Stack starten (§ 5); die Standardwerte zeigen schon auf SaaS. Ein anderes Modell:
+Dann den Dev-Stack starten (§ 5); die Standardwerte zeigen schon auf SaaS. Lief er schon, erkennt `make dev-up` einen
+neuen oder geänderten Schlüssel nicht (die UI liest ihn nur beim Start): vorher
+`docker compose -f deploy/compose.dev.yml rm -sf lgx-streamlit` (`scripts/quickstart.sh` macht das selbst). Ein anderes Modell:
 
 ```sh
 make dev-up LGX_LLM_MODEL=mistral-medium-latest     # oder dauerhaft: export LGX_LLM_MODEL=mistral-medium-latest
@@ -796,7 +799,7 @@ user "lgx_ro"`), auch nicht nach `docker compose down` / `up`.
 | `rerank_status: unavailable` direkt nach dem Start | TEI lädt noch (1,5–6 min); MCP prüft nach 1 min erneut | warten; `docker compose logs rerank` |
 | Vollabzug stoppt: « outside the nightly window » | Fenster 01:00–05:00 Uhr | in der nächsten Nacht denselben Befehl, oder `--ignore-window` |
 | Vollabzug stoppt wegen robots.txt | robots.txt hat sich geändert | prüfen, dann `uv run lgx --t $LGX_T robots-ack <sha256>` |
-| Image-Build scheitert mit TLS-Fehler | TLS-abfangender Proxy | `LGX_DEV_CA_BUNDLE=/pfad/ca-bundle.crt` (§ 1.5) |
+| Image-Build scheitert mit TLS-Fehler (`invalid peer certificate: UnknownIssuer`) | TLS-abfangender Proxy | `LGX_DEV_CA_BUNDLE=/pfad/ca-bundle.crt` (§ 1.5) |
 | `install`: « image …: ID …, expected … » | Image-Datei passt nicht zum Manifest | Paket neu kopieren; nie Images aus anderer Quelle nachladen |
 | `check`: `NOT reachable: … No route to host` | Mistral-IP/-Port falsch oder Firewall-Ausnahme fehlt | `.env` (`LGX_MISTRAL_IP`, `LGX_MISTRAL_PORT`), dann `… firewall` |
 | On-Prem-Mistral mit **interner CA** | die Container vertrauen nur öffentlichen CAs; ein eigenes CA-Bundle ist noch nicht vorgesehen | offen (M5); bis dahin ein öffentlich vertrautes Zertifikat verwenden |
